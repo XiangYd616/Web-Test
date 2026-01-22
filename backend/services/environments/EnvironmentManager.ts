@@ -5,7 +5,6 @@
 
 import crypto from 'crypto';
 import { promises as fs } from 'fs';
-import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 const { models } = require('../../database/sequelize');
@@ -495,7 +494,7 @@ class EnvironmentManager {
   /**
    * 批量变量替换
    */
-  resolveVariables(text: string, options: GetVariableOptions = {}) {
+  resolveVariables(text: string, options: GetVariableOptions = {}): unknown {
     if (typeof text !== 'string') {
       return text;
     }
@@ -518,7 +517,7 @@ class EnvironmentManager {
   /**
    * 批量解析对象中的变量
    */
-  resolveObjectVariables(obj: unknown, options: GetVariableOptions = {}) {
+  resolveObjectVariables(obj: unknown, options: GetVariableOptions = {}): unknown {
     if (typeof obj !== 'object' || obj === null) {
       return obj;
     }
@@ -545,11 +544,11 @@ class EnvironmentManager {
   /**
    * 动态变量处理
    */
-  isDynamicVariable(key: string) {
+  isDynamicVariable(key: string): boolean {
     return key.startsWith('$') && Object.prototype.hasOwnProperty.call(this.dynamicVariables, key);
   }
 
-  resolveDynamicVariable(key: string) {
+  resolveDynamicVariable(key: string): unknown {
     const generator = this.dynamicVariables[key];
     if (typeof generator === 'function') {
       return generator();
@@ -744,30 +743,19 @@ class EnvironmentManager {
   }
 
   async saveEnvironment(environment: EnvironmentCache) {
-    const filePath = path.join(this.options.storageDir, `${environment.id}.json`);
-    await fs.writeFile(filePath, JSON.stringify(environment, null, 2));
+    console.warn('File persistence for environments deprecated, use DB tables');
+    void environment;
   }
 
   async saveGlobalVariables() {
-    const filePath = path.join(this.options.storageDir, 'globals.json');
-    const globalData = {
-      variables: Array.from(this.globalVariables.entries()).map(([key, variable]) => ({
-        key,
-        ...variable,
-      })),
-      updatedAt: new Date().toISOString(),
-    };
-    await fs.writeFile(filePath, JSON.stringify(globalData, null, 2));
+    console.warn('File persistence for environments deprecated, use DB tables');
+    void this.globalVariables;
   }
 
   async loadEnvironment(environmentId: string) {
-    const filePath = path.join(this.options.storageDir, `${environmentId}.json`);
-    try {
-      const data = await fs.readFile(filePath, 'utf8');
-      return JSON.parse(data) as EnvironmentCache;
-    } catch {
-      return null;
-    }
+    console.warn('File persistence for environments deprecated, use DB tables');
+    void environmentId;
+    return null;
   }
 
   /**

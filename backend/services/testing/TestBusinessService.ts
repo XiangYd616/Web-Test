@@ -361,7 +361,7 @@ class TestBusinessService {
     user: User
   ): Promise<{ config: TestConfig; templateId?: string }> {
     let templateId = config.templateId;
-    let template = null as { id: number; config: Record<string, unknown> } | null;
+    let template = null as { id: string | number; config: Record<string, unknown> } | null;
 
     if (config.templateId) {
       const resolved = await testTemplateService.getTemplateForUser(user.userId, config.templateId);
@@ -512,6 +512,7 @@ class TestBusinessService {
       security: { engineName: 'SecurityTestEngine', testName: '安全测试' },
       api: { engineName: 'ApiTestEngine', testName: 'API测试' },
       stress: { engineName: 'StressTestEngine', testName: '压力测试' },
+      compatibility: { engineName: 'CompatibilityTestEngine', testName: '兼容性测试' },
     };
 
     return metaMap[testType] || { engineName: 'UnknownEngine', testName: '未知测试' };

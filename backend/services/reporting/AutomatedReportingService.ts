@@ -1149,6 +1149,7 @@ class AutomatedReportingService extends EventEmitter {
       const fileName = `report_${instanceId}.csv`;
       const filePath = path.join(this.reportsDir, fileName);
       const csvContent = this.convertReportToCSV(data);
+      // File persistence kept for large reports; metadata in report_data / file_path
       await fs.writeFile(filePath, csvContent, 'utf8');
       const stats = await fs.stat(filePath);
       return {

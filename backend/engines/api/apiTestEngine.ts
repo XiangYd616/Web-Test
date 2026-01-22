@@ -109,6 +109,7 @@ class ApiTestEngine {
         body = null,
         endpoints = [],
         assertions = [],
+        variables = {},
       } = config as {
         url?: string;
         method?: string;
@@ -116,6 +117,7 @@ class ApiTestEngine {
         body?: unknown;
         endpoints?: Array<Record<string, unknown>>;
         assertions?: Array<Record<string, unknown>>;
+        variables?: Record<string, string>;
       };
 
       Logger.info(`🚀 开始API测试: ${testId} - ${url || '多个端点'}`);
@@ -133,7 +135,8 @@ class ApiTestEngine {
       if (endpoints && endpoints.length > 0) {
         results = await this.testMultipleEndpoints(
           endpoints as Array<Record<string, unknown>>,
-          testId
+          testId,
+          variables
         );
       } else if (url) {
         results = await this.testSingleEndpoint({
@@ -143,6 +146,7 @@ class ApiTestEngine {
           body,
           assertions,
           testId,
+          variables,
         });
       } else {
         throw new Error('必须提供URL或端点列表');
@@ -282,6 +286,7 @@ class ApiTestEngine {
     body = null,
     assertions = [],
     testId = null,
+    variables = {},
   }: {
     url: string;
     method?: string;
@@ -289,19 +294,24 @@ class ApiTestEngine {
     body?: unknown;
     assertions?: Array<Record<string, unknown>>;
     testId?: string | null;
+    variables?: Record<string, string>;
   }) {
     const startTime = performance.now();
+
+    const resolvedUrl = this.resolveTemplate(url, variables);
+    const resolvedHeaders = this.resolveTemplate(headers, variables) as Record<string, unknown>;
+    const resolvedBody = this.resolveTemplate(body, variables);
 
     if (testId) {
       emitTestProgress(testId, {
         stage: 'running',
         progress: 30,
-        message: `测试: ${method} ${url}`,
+        message: `测试: ${method} ${resolvedUrl}`,
       });
     }
 
     try {
-      const urlObj = new URL(url);
+      const urlObj = new URL(resolvedUrl);
       const isHttps = urlObj.protocol === 'https:';
       const client = isHttps ? https : http;
 
@@ -313,13 +323,14 @@ class ApiTestEngine {
         headers: {
           'User-Agent': (this.options as { userAgent?: string }).userAgent,
           Accept: 'application/json, text/plain, */*',
-          ...headers,
+          ...resolvedHeaders,
         },
         timeout: (this.options as { timeout?: number }).timeout,
       } as Record<string, unknown>;
 
-      if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
-        const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
+      if (resolvedBody && ['POST', 'PUT', 'PATCH'].includes(method)) {
+        const bodyStr =
+          typeof resolvedBody === 'string' ? resolvedBody : JSON.stringify(resolvedBody);
         (requestOptions.headers as Record<string, unknown>)['Content-Length'] =
           Buffer.byteLength(bodyStr);
         if (!(requestOptions.headers as Record<string, unknown>)['Content-Type']) {
@@ -327,7 +338,7 @@ class ApiTestEngine {
         }
       }
 
-      const response = await this.makeRequest(client, requestOptions, body);
+      const response = await this.makeRequest(client, requestOptions, resolvedBody);
       const endTime = performance.now();
       const responseTime = Math.round(endTime - startTime);
 
@@ -341,7 +352,8 @@ class ApiTestEngine {
         });
       }
 
-      const validationResults = this._runAssertions(response, responseTime, assertions);
+      const validationResults = this._runAssertions(response, responseTime, assertions, variables);
+      const extractions = this.extractVariables(response, variables, assertions);
 
       if (this.alertManager && testId) {
         await this._checkAlerts(testId, url, response, responseTime, validationResults);
@@ -350,10 +362,11 @@ class ApiTestEngine {
       const statusCode = Number(response.statusCode || 0);
       const bodyText = response.body || '';
       return {
-        url,
+        url: resolvedUrl,
         method,
         timestamp: new Date().toISOString(),
         responseTime,
+        extractions,
         validations: validationResults,
         ...analysis,
         summary: {
@@ -368,17 +381,30 @@ class ApiTestEngine {
     } catch (error) {
       const endTime = performance.now();
       const responseTime = Math.round(endTime - startTime);
+      const errorMessage = (error as Error).message;
+      const validationResults = this._runAssertions(
+        {
+          headers: {},
+          body: '',
+          statusCode: 0,
+        },
+        responseTime,
+        assertions,
+        variables,
+        errorMessage
+      );
 
       return {
         url,
         method,
         timestamp: new Date().toISOString(),
         responseTime,
-        error: (error as Error).message,
+        error: errorMessage,
         success: false,
+        validations: validationResults,
         summary: {
           success: false,
-          error: (error as Error).message,
+          error: errorMessage,
           responseTime: `${responseTime}ms`,
         },
         recommendations: ['检查URL是否正确', '确认网络连接正常', '检查服务器是否正在运行'],
@@ -389,7 +415,9 @@ class ApiTestEngine {
   _runAssertions(
     response: ApiResponse,
     responseTime: number,
-    assertions: Array<Record<string, unknown>>
+    assertions: Array<Record<string, unknown>>,
+    variables: Record<string, string> = {},
+    errorMessage: string | null = null
   ) {
     if (!assertions || assertions.length === 0) {
       return {
@@ -401,40 +429,89 @@ class ApiTestEngine {
 
     const assertionResults: Array<Record<string, unknown>> = [];
     let passed = 0;
+    const contentType = response.headers['content-type'] || '';
+    const jsonBody = contentType.includes('application/json')
+      ? this.safeParseJson(response.body)
+      : null;
 
     for (const assertion of assertions) {
       try {
         let assertResult;
+        const resolved = this.resolveAssertion(assertion, variables);
+
+        if (resolved.type === 'extract') {
+          continue;
+        }
 
         const result = {
           status: response.statusCode,
           statusCode: response.statusCode,
           headers: response.headers,
           body: response.body,
+          jsonBody,
           responseTime,
+          error: errorMessage,
         };
 
-        switch (assertion.type) {
+        switch (resolved.type) {
+          case 'allOf': {
+            const group = Array.isArray(resolved.assertions) ? resolved.assertions : [];
+            const groupResults = group.map(item =>
+              this._runAssertions(response, responseTime, [item], variables, errorMessage)
+            );
+            const passed = groupResults.every(item => item.passed);
+            assertResult = {
+              passed,
+              message: passed ? '组合断言(allOf)通过' : '组合断言(allOf)失败',
+              details: groupResults,
+            };
+            break;
+          }
+          case 'anyOf': {
+            const group = Array.isArray(resolved.assertions) ? resolved.assertions : [];
+            const groupResults = group.map(item =>
+              this._runAssertions(response, responseTime, [item], variables, errorMessage)
+            );
+            const passed = groupResults.some(item => item.passed);
+            assertResult = {
+              passed,
+              message: passed ? '组合断言(anyOf)通过' : '组合断言(anyOf)失败',
+              details: groupResults,
+            };
+            break;
+          }
           case 'status':
-            assertResult = this.assertionSystem.status(assertion.expected).validate(result);
+            assertResult = this.assertionSystem.status(resolved.expected).validate(result);
             break;
           case 'header':
             assertResult = this.assertionSystem
-              .header(assertion.name, assertion.value)
+              .header(resolved.name, resolved.value)
               .validate(result);
             break;
           case 'json':
             assertResult = this.assertionSystem
-              .json(assertion.path, assertion.expected)
+              .json(resolved.path, resolved.expected, resolved.operator)
               .validate(result);
             break;
+          case 'error':
+            assertResult = this.assertionSystem.error(resolved.expected).validate(result);
+            break;
+          case 'jsonSchema':
+            assertResult = this.assertionSystem.jsonSchema(resolved.schema).validate(result);
+            break;
+          case 'bodyContains':
+            assertResult = this.assertionSystem.bodyContains(resolved.expected).validate(result);
+            break;
+          case 'bodyRegex':
+            assertResult = this.assertionSystem.bodyRegex(resolved.pattern).validate(result);
+            break;
           case 'responseTime':
-            assertResult = this.assertionSystem.responseTime(assertion.max).validate(result);
+            assertResult = this.assertionSystem.responseTime(resolved.max).validate(result);
             break;
           default:
             assertResult = {
               passed: false,
-              message: `未知的断言类型: ${assertion.type}`,
+              message: `未知的断言类型: ${resolved.type}`,
             };
         }
 
@@ -455,6 +532,93 @@ class ApiTestEngine {
       failedCount: assertions.length - passed,
       results: assertionResults,
     };
+  }
+
+  safeParseJson(body: string) {
+    try {
+      return JSON.parse(body);
+    } catch {
+      return null;
+    }
+  }
+
+  resolveTemplate(value: unknown, variables: Record<string, string>) {
+    if (typeof value === 'string') {
+      return value.replace(/\{\{\s*(\w+)\s*\}\}/g, (_match, key) => variables[key] ?? '');
+    }
+    if (Array.isArray(value)) {
+      return value.map(item => this.resolveTemplate(item, variables));
+    }
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value as Record<string, unknown>).map(([key, val]) => [
+          key,
+          this.resolveTemplate(val, variables),
+        ])
+      );
+    }
+    return value;
+  }
+
+  resolveAssertion(assertion: Record<string, unknown>, variables: Record<string, string>) {
+    return this.resolveTemplate(assertion, variables) as Record<string, unknown>;
+  }
+
+  extractVariables(
+    response: ApiResponse,
+    variables: Record<string, string>,
+    assertions: Array<Record<string, unknown>>
+  ) {
+    const extractionRules = assertions.filter(item => item.type === 'extract');
+    if (!extractionRules.length) {
+      return {};
+    }
+    const contentType = response.headers['content-type'] || '';
+    const jsonBody = contentType.includes('application/json')
+      ? this.safeParseJson(response.body)
+      : null;
+    const extracted: Record<string, string> = {};
+    for (const rule of extractionRules) {
+      const name = String(rule.name || '');
+      if (!name) continue;
+      if (rule.source === 'header') {
+        const value = response.headers[String(rule.path || '')];
+        if (value !== undefined) extracted[name] = String(value);
+        continue;
+      }
+      if (rule.source === 'json') {
+        const value = this.getValueByPath(jsonBody, String(rule.path || ''));
+        if (value !== undefined) extracted[name] = String(value);
+        continue;
+      }
+      if (rule.source === 'regex') {
+        try {
+          const regex = new RegExp(String(rule.pattern || ''));
+          const match = regex.exec(response.body || '');
+          if (match?.[1]) {
+            extracted[name] = String(match[1]);
+          }
+        } catch {
+          continue;
+        }
+      }
+    }
+    Object.assign(variables, extracted);
+    return extracted;
+  }
+
+  getValueByPath(value: unknown, path: string) {
+    if (!path) return value;
+    const segments = path
+      .replace(/\[(\d+)\]/g, '.$1')
+      .split('.')
+      .filter(Boolean);
+    let current: any = value;
+    for (const segment of segments) {
+      if (current === null || current === undefined) return undefined;
+      current = current[segment];
+    }
+    return current;
   }
 
   async _checkAlerts(
@@ -496,7 +660,8 @@ class ApiTestEngine {
 
   async testMultipleEndpoints(
     endpoints: Array<Record<string, unknown>>,
-    testId: string | null = null
+    testId: string | null = null,
+    variables: Record<string, string> = {}
   ) {
     const results = [];
     const startTime = performance.now();
@@ -528,10 +693,15 @@ class ApiTestEngine {
           },
         });
       } else {
+        const endpointVariables = {
+          ...variables,
+          ...(endpoint.variables as Record<string, string> | undefined),
+        };
         const result = await this.testSingleEndpoint({
           ...(endpoint as Record<string, unknown>),
           url: endpointUrl,
           testId: null,
+          variables: endpointVariables,
         });
         results.push(result);
       }

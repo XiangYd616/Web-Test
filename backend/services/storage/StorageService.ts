@@ -9,7 +9,6 @@ import path from 'path';
 import { query } from '../../config/database';
 import DataArchiveManager from './DataArchiveManager';
 import DataCleanupManager from './DataCleanupManager';
-import SpecializedStorageManager from './SpecializedStorageManager';
 
 // 存储配置接口
 export interface StorageServiceConfig {
@@ -43,7 +42,6 @@ export interface StorageOperationResult {
 
 class StorageService {
   private config: StorageServiceConfig;
-  private storageManager: SpecializedStorageManager;
   private archiveManager: DataArchiveManager;
   private cleanupManager: DataCleanupManager;
   private statistics: StorageStatistics;
@@ -58,7 +56,6 @@ class StorageService {
     };
 
     // 初始化各个管理器
-    this.storageManager = new SpecializedStorageManager(this.config.storage);
     this.archiveManager = new DataArchiveManager(this.config.archive);
     this.cleanupManager = new DataCleanupManager(this.config.cleanup);
 
@@ -152,57 +149,6 @@ class StorageService {
     );
   }
 
-  /**
-   * 存储数据
-   */
-  async store(
-    data: unknown,
-    options: Record<string, unknown> = {}
-  ): Promise<StorageOperationResult> {
-    const startTime = Date.now();
-
-    try {
-      const resolvedOptions = {
-        name: options.name || 'storage-item',
-        type: options.type || 'generic',
-        strategy: options.strategy || 'user_data',
-        metadata: options.metadata,
-        tags: options.tags,
-      } as Record<string, unknown>;
-      const normalizedData =
-        typeof data === 'string' || Buffer.isBuffer(data) ? data : JSON.stringify(data ?? {});
-      const result = await this.storageManager.store(
-        normalizedData as Buffer | string,
-        resolvedOptions as {
-          name: string;
-          type: string;
-          strategy: string;
-          metadata?: Record<string, unknown>;
-          tags?: string[];
-        }
-      );
-      this.statistics.storageOperations++;
-      this.statistics.totalOperations++;
-      this.statistics.lastOperation = new Date();
-
-      return {
-        success: true,
-        operation: 'store',
-        duration: Date.now() - startTime,
-        affected: result.success ? 1 : 0,
-      };
-    } catch (error) {
-      this.statistics.errors++;
-      return {
-        success: false,
-        operation: 'store',
-        duration: Date.now() - startTime,
-        affected: 0,
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
-
   async getArchiveJob(jobId: string) {
     return this.archiveManager.getArchiveJob(jobId);
   }
@@ -213,56 +159,6 @@ class StorageService {
 
   async deleteArchiveJob(jobId: string) {
     return this.archiveManager.deleteArchiveJob(jobId);
-  }
-
-  /**
-   * 检索数据
-   */
-  async retrieve(key: string): Promise<unknown> {
-    try {
-      const result = await this.storageManager.retrieve(key);
-      this.statistics.storageOperations++;
-      this.statistics.totalOperations++;
-      this.statistics.lastOperation = new Date();
-
-      return result;
-    } catch (error) {
-      this.statistics.errors++;
-      throw error;
-    }
-  }
-
-  /**
-   * 删除数据
-   */
-  async delete(
-    key: string,
-    _options: Record<string, unknown> = {}
-  ): Promise<StorageOperationResult> {
-    const startTime = Date.now();
-
-    try {
-      const result = await this.storageManager.delete(key);
-      this.statistics.storageOperations++;
-      this.statistics.totalOperations++;
-      this.statistics.lastOperation = new Date();
-
-      return {
-        success: true,
-        operation: 'delete',
-        duration: Date.now() - startTime,
-        affected: result ? 1 : 0,
-      };
-    } catch (error) {
-      this.statistics.errors++;
-      return {
-        success: false,
-        operation: 'delete',
-        duration: Date.now() - startTime,
-        affected: 0,
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
   }
 
   /**
@@ -446,7 +342,8 @@ class StorageService {
     overall: boolean;
   }> {
     try {
-      const storage = await this.storageManager.healthCheck();
+      await query('SELECT 1');
+      const storage = true;
       const archive = await this.archiveManager.healthCheck();
       const cleanup = await this.cleanupManager.healthCheck();
 

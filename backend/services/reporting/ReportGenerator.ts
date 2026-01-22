@@ -241,6 +241,7 @@ class ReportGenerator {
           this.addPDFSection(doc, '原始数据', JSON.stringify(data, null, 2), template.style);
         }
 
+        // File persistence kept for large reports; metadata in report_data / file_path
         // 保存文件
         doc.pipe(createWriteStream(filePath));
 
@@ -320,6 +321,7 @@ class ReportGenerator {
   ): Promise<ReportGenerationResult> {
     const html = this.generateHTMLTemplate(data, template, config);
 
+    // File persistence kept for large reports; metadata in report_data / file_path
     await fs.writeFile(filePath, html, 'utf8');
     const stats = await fs.stat(filePath);
 
@@ -349,6 +351,7 @@ class ReportGenerator {
       data,
     };
 
+    // File persistence kept for large reports; metadata in report_data / file_path
     await fs.writeFile(filePath, JSON.stringify(reportData, null, 2), 'utf8');
     const stats = await fs.stat(filePath);
 

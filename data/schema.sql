@@ -609,28 +609,7 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 存储索引表
-CREATE TABLE IF NOT EXISTS storage_items (
-    id VARCHAR(80) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    type VARCHAR(100) NOT NULL,
-    strategy VARCHAR(100) NOT NULL,
-    size BIGINT NOT NULL,
-    compressed_size BIGINT,
-    storage_path TEXT NOT NULL,
-    version INTEGER NOT NULL DEFAULT 1,
-    metadata JSONB DEFAULT '{}',
-    tags TEXT[] DEFAULT ARRAY[]::TEXT[],
-    checksum VARCHAR(255) NOT NULL,
-    encrypted BOOLEAN DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_storage_items_type ON storage_items(type);
-CREATE INDEX IF NOT EXISTS idx_storage_items_strategy ON storage_items(strategy);
-CREATE INDEX IF NOT EXISTS idx_storage_items_created ON storage_items(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_storage_items_tags ON storage_items USING GIN(tags);
+-- Removed storage_items table (2026-01): no read/write references found after full scan, unified to other storage tables
 
 -- 清理策略与任务表
 CREATE TABLE IF NOT EXISTS cleanup_policies (

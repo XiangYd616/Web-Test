@@ -181,6 +181,14 @@ const startWorker = (options: { queueName?: string; concurrency?: number } = {})
   return queue;
 };
 
+const closeQueues = async () => {
+  const workerClosures = Array.from(workers.values()).map(worker => worker.close());
+  const queueClosures = Array.from(queues.values()).map(queue => queue.close());
+  await Promise.allSettled([...workerClosures, ...queueClosures]);
+  workers.clear();
+  queues.clear();
+};
+
 const isOwnedJob = (job: Job, userId?: string) => {
   if (!userId) {
     return true;
@@ -411,6 +419,7 @@ const replayDeadLetterJob = async (
 module.exports = {
   enqueueTest,
   startWorker,
+  closeQueues,
   getQueue,
   getQueueName,
   getQueueStats,
@@ -421,6 +430,7 @@ module.exports = {
 };
 
 export {
+  closeQueues,
   enqueueTest,
   getDeadLetterJobs,
   getJobDetail,

@@ -1,30 +1,28 @@
 /**
- * Jest测试设置文件
+ * Jest 测试设置文件（JS 版本）
  */
 
-import { jest } from '@jest/globals';
-
-// 设置测试超时
 jest.setTimeout(30000);
 
-// 模拟浏览器环境
-globalThis.window = globalThis;
-globalThis.document = {
+global.window = global;
+global.document = {
   createElement: jest.fn(() => ({ style: {}, addEventListener: jest.fn() })),
   querySelector: jest.fn(),
   querySelectorAll: jest.fn(() => []),
   addEventListener: jest.fn(),
   removeEventListener: jest.fn(),
 };
-globalThis.navigator = {
+
+global.navigator = {
   userAgent: 'jest',
 };
-globalThis.testUtils = {
+
+global.testUtils = {
   delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   },
   mockFetch(response) {
-    globalThis.mockFetch = jest.fn().mockResolvedValue({
+    global.mockFetch = jest.fn().mockResolvedValue({
       ok: true,
       json() {
         return Promise.resolve(response);
@@ -35,19 +33,16 @@ globalThis.testUtils = {
     });
   },
   restoreFetch() {
-    globalThis.mockFetch = undefined;
+    global.mockFetch = undefined;
   },
 };
 
-// 测试前后钩子
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
 afterEach(() => {
-  if (globalThis.testUtils) {
-    globalThis.testUtils.restoreFetch();
+  if (global.testUtils) {
+    global.testUtils.restoreFetch();
   }
 });
-
-export {};

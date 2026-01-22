@@ -1,5 +1,38 @@
 ﻿// API Test Engine Types and Implementation
 
+// API断言与提取器配置
+export interface APIAssertion {
+  type:
+    | 'status'
+    | 'header'
+    | 'json'
+    | 'jsonSchema'
+    | 'bodyContains'
+    | 'bodyRegex'
+    | 'responseTime'
+    | 'error'
+    | 'allOf'
+    | 'anyOf'
+    | 'extract';
+  name?: string;
+  expected?: any;
+  operator?: 'equals' | 'contains' | 'exists' | 'regex' | 'gt' | 'gte' | 'lt' | 'lte' | 'oneOf';
+  path?: string;
+  value?: string;
+  max?: number | { min?: number; max?: number };
+  schema?: Record<string, any>;
+  pattern?: string;
+  assertions?: APIAssertion[];
+  source?: 'header' | 'json' | 'regex';
+}
+
+export interface APIExtractor {
+  name: string;
+  source: 'header' | 'json' | 'regex';
+  path?: string;
+  pattern?: string;
+}
+
 // API端点配置
 export interface APIEndpoint {
   id: string;
@@ -13,6 +46,9 @@ export interface APIEndpoint {
   headers?: Record<string, string>;
   body?: any;
   timeout?: number;
+  assertions?: APIAssertion[];
+  variables?: Record<string, string>;
+  extractors?: APIExtractor[];
 }
 
 // API测试配置
@@ -46,7 +82,7 @@ export class APITestEngine {
     return {
       success: true,
       message: 'API测试完成',
-      data: {}
+      data: {},
     };
   }
 }
