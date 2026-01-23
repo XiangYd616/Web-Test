@@ -286,7 +286,7 @@ class PerformanceMetricsService extends BaseService {
    */
   async analyzePerformance(
     url: string,
-    performanceData: any,
+    performanceData: Record<string, unknown>,
     options: Partial<PerformanceMetricsConfig> = {}
   ): Promise<PerformanceAnalysisResult> {
     if (!url || typeof url !== 'string') {
@@ -388,10 +388,11 @@ class PerformanceMetricsService extends BaseService {
    * 分析Core Web Vitals
    */
   private analyzeCoreWebVitals(
-    performanceData: any,
+    performanceData: Record<string, unknown>,
     thresholds: PerformanceThresholds
   ): CoreWebVitalsMetrics {
-    const vitals = performanceData.coreWebVitals || {};
+    const vitals =
+      (performanceData as { coreWebVitals?: Record<string, unknown> }).coreWebVitals || {};
     const threshold = thresholds.coreWebVitals;
 
     // Largest Contentful Paint
@@ -461,10 +462,11 @@ class PerformanceMetricsService extends BaseService {
    * 分析导航时序
    */
   private analyzeNavigationTiming(
-    performanceData: any,
+    performanceData: Record<string, unknown>,
     thresholds: PerformanceThresholds
   ): NavigationTimingMetrics {
-    const nav = performanceData.navigationTiming || {};
+    const nav =
+      (performanceData as { navigationTiming?: Record<string, number> }).navigationTiming || {};
     const threshold = thresholds.performance;
 
     // 计算各阶段持续时间
@@ -516,14 +518,14 @@ class PerformanceMetricsService extends BaseService {
    * 分析资源时序
    */
   private analyzeResourceTiming(
-    performanceData: any,
+    performanceData: Record<string, unknown>,
     thresholds: PerformanceThresholds
   ): ResourceTimingMetrics {
-    const resources = performanceData.resources || [];
-    const threshold = thresholds.resources;
+    const resources =
+      (performanceData as { resources?: Array<Record<string, unknown>> }).resources || [];
 
     let totalSize = 0;
-    let totalRequests = resources.length;
+    const totalRequests = resources.length;
     let cachedRequests = 0;
     let uncachedRequests = 0;
 
@@ -531,11 +533,13 @@ class PerformanceMetricsService extends BaseService {
     const slowResources: ResourceTimingMetrics['slowResources'] = [];
     const largeResources: ResourceTimingMetrics['largeResources'] = [];
 
-    resources.forEach((resource: any) => {
-      const size = resource.transferSize || 0;
-      const duration = resource.duration || 0;
-      const type = this.getResourceType(resource.name);
-      const isCached = resource.transferSize === 0 && resource.decodedBodySize > 0;
+    resources.forEach(resource => {
+      const size = Number(resource.transferSize ?? 0);
+      const duration = Number(resource.duration ?? 0);
+      const name = typeof resource.name === 'string' ? resource.name : '';
+      const type = this.getResourceType(name);
+      const decodedBodySize = Number(resource.decodedBodySize ?? 0);
+      const isCached = size === 0 && decodedBodySize > 0;
 
       totalSize += size;
       if (isCached) {
@@ -557,7 +561,7 @@ class PerformanceMetricsService extends BaseService {
       // 慢资源
       if (duration > 1000) {
         slowResources.push({
-          url: resource.name,
+          url: name,
           type,
           duration,
           size,
@@ -568,7 +572,7 @@ class PerformanceMetricsService extends BaseService {
       if (size > 500000) {
         // 500KB
         largeResources.push({
-          url: resource.name,
+          url: name,
           type,
           size,
           duration,
@@ -590,23 +594,31 @@ class PerformanceMetricsService extends BaseService {
   /**
    * 分析用户时序
    */
-  private analyzeUserTiming(performanceData: any): UserTimingMetrics {
-    const userTiming = performanceData.userTiming || {};
+  private analyzeUserTiming(performanceData: Record<string, unknown>): UserTimingMetrics {
+    const userTiming =
+      (
+        performanceData as {
+          userTiming?: {
+            marks?: Array<Record<string, unknown>>;
+            measures?: Array<Record<string, unknown>>;
+          };
+        }
+      ).userTiming || {};
 
-    const marks = (userTiming.marks || []).map((mark: any) => ({
-      name: mark.name,
-      startTime: mark.startTime,
-      duration: mark.duration,
+    const marks = (userTiming.marks || []).map(mark => ({
+      name: String(mark.name ?? ''),
+      startTime: Number(mark.startTime ?? 0),
+      duration: Number(mark.duration ?? 0),
     }));
 
-    const measures = (userTiming.measures || []).map((measure: any) => ({
-      name: measure.name,
-      startTime: measure.startTime,
-      duration: measure.duration,
+    const measures = (userTiming.measures || []).map(measure => ({
+      name: String(measure.name ?? ''),
+      startTime: Number(measure.startTime ?? 0),
+      duration: Number(measure.duration ?? 0),
     }));
 
     const customMetrics: Record<string, number> = {};
-    measures.forEach((measure: any) => {
+    measures.forEach(measure => {
       customMetrics[measure.name] = measure.duration;
     });
 
@@ -621,10 +633,10 @@ class PerformanceMetricsService extends BaseService {
    * 分析绘制时序
    */
   private analyzePaintTiming(
-    performanceData: any,
-    thresholds: PerformanceThresholds
+    performanceData: Record<string, unknown>,
+    _thresholds: PerformanceThresholds
   ): PaintTimingMetrics {
-    const paint = performanceData.paint || {};
+    const paint = (performanceData as { paint?: Record<string, number> }).paint || {};
 
     return {
       firstPaint: paint.firstPaint || 0,
@@ -638,10 +650,15 @@ class PerformanceMetricsService extends BaseService {
    * 分析布局偏移
    */
   private analyzeLayoutShift(
-    performanceData: any,
-    thresholds: PerformanceThresholds
+    performanceData: Record<string, unknown>,
+    _thresholds: PerformanceThresholds
   ): LayoutShiftMetrics {
-    const layoutShift = performanceData.layoutShift || {};
+    const layoutShift =
+      (
+        performanceData as {
+          layoutShift?: { cls?: number; layoutShifts?: unknown[]; totalShifts?: number };
+        }
+      ).layoutShift || {};
 
     return {
       cls: layoutShift.cls || 0,

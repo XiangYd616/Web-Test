@@ -54,7 +54,7 @@ export interface ServiceHealth {
     code: string;
   };
   dependencies: Record<string, boolean>;
-  metrics?: Record<string, any>;
+  metrics?: Record<string, unknown>;
 }
 
 // 服务依赖接口
@@ -69,7 +69,7 @@ export interface ServiceDependency {
 export interface ServiceEvent {
   type: 'initialized' | 'error' | 'shutdown' | 'metrics';
   timestamp: Date;
-  data?: any;
+  data?: Record<string, unknown>;
   error?: CustomError;
 }
 
@@ -232,7 +232,10 @@ export abstract class BaseService {
     if (!this.eventListeners.has(eventType)) {
       this.eventListeners.set(eventType, []);
     }
-    this.eventListeners.get(eventType)!.push(listener);
+    const listeners = this.eventListeners.get(eventType);
+    if (listeners) {
+      listeners.push(listener);
+    }
   }
 
   /**
@@ -313,7 +316,7 @@ export abstract class BaseService {
       }
     }
 
-    throw lastError!;
+    throw lastError;
   }
 
   /**
@@ -341,7 +344,11 @@ export abstract class BaseService {
   /**
    * 记录日志
    */
-  protected log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: any): void {
+  protected log(
+    level: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    data?: Record<string, unknown>
+  ): void {
     if (!this.config.logging?.enabled) return;
 
     const logLevel = this.config.logging.level;
@@ -418,7 +425,7 @@ export abstract class BaseService {
   /**
    * 发出事件
    */
-  private emitEvent(type: ServiceEvent['type'], data?: any): void {
+  private emitEvent(type: ServiceEvent['type'], data?: Record<string, unknown>): void {
     const event: ServiceEvent = {
       type,
       timestamp: new Date(),

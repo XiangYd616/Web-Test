@@ -4,28 +4,17 @@
  * 提供具体的代码示例、实施步骤和效果预估
  */
 
-interface OptimizationTemplate {
-  patterns: string[];
-  rules: {
-    minLength?: number;
-    maxLength?: number;
-    includeKeyword?: boolean;
-    includeBrand?: boolean;
-    avoidStuffing?: boolean;
-    minSentences?: number;
-    maxSentences?: number;
-    includeCallToAction?: boolean;
-  };
-}
-
-interface OptimizationTemplates {
-  title: OptimizationTemplate;
-  metaDescription: OptimizationTemplate;
-  headings: OptimizationTemplate;
-  content: OptimizationTemplate;
-  images: OptimizationTemplate;
-  links: OptimizationTemplate;
-}
+import {
+  CodeExample,
+  ImpactEstimate,
+  ImplementationStep,
+  OptimizationSuggestionTemplateMap,
+  OptimizationTemplates,
+  defaultOptimizationSuggestionTemplates,
+  defaultOptimizationTemplates,
+  validateOptimizationSuggestionTemplates,
+  validateOptimizationTemplates,
+} from './optimizationTemplates';
 
 interface OptimizationContext {
   url: string;
@@ -34,6 +23,35 @@ interface OptimizationContext {
   industry: string;
   targetAudience: string;
   contentType: string;
+}
+
+interface AnalysisHeading {
+  level?: number;
+  text?: string;
+}
+
+interface AnalysisImage {
+  alt?: string;
+  src?: string;
+}
+
+interface AnalysisLinks {
+  internal?: { issues?: string[] };
+  external?: { issues?: string[] };
+  broken?: { count?: number };
+}
+
+interface OptimizationAnalysisData {
+  meta?: {
+    title?: string;
+    description?: string;
+  };
+  content?: {
+    headings?: AnalysisHeading[];
+    content?: string;
+    images?: AnalysisImage[];
+  };
+  links?: AnalysisLinks;
 }
 
 interface OptimizationSuggestion {
@@ -51,118 +69,53 @@ interface OptimizationSuggestion {
   effort: 'low' | 'medium' | 'high';
 }
 
-interface ImplementationStep {
-  step: number;
-  action: string;
-  details: string;
-  code?: string;
-  estimatedTime: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-}
-
-interface CodeExample {
-  title: string;
-  language: string;
-  code: string;
-  explanation: string;
-  before?: string;
-  after?: string;
-}
-
-interface ImpactEstimate {
-  traffic: number;
-  ranking: number;
-  ctr: number;
-  conversions: number;
-  timeframe: string;
-  confidence: number;
+interface OptimizationEngineConfig {
+  templates?: OptimizationTemplates;
+  suggestionTemplates?: OptimizationSuggestionTemplateMap;
 }
 
 class OptimizationEngine {
   private optimizationTemplates: OptimizationTemplates;
+  private suggestionTemplates: OptimizationSuggestionTemplateMap;
 
-  constructor() {
-    this.optimizationTemplates = {
-      title: {
-        patterns: [
-          '主要关键词 - 次要关键词 | 品牌名',
-          '如何 [动作] [主题] - [年份] 完整指南',
-          '[数字] 个 [主题] [技巧/方法/策略] [年份]',
-          '[主题] 完整指南：[具体内容] [年份]',
-        ],
-        rules: {
-          minLength: 30,
-          maxLength: 60,
-          includeKeyword: true,
-          includeBrand: true,
-          avoidStuffing: true,
-        },
-      },
-      metaDescription: {
-        patterns: [
-          '了解 [主题] 的 [数字] 个关键要点。[具体价值] [行动号召]',
-          '发现 [主题] 的最佳实践。[具体收益] 立即开始！',
-          '[问题] 我们提供 [解决方案]。[具体结果] [行动号召]',
-        ],
-        rules: {
-          minLength: 120,
-          maxLength: 160,
-          includeKeyword: true,
-          includeCallToAction: true,
-          minSentences: 2,
-          maxSentences: 4,
-        },
-      },
-      headings: {
-        patterns: [
-          '[主题]：[具体内容]',
-          '如何 [动作] [主题]',
-          '[主题] 的 [数字] 个 [方面]',
-          '[主题] 最佳实践',
-        ],
-        rules: {
-          minLength: 10,
-          maxLength: 70,
-          includeKeyword: false,
-          avoidStuffing: true,
-        },
-      },
-      content: {
-        patterns: [
-          '[引言] [主体内容] [结论]',
-          '[问题] [分析] [解决方案] [总结]',
-          '[概述] [详细说明] [实例] [建议]',
-        ],
-        rules: {
-          minLength: 300,
-          includeKeyword: true,
-          minSentences: 10,
-          avoidStuffing: true,
-        },
-      },
-      images: {
-        patterns: ['[主题] 相关图片', '[主题] 示意图', '[主题] 流程图'],
-        rules: {
-          includeAlt: true,
-          includeCaption: true,
-          optimizeSize: true,
-        },
-      },
-      links: {
-        patterns: ['[相关资源]', '[进一步阅读]', '[参考链接]'],
-        rules: {
-          includeAnchor: true,
-          includeTitle: true,
-          avoidBroken: true,
-        },
-      },
-    };
+  constructor(config: OptimizationEngineConfig = {}) {
+    this.optimizationTemplates = config.templates ?? defaultOptimizationTemplates;
+    this.suggestionTemplates = config.suggestionTemplates ?? defaultOptimizationSuggestionTemplates;
+
+    const templateValidation = validateOptimizationTemplates(this.optimizationTemplates);
+    if (!templateValidation.isValid) {
+      throw new Error(`SEO优化模板配置无效: ${templateValidation.errors.join('; ')}`);
+    }
+
+    const suggestionValidation = validateOptimizationSuggestionTemplates(this.suggestionTemplates);
+    if (!suggestionValidation.isValid) {
+      throw new Error(`SEO优化建议模板配置无效: ${suggestionValidation.errors.join('; ')}`);
+    }
+  }
+
+  setTemplates(templates: OptimizationTemplates): void {
+    const validation = validateOptimizationTemplates(templates);
+    if (!validation.isValid) {
+      throw new Error(`SEO优化模板配置无效: ${validation.errors.join('; ')}`);
+    }
+    this.optimizationTemplates = templates;
+  }
+
+  setSuggestionTemplates(templates: OptimizationSuggestionTemplateMap): void {
+    const validation = validateOptimizationSuggestionTemplates(templates);
+    if (!validation.isValid) {
+      throw new Error(`SEO优化建议模板配置无效: ${validation.errors.join('; ')}`);
+    }
+    this.suggestionTemplates = templates;
   }
 
   /**
    * 生成优化建议
    */
-  generateOptimizations(analysisData: any, context: OptimizationContext): OptimizationSuggestion[] {
+  generateOptimizations(
+    analysisData: OptimizationAnalysisData,
+    context: OptimizationContext
+  ): OptimizationSuggestion[] {
     const suggestions: OptimizationSuggestion[] = [];
 
     // 标题优化
@@ -211,113 +164,34 @@ class OptimizationEngine {
   ): OptimizationSuggestion[] {
     const suggestions: OptimizationSuggestion[] = [];
     const template = this.optimizationTemplates.title;
+    const minLength = template.rules.minLength ?? 30;
+    const maxLength = template.rules.maxLength ?? 60;
 
     // 检查长度
-    if (
-      currentTitle.length < template.rules.minLength ||
-      currentTitle.length > template.rules.maxLength
-    ) {
+    if (currentTitle.length < minLength || currentTitle.length > maxLength) {
       const suggestedTitle = this.generateOptimalTitle(currentTitle, context);
-
-      suggestions.push({
-        type: 'title-length',
-        category: 'meta',
-        title: '优化标题长度',
-        description: `当前标题长度${currentTitle.length}字符，建议调整为${template.rules.minLength}-${template.rules.maxLength}字符`,
-        current: currentTitle,
-        suggested: suggestedTitle,
-        improvement: '提高搜索结果显示效果和点击率',
-        implementation: [
-          {
-            step: 1,
-            action: '分析当前标题',
-            details: '检查标题长度、关键词使用和品牌展示',
-            estimatedTime: '5分钟',
-            difficulty: 'easy',
-          },
-          {
-            step: 2,
-            action: '重写标题',
-            details: '使用优化模板创建新标题',
-            code: `<title>${suggestedTitle}</title>`,
-            estimatedTime: '10分钟',
-            difficulty: 'easy',
-          },
-        ],
-        examples: [
-          {
-            title: '标题优化示例',
-            language: 'html',
-            code: `<!-- 优化前 -->
-<title>页面标题</title>
-
-<!-- 优化后 -->
-<title>SEO优化技巧 - 提升排名指南 | 品牌名</title>`,
-            explanation: '包含关键词、符合长度要求、展示品牌',
-          },
-        ],
-        expectedImpact: {
-          traffic: 15,
-          ranking: 10,
-          ctr: 25,
-          conversions: 8,
-          timeframe: '2-4周',
-          confidence: 0.8,
-        },
-        priority: 'high',
-        effort: 'low',
-      });
+      suggestions.push(
+        this.buildSuggestion('title-length', 'medium', {
+          currentTitle,
+          suggestedTitle,
+          currentLength: currentTitle.length,
+          minLength,
+          maxLength,
+        })
+      );
     }
 
     // 检查关键词
     if (template.rules.includeKeyword && !this.containsKeyword(currentTitle, context.keywords)) {
-      suggestions.push({
-        type: 'title-keyword',
-        category: 'meta',
-        title: '添加关键词到标题',
-        description: '标题应包含主要关键词以提高搜索排名',
-        current: currentTitle,
-        suggested: this.addKeywordToTitle(currentTitle, context.keywords),
-        improvement: '提高搜索排名和相关性',
-        implementation: [
-          {
-            step: 1,
-            action: '确定主要关键词',
-            details: '选择最相关的关键词',
-            estimatedTime: '5分钟',
-            difficulty: 'easy',
-          },
-          {
-            step: 2,
-            action: '重写标题',
-            details: '自然地融入关键词',
-            estimatedTime: '10分钟',
-            difficulty: 'easy',
-          },
-        ],
-        examples: [
-          {
-            title: '关键词优化示例',
-            language: 'html',
-            code: `<!-- 优化前 -->
-<title>我们的服务</title>
-
-<!-- 优化后 -->
-<title>SEO优化服务 - 专业排名提升 | 品牌名</title>`,
-            explanation: '自然融入主要关键词',
-          },
-        ],
-        expectedImpact: {
-          traffic: 20,
-          ranking: 15,
-          ctr: 18,
-          conversions: 10,
-          timeframe: '2-4周',
-          confidence: 0.85,
-        },
-        priority: 'high',
-        effort: 'low',
-      });
+      const primaryKeyword = context.keywords[0] || '';
+      const suggestedTitle = this.addKeywordToTitle(currentTitle, context.keywords);
+      suggestions.push(
+        this.buildSuggestion('title-keyword', 'medium', {
+          currentTitle,
+          suggestedTitle,
+          primaryKeyword,
+        })
+      );
     }
 
     return suggestions;
@@ -332,62 +206,21 @@ class OptimizationEngine {
   ): OptimizationSuggestion[] {
     const suggestions: OptimizationSuggestion[] = [];
     const template = this.optimizationTemplates.metaDescription;
+    const minLength = template.rules.minLength ?? 120;
+    const maxLength = template.rules.maxLength ?? 160;
 
     // 检查长度
-    if (
-      currentDescription.length < template.rules.minLength ||
-      currentDescription.length > template.rules.maxLength
-    ) {
+    if (currentDescription.length < minLength || currentDescription.length > maxLength) {
       const suggestedDescription = this.generateOptimalMetaDescription(currentDescription, context);
-
-      suggestions.push({
-        type: 'meta-description-length',
-        category: 'meta',
-        title: '优化Meta描述长度',
-        description: `当前描述长度${currentDescription.length}字符，建议调整为${template.rules.minLength}-${template.rules.maxLength}字符`,
-        current: currentDescription,
-        suggested: suggestedDescription,
-        improvement: '提高搜索结果展示效果和点击率',
-        implementation: [
-          {
-            step: 1,
-            action: '分析当前描述',
-            details: '检查描述长度、内容和吸引力',
-            estimatedTime: '5分钟',
-            difficulty: 'easy',
-          },
-          {
-            step: 2,
-            action: '重写描述',
-            details: '使用优化模板创建新描述',
-            code: `<meta name="description" content="${suggestedDescription}">`,
-            estimatedTime: '15分钟',
-            difficulty: 'easy',
-          },
-        ],
-        examples: [
-          {
-            title: 'Meta描述优化示例',
-            language: 'html',
-            code: `<!-- 优化前 -->
-<meta name="description" content="简短描述">
-
-<!-- 优化后 -->
-<meta name="description" content="了解SEO优化的10个关键技巧。提升网站排名和流量，立即开始优化！">`,
-            explanation: '符合长度要求，包含关键词和行动号召',
-          },
-        ],
-        expectedImpact: {
-          traffic: 10,
-          ranking: 5,
-          ctr: 30,
-          conversions: 12,
-          timeframe: '1-3周',
-          confidence: 0.75,
-        },
-        priority: 'high',
-        effort: 'low',
-      });
+      suggestions.push(
+        this.buildSuggestion('meta-description-length', 'medium', {
+          currentDescription,
+          suggestedDescription,
+          currentLength: currentDescription.length,
+          minLength,
+          maxLength,
+        })
+      );
     }
 
     return suggestions;
@@ -397,67 +230,19 @@ class OptimizationEngine {
    * 生成标题结构优化建议
    */
   private generateHeadingOptimizations(
-    headings: any[],
-    context: OptimizationContext
+    headings: AnalysisHeading[],
+    _context: OptimizationContext
   ): OptimizationSuggestion[] {
     const suggestions: OptimizationSuggestion[] = [];
 
     // 检查标题结构
-    const h1Count = headings.filter((h: any) => h.level === 1).length;
+    const h1Count = headings.filter(h => h.level === 1).length;
     if (h1Count !== 1) {
-      suggestions.push({
-        type: 'heading-structure',
-        category: 'content',
-        title: '优化标题结构',
-        description: `页面应有且仅有一个H1标题，当前有${h1Count}个`,
-        current: `${h1Count}个H1标题`,
-        suggested: '1个H1标题，清晰的层次结构',
-        improvement: '提高内容结构和SEO效果',
-        implementation: [
-          {
-            step: 1,
-            action: '检查标题结构',
-            details: '识别所有H1-H6标题',
-            estimatedTime: '10分钟',
-            difficulty: 'easy',
-          },
-          {
-            step: 2,
-            action: '重构标题',
-            details: '确保只有一个H1，层次清晰',
-            code: `<h1>主标题</h1>
-<h2>二级标题</h2>
-<h3>三级标题</h3>`,
-            estimatedTime: '20分钟',
-            difficulty: 'medium',
-          },
-        ],
-        examples: [
-          {
-            title: '标题结构示例',
-            language: 'html',
-            code: `<!-- 优化前 -->
-<h1>标题1</h1>
-<h1>标题2</h1>
-
-<!-- 优化后 -->
-<h1>主标题</h1>
-<h2>二级标题</h2>
-<h3>三级标题</h3>`,
-            explanation: '清晰的标题层次结构',
-          },
-        ],
-        expectedImpact: {
-          traffic: 8,
-          ranking: 12,
-          ctr: 5,
-          conversions: 6,
-          timeframe: '2-3周',
-          confidence: 0.7,
-        },
-        priority: 'medium',
-        effort: 'medium',
-      });
+      suggestions.push(
+        this.buildSuggestion('heading-structure', h1Count > 2 ? 'high' : 'medium', {
+          h1Count,
+        })
+      );
     }
 
     return suggestions;
@@ -468,68 +253,21 @@ class OptimizationEngine {
    */
   private generateContentOptimizations(
     content: string,
-    context: OptimizationContext
+    _context: OptimizationContext
   ): OptimizationSuggestion[] {
     const suggestions: OptimizationSuggestion[] = [];
     const template = this.optimizationTemplates.content;
 
     // 检查内容长度
     const wordCount = this.countWords(content);
-    if (wordCount < (template.rules.minLength || 300)) {
-      suggestions.push({
-        type: 'content-length',
-        category: 'content',
-        title: '增加内容长度',
-        description: `当前内容${wordCount}字，建议增加到${template.rules.minLength}字以上`,
-        current: `${wordCount}字`,
-        suggested: `${template.rules.minLength}字以上`,
-        improvement: '提高内容价值和SEO排名',
-        implementation: [
-          {
-            step: 1,
-            action: '内容规划',
-            details: '确定需要扩展的内容部分',
-            estimatedTime: '15分钟',
-            difficulty: 'medium',
-          },
-          {
-            step: 2,
-            action: '内容扩展',
-            details: '添加详细说明、实例和分析',
-            estimatedTime: '1-2小时',
-            difficulty: 'medium',
-          },
-        ],
-        examples: [
-          {
-            title: '内容扩展示例',
-            language: 'markdown',
-            code: `# 原始内容
-简短介绍...
-
-# 扩展内容
-## 详细说明
-更详细的解释...
-
-## 实例分析
-具体案例...
-
-## 总结
-内容总结...`,
-            explanation: '通过添加详细内容扩展文章',
-          },
-        ],
-        expectedImpact: {
-          traffic: 15,
-          ranking: 20,
-          ctr: 8,
-          conversions: 10,
-          timeframe: '3-6周',
-          confidence: 0.8,
-        },
-        priority: 'medium',
-        effort: 'medium',
-      });
+    const minLength = template.rules.minLength ?? 300;
+    if (wordCount < minLength) {
+      suggestions.push(
+        this.buildSuggestion('content-length', wordCount < minLength * 0.5 ? 'high' : 'medium', {
+          wordCount,
+          minLength,
+        })
+      );
     }
 
     return suggestions;
@@ -539,62 +277,19 @@ class OptimizationEngine {
    * 生成图片优化建议
    */
   private generateImageOptimizations(
-    images: any[],
-    context: OptimizationContext
+    images: AnalysisImage[],
+    _context: OptimizationContext
   ): OptimizationSuggestion[] {
     const suggestions: OptimizationSuggestion[] = [];
 
     // 检查图片alt属性
-    const imagesWithoutAlt = images.filter((img: any) => !img.alt);
+    const imagesWithoutAlt = images.filter(img => !img.alt);
     if (imagesWithoutAlt.length > 0) {
-      suggestions.push({
-        type: 'image-alt',
-        category: 'content',
-        title: '添加图片Alt属性',
-        description: `${imagesWithoutAlt.length}张图片缺少alt属性`,
-        current: '缺少alt属性',
-        suggested: '为所有图片添加描述性alt属性',
-        improvement: '提高可访问性和SEO效果',
-        implementation: [
-          {
-            step: 1,
-            action: '识别图片',
-            details: '找出所有缺少alt属性的图片',
-            estimatedTime: '10分钟',
-            difficulty: 'easy',
-          },
-          {
-            step: 2,
-            action: '添加alt属性',
-            details: '为每张图片添加描述性alt文本',
-            code: `<img src="image.jpg" alt="描述性文本">`,
-            estimatedTime: '15分钟',
-            difficulty: 'easy',
-          },
-        ],
-        examples: [
-          {
-            title: 'Alt属性示例',
-            language: 'html',
-            code: `<!-- 优化前 -->
-<img src="seo-chart.jpg">
-
-<!-- 优化后 -->
-<img src="seo-chart.jpg" alt="SEO优化效果图表显示排名提升趋势">`,
-            explanation: '添加描述性的alt属性',
-          },
-        ],
-        expectedImpact: {
-          traffic: 5,
-          ranking: 8,
-          ctr: 3,
-          conversions: 4,
-          timeframe: '1-2周',
-          confidence: 0.6,
-        },
-        priority: 'medium',
-        effort: 'low',
-      });
+      suggestions.push(
+        this.buildSuggestion('image-alt', imagesWithoutAlt.length > 5 ? 'high' : 'medium', {
+          missingAltCount: imagesWithoutAlt.length,
+        })
+      );
     }
 
     return suggestions;
@@ -604,61 +299,19 @@ class OptimizationEngine {
    * 生成链接优化建议
    */
   private generateLinkOptimizations(
-    links: any,
-    context: OptimizationContext
+    links: AnalysisLinks,
+    _context: OptimizationContext
   ): OptimizationSuggestion[] {
     const suggestions: OptimizationSuggestion[] = [];
 
     // 检查内部链接
-    if (links.internal?.issues?.length > 0) {
-      suggestions.push({
-        type: 'internal-links',
-        category: 'links',
-        title: '优化内部链接',
-        description: '改善内部链接结构和锚文本',
-        current: '存在链接问题',
-        suggested: '优化链接结构，改善用户体验',
-        improvement: '提高网站结构和权重分配',
-        implementation: [
-          {
-            step: 1,
-            action: '链接审计',
-            details: '检查所有内部链接的有效性',
-            estimatedTime: '20分钟',
-            difficulty: 'medium',
-          },
-          {
-            step: 2,
-            action: '链接优化',
-            details: '修复无效链接，改善锚文本',
-            code: `<a href="/page" title="页面描述">描述性锚文本</a>`,
-            estimatedTime: '30分钟',
-            difficulty: 'medium',
-          },
-        ],
-        examples: [
-          {
-            title: '内部链接示例',
-            language: 'html',
-            code: `<!-- 优化前 -->
-<a href="#">点击这里</a>
-
-<!-- 优化后 -->
-<a href="/seo-guide" title="SEO优化完整指南">SEO优化指南</a>`,
-            explanation: '使用描述性锚文本和标题',
-          },
-        ],
-        expectedImpact: {
-          traffic: 10,
-          ranking: 15,
-          ctr: 5,
-          conversions: 6,
-          timeframe: '2-4周',
-          confidence: 0.7,
-        },
-        priority: 'medium',
-        effort: 'medium',
-      });
+    const issueCount = links.internal?.issues?.length ?? 0;
+    if (issueCount > 0) {
+      suggestions.push(
+        this.buildSuggestion('internal-links', issueCount > 10 ? 'high' : 'medium', {
+          issueCount,
+        })
+      );
     }
 
     return suggestions;
@@ -687,15 +340,10 @@ class OptimizationEngine {
     currentDescription: string,
     context: OptimizationContext
   ): string {
-    const primaryKeyword = context.keywords[0] || '';
-
-    // 使用模板生成描述
     const pattern = this.optimizationTemplates.metaDescription.patterns[0];
-    return pattern
-      .replace('[主题]', primaryKeyword)
-      .replace('[数字]', '10')
-      .replace('[具体价值]', '提升排名和流量')
-      .replace('[行动号召]', '立即开始优化！');
+    const primaryKeyword = context.keywords[0] || context.industry || '主题';
+    const tokens = this.buildMetaDescriptionTokens(primaryKeyword, currentDescription, context);
+    return this.replaceBracketTokens(pattern, tokens);
   }
 
   /**
@@ -845,7 +493,114 @@ class OptimizationEngine {
    * 设置优化模板
    */
   setOptimizationTemplates(templates: Partial<OptimizationTemplates>): void {
-    this.optimizationTemplates = { ...this.optimizationTemplates, ...templates };
+    const merged = { ...this.optimizationTemplates, ...templates } as OptimizationTemplates;
+    const validation = validateOptimizationTemplates(merged);
+    if (!validation.isValid) {
+      throw new Error(`SEO优化模板配置无效: ${validation.errors.join('; ')}`);
+    }
+    this.optimizationTemplates = merged;
+  }
+
+  setOptimizationSuggestionTemplates(templates: OptimizationSuggestionTemplateMap): void {
+    const validation = validateOptimizationSuggestionTemplates(templates);
+    if (!validation.isValid) {
+      throw new Error(`SEO优化建议模板配置无效: ${validation.errors.join('; ')}`);
+    }
+    this.suggestionTemplates = templates;
+  }
+
+  private buildSuggestion(
+    templateId: string,
+    impactLevel: 'low' | 'medium' | 'high',
+    tokens: Record<string, string | number>
+  ): OptimizationSuggestion {
+    const template = this.suggestionTemplates[templateId];
+    if (!template) {
+      throw new Error(`缺少优化建议模板: ${templateId}`);
+    }
+    const impact = template.impactRanges[impactLevel];
+    const description = this.interpolate(template.description, tokens);
+    const current = this.interpolate(template.current, tokens);
+    const suggested = this.interpolate(template.suggested, tokens);
+
+    return {
+      type: template.id,
+      category: template.category,
+      title: template.title,
+      description,
+      current,
+      suggested,
+      improvement: template.improvement,
+      implementation: template.implementation,
+      examples: template.examples,
+      expectedImpact: {
+        traffic: this.pickImpactValue(impact.traffic),
+        ranking: this.pickImpactValue(impact.ranking),
+        ctr: this.pickImpactValue(impact.ctr),
+        conversions: this.pickImpactValue(impact.conversions),
+        timeframe: impact.timeframe,
+        confidence: impact.confidence,
+      },
+      priority: template.priority,
+      effort: template.effort,
+    };
+  }
+
+  private interpolate(template: string, tokens: Record<string, string | number>): string {
+    return template.replace(/\{(\w+)\}/g, (_, key: string) => {
+      const value = tokens[key];
+      return value === undefined || value === null ? '' : String(value);
+    });
+  }
+
+  private pickImpactValue([min, max]: [number, number]): number {
+    return Math.round((min + max) / 2);
+  }
+
+  private buildMetaDescriptionTokens(
+    primaryKeyword: string,
+    currentDescription: string,
+    context: OptimizationContext
+  ): Record<string, string | number> {
+    const keywordCount = context.keywords.length;
+    const derivedFromContent = Math.max(3, Math.round(this.countWords(currentDescription) / 60));
+    const number = Math.min(12, keywordCount > 0 ? keywordCount + 4 : derivedFromContent);
+    const value = context.industry ? `提升${context.industry}曝光与转化` : '提升搜索曝光与流量';
+    const benefit = context.targetAudience
+      ? `更贴合${context.targetAudience}需求`
+      : '更高相关性与点击率';
+    const action = this.getCallToAction(context.contentType);
+    const issue = primaryKeyword ? `解决${primaryKeyword}相关痛点` : '解决关键问题';
+    const solution = primaryKeyword ? `${primaryKeyword}优化方案` : '专业优化方案';
+    const result = context.brand ? `强化${context.brand}认知` : '带来更多潜在客户';
+
+    return {
+      主题: primaryKeyword,
+      数字: number,
+      具体价值: value,
+      行动号召: action,
+      具体收益: benefit,
+      问题: issue,
+      解决方案: solution,
+      具体结果: result,
+    };
+  }
+
+  private getCallToAction(contentType: string): string {
+    const callToActionMap: Record<string, string> = {
+      ecommerce: '立即查看精选方案',
+      landing: '立即咨询获取方案',
+      blog: '阅读全文获取细节',
+      service: '获取专业服务建议',
+    };
+    return callToActionMap[contentType] ?? '立即开始优化';
+  }
+
+  private replaceBracketTokens(template: string, tokens: Record<string, string | number>): string {
+    return template.replace(/\[([^\]]+)\]/g, (_, key: string) => {
+      const value = tokens[key];
+      return value === undefined || value === null ? '' : String(value);
+    });
   }
 }
 

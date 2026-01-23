@@ -95,7 +95,6 @@ class StressAnalyzer {
     const errors: Map<string, number> = new Map();
 
     let activeConnections = 0;
-    let totalRequests = 0;
     let successfulRequests = 0;
     let failedRequests = 0;
 
@@ -213,7 +212,7 @@ class StressAnalyzer {
       onError: (error: Error) => void;
     }
   ): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       const startTime = performance.now();
 
       // 检查是否已超时
@@ -246,27 +245,22 @@ class StressAnalyzer {
       }
 
       const req: ClientRequest = client.request(requestOptions, res => {
-        let data = '';
-
-        res.on('data', chunk => {
-          data += chunk;
-        });
-
         res.on('end', () => {
           const endTime = performance.now();
           const responseTime = endTime - startTime;
+          const statusCode = res.statusCode ?? 0;
 
           options.metrics.push({
             startTime,
             endTime,
             responseTime,
-            success: res.statusCode! >= 200 && res.statusCode! < 400,
+            success: statusCode >= 200 && statusCode < 400,
           });
 
-          if (res.statusCode! >= 200 && res.statusCode! < 400) {
+          if (statusCode >= 200 && statusCode < 400) {
             options.onComplete();
           } else {
-            options.onError(new Error(`HTTP ${res.statusCode}`));
+            options.onError(new Error(`HTTP ${statusCode}`));
           }
 
           resolve();

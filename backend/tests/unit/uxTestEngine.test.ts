@@ -25,6 +25,16 @@ const createBrowserMock = () => ({
   close: mockClose,
 });
 
+const createProgressTracker = () => {
+  const progressUpdates: Array<Record<string, unknown>> = [];
+  return {
+    progressUpdates,
+    callback: (progress: Record<string, unknown>) => {
+      progressUpdates.push(progress);
+    },
+  };
+};
+
 describe('UXTestEngine', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -69,5 +79,47 @@ describe('UXTestEngine', () => {
     expect(result.results.metrics.fid).toBe(45);
     expect(result.results.score).toBeGreaterThanOrEqual(0);
     expect(result.results.grade).toBeDefined();
+    expect(result.results.summary).toBeDefined();
+    expect(result.results.summary.tags).toBeDefined();
+    expect(result.results.summary.level).toBeDefined();
+    expect(result.results.recommendations).toBeDefined();
+  });
+
+  test('浏览器启动失败时应返回失败结果', async () => {
+    const engine = new UXTestEngine();
+    mockLaunch.mockRejectedValue(new Error('launch failed'));
+
+    const result = await engine.executeTest({
+      url: 'https://example.com',
+      timeout: 1000,
+      confirmPuppeteer: true,
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('launch failed');
+  });
+
+  test('应输出进度回调', async () => {
+    const engine = new UXTestEngine();
+    const tracker = createProgressTracker();
+    engine.setProgressCallback(tracker.callback);
+    mockEvaluate.mockResolvedValue({
+      navigation: { ttfb: 900 },
+      fcp: 800,
+      lcp: 2400,
+      fid: 35,
+      cls: 0.05,
+      userAgent: 'jest',
+      timestamp: new Date().toISOString(),
+    });
+
+    await engine.executeTest({
+      url: 'https://example.com',
+      timeout: 1000,
+      confirmPuppeteer: true,
+    });
+
+    expect(tracker.progressUpdates.length).toBeGreaterThan(0);
+    expect(tracker.progressUpdates.some(item => item.progress === 100)).toBe(true);
   });
 });

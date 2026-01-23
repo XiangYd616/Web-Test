@@ -17,6 +17,7 @@ export interface CICDPlatform {
 
 // CI/CD集成配置接口
 export interface CICDIntegrationConfig {
+  id: string;
   platform: string;
   name: string;
   description?: string;
@@ -118,6 +119,20 @@ export interface CICDExecutionResult {
   logs: string[];
   metadata: Record<string, unknown>;
 }
+
+type BuildTriggerOptions = {
+  branch?: string;
+  commitId?: string;
+  variables?: Record<string, string>;
+  [key: string]: unknown;
+};
+
+type BuildTriggerResult = {
+  url: string;
+  buildNumber?: number;
+  runId?: number;
+  pipelineId?: number;
+};
 
 // CI/CD阶段结果接口
 export interface CICDStageResult {
@@ -510,7 +525,9 @@ class CICDIntegrationService extends EventEmitter {
     const successfulBuilds = builds.filter(b => b.status === 'success').length;
     const failedBuilds = builds.filter(b => b.status === 'failed').length;
 
-    const buildTimes = builds.filter(b => b.duration).map(b => b.duration!);
+    const buildTimes = builds
+      .map(build => build.duration)
+      .filter((duration): duration is number => typeof duration === 'number');
     const averageBuildTime =
       buildTimes.length > 0
         ? buildTimes.reduce((sum, time) => sum + time, 0) / buildTimes.length
@@ -589,7 +606,7 @@ class CICDIntegrationService extends EventEmitter {
   private async triggerJenkinsBuild(
     integration: CICDIntegrationConfig,
     build: CICDBuild,
-    options: BuildTriggerOptions
+    _options: BuildTriggerOptions
   ): Promise<BuildTriggerResult> {
     // 简化实现，实际应该调用Jenkins API
     const serverUrl = String(integration.config.serverUrl || '');
@@ -606,7 +623,7 @@ class CICDIntegrationService extends EventEmitter {
   private async triggerGitHubActionsBuild(
     integration: CICDIntegrationConfig,
     build: CICDBuild,
-    options: BuildTriggerOptions
+    _options: BuildTriggerOptions
   ): Promise<BuildTriggerResult> {
     // 简化实现，实际应该调用GitHub API
     const owner = String(integration.config.owner || '');
@@ -623,7 +640,7 @@ class CICDIntegrationService extends EventEmitter {
   private async triggerGitLabCIBuild(
     integration: CICDIntegrationConfig,
     build: CICDBuild,
-    options: BuildTriggerOptions
+    _options: BuildTriggerOptions
   ): Promise<BuildTriggerResult> {
     // 简化实现，实际应该调用GitLab API
     const serverUrl = String(integration.config.serverUrl || '');
@@ -691,6 +708,7 @@ class CICDIntegrationService extends EventEmitter {
       duration,
       artifacts,
       logs,
+      metadata: {},
     };
   }
 
@@ -741,8 +759,8 @@ class CICDIntegrationService extends EventEmitter {
    * 执行脚本
    */
   private async executeScript(
-    script: string,
-    variables: Record<string, string>
+    _script: string,
+    _variables: Record<string, string>
   ): Promise<{
     exitCode: number;
     logs: string[];
@@ -785,9 +803,9 @@ class CICDIntegrationService extends EventEmitter {
    * 验证webhook签名
    */
   private async verifyWebhookSignature(
-    platform: string,
-    payload: unknown,
-    signature: string
+    _platform: string,
+    _payload: unknown,
+    _signature: string
   ): Promise<boolean> {
     // 简化实现，实际应该验证签名
     return true;
@@ -797,8 +815,8 @@ class CICDIntegrationService extends EventEmitter {
    * 根据平台处理webhook
    */
   private async processWebhookByPlatform(
-    platform: string,
-    payload: unknown
+    _platform: string,
+    _payload: unknown
   ): Promise<Record<string, unknown>> {
     // 简化实现，实际应该根据平台处理webhook
     return { processed: true };

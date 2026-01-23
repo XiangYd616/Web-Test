@@ -1,11 +1,20 @@
 module.exports = {
   "testEnvironment": "node",
   "roots": [
-    "<rootDir>/tests"
+    "<rootDir>/tests",
+    "<rootDir>/backend/tests"
   ],
   "testMatch": [
-    "**/__tests__/**/*.js",
-    "**/?(*.)+(spec|test).js"
+    "**/__tests__/**/*.(js|ts)",
+    "**/?(*.)+(spec|test).(js|ts)"
+  ],
+  "transform": {
+    "^.+\\.ts$": "ts-jest"
+  },
+  "moduleFileExtensions": [
+    "js",
+    "ts",
+    "json"
   ],
   "collectCoverageFrom": [
     "backend/**/*.js",

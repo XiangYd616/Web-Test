@@ -51,8 +51,12 @@ export class MemoryMetricStorage implements MetricStorage {
       this.data.set(key, []);
     }
 
-    const points = this.data.get(key)!;
-    points.push(metric);
+    const points = this.data.get(key);
+    if (!points) {
+      this.data.set(key, [metric]);
+    } else {
+      points.push(metric);
+    }
 
     // 限制存储大小
     if (points.length > this.maxSize) {
@@ -199,8 +203,8 @@ export class MemoryMetricStorage implements MetricStorage {
 
     return {
       totalMetrics,
-      metricsByType: metricsByType as any,
-      metricsByCategory: metricsByCategory as any,
+      metricsByType,
+      metricsByCategory,
       dataPoints,
       storageSize: this.estimateStorageSize(),
       alerts: {
@@ -433,7 +437,7 @@ export class MetricCollector {
     name: string,
     aggregation: AggregationType,
     timeWindow: TimeWindow,
-    labels?: Record<string, string>
+    _labels?: Record<string, string>
   ): Promise<number> {
     return this.storage.aggregate(name, aggregation, timeWindow);
   }
@@ -567,7 +571,10 @@ export class MetricCollector {
   /**
    * 评估警报条件
    */
-  private evaluateAlertCondition(condition: any, value: number): boolean {
+  private evaluateAlertCondition(
+    condition: { operator?: string; threshold?: number },
+    value: number
+  ): boolean {
     switch (condition.operator) {
       case 'gt':
         return value > condition.threshold;
@@ -592,7 +599,7 @@ export class MetricCollector {
   private async triggerAlert(
     alert: MetricAlert,
     value: number,
-    labels?: Record<string, string>
+    _labels?: Record<string, string>
   ): Promise<void> {
     const event: MetricAlertEvent = {
       id: this.generateEventId(),

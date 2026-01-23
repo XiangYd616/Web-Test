@@ -36,13 +36,36 @@ interface AnalysisData {
     score: number;
     grade: string;
   };
-  meta?: any;
-  content?: any;
-  contentQuality?: any;
-  links?: any;
-  mobile?: any;
-  structuredData?: any;
-  performance?: any;
+  meta?: {
+    overall?: { score?: number };
+    title?: { issues?: string[] };
+    description?: { issues?: string[] };
+  };
+  content?: {
+    overall?: { score?: number };
+    issues?: string[];
+    headings?: unknown[];
+  };
+  contentQuality?: {
+    score?: number;
+    issues?: string[];
+  };
+  links?: {
+    overall?: { score?: number };
+    issues?: string[];
+  };
+  mobile?: {
+    overall?: { score?: number };
+    issues?: string[];
+  };
+  structuredData?: {
+    overall?: { score?: number };
+    issues?: string[];
+  };
+  performance?: {
+    overall?: { score?: number };
+    issues?: string[];
+  };
 }
 
 interface Recommendation {
@@ -52,10 +75,12 @@ interface Recommendation {
   title: string;
   description: string;
   impact: string;
+  impactScore?: number;
+  impactLevel?: 'low' | 'medium' | 'high';
   effort: 'low' | 'medium' | 'high';
-  examples: any[];
-  implementation: any[];
-  resources: any[];
+  examples: Array<Record<string, unknown>>;
+  implementation: Array<Record<string, unknown>>;
+  resources: Array<Record<string, unknown>>;
 }
 
 interface SeoReport {
@@ -370,67 +395,76 @@ class ReportGenerator {
   private generateScoreAnalysis(analysisData: AnalysisData): ScoreAnalysis {
     const categories: CategoryScore[] = [];
 
+    const getIssueCount = (issues?: string[]) => (Array.isArray(issues) ? issues.length : 0);
+
     // 分析各个类别的分数
     if (analysisData.meta) {
+      const meta = analysisData.meta;
+      const metaScore = meta.overall?.score ?? 0;
+      const titleIssues = getIssueCount(meta.title?.issues);
+      const descIssues = getIssueCount(meta.description?.issues);
       categories.push({
         category: 'meta',
-        score: analysisData.meta.overall?.score || 0,
+        score: metaScore,
         weight: 0.25,
         impact:
           this.seoImpactFactors.title.ranking + this.seoImpactFactors.meta_description.ranking,
-        issues:
-          (analysisData.meta.title?.issues?.length || 0) +
-          (analysisData.meta.description?.issues?.length || 0),
+        issues: titleIssues + descIssues,
       });
     }
 
     if (analysisData.content) {
+      const content = analysisData.content;
       categories.push({
         category: 'content',
-        score: analysisData.content.overall?.score || 0,
+        score: content.overall?.score ?? 0,
         weight: 0.2,
         impact: this.seoImpactFactors.content_quality.ranking,
-        issues: analysisData.content.issues?.length || 0,
+        issues: getIssueCount(content.issues),
       });
     }
 
     if (analysisData.links) {
+      const links = analysisData.links;
       categories.push({
         category: 'links',
-        score: analysisData.links.overall?.score || 0,
+        score: links.overall?.score ?? 0,
         weight: 0.15,
         impact: this.seoImpactFactors.internal_links.ranking,
-        issues: analysisData.links.issues?.length || 0,
+        issues: getIssueCount(links.issues),
       });
     }
 
     if (analysisData.mobile) {
+      const mobile = analysisData.mobile;
       categories.push({
         category: 'mobile',
-        score: analysisData.mobile.overall?.score || 0,
+        score: mobile.overall?.score ?? 0,
         weight: 0.2,
         impact: this.seoImpactFactors.mobile_friendly.ranking,
-        issues: analysisData.mobile.issues?.length || 0,
+        issues: getIssueCount(mobile.issues),
       });
     }
 
     if (analysisData.structuredData) {
+      const structuredData = analysisData.structuredData;
       categories.push({
         category: 'structured-data',
-        score: analysisData.structuredData.overall?.score || 0,
+        score: structuredData.overall?.score ?? 0,
         weight: 0.1,
         impact: this.seoImpactFactors.structured_data.ranking,
-        issues: analysisData.structuredData.issues?.length || 0,
+        issues: getIssueCount(structuredData.issues),
       });
     }
 
     if (analysisData.performance) {
+      const performance = analysisData.performance;
       categories.push({
         category: 'performance',
-        score: analysisData.performance.overall?.score || 0,
+        score: performance.overall?.score ?? 0,
         weight: 0.1,
         impact: this.seoImpactFactors.page_speed.ranking,
-        issues: analysisData.performance.issues?.length || 0,
+        issues: getIssueCount(performance.issues),
       });
     }
 
@@ -648,13 +682,14 @@ class ReportGenerator {
   ): ExpectedMetrics {
     const currentMetrics = this.getCurrentMetrics(analysisData);
     const projectedMetrics = this.calculateProjectedMetrics(currentMetrics, recommendations);
+    const safeIncrease = (current: number, projected: number) =>
+      current > 0 ? ((projected - current) / current) * 100 : 0;
 
     return {
       traffic: {
         current: currentMetrics.traffic,
         projected: projectedMetrics.traffic,
-        increase:
-          ((projectedMetrics.traffic - currentMetrics.traffic) / currentMetrics.traffic) * 100,
+        increase: safeIncrease(currentMetrics.traffic, projectedMetrics.traffic),
         timeframe: '3个月',
         confidence: 0.75,
       },
@@ -668,17 +703,14 @@ class ReportGenerator {
       ctr: {
         current: currentMetrics.ctr,
         projected: projectedMetrics.ctr,
-        increase: ((projectedMetrics.ctr - currentMetrics.ctr) / currentMetrics.ctr) * 100,
+        increase: safeIncrease(currentMetrics.ctr, projectedMetrics.ctr),
         timeframe: '1个月',
         confidence: 0.8,
       },
       conversions: {
         current: currentMetrics.conversions,
         projected: projectedMetrics.conversions,
-        increase:
-          ((projectedMetrics.conversions - currentMetrics.conversions) /
-            currentMetrics.conversions) *
-          100,
+        increase: safeIncrease(currentMetrics.conversions, projectedMetrics.conversions),
         timeframe: '3个月',
         confidence: 0.65,
       },
@@ -688,7 +720,7 @@ class ReportGenerator {
   /**
    * 生成资源推荐
    */
-  private generateResources(recommendations: Recommendation[]): ReportResources {
+  private generateResources(_recommendations: Recommendation[]): ReportResources {
     const tools: ToolResource[] = [
       {
         name: 'Google Search Console',
@@ -758,15 +790,13 @@ class ReportGenerator {
    * 计算预估影响
    */
   private calculateEstimatedImpact(recommendations: Recommendation[]): string {
-    const totalImpact = recommendations.reduce((sum, rec) => {
-      const impactValue = this.getImpactValue(rec.impact);
-      return sum + impactValue;
-    }, 0);
+    const totalImpact = this.getTotalImpactScore(recommendations);
+    const avgImpact = totalImpact / Math.max(1, recommendations.length);
 
-    if (totalImpact > 80) return '极高';
-    if (totalImpact > 60) return '高';
-    if (totalImpact > 40) return '中等';
-    if (totalImpact > 20) return '低';
+    if (avgImpact > 25) return '极高';
+    if (avgImpact > 18) return '高';
+    if (avgImpact > 12) return '中等';
+    if (avgImpact > 6) return '低';
     return '极低';
   }
 
@@ -839,6 +869,13 @@ class ReportGenerator {
     return 5;
   }
 
+  private getTotalImpactScore(recommendations: Recommendation[]): number {
+    return recommendations.reduce((sum, rec) => {
+      const impactValue = rec.impactScore ?? this.getImpactValue(rec.impact);
+      return sum + impactValue;
+    }, 0);
+  }
+
   /**
    * 获取工作量值
    */
@@ -874,51 +911,70 @@ class ReportGenerator {
    * 计算预期结果
    */
   private calculateExpectedResults(recommendations: Recommendation[]): string {
-    const totalImpact = recommendations.reduce(
-      (sum, rec) => sum + this.getImpactValue(rec.impact),
-      0
-    );
+    const totalImpact = this.getTotalImpactScore(recommendations);
+    const avgImpact = totalImpact / Math.max(1, recommendations.length);
+    const trafficMin = Math.max(5, Math.round(avgImpact * 0.6));
+    const trafficMax = Math.max(trafficMin + 3, Math.round(avgImpact * 1.2));
+    const rankingMin = Math.max(3, Math.round(avgImpact * 0.4));
+    const rankingMax = Math.max(rankingMin + 2, Math.round(avgImpact * 0.9));
 
-    if (totalImpact > 200) return 'SEO排名显著提升，流量增长50%以上';
-    if (totalImpact > 150) return 'SEO排名大幅提升，流量增长30-50%';
-    if (totalImpact > 100) return 'SEO排名明显提升，流量增长20-30%';
-    if (totalImpact > 50) return 'SEO排名有所提升，流量增长10-20%';
-    return 'SEO排名小幅提升，流量增长5-10%';
+    return `预计流量提升${trafficMin}-${trafficMax}%，排名改善${rankingMin}-${rankingMax}位`;
   }
 
   /**
    * 获取当前指标
    */
-  private getCurrentMetrics(analysisData: AnalysisData): {
+  private getCurrentMetrics(_analysisData: AnalysisData): {
     traffic: number;
     ranking: number;
     ctr: number;
     conversions: number;
   } {
-    // 简化的当前指标计算
+    const analysisData = _analysisData;
+    const overallScore = analysisData.overall?.score ?? 0;
+    const categoryScores = [
+      analysisData.meta?.overall?.score,
+      analysisData.content?.overall?.score,
+      analysisData.links?.overall?.score,
+      analysisData.mobile?.overall?.score,
+      analysisData.structuredData?.overall?.score,
+      analysisData.performance?.overall?.score,
+    ].filter((score): score is number => Number.isFinite(score));
+
+    const avgCategoryScore =
+      categoryScores.length > 0
+        ? categoryScores.reduce((sum, score) => sum + score, 0) / categoryScores.length
+        : overallScore;
+    const normalizedScore = Math.max(0, Math.min(100, avgCategoryScore || overallScore));
+    const traffic = Math.max(100, Math.round((normalizedScore + overallScore) * 12));
+    const ranking = Math.max(1, Math.round(100 - normalizedScore));
+    const ctr = Math.round((normalizedScore / 40) * 100) / 100;
+    const conversions = Math.max(1, Math.round(traffic * (ctr / 100) * 0.6));
+
     return {
-      traffic: 1000,
-      ranking: 50,
-      ctr: 2.5,
-      conversions: 25,
+      traffic,
+      ranking,
+      ctr,
+      conversions,
     };
   }
 
   /**
    * 计算预期指标
    */
-  private calculateProjectedMetrics(current: any, recommendations: Recommendation[]): any {
-    const totalImpact = recommendations.reduce(
-      (sum, rec) => sum + this.getImpactValue(rec.impact),
-      0
-    );
-    const impactMultiplier = 1 + totalImpact / 100;
+  private calculateProjectedMetrics(
+    current: { traffic: number; ranking: number; ctr: number; conversions: number },
+    recommendations: Recommendation[]
+  ): { traffic: number; ranking: number; ctr: number; conversions: number } {
+    const totalImpact = this.getTotalImpactScore(recommendations);
+    const avgImpact = totalImpact / Math.max(1, recommendations.length);
+    const improvementRatio = Math.min(0.4, avgImpact / 100);
 
     return {
-      traffic: Math.round(current.traffic * impactMultiplier),
-      ranking: Math.max(1, current.ranking - Math.round(totalImpact / 10)),
-      ctr: Math.round(current.ctr * (1 + totalImpact / 200) * 100) / 100,
-      conversions: Math.round(current.conversions * impactMultiplier),
+      traffic: Math.round(current.traffic * (1 + improvementRatio)),
+      ranking: Math.max(1, current.ranking - Math.round(avgImpact / 8)),
+      ctr: Math.round(current.ctr * (1 + improvementRatio * 0.6) * 100) / 100,
+      conversions: Math.round(current.conversions * (1 + improvementRatio * 0.9)),
     };
   }
 

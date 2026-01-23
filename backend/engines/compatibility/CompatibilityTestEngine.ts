@@ -229,6 +229,9 @@ class CompatibilityTestEngine {
         (matrixResults.length ? matrixResults : browserResults) as Array<{ compatible: boolean }>,
         deviceResults
       );
+      const warnings = enableRealBrowser
+        ? []
+        : ['未启用真实浏览器渲染，结果基于User-Agent模拟，可信度可能受限'];
       const results = {
         url,
         timestamp: new Date().toISOString(),
@@ -245,6 +248,7 @@ class CompatibilityTestEngine {
         realBrowser: realBrowserResults,
         featureSummary: this.buildFeatureSummary(baseSignals),
         recommendations: this.buildRecommendations(browserResults, deviceResults),
+        warnings,
       };
 
       this.activeTests.set(testId, {

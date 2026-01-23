@@ -26,7 +26,7 @@ export interface RequestMetric {
   statusCode: number;
   userAgent?: string;
   userId?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 系统指标接口
@@ -233,7 +233,7 @@ class PerformanceCollector {
     url: string;
     userAgent?: string;
     userId?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): string {
     const requestId = this.generateRequestId();
     const metric: RequestMetric = {
@@ -475,7 +475,7 @@ class PerformanceMonitor {
     url: string;
     userAgent?: string;
     userId?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): string {
     return this.collector.startRequest(request);
   }
@@ -581,7 +581,7 @@ class PerformanceMonitor {
       } else if (avgResponseTime > this.config.thresholds.responseTime.warning) {
         this.createAlert(
           'response_time',
-          'warning',
+          'medium',
           `Average response time is ${avgResponseTime.toFixed(2)}ms`,
           avgResponseTime,
           this.config.thresholds.responseTime.warning,
@@ -603,7 +603,7 @@ class PerformanceMonitor {
     } else if (metrics.api.errorRate > this.config.thresholds.errorRate.warning) {
       this.createAlert(
         'error_rate',
-        'warning',
+        'medium',
         `Error rate is ${metrics.api.errorRate.toFixed(2)}%`,
         metrics.api.errorRate,
         this.config.thresholds.errorRate.warning,
@@ -627,7 +627,7 @@ class PerformanceMonitor {
       } else if (latestCpu > this.config.thresholds.cpu.warning) {
         this.createAlert(
           'system_resource',
-          'warning',
+          'medium',
           `CPU usage is ${latestCpu.toFixed(2)}%`,
           latestCpu,
           this.config.thresholds.cpu.warning,
@@ -652,7 +652,7 @@ class PerformanceMonitor {
       } else if (latestMemory > this.config.thresholds.memory.warning) {
         this.createAlert(
           'system_resource',
-          'warning',
+          'medium',
           `Memory usage is ${latestMemory.toFixed(2)}%`,
           latestMemory,
           this.config.thresholds.memory.warning,
@@ -674,7 +674,7 @@ class PerformanceMonitor {
     } else if (metrics.cache.hitRate < this.config.thresholds.cacheHitRate.warning) {
       this.createAlert(
         'cache_hit_rate',
-        'warning',
+        'medium',
         `Cache hit rate is ${(metrics.cache.hitRate * 100).toFixed(2)}%`,
         metrics.cache.hitRate,
         this.config.thresholds.cacheHitRate.warning,
@@ -792,7 +792,10 @@ class PerformanceMonitor {
         });
       }
 
-      const endpoint = endpointMap.get(key)!;
+      const endpoint = endpointMap.get(key);
+      if (!endpoint) {
+        return;
+      }
       endpoint.count++;
       endpoint.averageResponseTime =
         (endpoint.averageResponseTime * (endpoint.count - 1) + request.duration) / endpoint.count;

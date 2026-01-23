@@ -131,13 +131,13 @@ export interface ErrorDetail {
 }
 
 // 验证错误接口
-export interface ValidationError extends BaseError {
+export interface ValidationErrorInfo extends BaseError {
   details: ErrorDetail[];
   invalidFields: string[];
 }
 
 // 系统错误接口
-export interface SystemError extends BaseError {
+export interface SystemErrorInfo extends BaseError {
   systemInfo: {
     hostname: string;
     pid: number;
@@ -150,7 +150,7 @@ export interface SystemError extends BaseError {
 }
 
 // 网络错误接口
-export interface NetworkError extends BaseError {
+export interface NetworkErrorInfo extends BaseError {
   networkInfo: {
     url?: string;
     method?: string;
@@ -161,7 +161,7 @@ export interface NetworkError extends BaseError {
 }
 
 // 外部服务错误接口
-export interface ExternalServiceError extends BaseError {
+export interface ExternalServiceErrorInfo extends BaseError {
   serviceInfo: {
     serviceName: string;
     endpoint?: string;
@@ -250,7 +250,8 @@ export class CustomError extends Error implements ExtendedError {
   public readonly version: string;
   public readonly metadata: Record<string, unknown>;
   public readonly retryable: boolean;
-  public retryCount?: number;
+  public readonly cause?: Error;
+  public retryCount: number;
   public maxRetries?: number;
 
   constructor(
@@ -322,6 +323,7 @@ export class CustomError extends Error implements ExtendedError {
       metadata: this.metadata,
       retryable: this.retryable,
       retryCount: this.retryCount,
+      cause: this.cause,
       maxRetries: this.maxRetries,
     };
   }
@@ -357,7 +359,7 @@ export class CustomError extends Error implements ExtendedError {
 }
 
 // 验证错误类
-export class ValidationError extends CustomError {
+export class EngineValidationError extends CustomError {
   public readonly details: ErrorDetail[];
   public readonly invalidFields: string[];
 
@@ -377,20 +379,22 @@ export class ValidationError extends CustomError {
 
     this.name = 'ValidationError';
     this.details = details;
-    this.invalidFields = details.filter(detail => detail.field).map(detail => detail.field!);
+    this.invalidFields = details
+      .map(detail => detail.field)
+      .filter((field): field is string => typeof field === 'string' && field.length > 0);
   }
 
-  public toJSON(): ValidationError & ExtendedError {
+  public toJSON(): ExtendedError {
     return {
       ...super.toJSON(),
       details: this.details,
       invalidFields: this.invalidFields,
-    };
+    } as ExtendedError;
   }
 }
 
 // 系统错误类
-export class SystemError extends CustomError {
+export class EngineSystemError extends CustomError {
   public readonly systemInfo: {
     hostname: string;
     pid: number;
@@ -419,21 +423,21 @@ export class SystemError extends CustomError {
     this.systemInfo = systemInfo;
   }
 
-  public toJSON(): SystemError & ExtendedError {
+  public toJSON(): ExtendedError {
     return {
       ...super.toJSON(),
       systemInfo: this.systemInfo,
-    };
+    } as ExtendedError;
   }
 
   public static create(
     options: {
-      message: string;
+      message?: string;
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
       context?: Record<string, unknown>;
     } = {}
-  ): SystemError {
+  ): EngineSystemError {
     const systemInfo = {
       hostname: require('os').hostname(),
       pid: process.pid,
@@ -441,12 +445,12 @@ export class SystemError extends CustomError {
       uptime: process.uptime(),
     };
 
-    return new SystemError(options.message || 'System error occurred', systemInfo, options);
+    return new EngineSystemError(options.message || 'System error occurred', systemInfo, options);
   }
 }
 
 // 网络错误类
-export class NetworkError extends CustomError {
+export class EngineNetworkError extends CustomError {
   public readonly networkInfo: {
     url?: string;
     method?: string;
@@ -457,7 +461,7 @@ export class NetworkError extends CustomError {
 
   constructor(
     message: string,
-    networkInfo: NetworkError['networkInfo'],
+    networkInfo: EngineNetworkError['networkInfo'],
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
@@ -473,16 +477,16 @@ export class NetworkError extends CustomError {
     this.networkInfo = networkInfo;
   }
 
-  public toJSON(): NetworkError & ExtendedError {
+  public toJSON(): ExtendedError {
     return {
       ...super.toJSON(),
       networkInfo: this.networkInfo,
-    };
+    } as ExtendedError;
   }
 }
 
 // 外部服务错误类
-export class ExternalServiceError extends CustomError {
+export class EngineExternalServiceError extends CustomError {
   public readonly serviceInfo: {
     serviceName: string;
     endpoint?: string;
@@ -492,7 +496,7 @@ export class ExternalServiceError extends CustomError {
 
   constructor(
     message: string,
-    serviceInfo: ExternalServiceError['serviceInfo'],
+    serviceInfo: EngineExternalServiceError['serviceInfo'],
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
@@ -508,11 +512,11 @@ export class ExternalServiceError extends CustomError {
     this.serviceInfo = serviceInfo;
   }
 
-  public toJSON(): ExternalServiceError & ExtendedError {
+  public toJSON(): ExtendedError {
     return {
       ...super.toJSON(),
       serviceInfo: this.serviceInfo,
-    };
+    } as ExtendedError;
   }
 }
 
@@ -529,8 +533,8 @@ export class ErrorFactory {
       severity?: ErrorSeverityType;
       context?: Record<string, unknown>;
     } = {}
-  ): ValidationError {
-    return new ValidationError(message, details, options);
+  ): EngineValidationError {
+    return new EngineValidationError(message, details, options);
   }
 
   /**
@@ -543,8 +547,8 @@ export class ErrorFactory {
       severity?: ErrorSeverityType;
       context?: Record<string, unknown>;
     } = {}
-  ): SystemError {
-    return SystemError.create({ message, ...options });
+  ): EngineSystemError {
+    return EngineSystemError.create({ message, ...options });
   }
 
   /**
@@ -552,14 +556,14 @@ export class ErrorFactory {
    */
   static createNetworkError(
     message: string,
-    networkInfo: NetworkError['networkInfo'],
+    networkInfo: NetworkErrorInfo['networkInfo'],
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
       context?: Record<string, unknown>;
     } = {}
-  ): NetworkError {
-    return new NetworkError(message, networkInfo, options);
+  ): EngineNetworkError {
+    return new EngineNetworkError(message, networkInfo, options);
   }
 
   /**
@@ -567,14 +571,14 @@ export class ErrorFactory {
    */
   static createExternalServiceError(
     message: string,
-    serviceInfo: ExternalServiceError['serviceInfo'],
+    serviceInfo: ExternalServiceErrorInfo['serviceInfo'],
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
       context?: Record<string, unknown>;
     } = {}
-  ): ExternalServiceError {
-    return new ExternalServiceError(message, serviceInfo, options);
+  ): EngineExternalServiceError {
+    return new EngineExternalServiceError(message, serviceInfo, options);
   }
 
   /**
@@ -702,10 +706,10 @@ export default {
   ErrorCategory,
   ErrorCode,
   CustomError,
-  ValidationError,
-  SystemError,
-  NetworkError,
-  ExternalServiceError,
+  EngineValidationError,
+  EngineSystemError,
+  EngineNetworkError,
+  EngineExternalServiceError,
   ErrorFactory,
   ErrorUtils,
 };

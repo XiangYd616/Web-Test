@@ -3,8 +3,9 @@
  * 提供无障碍检测、评估、优化建议功能
  */
 
+import type { Page } from 'puppeteer';
 import puppeteer from 'puppeteer';
-import Logger from '../../middleware/logger.js';
+import Logger from '../../utils/logger';
 
 interface AccessibilityCheck {
   category: string;
@@ -40,6 +41,46 @@ interface TestConfig {
   categories?: string[];
   timeout?: number;
 }
+
+type InteractiveElement = {
+  tagName: string;
+  hasTabIndex: boolean;
+  tabIndex: number;
+  isDisabled: boolean;
+  isHidden: boolean;
+};
+
+type HeadingInfo = {
+  level: number;
+  text?: string;
+};
+
+type TextElementStyle = {
+  tagName: string;
+  color: string;
+  backgroundColor: string;
+  fontSize: number;
+  fontWeight: string;
+};
+
+type ImageInfo = {
+  hasAlt: boolean;
+  alt: string | null;
+  isDecorative: boolean;
+};
+
+type FormControlInfo = {
+  tagName: string;
+  type: string;
+  hasLabel: boolean;
+  hasPlaceholder: boolean;
+  isRequired: boolean;
+};
+
+type VideoInfo = {
+  hasTracks: boolean;
+  hasControls: boolean;
+};
 
 class AccessibilityService {
   private logger = Logger;
@@ -95,7 +136,7 @@ class AccessibilityService {
    * 执行无障碍检查
    */
   private async performAccessibilityChecks(
-    page: puppeteer.Page,
+    page: Page,
     config: TestConfig
   ): Promise<AccessibilityCheck[]> {
     const checks: AccessibilityCheck[] = [];
@@ -136,14 +177,14 @@ class AccessibilityService {
   /**
    * 检查键盘导航
    */
-  private async checkKeyboardNavigation(page: puppeteer.Page): Promise<AccessibilityCheck[]> {
+  private async checkKeyboardNavigation(page: Page): Promise<AccessibilityCheck[]> {
     const checks: AccessibilityCheck[] = [];
 
     // 检查所有交互元素是否可通过键盘访问
-    const interactiveElements = await page.$$eval(
+    const interactiveElements = (await page.$$eval(
       'a, button, input, select, textarea, [tabindex]',
-      elements => {
-        return elements.map(el => ({
+      (elements: Element[]) => {
+        return elements.map((el: Element) => ({
           tagName: el.tagName,
           hasTabIndex: el.hasAttribute('tabindex'),
           tabIndex: parseInt(el.getAttribute('tabindex') || '0'),
@@ -151,9 +192,9 @@ class AccessibilityService {
           isHidden: window.getComputedStyle(el).display === 'none',
         }));
       }
-    );
+    )) as InteractiveElement[];
 
-    interactiveElements.forEach(element => {
+    interactiveElements.forEach((element: InteractiveElement) => {
       if (element.isHidden && !element.isDisabled) {
         checks.push({
           category: 'keyboard-navigation',
@@ -183,29 +224,29 @@ class AccessibilityService {
   /**
    * 检查屏幕阅读器支持
    */
-  private async checkScreenReader(page: puppeteer.Page): Promise<AccessibilityCheck[]> {
+  private async checkScreenReader(page: Page): Promise<AccessibilityCheck[]> {
     const checks: AccessibilityCheck[] = [];
 
     // 检查是否有适当的 ARIA 标签
-    const ariaElements = await page.$$eval(
+    const _ariaElements = (await page.$$eval(
       '[aria-label], [aria-labelledby], [aria-describedby]',
-      elements => {
-        return elements.map(el => ({
+      (elements: Element[]) => {
+        return elements.map((el: Element) => ({
           tagName: el.tagName,
           hasLabel: el.hasAttribute('aria-label'),
           hasLabelledBy: el.hasAttribute('aria-labelledby'),
           hasDescribedBy: el.hasAttribute('aria-describedby'),
         }));
       }
-    );
+    )) as Array<Record<string, unknown>>;
 
     // 检查标题结构
-    const headings = await page.$$eval('h1, h2, h3, h4, h5, h6', elements => {
-      return elements.map(el => ({
+    const headings = (await page.$$eval('h1, h2, h3, h4, h5, h6', (elements: Element[]) => {
+      return elements.map((el: Element) => ({
         level: parseInt(el.tagName.substring(1)),
         text: el.textContent?.trim(),
       }));
-    });
+    })) as HeadingInfo[];
 
     // 检查标题层级是否正确
     for (let i = 1; i < headings.length; i++) {
@@ -227,25 +268,28 @@ class AccessibilityService {
   /**
    * 检查颜色对比度
    */
-  private async checkColorContrast(page: puppeteer.Page): Promise<AccessibilityCheck[]> {
+  private async checkColorContrast(page: Page): Promise<AccessibilityCheck[]> {
     const checks: AccessibilityCheck[] = [];
 
     // 获取所有文本元素的颜色对比度
-    const textElements = await page.$$eval('p, h1, h2, h3, h4, h5, h6, span, div', elements => {
-      return elements.map(el => {
-        const styles = window.getComputedStyle(el);
-        return {
-          tagName: el.tagName,
-          color: styles.color,
-          backgroundColor: styles.backgroundColor,
-          fontSize: parseFloat(styles.fontSize),
-          fontWeight: styles.fontWeight,
-        };
-      });
-    });
+    const textElements = (await page.$$eval(
+      'p, h1, h2, h3, h4, h5, h6, span, div',
+      (elements: Element[]) => {
+        return elements.map((el: Element) => {
+          const styles = window.getComputedStyle(el);
+          return {
+            tagName: el.tagName,
+            color: styles.color,
+            backgroundColor: styles.backgroundColor,
+            fontSize: parseFloat(styles.fontSize),
+            fontWeight: styles.fontWeight,
+          };
+        });
+      }
+    )) as TextElementStyle[];
 
     // 简化的对比度检查（实际应用中需要更复杂的算法）
-    textElements.forEach(element => {
+    textElements.forEach((element: TextElementStyle) => {
       if (
         element.backgroundColor === 'rgba(0, 0, 0, 0)' ||
         element.backgroundColor === 'transparent'
@@ -267,15 +311,13 @@ class AccessibilityService {
   /**
    * 检查焦点管理
    */
-  private async checkFocusManagement(page: puppeteer.Page): Promise<AccessibilityCheck[]> {
+  private async checkFocusManagement(page: Page): Promise<AccessibilityCheck[]> {
     const checks: AccessibilityCheck[] = [];
 
     // 检查是否有跳过导航链接
     const skipLinks = await page.$$eval(
       'a[href*="skip"], a[href*="main"], a[href*="content"]',
-      elements => {
-        return elements.length;
-      }
+      (elements: Element[]) => elements.length
     );
 
     if (skipLinks === 0) {
@@ -294,15 +336,13 @@ class AccessibilityService {
   /**
    * 检查语义标记
    */
-  private async checkSemanticMarkup(page: puppeteer.Page): Promise<AccessibilityCheck[]> {
+  private async checkSemanticMarkup(page: Page): Promise<AccessibilityCheck[]> {
     const checks: AccessibilityCheck[] = [];
 
     // 检查是否使用了语义化标签
     const semanticElements = await page.$$eval(
       'header, nav, main, section, article, aside, footer',
-      elements => {
-        return elements.map(el => el.tagName);
-      }
+      (elements: Element[]) => elements.map((el: Element) => el.tagName)
     );
 
     if (semanticElements.length === 0) {
@@ -321,19 +361,19 @@ class AccessibilityService {
   /**
    * 检查替代文本
    */
-  private async checkAlternativeText(page: puppeteer.Page): Promise<AccessibilityCheck[]> {
+  private async checkAlternativeText(page: Page): Promise<AccessibilityCheck[]> {
     const checks: AccessibilityCheck[] = [];
 
     // 检查图片的 alt 属性
-    const images = await page.$$eval('img', elements => {
-      return elements.map(el => ({
+    const images = (await page.$$eval('img', (elements: Element[]) => {
+      return elements.map((el: Element) => ({
         hasAlt: el.hasAttribute('alt'),
         alt: el.getAttribute('alt'),
         isDecorative: el.hasAttribute('role') && el.getAttribute('role') === 'presentation',
       }));
-    });
+    })) as ImageInfo[];
 
-    images.forEach((image, index) => {
+    images.forEach((image: ImageInfo, index: number) => {
       if (!image.hasAlt && !image.isDecorative) {
         checks.push({
           category: 'alternative-text',
@@ -352,24 +392,24 @@ class AccessibilityService {
   /**
    * 检查表单无障碍
    */
-  private async checkFormAccessibility(page: puppeteer.Page): Promise<AccessibilityCheck[]> {
+  private async checkFormAccessibility(page: Page): Promise<AccessibilityCheck[]> {
     const checks: AccessibilityCheck[] = [];
 
     // 检查表单控件是否有标签
-    const formControls = await page.$$eval('input, select, textarea', elements => {
-      return elements.map(el => ({
+    const formControls = (await page.$$eval('input, select, textarea', (elements: Element[]) => {
+      return elements.map((el: Element) => ({
         tagName: el.tagName,
         type: (el as HTMLInputElement).type,
         hasLabel:
           el.hasAttribute('aria-label') ||
           el.hasAttribute('aria-labelledby') ||
-          document.querySelector(`label[for="${el.id}"]`) !== null,
+          document.querySelector(`label[for="${(el as HTMLInputElement).id}"]`) !== null,
         hasPlaceholder: el.hasAttribute('placeholder'),
         isRequired: el.hasAttribute('required'),
       }));
-    });
+    })) as FormControlInfo[];
 
-    formControls.forEach(control => {
+    formControls.forEach((control: FormControlInfo) => {
       if (!control.hasLabel && control.type !== 'hidden') {
         checks.push({
           category: 'form-accessibility',
@@ -388,18 +428,18 @@ class AccessibilityService {
   /**
    * 检查多媒体无障碍
    */
-  private async checkMultimediaAccessibility(page: puppeteer.Page): Promise<AccessibilityCheck[]> {
+  private async checkMultimediaAccessibility(page: Page): Promise<AccessibilityCheck[]> {
     const checks: AccessibilityCheck[] = [];
 
     // 检查视频是否有字幕
-    const videos = await page.$$eval('video', elements => {
-      return elements.map(el => ({
+    const videos = (await page.$$eval('video', (elements: Element[]) => {
+      return elements.map((el: Element) => ({
         hasTracks: el.querySelectorAll('track').length > 0,
         hasControls: el.hasAttribute('controls'),
       }));
-    });
+    })) as VideoInfo[];
 
-    videos.forEach((video, index) => {
+    videos.forEach((video: VideoInfo, index: number) => {
       if (!video.hasTracks) {
         checks.push({
           category: 'multimedia-accessibility',

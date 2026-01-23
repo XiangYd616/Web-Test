@@ -3,6 +3,13 @@
  * 基于分析结果生成具体的优化建议
  */
 
+import {
+  defaultRecommendationTemplates,
+  RecommendationTemplate,
+  RecommendationTemplateMap,
+  validateRecommendationTemplates,
+} from './recommendationTemplates';
+
 interface PriorityLevels {
   CRITICAL: 'critical';
   HIGH: 'high';
@@ -10,14 +17,44 @@ interface PriorityLevels {
   LOW: 'low';
 }
 
+interface RecommendationEngineConfig {
+  templates?: RecommendationTemplateMap;
+}
+
 interface AnalysisResults {
-  meta?: any;
-  content?: any;
-  contentQuality?: any;
-  links?: any;
-  mobile?: any;
-  structuredData?: any;
-  performance?: any;
+  meta?: {
+    title?: { optimized?: boolean };
+    description?: { optimized?: boolean };
+    keywords?: { present?: boolean };
+  };
+  content?: {
+    wordCount?: number;
+    hasStructure?: boolean;
+    hasMultimedia?: boolean;
+  };
+  contentQuality?: {
+    readability?: { score?: number };
+    uniqueness?: number;
+  };
+  links?: {
+    internal?: { issues?: string[] };
+    external?: { issues?: string[] };
+    broken?: { count?: number };
+  };
+  mobile?: {
+    viewport?: { configured?: boolean };
+    responsive?: boolean;
+    touchFriendly?: boolean;
+  };
+  structuredData?: {
+    jsonLd?: { present?: boolean };
+    microdata?: { present?: boolean };
+  };
+  performance?: {
+    loadTime?: number;
+    timeToInteractive?: number;
+    resourceCount?: number;
+  };
 }
 
 interface Recommendation {
@@ -27,6 +64,8 @@ interface Recommendation {
   title: string;
   description: string;
   impact: string;
+  impactScore?: number;
+  impactLevel?: 'low' | 'medium' | 'high';
   effort: 'low' | 'medium' | 'high';
   examples: CodeExample[];
   implementation: ImplementationStep[];
@@ -67,14 +106,29 @@ interface RecommendationSummary {
 
 class RecommendationEngine {
   private priorityLevels: PriorityLevels;
+  private templates: RecommendationTemplateMap;
 
-  constructor() {
+  constructor(config: RecommendationEngineConfig = {}) {
     this.priorityLevels = {
       CRITICAL: 'critical',
       HIGH: 'high',
       MEDIUM: 'medium',
       LOW: 'low',
     };
+
+    this.templates = config.templates ?? defaultRecommendationTemplates;
+    const validation = validateRecommendationTemplates(this.templates);
+    if (!validation.isValid) {
+      throw new Error(`SEO建议模板配置无效: ${validation.errors.join('; ')}`);
+    }
+  }
+
+  setTemplates(templates: RecommendationTemplateMap): void {
+    const validation = validateRecommendationTemplates(templates);
+    if (!validation.isValid) {
+      throw new Error(`SEO建议模板配置无效: ${validation.errors.join('; ')}`);
+    }
+    this.templates = templates;
   }
 
   /**
@@ -82,44 +136,65 @@ class RecommendationEngine {
    */
   generateRecommendations(analysisResults: AnalysisResults): Recommendation[] {
     const recommendations: Recommendation[] = [];
+    const missingTemplates: string[] = [];
 
     // Meta标签建议
     if (analysisResults.meta) {
-      recommendations.push(...this.generateMetaRecommendations(analysisResults.meta));
+      recommendations.push(
+        ...this.generateMetaRecommendations(analysisResults.meta, missingTemplates)
+      );
     }
 
     // 内容建议
     if (analysisResults.content) {
-      recommendations.push(...this.generateContentRecommendations(analysisResults.content));
+      recommendations.push(
+        ...this.generateContentRecommendations(analysisResults.content, missingTemplates)
+      );
     }
 
     // 内容质量建议
     if (analysisResults.contentQuality) {
       recommendations.push(
-        ...this.generateContentQualityRecommendations(analysisResults.contentQuality)
+        ...this.generateContentQualityRecommendations(
+          analysisResults.contentQuality,
+          missingTemplates
+        )
       );
     }
 
     // 链接建议
     if (analysisResults.links) {
-      recommendations.push(...this.generateLinkRecommendations(analysisResults.links));
+      recommendations.push(
+        ...this.generateLinkRecommendations(analysisResults.links, missingTemplates)
+      );
     }
 
     // 移动端建议
     if (analysisResults.mobile) {
-      recommendations.push(...this.generateMobileRecommendations(analysisResults.mobile));
+      recommendations.push(
+        ...this.generateMobileRecommendations(analysisResults.mobile, missingTemplates)
+      );
     }
 
     // 结构化数据建议
     if (analysisResults.structuredData) {
       recommendations.push(
-        ...this.generateStructuredDataRecommendations(analysisResults.structuredData)
+        ...this.generateStructuredDataRecommendations(
+          analysisResults.structuredData,
+          missingTemplates
+        )
       );
     }
 
     // 性能建议
     if (analysisResults.performance) {
-      recommendations.push(...this.generatePerformanceRecommendations(analysisResults.performance));
+      recommendations.push(
+        ...this.generatePerformanceRecommendations(analysisResults.performance, missingTemplates)
+      );
+    }
+
+    if (missingTemplates.length > 0) {
+      throw new Error(`缺少SEO建议模板: ${missingTemplates.join(', ')}`);
     }
 
     // 按优先级排序
@@ -129,99 +204,24 @@ class RecommendationEngine {
   /**
    * 生成Meta标签建议
    */
-  private generateMetaRecommendations(metaAnalysis: any): Recommendation[] {
+  private generateMetaRecommendations(
+    metaAnalysis: AnalysisResults['meta'] = {},
+    missingTemplates: string[]
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
 
     // 标题建议
-    if (!metaAnalysis.title?.optimized) {
-      recommendations.push({
-        id: 'meta-title-optimization',
-        priority: 'high',
-        category: 'meta',
-        title: '优化页面标题',
-        description: '改进标题长度和内容质量以提高搜索排名和点击率',
-        impact: '提升搜索排名15-30%，提高点击率20-40%',
-        effort: 'low',
-        examples: [
-          {
-            title: '标题优化示例',
-            language: 'html',
-            code: `<title>优化后的页面标题 - 品牌名称</title>`,
-            explanation: '标题长度30-60字符，包含主要关键词，具有吸引力',
-          },
-        ],
-        implementation: [
-          {
-            step: 1,
-            action: '分析当前标题',
-            details: '检查标题长度、关键词使用和吸引力',
-            estimatedTime: '5分钟',
-          },
-          {
-            step: 2,
-            action: '重写标题',
-            details: '创建符合SEO最佳实践的新标题',
-            estimatedTime: '10分钟',
-          },
-          {
-            step: 3,
-            action: '测试效果',
-            details: '监控搜索排名和点击率变化',
-            estimatedTime: '持续监控',
-          },
-        ],
-        resources: [
-          {
-            title: 'Google标题优化指南',
-            type: 'documentation',
-            url: 'https://developers.google.com/search/docs/advanced/appearance/title-link',
-            description: 'Google官方标题优化最佳实践',
-          },
-        ],
-      });
+    if (!metaAnalysis?.title?.optimized) {
+      recommendations.push(
+        this.buildRecommendation('meta-title-optimization', 'medium', missingTemplates)
+      );
     }
 
     // 描述建议
-    if (!metaAnalysis.description?.optimized) {
-      recommendations.push({
-        id: 'meta-description-optimization',
-        priority: 'high',
-        category: 'meta',
-        title: '优化Meta描述',
-        description: '改进描述内容以提高搜索结果展示效果和点击率',
-        impact: '提高点击率10-25%，改善搜索结果展示',
-        effort: 'low',
-        examples: [
-          {
-            title: '描述优化示例',
-            language: 'html',
-            code: `<meta name="description" content="这是一个优化的页面描述，长度在120-160字符之间，包含关键词和吸引人的内容。">`,
-            explanation: '描述长度120-160字符，包含关键词，具有吸引力',
-          },
-        ],
-        implementation: [
-          {
-            step: 1,
-            action: '分析当前描述',
-            details: '检查描述长度、关键词和吸引力',
-            estimatedTime: '5分钟',
-          },
-          {
-            step: 2,
-            action: '重写描述',
-            details: '创建符合SEO最佳实践的新描述',
-            estimatedTime: '10分钟',
-          },
-        ],
-        resources: [
-          {
-            title: 'Meta描述优化指南',
-            type: 'documentation',
-            url: 'https://moz.com/learn/seo/meta-description',
-            description: 'Meta描述优化最佳实践',
-          },
-        ],
-      });
+    if (!metaAnalysis?.description?.optimized) {
+      recommendations.push(
+        this.buildRecommendation('meta-description-optimization', 'medium', missingTemplates)
+      );
     }
 
     return recommendations;
@@ -230,70 +230,19 @@ class RecommendationEngine {
   /**
    * 生成内容建议
    */
-  private generateContentRecommendations(contentAnalysis: any): Recommendation[] {
+  private generateContentRecommendations(
+    contentAnalysis: AnalysisResults['content'] = {},
+    missingTemplates: string[]
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
 
     // 内容长度建议
-    if (contentAnalysis.wordCount < 300) {
-      recommendations.push({
-        id: 'content-length-optimization',
-        priority: 'medium',
-        category: 'content',
-        title: '增加内容长度',
-        description: '扩展内容长度以提供更全面的信息和更好的SEO效果',
-        impact: '提升搜索排名10-20%，提高用户停留时间',
-        effort: 'medium',
-        examples: [
-          {
-            title: '内容扩展示例',
-            language: 'markdown',
-            code: `# 原始内容
-简短介绍...
-
-# 扩展内容
-## 详细说明
-更详细的解释和背景信息...
-
-## 实例分析
-具体案例和数据支持...
-
-## 常见问题
-用户可能关心的问题解答...
-
-## 总结
-内容总结和行动建议...`,
-            explanation: '通过添加详细说明、实例分析和常见问题来扩展内容',
-          },
-        ],
-        implementation: [
-          {
-            step: 1,
-            action: '内容规划',
-            details: '确定需要扩展的内容部分',
-            estimatedTime: '15分钟',
-          },
-          {
-            step: 2,
-            action: '内容扩展',
-            details: '添加详细说明、实例和案例分析',
-            estimatedTime: '1-2小时',
-          },
-          {
-            step: 3,
-            action: '内容优化',
-            details: '确保内容质量和可读性',
-            estimatedTime: '30分钟',
-          },
-        ],
-        resources: [
-          {
-            title: '内容长度最佳实践',
-            type: 'documentation',
-            url: 'https://backlinko.com/hub/content/seo-content-length',
-            description: 'SEO内容长度研究和建议',
-          },
-        ],
-      });
+    const wordCount = contentAnalysis?.wordCount ?? 0;
+    if (wordCount < 300) {
+      const impactLevel = wordCount < 150 ? 'high' : 'medium';
+      recommendations.push(
+        this.buildRecommendation('content-length-optimization', impactLevel, missingTemplates)
+      );
     }
 
     return recommendations;
@@ -302,64 +251,19 @@ class RecommendationEngine {
   /**
    * 生成内容质量建议
    */
-  private generateContentQualityRecommendations(qualityAnalysis: any): Recommendation[] {
+  private generateContentQualityRecommendations(
+    qualityAnalysis: AnalysisResults['contentQuality'] = {},
+    missingTemplates: string[]
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
 
     // 可读性建议
-    if (qualityAnalysis.readability?.score < 70) {
-      recommendations.push({
-        id: 'content-readability-optimization',
-        priority: 'medium',
-        category: 'content-quality',
-        title: '改善内容可读性',
-        description: '优化句子结构、段落长度和语言表达以提高可读性',
-        impact: '提高用户体验30-50%，降低跳出率',
-        effort: 'medium',
-        examples: [
-          {
-            title: '可读性优化示例',
-            language: 'markdown',
-            code: `# 改善前
-这是一个非常长的句子，包含了太多的技术术语和复杂的概念，让读者难以理解和消化。
-
-# 改善后
-这是第一个句子。它使用简单的语言表达概念。
-
-这是第二个句子。它分解了复杂的思想。
-
-使用短句提高可读性。`,
-            explanation: '使用短句、简单词汇和清晰的段落结构',
-          },
-        ],
-        implementation: [
-          {
-            step: 1,
-            action: '可读性分析',
-            details: '使用工具分析当前内容的可读性指标',
-            estimatedTime: '10分钟',
-          },
-          {
-            step: 2,
-            action: '句子优化',
-            details: '拆分长句，简化复杂表达',
-            estimatedTime: '30分钟',
-          },
-          {
-            step: 3,
-            action: '段落优化',
-            details: '调整段落长度和结构',
-            estimatedTime: '20分钟',
-          },
-        ],
-        resources: [
-          {
-            title: '可读性测试工具',
-            type: 'tool',
-            url: 'https://hemingwayapp.com/',
-            description: '免费的可读性分析和优化工具',
-          },
-        ],
-      });
+    const readabilityScore = qualityAnalysis?.readability?.score ?? 100;
+    if (readabilityScore < 70) {
+      const impactLevel = readabilityScore < 40 ? 'high' : 'medium';
+      recommendations.push(
+        this.buildRecommendation('content-readability-optimization', impactLevel, missingTemplates)
+      );
     }
 
     return recommendations;
@@ -368,65 +272,19 @@ class RecommendationEngine {
   /**
    * 生成链接建议
    */
-  private generateLinkRecommendations(linkAnalysis: any): Recommendation[] {
+  private generateLinkRecommendations(
+    linkAnalysis: AnalysisResults['links'] = {},
+    missingTemplates: string[]
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
 
     // 内部链接建议
-    if (linkAnalysis.internal?.issues?.length > 0) {
-      recommendations.push({
-        id: 'internal-link-optimization',
-        priority: 'medium',
-        category: 'links',
-        title: '优化内部链接结构',
-        description: '改善内部链接以提高网站结构和用户体验',
-        impact: '改善网站结构，提高页面权重分配',
-        effort: 'medium',
-        examples: [
-          {
-            title: '内部链接优化示例',
-            language: 'html',
-            code: `<nav>
-  <ul>
-    <li><a href="/" title="首页">首页</a></li>
-    <li><a href="/services" title="服务">服务</a></li>
-    <li><a href="/about" title="关于我们">关于我们</a></li>
-  </ul>
-</nav>
-
-<!-- 内容中的相关链接 -->
-<p>了解更多关于<a href="/services/seo" title="SEO优化服务">SEO优化</a>的信息。</p>`,
-            explanation: '使用描述性锚文本，确保链接有效性',
-          },
-        ],
-        implementation: [
-          {
-            step: 1,
-            action: '链接审计',
-            details: '检查所有内部链接的有效性和锚文本',
-            estimatedTime: '30分钟',
-          },
-          {
-            step: 2,
-            action: '链接优化',
-            details: '修复无效链接，改善锚文本',
-            estimatedTime: '1小时',
-          },
-          {
-            step: 3,
-            action: '结构优化',
-            details: '优化链接结构和层次',
-            estimatedTime: '45分钟',
-          },
-        ],
-        resources: [
-          {
-            title: '内部链接优化指南',
-            type: 'documentation',
-            url: 'https://moz.com/learn/seo/internal-links',
-            description: '内部链接最佳实践和策略',
-          },
-        ],
-      });
+    if (linkAnalysis?.internal?.issues?.length) {
+      const issueCount = linkAnalysis.internal.issues.length;
+      const impactLevel = issueCount > 10 ? 'high' : 'medium';
+      recommendations.push(
+        this.buildRecommendation('internal-link-optimization', impactLevel, missingTemplates)
+      );
     }
 
     return recommendations;
@@ -435,50 +293,18 @@ class RecommendationEngine {
   /**
    * 生成移动端建议
    */
-  private generateMobileRecommendations(mobileAnalysis: any): Recommendation[] {
+  private generateMobileRecommendations(
+    mobileAnalysis: AnalysisResults['mobile'] = {},
+    missingTemplates: string[]
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
 
     // 视口配置建议
-    if (!mobileAnalysis.viewport?.configured) {
-      recommendations.push({
-        id: 'mobile-viewport-optimization',
-        priority: 'critical',
-        category: 'mobile',
-        title: '添加移动端视口配置',
-        description: '添加viewport meta标签确保移动端正确显示',
-        impact: '修复移动端显示问题，提高移动端用户体验',
-        effort: 'low',
-        examples: [
-          {
-            title: '视口配置示例',
-            language: 'html',
-            code: `<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">`,
-            explanation: '设置viewport为设备宽度，禁用缩放',
-          },
-        ],
-        implementation: [
-          {
-            step: 1,
-            action: '添加meta标签',
-            details: '在HTML head中添加viewport meta标签',
-            estimatedTime: '5分钟',
-          },
-          {
-            step: 2,
-            action: '测试显示效果',
-            details: '在不同移动设备上测试显示效果',
-            estimatedTime: '15分钟',
-          },
-        ],
-        resources: [
-          {
-            title: '移动端视口配置指南',
-            type: 'documentation',
-            url: 'https://developers.google.com/web/fundamentals/design-and-ux/responsive/',
-            description: 'Google移动端最佳实践',
-          },
-        ],
-      });
+    if (!mobileAnalysis?.viewport?.configured) {
+      const impactLevel = mobileAnalysis?.responsive === false ? 'high' : 'medium';
+      recommendations.push(
+        this.buildRecommendation('mobile-viewport-optimization', impactLevel, missingTemplates)
+      );
     }
 
     return recommendations;
@@ -487,70 +313,17 @@ class RecommendationEngine {
   /**
    * 生成结构化数据建议
    */
-  private generateStructuredDataRecommendations(structuredDataAnalysis: any): Recommendation[] {
+  private generateStructuredDataRecommendations(
+    structuredDataAnalysis: AnalysisResults['structuredData'] = {},
+    missingTemplates: string[]
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
 
     // JSON-LD建议
-    if (!structuredDataAnalysis.jsonLd?.present) {
-      recommendations.push({
-        id: 'structured-data-jsonld',
-        priority: 'medium',
-        category: 'structured-data',
-        title: '添加JSON-LD结构化数据',
-        description: '使用JSON-LD格式添加结构化数据以提高搜索结果显示',
-        impact: '改善搜索结果显示，提高点击率15-30%',
-        effort: 'medium',
-        examples: [
-          {
-            title: 'JSON-LD示例',
-            language: 'json',
-            code: `{
-  "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "文章标题",
-  "author": {
-    "@type": "Person",
-    "name": "作者姓名"
-  },
-  "datePublished": "2024-01-01",
-  "image": "https://example.com/image.jpg",
-  "publisher": {
-    "@type": "Organization",
-    "name": "发布者名称"
-  }
-}`,
-            explanation: '使用JSON-LD格式定义文章结构化数据',
-          },
-        ],
-        implementation: [
-          {
-            step: 1,
-            action: '选择Schema类型',
-            details: '根据内容类型选择合适的Schema.org类型',
-            estimatedTime: '10分钟',
-          },
-          {
-            step: 2,
-            action: '创建JSON-LD',
-            details: '编写符合Schema.org规范的结构化数据',
-            estimatedTime: '30分钟',
-          },
-          {
-            step: 3,
-            action: '添加到页面',
-            details: '将JSON-LD添加到HTML head中',
-            estimatedTime: '5分钟',
-          },
-        ],
-        resources: [
-          {
-            title: 'Schema.org文档',
-            type: 'documentation',
-            url: 'https://schema.org/',
-            description: 'Schema.org完整类型文档',
-          },
-        ],
-      });
+    if (!structuredDataAnalysis?.jsonLd?.present) {
+      recommendations.push(
+        this.buildRecommendation('structured-data-jsonld', 'medium', missingTemplates)
+      );
     }
 
     return recommendations;
@@ -559,63 +332,19 @@ class RecommendationEngine {
   /**
    * 生成性能建议
    */
-  private generatePerformanceRecommendations(performanceAnalysis: any): Recommendation[] {
+  private generatePerformanceRecommendations(
+    performanceAnalysis: AnalysisResults['performance'] = {},
+    missingTemplates: string[]
+  ): Recommendation[] {
     const recommendations: Recommendation[] = [];
 
     // 页面加载速度建议
-    if (performanceAnalysis.loadTime > 3000) {
-      recommendations.push({
-        id: 'performance-load-time',
-        priority: 'high',
-        category: 'performance',
-        title: '优化页面加载速度',
-        description: '减少页面加载时间以提高用户体验和搜索排名',
-        impact: '提高用户体验，提升搜索排名5-15%',
-        effort: 'high',
-        examples: [
-          {
-            title: '图片优化示例',
-            language: 'html',
-            code: `<img src="image.webp" alt="描述" loading="lazy" width="800" height="600">
-
-<!-- 响应式图片 -->
-<picture>
-  <source srcset="image-large.webp" media="(min-width: 768px)">
-  <source srcset="image-small.webp" media="(max-width: 767px)">
-  <img src="image-fallback.jpg" alt="描述">
-</picture>`,
-            explanation: '使用现代图片格式和懒加载技术',
-          },
-        ],
-        implementation: [
-          {
-            step: 1,
-            action: '性能分析',
-            details: '使用PageSpeed Insights分析性能瓶颈',
-            estimatedTime: '15分钟',
-          },
-          {
-            step: 2,
-            action: '图片优化',
-            details: '压缩图片，使用现代格式',
-            estimatedTime: '1-2小时',
-          },
-          {
-            step: 3,
-            action: '代码优化',
-            details: '压缩CSS/JS，启用缓存',
-            estimatedTime: '2-3小时',
-          },
-        ],
-        resources: [
-          {
-            title: 'PageSpeed Insights',
-            type: 'tool',
-            url: 'https://pagespeed.web.dev/',
-            description: 'Google免费性能分析工具',
-          },
-        ],
-      });
+    if ((performanceAnalysis?.loadTime ?? 0) > 3000) {
+      const loadTime = performanceAnalysis?.loadTime ?? 0;
+      const impactLevel = loadTime > 6000 ? 'high' : 'medium';
+      recommendations.push(
+        this.buildRecommendation('performance-load-time', impactLevel, missingTemplates)
+      );
     }
 
     return recommendations;
@@ -718,6 +447,59 @@ class RecommendationEngine {
    */
   getPriorityLevels(): PriorityLevels {
     return { ...this.priorityLevels };
+  }
+
+  private buildRecommendation(
+    templateId: string,
+    impactLevel: 'low' | 'medium' | 'high',
+    missingTemplates: string[]
+  ): Recommendation {
+    const template = this.templates[templateId];
+    if (!template) {
+      missingTemplates.push(templateId);
+      return {
+        id: templateId,
+        priority: 'low',
+        category: 'unknown',
+        title: '缺少模板配置',
+        description: '建议模板缺失，无法生成具体建议内容',
+        impact: '影响未知',
+        effort: 'low',
+        examples: [],
+        implementation: [],
+        resources: [],
+      };
+    }
+
+    const impact = this.formatImpact(template, impactLevel);
+
+    return {
+      id: template.id,
+      priority: template.priority,
+      category: template.category,
+      title: template.title,
+      description: template.description,
+      impact: impact.text,
+      impactScore: impact.score,
+      impactLevel: impact.level,
+      effort: template.effort,
+      examples: template.examples,
+      implementation: template.implementation,
+      resources: template.resources,
+    };
+  }
+
+  private formatImpact(
+    template: RecommendationTemplate,
+    impactLevel: 'low' | 'medium' | 'high'
+  ): { text: string; score: number; level: 'low' | 'medium' | 'high' } {
+    const range = template.impactRanges[impactLevel];
+    const score = Math.round((range[0] + range[1]) / 2);
+    return {
+      text: `预计综合提升${range[0]}-${range[1]}%`,
+      score,
+      level: impactLevel,
+    };
   }
 }
 

@@ -10,10 +10,7 @@ const { rbacService } = require('../services/core/rbacService');
 const Logger = require('../utils/logger');
 
 interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    role: string;
-  };
+  user?: Express.User;
   sessionId?: string;
   permissionContext?: {
     user: unknown;
@@ -238,7 +235,7 @@ function requireRole(roles: string | string[]) {
       });
     }
 
-    next();
+    return next();
   };
 }
 
@@ -328,7 +325,7 @@ function requirePermissionIf(
     if (condition(req)) {
       return requirePermission(resource, action, options)(req, res, next);
     }
-    next();
+    return next();
   };
 }
 
@@ -407,7 +404,7 @@ function permissionAudit(auditLevel: 'basic' | 'detailed' = 'basic') {
       return originalJson.call(this, data);
     };
 
-    next();
+    return next();
   };
 }
 
@@ -415,19 +412,29 @@ function permissionAudit(auditLevel: 'basic' | 'detailed' = 'basic') {
  * 记录权限审计日志
  */
 function logPermissionAudit(req: AuthenticatedRequest, auditLevel: string, responseType: string) {
-  const auditData = {
+  const auditData: {
+    userId?: string;
+    userRole?: string;
+    method: string;
+    path: string;
+    ip: string;
+    userAgent: string | undefined;
+    responseType: string;
+    timestamp: string;
+    permissionContext?: AuthenticatedRequest['permissionContext'];
+  } = {
     userId: req.user?.id,
     userRole: req.user?.role,
     method: req.method,
     path: req.path,
-    ip: req.ip,
-    userAgent: req.get('User-Agent'),
+    ip: req.ip || '',
+    userAgent: req.get('User-Agent') || undefined,
     responseType,
     timestamp: new Date().toISOString(),
   };
 
   if (auditLevel === 'detailed' && req.permissionContext) {
-    (auditData as any).permissionContext = req.permissionContext;
+    auditData.permissionContext = req.permissionContext;
   }
 
   Logger.info('Permission audit', auditData);
@@ -486,7 +493,7 @@ function permissionCache(ttl: number = 300000) {
       return result;
     };
 
-    next();
+    return next();
   };
 }
 

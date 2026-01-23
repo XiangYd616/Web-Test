@@ -33,7 +33,7 @@ interface ValidationResult {
     message: string;
     details: Joi.ValidationResult;
   };
-  value?: unknown;
+  value?: Record<string, unknown>;
 }
 
 /**
@@ -301,7 +301,7 @@ function validateTestConfig(testType: TestType, config: unknown): ValidationResu
     };
   }
 
-  return { value };
+  return { value: value as Record<string, unknown> };
 }
 
 /**
@@ -342,13 +342,14 @@ function testEngineValidation(req: TestEngineRequest, res: Response, next: NextF
     return res.status(400).json(validation.error);
   }
 
+  const validatedValue = validation.value ?? {};
   // 将验证后的配置重新赋值到请求体
   req.body = {
     testType,
-    ...validation.value,
+    ...validatedValue,
   };
 
-  next();
+  return next();
 }
 
 /**
@@ -361,8 +362,8 @@ function performanceTestValidation(req: Request, res: Response, next: NextFuncti
     return res.status(400).json(validation.error);
   }
 
-  req.body = validation.value;
-  next();
+  req.body = validation.value ?? {};
+  return next();
 }
 
 /**
@@ -375,8 +376,8 @@ function securityTestValidation(req: Request, res: Response, next: NextFunction)
     return res.status(400).json(validation.error);
   }
 
-  req.body = validation.value;
-  next();
+  req.body = validation.value ?? {};
+  return next();
 }
 
 /**
@@ -389,8 +390,8 @@ function apiTestValidation(req: Request, res: Response, next: NextFunction) {
     return res.status(400).json(validation.error);
   }
 
-  req.body = validation.value;
-  next();
+  req.body = validation.value ?? {};
+  return next();
 }
 
 /**
@@ -403,8 +404,8 @@ function stressTestValidation(req: Request, res: Response, next: NextFunction) {
     return res.status(400).json(validation.error);
   }
 
-  req.body = validation.value;
-  next();
+  req.body = validation.value ?? {};
+  return next();
 }
 
 /**
@@ -417,8 +418,8 @@ function seoTestValidation(req: Request, res: Response, next: NextFunction) {
     return res.status(400).json(validation.error);
   }
 
-  req.body = validation.value;
-  next();
+  req.body = validation.value ?? {};
+  return next();
 }
 
 /**
@@ -431,8 +432,8 @@ function accessibilityTestValidation(req: Request, res: Response, next: NextFunc
     return res.status(400).json(validation.error);
   }
 
-  req.body = validation.value;
-  next();
+  req.body = validation.value ?? {};
+  return next();
 }
 
 /**
@@ -445,8 +446,8 @@ function websiteTestValidation(req: Request, res: Response, next: NextFunction) 
     return res.status(400).json(validation.error);
   }
 
-  req.body = validation.value;
-  next();
+  req.body = validation.value ?? {};
+  return next();
 }
 
 /**
@@ -475,8 +476,11 @@ function batchTestValidation(req: Request, res: Response, next: NextFunction) {
     });
   }
 
-  const validationResults = tests.map((testConfig, index) => {
-    const testType = (testConfig as any)?.testType;
+  const validationResults: Array<
+    | ValidationResult
+    | { index: number; error: { success: boolean; message: string; details: unknown } }
+  > = tests.map((testConfig, index) => {
+    const testType = (testConfig as { testType?: TestType }).testType;
 
     if (!testType || !TEST_TYPES.includes(testType)) {
       return {
@@ -505,10 +509,13 @@ function batchTestValidation(req: Request, res: Response, next: NextFunction) {
     });
   }
 
+  const validatedResults = validationResults.filter(
+    (result): result is ValidationResult => !result.error
+  );
   // 更新请求体，使用验证后的配置
-  req.body.tests = validationResults.map(result => result.value);
+  req.body.tests = validatedResults.map(result => result.value ?? {});
 
-  next();
+  return next();
 }
 
 /**
@@ -523,10 +530,10 @@ function conditionalValidation(condition: (req: Request) => boolean, testType: T
         return res.status(400).json(validation.error);
       }
 
-      req.body = validation.value;
+      req.body = validation.value ?? {};
     }
 
-    next();
+    return next();
   };
 }
 
@@ -542,8 +549,8 @@ function dynamicTestValidation(getTestType: (req: Request) => TestType) {
       return res.status(400).json(validation.error);
     }
 
-    req.body = validation.value;
-    next();
+    req.body = validation.value ?? {};
+    return next();
   };
 }
 

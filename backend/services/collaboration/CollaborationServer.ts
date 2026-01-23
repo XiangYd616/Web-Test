@@ -4,8 +4,10 @@
  */
 
 import { EventEmitter } from 'events';
+import type { IncomingMessage } from 'http';
 import { v4 as uuidv4 } from 'uuid';
-import * as WebSocket from 'ws';
+import type { Data as WebSocketData } from 'ws';
+import WebSocket, { Server as WebSocketServer } from 'ws';
 
 // WebSocket连接接口
 export interface CollaborationConnection {
@@ -65,7 +67,7 @@ export interface CollaborationServerConfig {
  */
 class CollaborationServer extends EventEmitter {
   private options: CollaborationServerConfig;
-  private server: WebSocket.Server | null = null;
+  private server: WebSocketServer | null = null;
   private connections: Map<string, CollaborationConnection> = new Map();
   private rooms: Map<string, CollaborationRoom> = new Map();
   private messageHandlers: Map<
@@ -95,6 +97,46 @@ class CollaborationServer extends EventEmitter {
     this.initializeMessageHandlers();
   }
 
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+  }
+
+  private getString(value: unknown): string | undefined {
+    return typeof value === 'string' ? value : undefined;
+  }
+
+  private getDataLength(data: WebSocketData): number {
+    if (typeof data === 'string') {
+      return Buffer.byteLength(data);
+    }
+    if (Buffer.isBuffer(data)) {
+      return data.length;
+    }
+    if (Array.isArray(data)) {
+      return data.reduce((sum, chunk) => sum + chunk.length, 0);
+    }
+    if (data instanceof ArrayBuffer) {
+      return data.byteLength;
+    }
+    return 0;
+  }
+
+  private toMessageText(data: WebSocketData): string | null {
+    if (typeof data === 'string') {
+      return data;
+    }
+    if (Buffer.isBuffer(data)) {
+      return data.toString();
+    }
+    if (Array.isArray(data)) {
+      return Buffer.concat(data).toString();
+    }
+    if (data instanceof ArrayBuffer) {
+      return Buffer.from(data).toString();
+    }
+    return null;
+  }
+
   /**
    * 启动协作服务器
    */
@@ -104,7 +146,7 @@ class CollaborationServer extends EventEmitter {
     }
 
     try {
-      this.server = new WebSocket.Server({
+      this.server = new WebSocketServer({
         port: this.options.port,
         maxPayload: this.options.maxMessageSize,
       });
@@ -378,11 +420,13 @@ class CollaborationServer extends EventEmitter {
   private setupServerListeners(): void {
     if (!this.server) return;
 
-    this.server.on('connection', (socket: WebSocket, request: unknown) => {
+    this.server.on('connection', (...args: unknown[]) => {
+      const [socket, request] = args as [WebSocket, IncomingMessage];
       this.handleConnection(socket, request);
     });
 
-    this.server.on('error', (error: Error) => {
+    this.server.on('error', (...args: unknown[]) => {
+      const [error] = args as [Error];
       this.emit('error', error);
     });
   }
@@ -390,7 +434,7 @@ class CollaborationServer extends EventEmitter {
   /**
    * 处理新连接
    */
-  private handleConnection(socket: WebSocket, _request: unknown): void {
+  private handleConnection(socket: WebSocket, _request: IncomingMessage): void {
     const connectionId = uuidv4();
     const connection: CollaborationConnection = {
       id: connectionId,
@@ -414,15 +458,18 @@ class CollaborationServer extends EventEmitter {
   private setupSocketListeners(connection: CollaborationConnection): void {
     const socket = connection.socket;
 
-    socket.on('message', (data: WebSocket.Data) => {
+    socket.on('message', (...args: unknown[]) => {
+      const [data] = args as [WebSocketData];
       this.handleMessage(connection, data);
     });
 
-    socket.on('close', (code: number, reason: string) => {
-      this.handleDisconnection(connection, code, reason);
+    socket.on('close', (...args: unknown[]) => {
+      const [code, reason] = args as [number, Buffer];
+      this.handleDisconnection(connection, code, reason.toString());
     });
 
-    socket.on('error', (error: Error) => {
+    socket.on('error', (...args: unknown[]) => {
+      const [error] = args as [Error];
       this.emit('socket_error', { connectionId: connection.id, error });
     });
 
@@ -434,15 +481,31 @@ class CollaborationServer extends EventEmitter {
   /**
    * 处理消息
    */
-  private handleMessage(connection: CollaborationConnection, data: WebSocket.Data): void {
+  private handleMessage(connection: CollaborationConnection, data: WebSocketData): void {
     try {
       // 检查消息大小
-      if (data.length > this.options.maxMessageSize) {
+      if (this.getDataLength(data) > this.options.maxMessageSize) {
         connection.socket.close(1009, 'Message too large');
         return;
       }
 
-      const message = JSON.parse(data.toString());
+      const messageText = this.toMessageText(data);
+      if (!messageText) {
+        this.sendToConnection(connection.id, 'error', {
+          message: 'Invalid message format',
+        });
+        return;
+      }
+
+      const parsed = JSON.parse(messageText) as unknown;
+      if (!this.isRecord(parsed) || typeof parsed.type !== 'string') {
+        this.sendToConnection(connection.id, 'error', {
+          message: 'Invalid message format',
+        });
+        return;
+      }
+
+      const message = parsed as { type: string; data?: unknown };
       connection.lastActivity = new Date();
 
       // 处理认证消息
@@ -462,7 +525,7 @@ class CollaborationServer extends EventEmitter {
       }
 
       this.emit('message_received', { connection, message });
-    } catch (error) {
+    } catch {
       this.sendToConnection(connection.id, 'error', {
         message: 'Invalid message format',
       });
@@ -473,17 +536,18 @@ class CollaborationServer extends EventEmitter {
    * 处理认证
    */
   private handleAuthentication(connection: CollaborationConnection, data: unknown): void {
-    if (!isRecord(data)) {
+    if (!this.isRecord(data)) {
       this.sendToConnection(connection.id, 'authenticated', {
         success: false,
         error: 'Invalid authentication payload',
       });
       return;
     }
+    const authData = data as Record<string, unknown>;
     if (!this.options.authentication.required) {
       connection.isAuthenticated = true;
-      connection.userId = typeof data.userId === 'string' ? data.userId : undefined;
-      connection.username = typeof data.username === 'string' ? data.username : undefined;
+      connection.userId = this.getString(authData.userId);
+      connection.username = this.getString(authData.username);
 
       this.sendToConnection(connection.id, 'authenticated', {
         success: true,
@@ -498,10 +562,10 @@ class CollaborationServer extends EventEmitter {
     }
 
     // 简化的认证逻辑
-    if (data.token === this.options.authentication.secret) {
+    if (this.getString(authData.token) === this.options.authentication.secret) {
       connection.isAuthenticated = true;
-      connection.userId = typeof data.userId === 'string' ? data.userId : undefined;
-      connection.username = typeof data.username === 'string' ? data.username : undefined;
+      connection.userId = this.getString(authData.userId);
+      connection.username = this.getString(authData.username);
 
       this.sendToConnection(connection.id, 'authenticated', {
         success: true,
@@ -545,22 +609,31 @@ class CollaborationServer extends EventEmitter {
   private initializeMessageHandlers(): void {
     // 房间相关处理器
     this.registerHandler('join_room', (connection, data) => {
-      this.joinRoom(connection.id, data.roomId);
+      const payload = this.isRecord(data) ? data : {};
+      const roomId = this.getString(payload.roomId);
+      if (roomId) {
+        this.joinRoom(connection.id, roomId);
+      }
     });
 
     this.registerHandler('leave_room', (connection, data) => {
-      this.leaveRoom(connection.id, data.roomId);
+      const payload = this.isRecord(data) ? data : {};
+      const roomId = this.getString(payload.roomId);
+      if (roomId) {
+        this.leaveRoom(connection.id, roomId);
+      }
     });
 
     // 协作消息处理器
     this.registerHandler('cursor_move', (connection, data) => {
+      const payload = this.isRecord(data) ? data : {};
       if (connection.roomId) {
         this.sendToRoom(
           connection.roomId,
           'cursor_move',
           {
             userId: connection.userId,
-            position: data.position,
+            position: payload.position,
           },
           [connection.id]
         );
@@ -568,13 +641,14 @@ class CollaborationServer extends EventEmitter {
     });
 
     this.registerHandler('text_change', (connection, data) => {
+      const payload = this.isRecord(data) ? data : {};
       if (connection.roomId) {
         this.sendToRoom(
           connection.roomId,
           'text_change',
           {
             userId: connection.userId,
-            changes: data.changes,
+            changes: payload.changes,
           },
           [connection.id]
         );

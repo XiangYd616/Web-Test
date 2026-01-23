@@ -546,6 +546,7 @@ class PerformanceBenchmarkService extends EventEmitter {
     options: BenchmarkExecutionOptions
   ): Promise<PerformanceData> {
     const metrics: Record<string, number> = {};
+    let totalBytes: number | null = null;
     const targetUrl =
       options.targetUrl ||
       (options.metadata?.url as string | undefined) ||
@@ -578,6 +579,7 @@ class PerformanceBenchmarkService extends EventEmitter {
         targetUrl,
         iterations
       );
+      totalBytes = bytes;
       const totalDuration = timings.reduce((sum, value) => sum + value, 0);
       const averageDuration = totalDuration / timings.length;
       const throughput = totalDuration > 0 ? (timings.length / totalDuration) * 1000 : 0;
@@ -618,7 +620,7 @@ class PerformanceBenchmarkService extends EventEmitter {
       metadata: {
         targetUrl: targetUrl || null,
         iterations,
-        totalBytes: bytes,
+        totalBytes,
         ...options.metadata,
       },
     };

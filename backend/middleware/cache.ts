@@ -5,6 +5,13 @@
 
 import type { NextFunction, Request, Response } from 'express';
 
+type AuthenticatedRequest = Request & {
+  user?: {
+    id?: string;
+    role?: string;
+  };
+};
+
 interface CacheItem {
   data: unknown;
   timestamp: number;
@@ -47,7 +54,7 @@ function apiCache(key: string, options: CacheOptions = {}) {
       return originalJson.call(this, data);
     };
 
-    next();
+    return next();
   };
 }
 
@@ -93,7 +100,7 @@ function getCacheStats() {
  */
 function userCache(key: string, options: CacheOptions = {}) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const userId = (req as any).user?.id || 'anonymous';
+    const userId = (req as AuthenticatedRequest).user?.id || 'anonymous';
     const userKey = `${key}_user_${userId}_${req.originalUrl}`;
 
     return apiCache(userKey, options)(req, res, next);
@@ -105,7 +112,7 @@ function userCache(key: string, options: CacheOptions = {}) {
  */
 function roleCache(key: string, options: CacheOptions = {}) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const userRole = (req as any).user?.role || 'anonymous';
+    const userRole = (req as AuthenticatedRequest).user?.role || 'anonymous';
     const roleKey = `${key}_role_${userRole}_${req.originalUrl}`;
 
     return apiCache(roleKey, options)(req, res, next);
@@ -146,7 +153,7 @@ function conditionalCache(
       return originalJson.call(this, data);
     };
 
-    next();
+    return next();
   };
 }
 

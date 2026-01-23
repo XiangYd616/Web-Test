@@ -309,7 +309,7 @@ export interface MetricReport {
 export interface ReportSection {
   title: string;
   type: 'summary' | 'chart' | 'table' | 'text';
-  content: any;
+  content: Record<string, unknown> | string | number | boolean | Array<unknown>;
   metrics: string[];
 }
 
@@ -565,10 +565,13 @@ export class MetricUtils {
         return values.length;
       case AggregationType.RATE:
         if (dataPoints.length < 2) return 0;
-        const timeDiff =
-          dataPoints[dataPoints.length - 1].timestamp.getTime() - dataPoints[0].timestamp.getTime();
-        const valueDiff = dataPoints[dataPoints.length - 1].value - dataPoints[0].value;
-        return timeDiff > 0 ? (valueDiff / timeDiff) * 1000 : 0; // 每秒速率
+        {
+          const timeDiff =
+            dataPoints[dataPoints.length - 1].timestamp.getTime() -
+            dataPoints[0].timestamp.getTime();
+          const valueDiff = dataPoints[dataPoints.length - 1].value - dataPoints[0].value;
+          return timeDiff > 0 ? (valueDiff / timeDiff) * 1000 : 0; // 每秒速率
+        }
       default:
         return 0;
     }

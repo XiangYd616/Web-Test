@@ -6,9 +6,33 @@ describe('uxScore utils', () => {
       lcp: 3200,
       cls: 0.2,
       navigation: { ttfb: 1200 },
+      fcp: 2400,
+      fid: 180,
     });
     expect(score).toBeGreaterThanOrEqual(0);
     expect(score).toBeLessThanOrEqual(100);
+  });
+
+  test('高性能指标应得到较高分', () => {
+    const score = calculateUXScore({
+      lcp: 1800,
+      cls: 0.02,
+      navigation: { ttfb: 300 },
+      fcp: 900,
+      fid: 30,
+    });
+    expect(score).toBeGreaterThanOrEqual(85);
+  });
+
+  test('低性能指标应显著降分', () => {
+    const score = calculateUXScore({
+      lcp: 6000,
+      cls: 0.4,
+      navigation: { ttfb: 2500 },
+      fcp: 4000,
+      fid: 350,
+    });
+    expect(score).toBeLessThan(60);
   });
 
   test('应返回评分等级', () => {

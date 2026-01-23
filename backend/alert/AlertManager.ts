@@ -13,6 +13,7 @@
 
 import { EventEmitter } from 'events';
 import { query } from '../config/database';
+import { notificationService } from '../services/notifications/NotificationService';
 
 const Logger = require('../utils/logger');
 
@@ -450,6 +451,12 @@ class AlertManager extends EventEmitter {
 
     // 触发事件
     this.emit('alert', alert);
+
+    try {
+      void notificationService.sendAlert(alert);
+    } catch (error) {
+      Logger.error('告警通知发送失败:', error);
+    }
 
     // 调用注册的处理器
     const handler = this.alertHandlers.get(alert.type);
