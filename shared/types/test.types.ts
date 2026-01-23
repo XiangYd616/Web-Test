@@ -10,6 +10,8 @@ export const TestTypeValues = [
   'api',
   'stress',
   'accessibility',
+  'compatibility',
+  'ux',
 ] as const;
 
 export type TestType = (typeof TestTypeValues)[number];

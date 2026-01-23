@@ -467,6 +467,20 @@ class TestService {
   }
 
   /**
+   * 创建兼容性测试
+   */
+  async createCompatibilityTest(config: TestConfig, user: User): Promise<Record<string, unknown>> {
+    return this.createAndStart({ ...config, testType: 'compatibility' }, user);
+  }
+
+  /**
+   * 创建UX测试
+   */
+  async createUXTest(config: TestConfig, user: User): Promise<Record<string, unknown>> {
+    return this.createAndStart({ ...config, testType: 'ux' }, user);
+  }
+
+  /**
    * 获取测试状态
    */
   async getStatus(userId: string, testId: string): Promise<TestStatusResponse> {

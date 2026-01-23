@@ -6,13 +6,7 @@
 // 🚀 主要Hook - 推荐使用
 export { useTestManager } from './useTestManager';
 
-// 🔄 兼容性Hook - 为现有代码提供无缝迁移
-export {
-  useBridgeTest,
-  useSimpleTestEngine,
-  useTestEngine,
-  useTestState,
-} from './useCompatibilityBridge';
+export { useTestEngine } from './useTestEngine';
 
 // 📋 专用测试Hook
 export { useAPITestState } from './useAPITestState';

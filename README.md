@@ -168,8 +168,60 @@ Test-Web/
 - **仪表板** (`/dashboard`) - 系统概览和统计
 - **压力测试** (`/stress-test`) - 性能压力测试
 - **兼容性测试** (`/compatibility-test`) - 浏览器兼容性检测
+- **UX测试** (`/ux-test`) - 用户体验指标检测
 - **内容检测** (`/content-detection`) - 安全内容扫描
 - **系统设置** (`/settings`) - 配置管理
+
+## 🧪 测试配置示例
+
+### ✅ UX 测试
+
+```json
+{
+  "url": "https://example.com",
+  "confirmPuppeteer": true,
+  "timeout": 60000
+}
+```
+
+### ✅ 兼容性测试（启用真实浏览器）
+
+```json
+{
+  "url": "https://example.com",
+  "realBrowser": true,
+  "timeout": 60000
+}
+```
+
+### ✅ 网站综合测试（包含UX）
+
+```json
+{
+  "url": "https://example.com",
+  "enablePerformance": true,
+  "enableSEO": true,
+  "enableAccessibility": true,
+  "enableUX": true,
+  "confirmPuppeteer": true,
+  "timeout": 60000,
+  "performanceConfig": {
+    "iterations": 3
+  },
+  "seoConfig": {
+    "enableAdvanced": true
+  },
+  "accessibilityConfig": {
+    "level": "AA"
+  },
+  "uxConfig": {
+    "timeout": 60000
+  }
+}
+```
+
+> 网站综合测试会按顺序执行性能/SEO/可访问性/UX并汇总评分，通过
+> `enablePerformance/enableSEO/enableAccessibility/enableUX` 控制子引擎开关。
 
 ## 📜 文档
 

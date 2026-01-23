@@ -11,6 +11,7 @@
 const { URL } = require('url');
 const tls = require('tls');
 const axios = require('axios');
+const Joi = require('joi');
 const SecurityHeadersAnalyzer = require('./analyzers/securityHeadersAnalyzer');
 const { emitTestProgress, emitTestComplete, emitTestError } = require('../../websocket/testEvents');
 const { getAlertManager } = require('../../alert/AlertManager');
@@ -172,6 +173,22 @@ class SecurityTestEngine {
     this.errorCallback = callback;
   }
 
+  private validateConfig(config: { testId?: string; url?: string; enableDeepScan?: boolean }) {
+    const schema = Joi.object({
+      testId: Joi.string(),
+      url: Joi.string().uri().required(),
+      enableDeepScan: Joi.boolean(),
+    }).unknown(true);
+
+    const { error, value } = schema.validate(config, { abortEarly: false });
+    if (error) {
+      throw new Error(
+        `配置验证失败: ${error.details.map((item: { message: string }) => item.message).join(', ')}`
+      );
+    }
+    return value as { testId?: string; url?: string; enableDeepScan?: boolean };
+  }
+
   /**
    * 检查引擎可用性
    */
@@ -188,8 +205,9 @@ class SecurityTestEngine {
    * 执行安全测试
    */
   async executeTest(config: { testId?: string; url?: string; enableDeepScan?: boolean }) {
-    const testId = config.testId || `security-${Date.now()}`;
-    const { url } = config;
+    const validatedConfig = this.validateConfig(config);
+    const testId = validatedConfig.testId || `security-${Date.now()}`;
+    const { url } = validatedConfig as { url: string };
     if (!url) {
       throw new Error('安全测试URL不能为空');
     }

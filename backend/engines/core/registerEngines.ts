@@ -12,6 +12,7 @@ const registerTestEngines = () => {
     [TestEngineType.ACCESSIBILITY]: require('../accessibility/AccessibilityTestEngine'),
     [TestEngineType.STRESS]: require('../stress/stressTestEngine'),
     [TestEngineType.COMPATIBILITY]: require('../compatibility/CompatibilityTestEngine'),
+    [TestEngineType.UX]: require('../ux/UXTestEngine'),
   } as Record<string, new () => unknown>;
 
   Object.entries(engineMap).forEach(([type, Engine]) => {

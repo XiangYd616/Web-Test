@@ -1,5 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const Joi = require('joi');
 
 const DEFAULT_BROWSERS = [
   { name: 'Chrome', version: '120' },
@@ -46,12 +47,33 @@ type DeviceConfig = {
   userAgent?: string;
 };
 
+type PageSignals = {
+  meta: {
+    hasViewport: boolean;
+    hasH1: boolean;
+    hasCharset: boolean;
+    hasLang: boolean;
+  };
+  resources: {
+    hasPicture: boolean;
+    hasModuleScript: boolean;
+    hasNoModule: boolean;
+    hasWebp: boolean;
+    hasLazyLoading: boolean;
+  };
+  polyfill: { hasPolyfillHint: boolean };
+  requiredFeatures: string[];
+  issues: string[];
+};
+
 type CompatibilityConfig = {
   url: string;
   browsers?: BrowserConfig[];
   devices?: DeviceConfig[];
   enableMatrix?: boolean;
   featureDetection?: boolean;
+  realBrowser?: boolean;
+  captureScreenshot?: boolean;
   timeout?: number;
   testId?: string;
 };
@@ -75,6 +97,43 @@ class CompatibilityTestEngine {
     this.errorCallback = null;
   }
 
+  private validateConfig(config: CompatibilityConfig) {
+    const schema = Joi.object({
+      url: Joi.string().uri().required(),
+      browsers: Joi.array().items(
+        Joi.object({
+          name: Joi.string().required(),
+          version: Joi.string(),
+          userAgent: Joi.string(),
+        })
+      ),
+      devices: Joi.array().items(
+        Joi.object({
+          name: Joi.string().required(),
+          viewport: Joi.object({
+            width: Joi.number().min(320).required(),
+            height: Joi.number().min(480).required(),
+          }).required(),
+          userAgent: Joi.string(),
+        })
+      ),
+      enableMatrix: Joi.boolean(),
+      featureDetection: Joi.boolean(),
+      realBrowser: Joi.boolean(),
+      captureScreenshot: Joi.boolean(),
+      timeout: Joi.number().min(1000).max(120000),
+      testId: Joi.string(),
+    }).unknown(true);
+
+    const { error, value } = schema.validate(config, { abortEarly: false });
+    if (error) {
+      throw new Error(
+        `配置验证失败: ${error.details.map((item: { message: string }) => item.message).join(', ')}`
+      );
+    }
+    return value as CompatibilityConfig;
+  }
+
   checkAvailability() {
     return {
       available: true,
@@ -91,9 +150,10 @@ class CompatibilityTestEngine {
   }
 
   async executeTest(config: CompatibilityConfig) {
-    const testId = config.testId || `compatibility_${Date.now()}`;
-    const timeout = config.timeout || 30000;
-    const url = config.url;
+    const validatedConfig = this.validateConfig(config);
+    const testId = validatedConfig.testId || `compatibility_${Date.now()}`;
+    const timeout = validatedConfig.timeout || 30000;
+    const url = validatedConfig.url;
 
     if (!url) {
       throw new Error('兼容性测试URL不能为空');
@@ -111,15 +171,19 @@ class CompatibilityTestEngine {
       const baseHtml = String(response.data || '');
       const baseSignals = this.extractPageSignals(baseHtml);
 
-      const browsers = config.browsers?.length ? config.browsers : DEFAULT_BROWSERS;
-      const devices = config.devices?.length ? config.devices : DEFAULT_DEVICES;
-      const enableMatrix = config.enableMatrix !== false;
-      const enableFeatureDetection = config.featureDetection !== false;
+      const browsers = validatedConfig.browsers?.length
+        ? validatedConfig.browsers
+        : DEFAULT_BROWSERS;
+      const devices = validatedConfig.devices?.length ? validatedConfig.devices : DEFAULT_DEVICES;
+      const enableMatrix = validatedConfig.enableMatrix !== false;
+      const enableFeatureDetection = validatedConfig.featureDetection !== false;
+      const enableRealBrowser = validatedConfig.realBrowser === true;
+      const captureScreenshot = validatedConfig.captureScreenshot === true;
 
       this.updateTestProgress(testId, 35, '准备UA矩阵');
       const variantMap = enableMatrix
         ? await this.fetchVariants(url, timeout, browsers, devices)
-        : new Map<string, { html: string; signals: ReturnType<typeof this.extractPageSignals> }>();
+        : new Map<string, { html: string; signals: PageSignals }>();
 
       this.updateTestProgress(testId, 55, '执行浏览器兼容性检查');
       const browserResults = browsers.map(browser => {
@@ -157,8 +221,12 @@ class CompatibilityTestEngine {
           )
         : [];
 
+      const realBrowserResults = enableRealBrowser
+        ? await this.runRealBrowserChecks(url, timeout, browsers, devices, captureScreenshot)
+        : [];
+
       const overallScore = this.calculateScore(
-        matrixResults.length ? matrixResults : browserResults,
+        (matrixResults.length ? matrixResults : browserResults) as Array<{ compatible: boolean }>,
         deviceResults
       );
       const results = {
@@ -169,10 +237,12 @@ class CompatibilityTestEngine {
           browserCount: browserResults.length,
           deviceCount: deviceResults.length,
           matrixCount: matrixResults.length,
+          realBrowserCount: realBrowserResults.length,
         },
         browsers: browserResults,
         devices: deviceResults,
         matrix: matrixResults,
+        realBrowser: realBrowserResults,
         featureSummary: this.buildFeatureSummary(baseSignals),
         recommendations: this.buildRecommendations(browserResults, deviceResults),
       };
@@ -285,10 +355,10 @@ class CompatibilityTestEngine {
   }
 
   private resolveSignals(
-    baseSignals: ReturnType<typeof this.extractPageSignals>,
+    baseSignals: PageSignals,
     browser: BrowserConfig | null,
     device: DeviceConfig | null,
-    variantMap: Map<string, { html: string; signals: ReturnType<typeof this.extractPageSignals> }>
+    variantMap: Map<string, { html: string; signals: PageSignals }>
   ) {
     const userAgent = this.resolveUserAgent(browser, device);
     if (!userAgent) return baseSignals;
@@ -298,8 +368,8 @@ class CompatibilityTestEngine {
   private buildCompatibilityMatrix(
     browsers: BrowserConfig[],
     devices: DeviceConfig[],
-    baseSignals: ReturnType<typeof this.extractPageSignals>,
-    variantMap: Map<string, { html: string; signals: ReturnType<typeof this.extractPageSignals> }>,
+    baseSignals: PageSignals,
+    variantMap: Map<string, { html: string; signals: PageSignals }>,
     enableFeatureDetection: boolean
   ) {
     const results: Array<Record<string, unknown>> = [];
@@ -344,10 +414,7 @@ class CompatibilityTestEngine {
     browsers: BrowserConfig[],
     devices: DeviceConfig[]
   ) {
-    const map = new Map<
-      string,
-      { html: string; signals: ReturnType<typeof this.extractPageSignals> }
-    >();
+    const map = new Map<string, { html: string; signals: PageSignals }>();
     const userAgents = new Set<string>();
     for (const browser of browsers) {
       const agent = this.resolveUserAgent(browser, null);
@@ -372,7 +439,7 @@ class CompatibilityTestEngine {
     return map;
   }
 
-  private extractPageSignals(html: string) {
+  private extractPageSignals(html: string): PageSignals {
     const $ = cheerio.load(html || '');
     const hasViewport = $('meta[name="viewport"]').length > 0;
     const hasH1 = $('h1').length > 0;
@@ -434,13 +501,180 @@ class CompatibilityTestEngine {
     return { issues, warnings, supported };
   }
 
-  private buildFeatureSummary(signals: ReturnType<typeof this.extractPageSignals>) {
+  private buildFeatureSummary(signals: PageSignals) {
     return {
       requiredFeatures: signals.requiredFeatures,
       meta: signals.meta,
       resources: signals.resources,
       polyfill: signals.polyfill,
     };
+  }
+
+  private async runRealBrowserChecks(
+    url: string,
+    timeout: number,
+    browsers: BrowserConfig[],
+    devices: DeviceConfig[],
+    captureScreenshot: boolean
+  ) {
+    let puppeteer: typeof import('puppeteer') | null = null;
+    try {
+      puppeteer = require('puppeteer');
+    } catch {
+      return [
+        {
+          available: false,
+          issues: ['未检测到 Puppeteer 依赖，无法执行真实浏览器测试'],
+        },
+      ];
+    }
+
+    if (!puppeteer) {
+      return [
+        {
+          available: false,
+          issues: ['Puppeteer未初始化'],
+        },
+      ];
+    }
+
+    const browserLauncher = puppeteer as typeof import('puppeteer');
+
+    const results: Array<Record<string, unknown>> = [];
+    const combinations: Array<{ browser: BrowserConfig; device: DeviceConfig }> = [];
+    for (const browser of browsers) {
+      for (const device of devices) {
+        combinations.push({ browser, device });
+      }
+    }
+
+    for (const { browser, device } of combinations) {
+      const issues: string[] = [];
+      const warnings: string[] = [];
+      const userAgent = this.resolveUserAgent(browser, device);
+      const pageErrors: string[] = [];
+      const consoleErrors: string[] = [];
+      const failedRequests: string[] = [];
+      let screenshotBase64: string | null = null;
+      let browserInstance: import('puppeteer').Browser | null = null;
+      try {
+        browserInstance = await browserLauncher.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        });
+        if (!browserInstance) {
+          throw new Error('无法启动浏览器实例');
+        }
+        const page = await browserInstance.newPage();
+        page.on('pageerror', error => pageErrors.push(error.message));
+        page.on('console', msg => {
+          if (msg.type() === 'error') {
+            consoleErrors.push(msg.text());
+          }
+        });
+        page.on('requestfailed', request => {
+          failedRequests.push(request.url());
+        });
+        if (userAgent) {
+          await page.setUserAgent(userAgent);
+        }
+        await page.setViewport({
+          width: device.viewport.width,
+          height: device.viewport.height,
+          deviceScaleFactor: device.name === 'Mobile' ? 2 : 1,
+        });
+        await page.goto(url, { waitUntil: 'networkidle2', timeout });
+        if (captureScreenshot) {
+          try {
+            screenshotBase64 = (await page.screenshot({ fullPage: true, encoding: 'base64' })) as
+              | string
+              | null;
+          } catch {
+            screenshotBase64 = null;
+          }
+        }
+        const domStats = await page.evaluate(() => {
+          const fcpEntry = performance.getEntriesByName('first-contentful-paint')[0] as
+            | PerformanceEntry
+            | undefined;
+          return {
+            title: document.title,
+            viewportMeta: !!document.querySelector('meta[name="viewport"]'),
+            h1Count: document.querySelectorAll('h1').length,
+            scrollWidth: document.documentElement.scrollWidth,
+            scrollHeight: document.documentElement.scrollHeight,
+            timing: performance.timing
+              ? {
+                  domContentLoaded:
+                    performance.timing.domContentLoadedEventEnd -
+                    performance.timing.navigationStart,
+                  loadEvent: performance.timing.loadEventEnd - performance.timing.navigationStart,
+                }
+              : null,
+            firstContentfulPaint: fcpEntry ? fcpEntry.startTime : 0,
+          };
+        });
+
+        if (!domStats.viewportMeta) {
+          issues.push('缺少viewport meta标签');
+        }
+        if (!domStats.h1Count) {
+          warnings.push('页面缺少H1标题');
+        }
+        if (domStats.scrollWidth > device.viewport.width + 5) {
+          issues.push('存在水平溢出，可能影响布局适配');
+        }
+        if (pageErrors.length) {
+          issues.push(`页面脚本错误: ${pageErrors.join(' | ')}`);
+        }
+        if (consoleErrors.length) {
+          warnings.push(`控制台错误: ${consoleErrors.join(' | ')}`);
+        }
+        if (failedRequests.length) {
+          warnings.push(`资源加载失败: ${failedRequests.length} 个`);
+        }
+
+        results.push({
+          browser: browser.name,
+          version: browser.version || 'latest',
+          device: device.name,
+          viewport: device.viewport,
+          userAgent,
+          available: true,
+          compatible: issues.length === 0,
+          issues,
+          warnings,
+          metrics: {
+            title: domStats.title,
+            scrollWidth: domStats.scrollWidth,
+            scrollHeight: domStats.scrollHeight,
+            timing: domStats.timing,
+            failedRequests: failedRequests.length,
+            firstContentfulPaint: domStats.firstContentfulPaint,
+            screenshot: screenshotBase64,
+          },
+        });
+      } catch (error) {
+        issues.push(error instanceof Error ? error.message : String(error));
+        results.push({
+          browser: browser.name,
+          version: browser.version || 'latest',
+          device: device.name,
+          viewport: device.viewport,
+          userAgent,
+          available: false,
+          compatible: false,
+          issues,
+          warnings,
+        });
+      } finally {
+        if (browserInstance) {
+          await browserInstance.close();
+        }
+      }
+    }
+
+    return results;
   }
 
   buildRecommendations(

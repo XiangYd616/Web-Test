@@ -513,6 +513,7 @@ class TestBusinessService {
       api: { engineName: 'ApiTestEngine', testName: 'API测试' },
       stress: { engineName: 'StressTestEngine', testName: '压力测试' },
       compatibility: { engineName: 'CompatibilityTestEngine', testName: '兼容性测试' },
+      ux: { engineName: 'UXTestEngine', testName: 'UX测试' },
     };
 
     return metaMap[testType] || { engineName: 'UnknownEngine', testName: '未知测试' };

@@ -581,6 +581,8 @@ class TestController {
           'POST /api/test/stress',
           'POST /api/test/api',
           'POST /api/test/accessibility',
+          'POST /api/test/compatibility',
+          'POST /api/test/ux',
         ],
         management: [
           'GET /api/test/:testId/status',
@@ -792,6 +794,60 @@ class TestController {
    */
   async runAccessibilityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     return this.createAccessibilityTest(req, res, next);
+  }
+
+  /**
+   * 创建兼容性测试
+   * POST /api/test/compatibility
+   */
+  async createCompatibilityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const config = req.body as Record<string, unknown>;
+      const user = {
+        userId: req.user.id,
+        role: req.user.role || 'free',
+      };
+
+      const result = await testService.createCompatibilityTest(config, user);
+      return createdResponse(res, result, '兼容性测试创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 运行兼容性测试（兼容旧路由）
+   * POST /api/test/compatibility
+   */
+  async runCompatibilityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    return this.createCompatibilityTest(req, res, next);
+  }
+
+  /**
+   * 创建UX测试
+   * POST /api/test/ux
+   */
+  async createUXTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const config = req.body as Record<string, unknown>;
+      const user = {
+        userId: req.user.id,
+        role: req.user.role || 'free',
+      };
+
+      const result = await testService.createUXTest(config, user);
+      return createdResponse(res, result, 'UX测试创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 运行UX测试（兼容旧路由）
+   * POST /api/test/ux
+   */
+  async runUXTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    return this.createUXTest(req, res, next);
   }
 
   /**

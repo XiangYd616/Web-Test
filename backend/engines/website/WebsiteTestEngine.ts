@@ -1,16 +1,27 @@
 import type { Element as DomElement } from 'domhandler';
 
 const axios = require('axios');
+const Joi = require('joi');
 const cheerio = require('cheerio');
 const { emitTestProgress, emitTestComplete, emitTestError } = require('../../websocket/testEvents');
 const PerformanceTestEngine = require('../performance/PerformanceTestEngine');
 const SeoTestEngine = require('../seo/SeoTestEngine');
 const AccessibilityTestEngine = require('../accessibility/AccessibilityTestEngine');
+const UXTestEngine = require('../ux/UXTestEngine');
 
 type WebsiteConfig = {
   testId?: string;
   url?: string;
   timeout?: number;
+  enablePerformance?: boolean;
+  enableSEO?: boolean;
+  enableAccessibility?: boolean;
+  enableUX?: boolean;
+  confirmPuppeteer?: boolean;
+  performanceConfig?: Record<string, unknown>;
+  seoConfig?: Record<string, unknown>;
+  accessibilityConfig?: Record<string, unknown>;
+  uxConfig?: Record<string, unknown>;
 };
 
 class WebsiteTestEngine {
@@ -25,6 +36,7 @@ class WebsiteTestEngine {
   performanceEngine: Record<string, unknown>;
   seoEngine: Record<string, unknown>;
   accessibilityEngine: Record<string, unknown>;
+  uxEngine: Record<string, unknown>;
 
   constructor(options: Record<string, unknown> = {}) {
     this.name = 'website';
@@ -38,6 +50,53 @@ class WebsiteTestEngine {
     this.performanceEngine = new PerformanceTestEngine();
     this.seoEngine = new SeoTestEngine();
     this.accessibilityEngine = new AccessibilityTestEngine();
+    this.uxEngine = new UXTestEngine();
+  }
+
+  private validateConfig(config: WebsiteConfig) {
+    const performanceConfigSchema = Joi.object({
+      iterations: Joi.number().min(1).max(10),
+      includeResources: Joi.boolean(),
+    }).unknown(true);
+    const seoConfigSchema = Joi.object({
+      enableAdvanced: Joi.boolean(),
+    }).unknown(true);
+    const accessibilityConfigSchema = Joi.object({
+      level: Joi.string().valid('A', 'AA', 'AAA'),
+    }).unknown(true);
+    const uxConfigSchema = Joi.object({
+      timeout: Joi.number().min(1000).max(120000),
+    }).unknown(true);
+
+    const schema = Joi.object({
+      testId: Joi.string(),
+      url: Joi.string().uri().required(),
+      timeout: Joi.number().min(1000).max(120000),
+      enablePerformance: Joi.boolean(),
+      enableSEO: Joi.boolean(),
+      enableAccessibility: Joi.boolean(),
+      enableUX: Joi.boolean(),
+      confirmPuppeteer: Joi.boolean(),
+      performanceConfig: performanceConfigSchema,
+      seoConfig: seoConfigSchema,
+      accessibilityConfig: accessibilityConfigSchema,
+      uxConfig: uxConfigSchema,
+    }).unknown(true);
+
+    return schema.validate(config, { abortEarly: false });
+  }
+
+  private getOptimalStrategy(enabledEngines: string[]) {
+    const heavyEngines = enabledEngines.filter(engine =>
+      ['performance', 'ux', 'accessibility'].includes(engine)
+    );
+    if (heavyEngines.length >= 2) {
+      return { parallel: false, reason: '重型引擎较多，采用串行策略' };
+    }
+    if (enabledEngines.length >= 2) {
+      return { parallel: true, reason: '轻量组合，采用并行策略' };
+    }
+    return { parallel: false, reason: '单引擎无需并行' };
   }
 
   checkAvailability() {
@@ -55,8 +114,29 @@ class WebsiteTestEngine {
 
   async executeTest(config: WebsiteConfig) {
     try {
-      const testId = config.testId || `website-${Date.now()}`;
-      const { url, timeout = 30000 } = config;
+      const { error, value: validatedConfig } = this.validateConfig(config);
+      if (error) {
+        throw new Error(
+          `配置验证失败: ${error.details
+            .map((item: { message: string }) => item.message)
+            .join(', ')}`
+        );
+      }
+
+      const testId = validatedConfig.testId || `website-${Date.now()}`;
+      const {
+        url,
+        timeout = 30000,
+        enablePerformance = true,
+        enableSEO = true,
+        enableAccessibility = true,
+        enableUX = true,
+        confirmPuppeteer,
+        performanceConfig,
+        seoConfig,
+        accessibilityConfig,
+        uxConfig,
+      } = validatedConfig as WebsiteConfig;
       if (!url) {
         throw new Error('网站测试URL不能为空');
       }
@@ -73,46 +153,224 @@ class WebsiteTestEngine {
 
       const basicChecks = await this.performBasicChecks($);
 
-      this.updateTestProgress(testId, 35, '执行性能测试', 'running');
-      const performanceResult = await (
-        this.performanceEngine as {
-          executeTest: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>;
-        }
-      ).executeTest({
-        url,
-        testId: `${testId}_performance`,
-      });
-      const performanceChecks =
-        (performanceResult as { results?: Record<string, unknown> })?.results || {};
+      const enabledEngines = [
+        enablePerformance ? 'performance' : null,
+        enableSEO ? 'seo' : null,
+        enableAccessibility ? 'accessibility' : null,
+        enableUX ? 'ux' : null,
+      ].filter(Boolean) as string[];
 
-      this.updateTestProgress(testId, 60, '执行SEO测试', 'running');
-      const seoResult = await (
-        this.seoEngine as {
-          executeTest: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>;
-        }
-      ).executeTest({
-        url,
-        testId: `${testId}_seo`,
-      });
-      const seoChecks = seoResult || {};
+      const strategy = this.getOptimalStrategy(enabledEngines);
+      const engineMetrics: Record<string, Record<string, unknown>> = {};
 
-      this.updateTestProgress(testId, 80, '执行可访问性测试', 'running');
-      const accessibilityResult = await (
-        this.accessibilityEngine as {
-          executeTest: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>;
+      const runEngine = async (
+        key: string,
+        label: string,
+        runner: () => Promise<Record<string, unknown>>,
+        progress: number
+      ) => {
+        this.updateTestProgress(testId, progress, label, 'running');
+        const start = Date.now();
+        const startMemory = process.memoryUsage().heapUsed;
+        const result = await runner();
+        const end = Date.now();
+        const endMemory = process.memoryUsage().heapUsed;
+        engineMetrics[key] = {
+          executionTime: end - start,
+          memoryUsage: Math.max(0, endMemory - startMemory),
+        };
+        return result;
+      };
+
+      let performanceChecks: Record<string, unknown> = enablePerformance ? {} : { skipped: true };
+      let seoChecks: Record<string, unknown> = enableSEO ? {} : { skipped: true };
+      let accessibilityChecks: Record<string, unknown> = enableAccessibility
+        ? {}
+        : { skipped: true };
+
+      if (strategy.parallel) {
+        const tasks: Array<Promise<void>> = [];
+        if (enablePerformance) {
+          tasks.push(
+            runEngine(
+              'performance',
+              '执行性能测试',
+              async () => {
+                const performanceResult = await (
+                  this.performanceEngine as {
+                    executeTest: (
+                      payload: Record<string, unknown>
+                    ) => Promise<Record<string, unknown>>;
+                  }
+                ).executeTest({
+                  url,
+                  testId: `${testId}_performance`,
+                  ...(performanceConfig || {}),
+                });
+                performanceChecks =
+                  (performanceResult as { results?: Record<string, unknown> })?.results || {};
+                return performanceChecks;
+              },
+              35
+            ).then(() => undefined)
+          );
         }
-      ).executeTest({
-        url,
-        testId: `${testId}_accessibility`,
-      });
-      const accessibilityChecks =
-        (accessibilityResult as { results?: Record<string, unknown> })?.results || {};
+        if (enableSEO) {
+          tasks.push(
+            runEngine(
+              'seo',
+              '执行SEO测试',
+              async () => {
+                const seoResult = await (
+                  this.seoEngine as {
+                    executeTest: (
+                      payload: Record<string, unknown>
+                    ) => Promise<Record<string, unknown>>;
+                  }
+                ).executeTest({
+                  url,
+                  testId: `${testId}_seo`,
+                  ...(seoConfig || {}),
+                });
+                seoChecks = seoResult || {};
+                return seoChecks;
+              },
+              50
+            ).then(() => undefined)
+          );
+        }
+        if (enableAccessibility) {
+          tasks.push(
+            runEngine(
+              'accessibility',
+              '执行可访问性测试',
+              async () => {
+                const accessibilityResult = await (
+                  this.accessibilityEngine as {
+                    executeTest: (
+                      payload: Record<string, unknown>
+                    ) => Promise<Record<string, unknown>>;
+                  }
+                ).executeTest({
+                  url,
+                  testId: `${testId}_accessibility`,
+                  ...(accessibilityConfig || {}),
+                });
+                accessibilityChecks =
+                  (accessibilityResult as { results?: Record<string, unknown> })?.results || {};
+                return accessibilityChecks;
+              },
+              65
+            ).then(() => undefined)
+          );
+        }
+        await Promise.all(tasks);
+      } else {
+        if (enablePerformance) {
+          await runEngine(
+            'performance',
+            '执行性能测试',
+            async () => {
+              const performanceResult = await (
+                this.performanceEngine as {
+                  executeTest: (
+                    payload: Record<string, unknown>
+                  ) => Promise<Record<string, unknown>>;
+                }
+              ).executeTest({
+                url,
+                testId: `${testId}_performance`,
+                ...(performanceConfig || {}),
+              });
+              performanceChecks =
+                (performanceResult as { results?: Record<string, unknown> })?.results || {};
+              return performanceChecks;
+            },
+            35
+          );
+        }
+        if (enableSEO) {
+          await runEngine(
+            'seo',
+            '执行SEO测试',
+            async () => {
+              const seoResult = await (
+                this.seoEngine as {
+                  executeTest: (
+                    payload: Record<string, unknown>
+                  ) => Promise<Record<string, unknown>>;
+                }
+              ).executeTest({
+                url,
+                testId: `${testId}_seo`,
+                ...(seoConfig || {}),
+              });
+              seoChecks = seoResult || {};
+              return seoChecks;
+            },
+            60
+          );
+        }
+        if (enableAccessibility) {
+          await runEngine(
+            'accessibility',
+            '执行可访问性测试',
+            async () => {
+              const accessibilityResult = await (
+                this.accessibilityEngine as {
+                  executeTest: (
+                    payload: Record<string, unknown>
+                  ) => Promise<Record<string, unknown>>;
+                }
+              ).executeTest({
+                url,
+                testId: `${testId}_accessibility`,
+                ...(accessibilityConfig || {}),
+              });
+              accessibilityChecks =
+                (accessibilityResult as { results?: Record<string, unknown> })?.results || {};
+              return accessibilityChecks;
+            },
+            80
+          );
+        }
+      }
+
+      let uxChecks: Record<string, unknown> = {};
+      if (enableUX) {
+        if (confirmPuppeteer !== true) {
+          uxChecks = { skipped: true, reason: '需确认Puppeteer环境' };
+        } else {
+          this.updateTestProgress(testId, 90, '执行UX测试', 'running');
+          const uxResult = await (
+            this.uxEngine as {
+              executeTest: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>;
+            }
+          ).executeTest({
+            url,
+            testId: `${testId}_ux`,
+            timeout,
+            confirmPuppeteer,
+            ...(uxConfig || {}),
+          });
+          uxChecks = (uxResult as { results?: Record<string, unknown> })?.results || {};
+        }
+      } else {
+        uxChecks = { skipped: true, reason: '未启用UX测试' };
+      }
 
       const scores = [
         (basicChecks as { score?: number })?.score,
-        (performanceChecks as { summary?: { score?: number } })?.summary?.score,
-        (seoChecks as { summary?: { score?: number } })?.summary?.score,
-        (accessibilityChecks as { summary?: { score?: number } })?.summary?.score,
+        !('skipped' in performanceChecks)
+          ? (performanceChecks as { summary?: { score?: number } })?.summary?.score
+          : null,
+        !('skipped' in seoChecks)
+          ? (seoChecks as { summary?: { score?: number } })?.summary?.score
+          : null,
+        !('skipped' in accessibilityChecks)
+          ? (accessibilityChecks as { summary?: { score?: number } })?.summary?.score
+          : null,
+        enableUX && !('skipped' in uxChecks) ? (uxChecks as { score?: number })?.score : null,
       ].filter(score => Number.isFinite(score));
       const overallScore =
         scores.length > 0
@@ -124,11 +382,20 @@ class WebsiteTestEngine {
         timestamp: new Date().toISOString(),
         summary: {
           overallScore,
-          accessibility:
-            (accessibilityChecks as { summary?: { score?: number } })?.summary?.score ??
-            (basicChecks as { accessibility?: number })?.accessibility,
-          performance: (performanceChecks as { summary?: { score?: number } })?.summary?.score ?? 0,
-          seo: (seoChecks as { summary?: { score?: number } })?.summary?.score ?? 0,
+          accessibility: !('skipped' in accessibilityChecks)
+            ? ((accessibilityChecks as { summary?: { score?: number } })?.summary?.score ??
+              (basicChecks as { accessibility?: number })?.accessibility)
+            : 0,
+          performance: !('skipped' in performanceChecks)
+            ? ((performanceChecks as { summary?: { score?: number } })?.summary?.score ?? 0)
+            : 0,
+          seo: !('skipped' in seoChecks)
+            ? ((seoChecks as { summary?: { score?: number } })?.summary?.score ?? 0)
+            : 0,
+          ux:
+            enableUX && !('skipped' in uxChecks)
+              ? ((uxChecks as { score?: number })?.score ?? 0)
+              : 0,
           status: 'completed',
         },
         checks: {
@@ -136,12 +403,15 @@ class WebsiteTestEngine {
           performance: performanceChecks,
           seo: seoChecks,
           accessibility: accessibilityChecks,
+          ux: enableUX ? uxChecks : { skipped: true },
         },
+        engineMetrics,
         recommendations: this.buildRecommendations({
           basic: basicChecks,
           performance: performanceChecks,
           seo: seoChecks,
           accessibility: accessibilityChecks,
+          ux: uxChecks,
         }),
       };
 
@@ -241,11 +511,13 @@ class WebsiteTestEngine {
     performance,
     seo,
     accessibility,
+    ux,
   }: {
     basic: Record<string, unknown>;
     performance: Record<string, unknown>;
     seo: Record<string, unknown>;
     accessibility: Record<string, unknown>;
+    ux: Record<string, unknown>;
   }) {
     const recommendations: string[] = [];
     if ((basic as { warnings?: string[] })?.warnings?.length) {
@@ -268,6 +540,9 @@ class WebsiteTestEngine {
       recommendations.push(
         ...((accessibility as { recommendations?: string[] }).recommendations || [])
       );
+    }
+    if ((ux as { recommendations?: string[] })?.recommendations?.length) {
+      recommendations.push(...((ux as { recommendations?: string[] }).recommendations || []));
     }
 
     if (recommendations.length === 0) {

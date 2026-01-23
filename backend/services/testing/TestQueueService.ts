@@ -39,24 +39,23 @@ const getQueueName = (testType?: string) => {
   return DEFAULT_QUEUE;
 };
 
+const getConfiguredMaxConcurrent = (fallback = 5) =>
+  Number(
+    configManager?.get?.('testEngines.maxConcurrent', undefined) ||
+      configManager?.get?.('testEngines.concurrency.max', undefined) ||
+      fallback
+  );
+
 const getQueueConcurrency = (queueName: string) => {
   if (queueName === HEAVY_QUEUE) {
-    return Number(
-      process.env.TEST_QUEUE_HEAVY_CONCURRENCY ||
-        configManager?.get?.('testEngines.maxConcurrent', 5) ||
-        5
-    );
+    return Number(process.env.TEST_QUEUE_HEAVY_CONCURRENCY || getConfiguredMaxConcurrent(5) || 5);
   }
   if (queueName === SECURITY_QUEUE) {
     return Number(
-      process.env.TEST_QUEUE_SECURITY_CONCURRENCY ||
-        configManager?.get?.('testEngines.maxConcurrent', 5) ||
-        5
+      process.env.TEST_QUEUE_SECURITY_CONCURRENCY || getConfiguredMaxConcurrent(5) || 5
     );
   }
-  return Number(
-    process.env.TEST_QUEUE_CONCURRENCY || configManager?.get?.('testEngines.maxConcurrent', 5) || 5
-  );
+  return Number(process.env.TEST_QUEUE_CONCURRENCY || getConfiguredMaxConcurrent(5) || 5);
 };
 
 const getQueue = (name: string) => {

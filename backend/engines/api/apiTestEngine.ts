@@ -2,6 +2,7 @@ const http = require('http');
 const https = require('https');
 const { URL } = require('url');
 const { performance } = require('perf_hooks');
+const Joi = require('joi');
 const { AssertionSystem } = require('./AssertionSystem');
 const { emitTestProgress, emitTestComplete, emitTestError } = require('../../websocket/testEvents');
 const { getAlertManager } = require('../../alert/AlertManager');
@@ -90,6 +91,39 @@ class ApiTestEngine {
     }
   }
 
+  private validateConfig(config: Record<string, unknown>) {
+    const endpointSchema = Joi.object({
+      name: Joi.string(),
+      url: Joi.string().uri().required(),
+      method: Joi.string().valid('GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'),
+      headers: Joi.object().unknown(true),
+      body: Joi.any(),
+      assertions: Joi.array().items(Joi.object().unknown(true)),
+    }).unknown(true);
+
+    const schema = Joi.object({
+      testId: Joi.string(),
+      url: Joi.string().uri(),
+      method: Joi.string().valid('GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'),
+      headers: Joi.object().unknown(true),
+      body: Joi.any(),
+      endpoints: Joi.array().items(endpointSchema),
+      assertions: Joi.array().items(Joi.object().unknown(true)),
+      variables: Joi.object().pattern(Joi.string(), Joi.string()),
+    }).unknown(true);
+
+    const { error, value } = schema.validate(config, { abortEarly: false });
+    if (error) {
+      throw new Error(
+        `配置验证失败: ${error.details.map((item: { message: string }) => item.message).join(', ')}`
+      );
+    }
+    if (!value.url && (!value.endpoints || value.endpoints.length === 0)) {
+      throw new Error('配置验证失败: url 或 endpoints 至少提供一个');
+    }
+    return value as Record<string, unknown>;
+  }
+
   checkAvailability() {
     return {
       available: true,
@@ -99,7 +133,8 @@ class ApiTestEngine {
   }
 
   async executeTest(config: Record<string, unknown>) {
-    const testId = (config as { testId?: string }).testId || `api-${Date.now()}`;
+    const validatedConfig = this.validateConfig(config);
+    const testId = (validatedConfig as { testId?: string }).testId || `api-${Date.now()}`;
 
     try {
       const {
@@ -110,7 +145,7 @@ class ApiTestEngine {
         endpoints = [],
         assertions = [],
         variables = {},
-      } = config as {
+      } = validatedConfig as {
         url?: string;
         method?: string;
         headers?: Record<string, unknown>;

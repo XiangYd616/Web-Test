@@ -1,5 +1,6 @@
 const PerformanceMetricsService = require('../shared/services/PerformanceMetricsService');
 const HTMLParsingService = require('../shared/services/HTMLParsingService');
+const Joi = require('joi');
 
 type PerformanceConfig = {
   testId?: string;
@@ -104,6 +105,25 @@ class PerformanceTestEngine {
     this.errorCallback = null;
   }
 
+  validateConfig(config: PerformanceConfig) {
+    const schema = Joi.object({
+      testId: Joi.string(),
+      url: Joi.string().uri().required(),
+      iterations: Joi.number().min(1).max(10).default(3),
+      includeResources: Joi.boolean().default(true),
+      fetchHtml: Joi.boolean().default(true),
+      verbose: Joi.boolean().default(false),
+    }).unknown(true);
+
+    const { error, value } = schema.validate(config, { abortEarly: false });
+    if (error) {
+      throw new Error(
+        `配置验证失败: ${error.details.map((item: { message: string }) => item.message).join(', ')}`
+      );
+    }
+    return value as PerformanceConfig;
+  }
+
   async initialize() {
     if (this.initialized) {
       return true;
@@ -145,21 +165,14 @@ class PerformanceTestEngine {
 
       this.updateTestProgress(testId, 5, '初始化性能测试');
 
+      const validatedConfig = this.validateConfig(config);
       const {
         url,
         iterations = 3,
         includeResources = true,
         fetchHtml = true,
         verbose = false,
-      } = config;
-
-      if (!url || typeof url !== 'string') {
-        throw new Error('性能测试URL不能为空');
-      }
-
-      if (!Number.isFinite(iterations) || iterations <= 0) {
-        throw new Error('iterations 必须为正整数');
-      }
+      } = validatedConfig as PerformanceConfig & { url: string };
 
       if (verbose) {
         console.debug(`[PerformanceTestEngine] 测试中: ${url}`);

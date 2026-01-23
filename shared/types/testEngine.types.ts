@@ -1,6 +1,6 @@
 /**
  * 测试引擎插件化架构 - 核心类型定义
- * 
+ *
  * 用于统一管理所有测试引擎，解决功能重叠和耦合问题
  */
 
@@ -10,44 +10,28 @@
 export enum TestEngineType {
   // 核心功能引擎 (Core Engines)
   API = 'api',
-  PERFORMANCE = 'performance', 
+  PERFORMANCE = 'performance',
   SECURITY = 'security',
   STRESS = 'stress',
-  
+
   // 分析引擎 (Analysis Engines)
   SEO = 'seo',
   ACCESSIBILITY = 'accessibility',
   COMPATIBILITY = 'compatibility',
-  
+  UX = 'ux',
+
   // 复合引擎 (Composite Engines)
   WEBSITE = 'website',
-  INFRASTRUCTURE = 'infrastructure'
+  INFRASTRUCTURE = 'infrastructure',
 }
 
 /**
  * 测试引擎层次
  */
 export enum TestEngineLayer {
-  CORE = 'core',        // 核心功能引擎
-  ANALYSIS = 'analysis', // 分析引擎  
-  COMPOSITE = 'composite' // 复合引擎
-}
-
-/**
- * 弃用的测试引擎类型 (已移除)
- */
-export enum DeprecatedTestEngineType {
-  SERVICES = 'services',
-  CLIENTS = 'clients', 
-  CONTENT = 'content',
-  DOCUMENTATION = 'documentation',
-  NETWORK = 'network',
-  REGRESSION = 'regression',
-  AUTOMATION = 'automation',
-  DATABASE = 'database',
-  UX = 'ux',
-  BASE = 'base',
-  CORE = 'core'
+  CORE = 'core', // 核心功能引擎
+  ANALYSIS = 'analysis', // 分析引擎
+  COMPOSITE = 'composite', // 复合引擎
 }
 
 /**
@@ -57,7 +41,7 @@ export enum TestPriority {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 /**
@@ -69,7 +53,7 @@ export enum TestStatus {
   RUNNING = 'running',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 /**
@@ -162,7 +146,7 @@ export interface TestEngineLifecycle {
  */
 export interface ITestEngine<
   TConfig extends BaseTestConfig = BaseTestConfig,
-  TResult extends BaseTestResult = BaseTestResult
+  TResult extends BaseTestResult = BaseTestResult,
 > {
   // 基础属性
   readonly type: TestEngineType;
@@ -179,7 +163,7 @@ export interface ITestEngine<
   run(config: TConfig, onProgress?: (progress: TestProgress) => void): Promise<TResult>;
   cancel(testId: string): Promise<void>;
   getStatus(testId: string): TestProgress;
-  
+
   // 辅助方法
   estimateDuration(config: TConfig): number;
   getDependencies(): TestEngineType[];

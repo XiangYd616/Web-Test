@@ -31,6 +31,23 @@ router.post(
 router.post('/website', optionalAuth, testRateLimiter, asyncHandler(testController.runWebsiteTest));
 
 /**
+ * 创建兼容性测试
+ * POST /api/test/compatibility
+ */
+router.post(
+  '/compatibility',
+  authMiddleware,
+  testRateLimiter,
+  asyncHandler(testController.runCompatibilityTest)
+);
+
+/**
+ * 创建UX测试
+ * POST /api/test/ux
+ */
+router.post('/ux', authMiddleware, testRateLimiter, asyncHandler(testController.runUXTest));
+
+/**
  * 获取测试状态
  * GET /api/test/:testId/status
  */

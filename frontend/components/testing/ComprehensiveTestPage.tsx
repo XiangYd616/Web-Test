@@ -5,7 +5,7 @@
 
 import { LucideIcon } from 'lucide-react';
 import React, { ReactNode } from 'react';
-import { useBridgeTest } from '../../hooks/compatibilityBridge';
+import { useTestState } from '../../hooks/useTestState';
 import { TestConfigPanel as ConfigPanel } from './shared/TestConfigPanel';
 
 export interface TestTypeConfig {
@@ -114,12 +114,18 @@ export const ComprehensiveTestPage: React.FC<ComprehensiveTestPageProps> = ({
     result,
     error,
     config,
-    updateConfig,
+    setConfig,
     startTest,
     stopTest,
     resetTest,
-    validateConfig,
-  } = useBridgeTest(testType.id, testType.defaultConfig);
+    isConfigValid,
+    configErrors,
+  } = useTestState({
+    testType: testType.id as any,
+    defaultConfig: testType.defaultConfig,
+    onConfigChange,
+    validateConfig: () => ({ isValid: true, errors: [] }),
+  });
 
   const isRunningBool = Boolean(isRunning);
   const progressNum = Number(progress || 0);
@@ -138,15 +144,15 @@ export const ComprehensiveTestPage: React.FC<ComprehensiveTestPageProps> = ({
     ...(config as Record<string, unknown>),
   } as unknown as Parameters<typeof ConfigPanel>[0]['config'];
 
-  const validateResult =
-    typeof validateConfig === 'function'
-      ? validateConfig(safeConfig as unknown as Record<string, unknown>)
-      : { isValid: true, errors: [] as string[] };
+  const validateResult = {
+    isValid: isConfigValid,
+    errors: configErrors,
+  };
 
   // 处理配置变更
   const handleConfigChange = (newConfig: unknown) => {
     // 使用updateConfig方法更新整个配置对象
-    updateConfig(newConfig as Record<string, unknown>);
+    setConfig(newConfig as Record<string, unknown>);
     onConfigChange?.(newConfig);
   };
 

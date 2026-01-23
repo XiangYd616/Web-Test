@@ -1,4 +1,5 @@
 const StressAnalyzer = require('./StressAnalyzer.js');
+const Joi = require('joi');
 const { emitTestProgress, emitTestComplete, emitTestError } = require('../../websocket/testEvents');
 const { getAlertManager } = require('../../alert/AlertManager');
 const Logger = require('../../utils/logger');
@@ -47,6 +48,24 @@ class StressTestEngine {
     }
   }
 
+  private validateConfig(config: Record<string, unknown>) {
+    const schema = Joi.object({
+      testId: Joi.string(),
+      url: Joi.string().uri().required(),
+      duration: Joi.number().min(1).max(3600),
+      concurrency: Joi.number().min(1).max(1000),
+      rampUp: Joi.number().min(0).max(600),
+    }).unknown(true);
+
+    const { error, value } = schema.validate(config, { abortEarly: false });
+    if (error) {
+      throw new Error(
+        `配置验证失败: ${error.details.map((item: { message: string }) => item.message).join(', ')}`
+      );
+    }
+    return value as Record<string, unknown>;
+  }
+
   checkAvailability() {
     return {
       engine: this.name,
@@ -62,8 +81,9 @@ class StressTestEngine {
   }
 
   async executeTest(config: Record<string, unknown>) {
-    const testId = (config as { testId?: string }).testId || `stress-${Date.now()}`;
-    const { url } = config as { url?: string };
+    const validatedConfig = this.validateConfig(config);
+    const testId = (validatedConfig as { testId?: string }).testId || `stress-${Date.now()}`;
+    const { url } = validatedConfig as { url?: string };
     if (!url) {
       throw new Error('压力测试URL不能为空');
     }
@@ -83,7 +103,7 @@ class StressTestEngine {
         duration: 30,
         concurrency: 5,
         rampUp: 5,
-        ...config,
+        ...validatedConfig,
         onProgress: (progress: StressProgress) => {
           emitTestProgress(testId, {
             stage: 'running',
