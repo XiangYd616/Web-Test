@@ -111,6 +111,30 @@ describe('DataManagementService', () => {
         expect.any(Array)
       );
     });
+
+    test('应该硬删除数据记录', async () => {
+      const mockQuery = require('../../config/database').query;
+      mockQuery
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'data_2',
+              type: 'test_results',
+              data: { url: 'https://example.com', testType: 'ui' },
+              metadata: { createdAt: new Date().toISOString(), updatedAt: 'x', version: 1 },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const result = await service.deleteData('test_results', 'data_2', { softDelete: false });
+
+      expect(result.success).toBe(true);
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM data_records'), [
+        'test_results',
+        'data_2',
+      ]);
+    });
   });
 
   describe('deleteData', () => {
@@ -140,6 +164,30 @@ describe('DataManagementService', () => {
         expect.any(Array)
       );
     });
+
+    test('应该硬删除数据记录', async () => {
+      const mockQuery = require('../../config/database').query;
+      mockQuery
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'data_2',
+              type: 'test_results',
+              data: { url: 'https://example.com', testType: 'ui' },
+              metadata: { createdAt: new Date().toISOString(), updatedAt: 'x', version: 1 },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const result = await service.deleteData('test_results', 'data_2', { softDelete: false });
+
+      expect(result.success).toBe(true);
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM data_records'), [
+        'test_results',
+        'data_2',
+      ]);
+    });
   });
 
   describe('queryData', () => {
@@ -162,6 +210,33 @@ describe('DataManagementService', () => {
       expect(result.total).toBe(2);
       expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('SELECT COUNT(*)'), [
         'test_results',
+      ]);
+    });
+
+    test('应该支持搜索与排序', async () => {
+      const mockQuery = require('../../config/database').query;
+      mockQuery.mockResolvedValueOnce({ rows: [{ total: 1 }] }).mockResolvedValueOnce({
+        rows: [
+          {
+            id: 'data_3',
+            type: 'test_results',
+            data: { url: 'https://example.com', testType: 'ui', name: 'Alpha' },
+            metadata: { createdAt: new Date().toISOString() },
+          },
+        ],
+      });
+
+      const result = await service.queryData(
+        'test_results',
+        { search: 'Alpha', sort: { field: 'name', direction: 'asc' } },
+        { page: 1, limit: 10 }
+      );
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].data.name).toBe('Alpha');
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('SELECT COUNT(*)'), [
+        'test_results',
+        '%Alpha%',
       ]);
     });
   });

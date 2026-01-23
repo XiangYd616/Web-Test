@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import analyticsController from '../controllers/analyticsController';
+const analyticsController = require('../controllers/analyticsController');
 import { authMiddleware } from '../middleware/auth';
 
 const router = express.Router();

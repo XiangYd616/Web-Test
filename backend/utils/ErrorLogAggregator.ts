@@ -8,6 +8,7 @@ import fs from 'fs/promises';
 import https from 'https';
 import path from 'path';
 import { configCenter } from '../config/ConfigCenter';
+import Logger from './logger';
 
 type LogLevel = 'error' | 'warn' | 'info' | 'debug';
 
@@ -346,9 +347,9 @@ export class ErrorLogAggregator extends EventEmitter {
       this.startLogProcessing();
 
       this.isInitialized = true;
-      console.log('✅ 错误日志聚合器初始化完成');
+      Logger.system('error_log_aggregator_initialized', '错误日志聚合器初始化完成');
     } catch (error) {
-      console.error('❌ 错误日志聚合器初始化失败:', error);
+      Logger.error('错误日志聚合器初始化失败', error);
       throw error;
     }
   }
@@ -452,7 +453,7 @@ export class ErrorLogAggregator extends EventEmitter {
         await this.writeToOutputs(logEntry);
       }
     } catch (error) {
-      console.error('处理日志队列失败:', error);
+      Logger.error('处理日志队列失败', error);
     } finally {
       this.processing = false;
     }
@@ -466,7 +467,7 @@ export class ErrorLogAggregator extends EventEmitter {
       try {
         await output.write(logEntry);
       } catch (error) {
-        console.error('日志输出器写入失败:', error);
+        Logger.error('日志输出器写入失败', error);
       }
     });
 
@@ -486,7 +487,7 @@ export class ErrorLogAggregator extends EventEmitter {
     if (this.logQueue.length < this.config.maxQueueSize) {
       this.logQueue.push(logEntry);
     } else {
-      console.warn('日志队列已满，丢弃日志条目');
+      Logger.warn('日志队列已满，丢弃日志条目', { maxQueueSize: this.config.maxQueueSize });
     }
 
     this.emit('log', logEntry);
@@ -557,7 +558,7 @@ export class ErrorLogAggregator extends EventEmitter {
           }
         }
       } catch (error) {
-        console.error('搜索日志失败:', error);
+        Logger.error('搜索日志失败', error);
       }
     }
 

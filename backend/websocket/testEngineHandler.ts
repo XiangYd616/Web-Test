@@ -11,7 +11,11 @@ type WebSocketLike = {
   readyState: number;
   send: (data: string) => void;
   close: (code?: number, reason?: string) => void;
-  on: (event: 'message' | 'close' | 'error', handler: (...args: any[]) => void) => void;
+  on: {
+    (event: 'message', handler: (data: Buffer | string) => void): void;
+    (event: 'close', handler: (code: number, reason: string) => void): void;
+    (event: 'error', handler: (error: Error) => void): void;
+  };
 };
 
 type ClientInfo = {

@@ -7,6 +7,7 @@ import express from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
 import winston from 'winston';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
 import DataExportService, {
   ExportJobRequest,
 } from '../../services/dataManagement/dataExportService';
@@ -19,11 +20,22 @@ type AuthRequest = express.Request & {
   };
 };
 
-const formatResponse = (success: boolean, message: string, data: Record<string, unknown> = {}) => ({
-  success,
-  message,
-  data,
-});
+type ApiResponse = express.Response & {
+  success: (
+    data?: unknown,
+    message?: string,
+    statusCode?: number,
+    meta?: unknown
+  ) => express.Response;
+  error: (
+    code: string,
+    message?: string,
+    details?: unknown,
+    statusCode?: number,
+    meta?: unknown
+  ) => express.Response;
+  created: (data?: unknown, message?: string, meta?: unknown) => express.Response;
+};
 
 // 创建日志记录器
 const logger = winston.createLogger({
@@ -61,28 +73,27 @@ const initializeExportService = (): DataExportService => {
 router.get(
   '/status/:jobId',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const { jobId } = req.params;
     const service = initializeExportService();
 
     try {
       const status = await service.getExportStatus(jobId);
 
-      return res.json(
-        formatResponse(true, '获取导出状态成功', {
+      return res.success(
+        {
           jobId,
           ...status,
-        })
+        },
+        '获取导出状态成功'
       );
     } catch (error) {
       logger.error('获取导出状态失败', { jobId, error });
 
-      return res.status(500).json(
-        formatResponse(false, '获取导出状态失败', {
-          jobId,
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '获取导出状态失败', {
+        jobId,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -94,7 +105,7 @@ router.get(
 router.post(
   '/',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const { dataType, format, filters, options } = req.body as {
       dataType?: string;
       format?: string;
@@ -115,15 +126,15 @@ router.post(
     try {
       // 验证请求参数
       if (!dataType || !format) {
-        return res.status(400).json(formatResponse(false, '数据类型和格式是必需的'));
+        return res.error(StandardErrorCode.INVALID_INPUT, '数据类型和格式是必需的');
       }
 
       if (!allowedTypes.includes(dataType as ExportJobRequest['dataType'])) {
-        return res.status(400).json(formatResponse(false, '不支持的数据类型'));
+        return res.error(StandardErrorCode.INVALID_INPUT, '不支持的数据类型');
       }
 
       if (!allowedFormats.includes(format as ExportJobRequest['format'])) {
-        return res.status(400).json(formatResponse(false, '不支持的导出格式'));
+        return res.error(StandardErrorCode.INVALID_INPUT, '不支持的导出格式');
       }
 
       const service = initializeExportService();
@@ -139,20 +150,19 @@ router.post(
 
       logger.info('创建导出任务', { jobId: job.id, userId, dataType, format });
 
-      return res.status(201).json(
-        formatResponse(true, '导出任务创建成功', {
+      return res.created(
+        {
           jobId: job.id,
           status: job.status,
-        })
+        },
+        '导出任务创建成功'
       );
     } catch (error) {
       logger.error('创建导出任务失败', { userId, dataType, format, error });
 
-      return res.status(500).json(
-        formatResponse(false, '创建导出任务失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '创建导出任务失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -175,31 +185,29 @@ router.get(
       const status = await service.getExportStatus(jobId);
 
       if (status.status !== 'completed') {
-        return res.status(400).json(
-          formatResponse(false, '导出尚未完成', {
-            jobId,
-            status: status.status,
-          })
-        );
+        return res.error(StandardErrorCode.INVALID_INPUT, '导出尚未完成', {
+          jobId,
+          status: status.status,
+        });
       }
 
       // 验证用户权限
       if (status.userId !== userId) {
-        return res.status(403).json(formatResponse(false, '无权访问此导出文件'));
+        return res.error(StandardErrorCode.FORBIDDEN, '无权访问此导出文件');
       }
 
       // 获取文件路径
       const filePath = await service.getExportFilePath(jobId);
 
       if (!filePath) {
-        return res.status(404).json(formatResponse(false, '导出文件不存在'));
+        return res.error(StandardErrorCode.NOT_FOUND, '导出文件不存在');
       }
 
       // 检查文件是否存在
       try {
         await fs.access(filePath);
       } catch {
-        return res.status(404).json(formatResponse(false, '导出文件不存在'));
+        return res.error(StandardErrorCode.NOT_FOUND, '导出文件不存在');
       }
 
       // 设置下载响应头
@@ -214,11 +222,9 @@ router.get(
     } catch (error) {
       logger.error('下载导出文件失败', { jobId, userId, error });
 
-      return res.status(500).json(
-        formatResponse(false, '下载导出文件失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '下载导出文件失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -241,11 +247,11 @@ router.delete(
       const status = await service.getExportStatus(jobId);
 
       if (status.userId !== userId) {
-        return res.status(403).json(formatResponse(false, '无权取消此导出任务'));
+        return res.error(StandardErrorCode.FORBIDDEN, '无权取消此导出任务');
       }
 
       if (status.status === 'completed') {
-        return res.status(400).json(formatResponse(false, '无法取消已完成的导出任务'));
+        return res.error(StandardErrorCode.INVALID_INPUT, '无法取消已完成的导出任务');
       }
 
       // 取消导出任务
@@ -253,15 +259,13 @@ router.delete(
 
       logger.info('取消导出任务', { jobId, userId });
 
-      return res.json(formatResponse(true, '导出任务已取消', { jobId }));
+      return res.success({ jobId }, '导出任务已取消');
     } catch (error) {
       logger.error('取消导出任务失败', { jobId, userId, error });
 
-      return res.status(500).json(
-        formatResponse(false, '取消导出任务失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '取消导出任务失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -286,15 +290,13 @@ router.get(
         status: status as string,
       });
 
-      return res.json(formatResponse(true, '获取导出历史成功', history));
+      return res.success(history, '获取导出历史成功');
     } catch (error) {
       logger.error('获取导出历史失败', { userId, error });
 
-      return res.status(500).json(
-        formatResponse(false, '获取导出历史失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '获取导出历史失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -306,20 +308,18 @@ router.get(
 router.get(
   '/formats',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     try {
       const service = initializeExportService();
       const formats = service.getSupportedFormats();
 
-      return res.json(formatResponse(true, '获取支持的导出格式成功', { formats }));
+      return res.success({ formats }, '获取支持的导出格式成功');
     } catch (error) {
       logger.error('获取支持的导出格式失败', { error });
 
-      return res.status(500).json(
-        formatResponse(false, '获取支持的导出格式失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '获取支持的导出格式失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -344,15 +344,13 @@ router.delete(
 
       logger.info('清理过期导出文件', { userId, ...result });
 
-      return res.json(formatResponse(true, '清理过期导出文件成功', result));
+      return res.success(result, '清理过期导出文件成功');
     } catch (error) {
       logger.error('清理过期导出文件失败', { userId, error });
 
-      return res.status(500).json(
-        formatResponse(false, '清理过期导出文件失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '清理过期导出文件失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );

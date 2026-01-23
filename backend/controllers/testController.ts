@@ -4,6 +4,7 @@
  */
 
 import type { NextFunction, Request, Response } from 'express';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 
 const testService = require('../services/testing/testService');
 const testTemplateService = require('../services/testing/testTemplateService');
@@ -16,7 +17,6 @@ const {
   replayDeadLetterJob,
 } = require('../services/testing/TestQueueService');
 const { getLogsByTraceId } = require('../services/testing/testLogService');
-const { successResponse, createdResponse, _errorResponse } = require('../utils/response');
 
 type AuthRequest = Request & { user: { id: string; role?: string } };
 
@@ -66,8 +66,59 @@ const chunkArray = <T>(items: T[], chunkSize: number) => {
 };
 
 type ApiResponse = Response & {
-  json: (data: unknown) => Response;
-  status: (code: number) => Response;
+  success: (data?: unknown, message?: string, statusCode?: number, meta?: unknown) => Response;
+  error: (
+    code: string,
+    message?: string,
+    details?: unknown,
+    statusCode?: number,
+    meta?: unknown
+  ) => Response;
+  created: (data?: unknown, message?: string, meta?: unknown) => Response;
+};
+
+const mapStatusToErrorCode = (statusCode?: number) => {
+  if (statusCode === 400) {
+    return StandardErrorCode.INVALID_INPUT;
+  }
+  if (statusCode === 401) {
+    return StandardErrorCode.UNAUTHORIZED;
+  }
+  if (statusCode === 403) {
+    return StandardErrorCode.FORBIDDEN;
+  }
+  if (statusCode === 404) {
+    return StandardErrorCode.NOT_FOUND;
+  }
+  if (statusCode === 429) {
+    return StandardErrorCode.RATE_LIMIT_EXCEEDED;
+  }
+  return StandardErrorCode.INTERNAL_SERVER_ERROR;
+};
+
+const successResponse = (res: ApiResponse, data?: unknown, message?: string) => {
+  return res.success(data, message);
+};
+
+const createdResponse = (res: ApiResponse, data?: unknown, message?: string) => {
+  return res.created(data, message);
+};
+
+const _errorResponse = (
+  res: ApiResponse,
+  messageOrStatus: string | number,
+  statusOrMessage?: number | string
+) => {
+  const message =
+    typeof messageOrStatus === 'string' ? messageOrStatus : String(statusOrMessage ?? '请求失败');
+  const statusCode =
+    typeof messageOrStatus === 'number'
+      ? messageOrStatus
+      : typeof statusOrMessage === 'number'
+        ? statusOrMessage
+        : undefined;
+  const code = mapStatusToErrorCode(statusCode);
+  return res.error(code, message, undefined, statusCode);
 };
 
 const escapeCsvValue = (value: unknown) => {
@@ -128,6 +179,7 @@ class TestController {
       return createdResponse(res, result, '测试创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -153,6 +205,7 @@ class TestController {
       return successResponse(res, { jobs });
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -386,6 +439,7 @@ class TestController {
       });
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -424,6 +478,7 @@ class TestController {
       return successResponse(res, { job });
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -444,6 +499,7 @@ class TestController {
       return successResponse(res, { jobs });
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -468,6 +524,7 @@ class TestController {
       return successResponse(res, { job });
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -495,6 +552,7 @@ class TestController {
       return successResponse(res, stats);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -511,6 +569,7 @@ class TestController {
       return successResponse(res, status);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -527,6 +586,7 @@ class TestController {
       return successResponse(res, result);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -543,6 +603,7 @@ class TestController {
       return successResponse(res, { testId }, '测试已停止');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -559,6 +620,7 @@ class TestController {
       return successResponse(res, { testId }, '测试已删除');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -623,6 +685,7 @@ class TestController {
       return createdResponse(res, result, '网站测试创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -650,6 +713,7 @@ class TestController {
       return createdResponse(res, result, '性能测试创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -677,6 +741,7 @@ class TestController {
       return createdResponse(res, result, '安全测试创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -704,6 +769,7 @@ class TestController {
       return createdResponse(res, result, 'SEO测试创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -731,6 +797,7 @@ class TestController {
       return createdResponse(res, result, '压力测试创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -758,6 +825,7 @@ class TestController {
       return createdResponse(res, result, 'API测试创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -785,6 +853,7 @@ class TestController {
       return createdResponse(res, result, '可访问性测试创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -812,6 +881,7 @@ class TestController {
       return createdResponse(res, result, '兼容性测试创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -839,6 +909,7 @@ class TestController {
       return createdResponse(res, result, 'UX测试创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -863,6 +934,7 @@ class TestController {
       return successResponse(res, result, '测试重新运行成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -880,6 +952,7 @@ class TestController {
       return successResponse(res, result, '测试更新成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -906,6 +979,7 @@ class TestController {
       return createdResponse(res, result, '批量测试创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -922,6 +996,7 @@ class TestController {
       return successResponse(res, result);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -938,6 +1013,7 @@ class TestController {
       return successResponse(res, { batchId }, '批量测试删除成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -956,6 +1032,7 @@ class TestController {
       return successResponse(res, result);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -975,6 +1052,7 @@ class TestController {
       return successResponse(res, result);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -989,6 +1067,7 @@ class TestController {
       return successResponse(res, { testId, progress: status.progress, status: status.status });
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -1037,6 +1116,7 @@ class TestController {
       return successResponse(res, result);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -1051,6 +1131,7 @@ class TestController {
       return successResponse(res, { testId }, '测试已取消');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -1065,6 +1146,7 @@ class TestController {
       return successResponse(res, result);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -1086,6 +1168,7 @@ class TestController {
       return successResponse(res, result);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -1100,6 +1183,7 @@ class TestController {
       return successResponse(res, templates);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -1137,6 +1221,7 @@ class TestController {
       return createdResponse(res, { id: templateId }, '模板创建成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -1160,6 +1245,7 @@ class TestController {
       return successResponse(res, { templateId }, '模板更新成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -1174,6 +1260,7 @@ class TestController {
       return successResponse(res, { templateId }, '模板删除成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 }

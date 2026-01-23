@@ -29,6 +29,7 @@ export interface EnhancedServiceConfig extends ServiceConfig {
   };
   metrics?: {
     enabled: boolean;
+    interval: number;
     prefix: string;
     labels?: Record<string, string>;
   };
@@ -104,7 +105,7 @@ export interface ServiceMetrics {
 export class EnhancedBaseService extends BaseService {
   protected errorHandlingConfig: EnhancedServiceConfig['errorHandling'];
   protected circuitBreakerConfig: CircuitBreakerConfig;
-  protected healthCheckConfig: EnhancedServiceConfig['healthCheck'];
+  protected healthCheckConfig: NonNullable<EnhancedServiceConfig['healthCheck']>;
   protected metricsConfig: EnhancedServiceConfig['metrics'];
 
   // 断路器相关
@@ -181,6 +182,7 @@ export class EnhancedBaseService extends BaseService {
 
     this.metricsConfig = {
       enabled: true,
+      interval: 60000,
       prefix: 'service',
       labels: {},
       ...config.metrics,
@@ -195,6 +197,13 @@ export class EnhancedBaseService extends BaseService {
     if (this.healthCheckConfig.enabled) {
       this.startHealthCheckMonitoring();
     }
+  }
+
+  /**
+   * 执行初始化（默认无操作，子类可覆盖）
+   */
+  protected async performInitialization(): Promise<void> {
+    return;
   }
 
   /**
@@ -221,14 +230,14 @@ export class EnhancedBaseService extends BaseService {
     // 检查断路器状态
     if (circuitBreaker && this.isCircuitBreakerOpen()) {
       throw ErrorFactory.createSystemError('Circuit breaker is open', {
-        code: ErrorCode.DEPENDENCY_FAILED,
+        code: ErrorCode.EXTERNAL_SERVICE_UNAVAILABLE,
         severity: ErrorSeverity.HIGH,
         context: { service: this.name, operation: operationName },
       });
     }
 
     const startTime = Date.now();
-    let lastError: Error;
+    let lastError: Error | undefined;
 
     // 执行重试逻辑
     for (let attempt = 0; attempt <= retries; attempt++) {
@@ -269,7 +278,10 @@ export class EnhancedBaseService extends BaseService {
       }
     }
 
-    throw lastError!;
+    if (!lastError) {
+      throw new Error('Unknown error');
+    }
+    throw lastError;
   }
 
   /**
@@ -408,7 +420,7 @@ export class EnhancedBaseService extends BaseService {
       this.healthCheckTimer = undefined;
     }
 
-    await super.performShutdown();
+    return;
   }
 
   /**
@@ -550,7 +562,9 @@ export class EnhancedBaseService extends BaseService {
       try {
         await this.performHealthCheck();
       } catch (error) {
-        this.log('error', 'Health check failed', error);
+        this.log('error', 'Health check failed', {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }, this.healthCheckConfig.interval);
   }
@@ -697,13 +711,6 @@ export class EnhancedBaseService extends BaseService {
     const fraction = index - Math.floor(index);
 
     return lower + (upper - lower) * fraction;
-  }
-
-  /**
-   * 睡眠函数
-   */
-  private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

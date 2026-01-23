@@ -3,17 +3,23 @@
  * 职责: 处理用户相关的HTTP请求
  */
 
+import bcrypt from 'bcrypt';
 import type { NextFunction, Request, Response } from 'express';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 
 const { query } = require('../config/database');
-const { successResponse, errorResponse } = require('../utils/response');
-const bcrypt = require('bcrypt');
 
 type AuthRequest = Request & { user: { id: string } };
 
 type ApiResponse = Response & {
-  status: (code: number) => Response;
-  json: (data: unknown) => Response;
+  success: (data?: unknown, message?: string, statusCode?: number, meta?: unknown) => Response;
+  error: (
+    code: string,
+    message?: string,
+    details?: unknown,
+    statusCode?: number,
+    meta?: unknown
+  ) => Response;
 };
 
 type UserProfile = {
@@ -41,15 +47,16 @@ class UserController {
       const userId = req.user.id;
 
       const sql = 'SELECT id, username, email, role, created_at FROM users WHERE id = $1';
-      const [user] = (await query(sql, [userId])) as UserProfile[];
+      const [user] = (await query(sql, [userId])) as unknown as UserProfile[];
 
       if (!user) {
-        return errorResponse(res, '用户不存在', 404);
+        return res.error(StandardErrorCode.NOT_FOUND, '用户不存在');
       }
 
-      return successResponse(res, user);
+      return res.success(user);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -76,16 +83,17 @@ class UserController {
       }
 
       if (updates.length === 0) {
-        return errorResponse(res, '没有要更新的字段', 400);
+        return res.error(StandardErrorCode.INVALID_INPUT, '没有要更新的字段');
       }
 
       values.push(userId);
       const sql = `UPDATE users SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $$${values.length}`;
       await query(sql, values);
 
-      return successResponse(res, { userId }, '用户信息更新成功');
+      return res.success({ userId }, '用户信息更新成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -102,23 +110,25 @@ class UserController {
       };
 
       if (!currentPassword || !newPassword) {
-        return errorResponse(res, '请提供当前密码和新密码', 400);
+        return res.error(StandardErrorCode.INVALID_INPUT, '请提供当前密码和新密码');
       }
 
       if (newPassword.length < 6) {
-        return errorResponse(res, '新密码长度至少6位', 400);
+        return res.error(StandardErrorCode.INVALID_INPUT, '新密码长度至少6位');
       }
 
-      const [user] = (await query('SELECT password_hash FROM users WHERE id = $1', [userId])) as {
+      const [user] = (await query('SELECT password_hash FROM users WHERE id = $1', [
+        userId,
+      ])) as unknown as {
         password_hash: string;
       }[];
       if (!user) {
-        return errorResponse(res, '用户不存在', 404);
+        return res.error(StandardErrorCode.NOT_FOUND, '用户不存在');
       }
 
       const isValid = await bcrypt.compare(currentPassword, user.password_hash);
       if (!isValid) {
-        return errorResponse(res, '当前密码错误', 401);
+        return res.error(StandardErrorCode.UNAUTHORIZED, '当前密码错误');
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -127,9 +137,10 @@ class UserController {
         userId,
       ]);
 
-      return successResponse(res, null, '密码修改成功');
+      return res.success(null, '密码修改成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -152,9 +163,9 @@ class UserController {
         WHERE te.user_id = $1
       `;
 
-      const [stats] = (await query(sql, [userId])) as UserStats[];
+      const [stats] = (await query(sql, [userId])) as unknown as UserStats[];
 
-      return successResponse(res, {
+      return res.success({
         totalTests: Number(stats.totalTests) || 0,
         completedTests: Number(stats.completedTests) || 0,
         failedTests: Number(stats.failedTests) || 0,
@@ -162,6 +173,7 @@ class UserController {
       });
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -200,9 +212,9 @@ class UserController {
       const activities = await query(sql, [userId, limitNum, offset]);
 
       const countSql = 'SELECT COUNT(*) as total FROM test_executions WHERE user_id = $1';
-      const [countResult] = (await query(countSql, [userId])) as { total: number }[];
+      const [countResult] = (await query(countSql, [userId])) as unknown as { total: number }[];
 
-      return successResponse(res, {
+      return res.success({
         activities,
         pagination: {
           page: pageNum,
@@ -213,6 +225,7 @@ class UserController {
       });
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -226,19 +239,19 @@ class UserController {
       const { password } = req.body as { password?: string };
 
       if (!password) {
-        return errorResponse(res, '请提供密码确认删除', 400);
+        return res.error(StandardErrorCode.INVALID_INPUT, '请提供密码确认删除');
       }
 
       const [user] = (await query('SELECT password_hash FROM users WHERE id = $1', [userId])) as {
         password_hash: string;
       }[];
       if (!user) {
-        return errorResponse(res, '用户不存在', 404);
+        return res.error(StandardErrorCode.NOT_FOUND, '用户不存在');
       }
 
       const isValid = await bcrypt.compare(password, user.password_hash);
       if (!isValid) {
-        return errorResponse(res, '密码错误', 401);
+        return res.error(StandardErrorCode.UNAUTHORIZED, '密码错误');
       }
 
       // 软删除用户相关的所有数据
@@ -249,9 +262,10 @@ class UserController {
         [userId]
       );
 
-      return successResponse(res, null, '账户删除成功');
+      return res.success(null, '账户删除成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -265,7 +279,7 @@ class UserController {
 
       const [preferences] = (await query('SELECT preferences FROM users WHERE id = $1', [
         _userId,
-      ])) as { preferences: string | null }[];
+      ])) as unknown as { preferences: string | null }[];
 
       const prefs =
         preferences && typeof preferences.preferences === 'string'
@@ -277,9 +291,10 @@ class UserController {
               autoSave: true,
             };
 
-      return successResponse(res, prefs);
+      return res.success(prefs);
     } catch (error) {
       next(error);
+      return;
     }
   }
 
@@ -293,7 +308,7 @@ class UserController {
       const preferences = req.body as Record<string, unknown>;
 
       if (typeof preferences !== 'object' || preferences === null) {
-        return errorResponse(res, '偏好设置必须是对象格式', 400);
+        return res.error(StandardErrorCode.INVALID_INPUT, '偏好设置必须是对象格式');
       }
 
       const preferencesJson = JSON.stringify(preferences);
@@ -302,9 +317,10 @@ class UserController {
         userId,
       ]);
 
-      return successResponse(res, preferences, '偏好设置更新成功');
+      return res.success(preferences, '偏好设置更新成功');
     } catch (error) {
       next(error);
+      return;
     }
   }
 }

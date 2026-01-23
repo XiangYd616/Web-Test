@@ -144,7 +144,8 @@ export abstract class BaseService {
       this.emitEvent('initialized');
       return true;
     } catch (error) {
-      this.lastError = ErrorFactory.fromError(error, {
+      const normalizedError = error instanceof Error ? error : new Error(String(error));
+      this.lastError = ErrorFactory.fromError(normalizedError, {
         code: ErrorCode.SYSTEM_INIT_FAILED,
         category: ErrorCategory.INITIALIZATION,
         severity: ErrorSeverity.CRITICAL,
@@ -167,7 +168,8 @@ export abstract class BaseService {
       this.setStatus(ServiceStatus.SHUTDOWN);
       this.emitEvent('shutdown');
     } catch (error) {
-      this.lastError = ErrorFactory.fromError(error, {
+      const normalizedError = error instanceof Error ? error : new Error(String(error));
+      this.lastError = ErrorFactory.fromError(normalizedError, {
         service: this.name,
       });
       this.setStatus(ServiceStatus.ERROR);
@@ -207,7 +209,9 @@ export abstract class BaseService {
           }
         : undefined,
       dependencies: dependencyStatus,
-      metrics: this.config.metrics?.enabled ? this.metrics : undefined,
+      metrics: this.config.metrics?.enabled
+        ? (this.metrics as unknown as Record<string, unknown>)
+        : undefined,
     };
   }
 
@@ -261,7 +265,7 @@ export abstract class BaseService {
   /**
    * 更新自定义指标
    */
-  updateCustomMetric(name: string, value: number): void {
+  updateCustomMetric(name: string, value: number, _meta?: Record<string, unknown>): void {
     this.metrics.custom[name] = value;
   }
 
@@ -297,7 +301,7 @@ export abstract class BaseService {
     const delay = options?.delay ?? 1000;
     const backoff = options?.backoff ?? 2;
 
-    let lastError: Error;
+    let lastError: Error = new Error('Unknown error');
 
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
@@ -394,7 +398,7 @@ export abstract class BaseService {
           throw ErrorFactory.createSystemError(
             `Required dependency '${dependency.name}' is not available`,
             {
-              code: ErrorCode.DEPENDENCY_FAILED,
+              code: ErrorCode.EXTERNAL_SERVICE_UNAVAILABLE,
               severity: ErrorSeverity.CRITICAL,
               context: { dependency: dependency.name },
             }
@@ -439,7 +443,9 @@ export abstract class BaseService {
         try {
           listener(event);
         } catch (error) {
-          this.log('error', 'Error in event listener', error);
+          this.log('error', 'Error in event listener', {
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       });
     }
@@ -468,7 +474,7 @@ export abstract class BaseService {
   /**
    * 睡眠函数
    */
-  private sleep(ms: number): Promise<void> {
+  protected sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 

@@ -33,18 +33,13 @@ interface EnhancedRequest extends Request {
 }
 
 interface EnhancedResponse extends Response {
-  success: (
-    data?: unknown,
-    message?: string,
-    statusCode?: number,
-    meta?: Record<string, unknown>
-  ) => Response;
+  success: (data?: unknown, message?: string, statusCode?: number, meta?: unknown) => Response;
   error: (
     code: string,
     message?: string,
     details?: unknown,
     statusCode?: number,
-    meta?: Record<string, unknown>
+    meta?: unknown
   ) => Response;
   paginated: (
     data: unknown[],
@@ -52,7 +47,7 @@ interface EnhancedResponse extends Response {
     limit: number,
     total: number,
     message?: string,
-    meta?: Record<string, unknown>
+    meta?: unknown
   ) => Response;
   validationError: (errors: unknown[] | Record<string, unknown>, message?: string) => Response;
   unauthorized: (message?: string) => Response;
@@ -61,14 +56,9 @@ interface EnhancedResponse extends Response {
   conflict: (message?: string) => Response;
   rateLimit: (message?: string) => Response;
   internalError: (message?: string) => Response;
-  created: (data?: unknown, message?: string, meta?: Record<string, unknown>) => Response;
+  created: (data?: unknown, message?: string, meta?: unknown) => Response;
   noContent: () => Response;
-  custom: (
-    statusCode: number,
-    data?: unknown,
-    message?: string,
-    meta?: Record<string, unknown>
-  ) => Response;
+  custom: (statusCode: number, data?: unknown, message?: string, meta?: unknown) => Response;
   redirectResponse: (url: string, message?: string, statusCode?: number) => Response;
 }
 
@@ -91,9 +81,10 @@ const responseFormatter = (req: EnhancedRequest, res: EnhancedResponse, next: Ne
     data: unknown = null,
     message: string | null = null,
     statusCode: number = 200,
-    meta: Record<string, unknown> = {}
+    meta: unknown = undefined
   ) => {
     const duration = Date.now() - req.startTime;
+    const metaObject = typeof meta === 'object' && meta ? (meta as Record<string, unknown>) : {};
 
     const response = createSuccessResponse(data, message, {
       requestId,
@@ -101,7 +92,7 @@ const responseFormatter = (req: EnhancedRequest, res: EnhancedResponse, next: Ne
       path: req.originalUrl,
       method: req.method,
       version: '2.0.0',
-      ...meta,
+      ...metaObject,
     });
 
     return res.status(statusCode).json(response);
@@ -115,10 +106,11 @@ const responseFormatter = (req: EnhancedRequest, res: EnhancedResponse, next: Ne
     message: string | null = null,
     details: unknown = null,
     statusCode: number | null = null,
-    meta: Record<string, unknown> = {}
+    meta: unknown = undefined
   ) => {
     const duration = Date.now() - req.startTime;
     const httpStatusCode = statusCode || getHttpStatusCode(code);
+    const metaObject = typeof meta === 'object' && meta ? (meta as Record<string, unknown>) : {};
 
     const response = createErrorResponse(code, message, details, {
       requestId,
@@ -126,7 +118,7 @@ const responseFormatter = (req: EnhancedRequest, res: EnhancedResponse, next: Ne
       path: req.originalUrl,
       method: req.method,
       version: '2.0.0',
-      ...meta,
+      ...metaObject,
     });
 
     return res.status(httpStatusCode).json(response);
@@ -141,10 +133,11 @@ const responseFormatter = (req: EnhancedRequest, res: EnhancedResponse, next: Ne
     limit: number,
     total: number,
     message: string | null = null,
-    meta: Record<string, unknown> = {}
+    meta: unknown = undefined
   ) => {
     const duration = Date.now() - req.startTime;
     const pagination = createPaginationMeta(page, limit, total);
+    const metaObject = typeof meta === 'object' && meta ? (meta as Record<string, unknown>) : {};
 
     const response = createPaginatedResponse(data, pagination, message, {
       requestId,
@@ -152,7 +145,7 @@ const responseFormatter = (req: EnhancedRequest, res: EnhancedResponse, next: Ne
       path: req.originalUrl,
       method: req.method,
       version: '2.0.0',
-      ...meta,
+      ...metaObject,
     });
 
     return res.status(200).json(response);
@@ -287,9 +280,10 @@ const responseFormatter = (req: EnhancedRequest, res: EnhancedResponse, next: Ne
   res.created = (
     data: unknown = null,
     message: string | null = null,
-    meta: Record<string, unknown> = {}
+    meta: unknown = undefined
   ) => {
     const duration = Date.now() - req.startTime;
+    const metaObject = typeof meta === 'object' && meta ? (meta as Record<string, unknown>) : {};
 
     const response = createCreatedResponse(data, message, {
       requestId,
@@ -297,7 +291,7 @@ const responseFormatter = (req: EnhancedRequest, res: EnhancedResponse, next: Ne
       path: req.originalUrl,
       method: req.method,
       version: '2.0.0',
-      ...meta,
+      ...metaObject,
     });
 
     return res.status(201).json(response);
@@ -327,9 +321,10 @@ const responseFormatter = (req: EnhancedRequest, res: EnhancedResponse, next: Ne
     statusCode: number,
     data: unknown = null,
     message: string | null = null,
-    meta: Record<string, unknown> = {}
+    meta: unknown = undefined
   ) => {
     const duration = Date.now() - req.startTime;
+    const metaObject = typeof meta === 'object' && meta ? (meta as Record<string, unknown>) : {};
 
     const response = createSuccessResponse(data, message, {
       requestId,
@@ -337,7 +332,7 @@ const responseFormatter = (req: EnhancedRequest, res: EnhancedResponse, next: Ne
       path: req.originalUrl,
       method: req.method,
       version: '2.0.0',
-      ...meta,
+      ...metaObject,
     });
 
     return res.status(statusCode).json(response);

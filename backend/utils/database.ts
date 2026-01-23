@@ -73,16 +73,17 @@ class DatabaseConnectionManager extends EventEmitter {
       return this.pool;
     }
 
-    this.pool = new Pool(this.config);
+    const pool = new Pool(this.config);
+    this.pool = pool;
 
     // Setup pool event listeners
-    this.pool.on('error', (err: Error) => {
+    pool.on('error', (err: Error) => {
       console.error('Unexpected error on idle client', err);
       this.emit('connectionError', { error: err, timestamp: new Date().toISOString() });
       this.isConnected = false;
     });
 
-    this.pool.on('connect', (client: { query: (sql: string) => Promise<unknown> }) => {
+    pool.on('connect', (client: { query: (sql: string) => Promise<unknown> }) => {
       this.isConnected = true;
       // Set session parameters
       client
@@ -99,14 +100,14 @@ class DatabaseConnectionManager extends EventEmitter {
     });
 
     // Test the connection
-    const client = await this.pool.connect();
+    const client = await pool.connect();
     await client.query('SELECT NOW()');
     client.release();
 
     this.isConnected = true;
     this.retryCount = 0;
 
-    return this.pool;
+    return pool;
   }
 
   /**

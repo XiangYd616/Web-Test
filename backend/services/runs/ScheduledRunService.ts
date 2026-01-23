@@ -3,6 +3,7 @@
  * 提供定时任务调度、执行管理、结果追踪等功能
  */
 
+import cronParser from 'cron-parser';
 import cron from 'node-cron';
 const CollectionManager = require('../collections/CollectionManager');
 const EnvironmentManager = require('../environments/EnvironmentManager');
@@ -141,6 +142,8 @@ class ScheduledRunService {
   private jobs: Map<string, { task: CronTask; config: ScheduledRunConfig }> = new Map();
   private isRunning: boolean = false;
   private executions: Map<string, JobExecution> = new Map();
+  private readonly retryIntervalMs = 5 * 60 * 1000;
+  private readonly maxRetries = 3;
 
   constructor(
     options: {
@@ -165,11 +168,16 @@ class ScheduledRunService {
     }
 
     try {
+      await this.recoverRunningExecutions();
+      await this.resumeScheduledRetries();
       const schedules = await this.models.ScheduledRun.findAll({ where: { status: 'active' } });
 
       for (const schedule of schedules) {
+        await this.updateScheduleNextRunAt(schedule);
         await this.scheduleJob(schedule);
       }
+
+      await this.compensateMissedRuns(schedules);
 
       this.isRunning = true;
       console.log('Scheduled run service started');
@@ -396,8 +404,12 @@ class ScheduledRunService {
     const baseMetadata = { ...options.metadata };
     const triggeredBy =
       (baseMetadata?.triggeredBy as ScheduledRunResult['triggeredBy']) || 'schedule';
+    const retryCount = typeof baseMetadata?.retryCount === 'number' ? baseMetadata.retryCount : 0;
     if (baseMetadata?.triggeredBy !== undefined) {
       delete baseMetadata.triggeredBy;
+    }
+    if (baseMetadata?.retryCount !== undefined) {
+      delete baseMetadata.retryCount;
     }
     const runningResult: ScheduledRunResult = {
       id: this.generateId(),
@@ -410,7 +422,7 @@ class ScheduledRunService {
       errorCount: 0,
       logs: [],
       triggeredBy,
-      metadata: { ...baseMetadata, executionId },
+      metadata: { ...baseMetadata, executionId, retryCount },
     };
 
     this.executions.set(executionId, execution);
@@ -457,7 +469,8 @@ class ScheduledRunService {
         where: { id: runningResult.id },
       });
 
-      // 更新任务的最后运行时间
+      // 更新任务的最后/下次运行时间
+      await this.updateScheduleRunTimes(scheduleId, startTime);
       await this.models.ScheduledRun.update(
         {
           last_run_at: new Date(),
@@ -473,6 +486,8 @@ class ScheduledRunService {
       execution.duration = Date.now() - startTime.getTime();
       execution.error = error instanceof Error ? error.message : String(error);
 
+      const nextRetryAt =
+        retryCount < this.maxRetries ? new Date(Date.now() + this.retryIntervalMs) : undefined;
       const failedResult: ScheduledRunResult = {
         id: runningResult.id,
         scheduledRunId: scheduleId,
@@ -486,12 +501,24 @@ class ScheduledRunService {
         errorCount: 1,
         logs: [`Execution failed: ${execution.error}`],
         triggeredBy,
-        metadata: { error: execution.error, ...baseMetadata },
+        metadata: {
+          error: execution.error,
+          retryCount,
+          nextRetryAt: nextRetryAt ? nextRetryAt.toISOString() : null,
+          ...baseMetadata,
+        },
       };
 
       await this.models.ScheduledRunResult.update(this.toScheduledRunResultRecord(failedResult), {
         where: { id: runningResult.id },
       });
+
+      if (nextRetryAt) {
+        this.scheduleRetry(scheduleId, retryCount + 1, nextRetryAt, {
+          ...baseMetadata,
+          previousExecutionId: executionId,
+        });
+      }
       throw error;
     }
   }
@@ -619,6 +646,155 @@ class ScheduledRunService {
 
     this.jobs.set(schedule.id, { task, config });
     task.start();
+  }
+
+  private scheduleRetry(
+    scheduleId: string,
+    retryCount: number,
+    nextRetryAt: Date,
+    metadata: Record<string, unknown>
+  ) {
+    const delay = Math.max(nextRetryAt.getTime() - Date.now(), 0);
+    setTimeout(() => {
+      this.executeSchedule(scheduleId, {
+        metadata: {
+          ...metadata,
+          triggeredBy: 'retry',
+          retryCount,
+        },
+      }).catch(error => {
+        console.error(`Retry execution failed for schedule ${scheduleId}:`, error);
+      });
+    }, delay);
+  }
+
+  private getNextRunAt(schedule: ScheduledRunRecord, fromDate: Date): Date | null {
+    try {
+      const interval = cronParser.parseExpression(schedule.cron_expression, {
+        currentDate: fromDate,
+        tz: schedule.timezone || 'UTC',
+      });
+      return interval.next().toDate();
+    } catch (error) {
+      console.error('Failed to calculate next run time:', error);
+      return null;
+    }
+  }
+
+  private getPreviousRunAt(schedule: ScheduledRunRecord, fromDate: Date): Date | null {
+    try {
+      const interval = cronParser.parseExpression(schedule.cron_expression, {
+        currentDate: fromDate,
+        tz: schedule.timezone || 'UTC',
+      });
+      return interval.prev().toDate();
+    } catch (error) {
+      console.error('Failed to calculate previous run time:', error);
+      return null;
+    }
+  }
+
+  private async updateScheduleNextRunAt(schedule: ScheduledRunRecord): Promise<void> {
+    const nextRunAt = this.getNextRunAt(schedule, new Date());
+    if (!nextRunAt) {
+      return;
+    }
+    await this.models.ScheduledRun.update(
+      { next_run_at: nextRunAt, updated_at: new Date() },
+      { where: { id: schedule.id } }
+    );
+  }
+
+  private async updateScheduleRunTimes(scheduleId: string, startedAt: Date): Promise<void> {
+    const schedule = await this.models.ScheduledRun.findByPk(scheduleId);
+    if (!schedule) {
+      return;
+    }
+    const nextRunAt = this.getNextRunAt(schedule, startedAt);
+    await this.models.ScheduledRun.update(
+      {
+        last_run_at: new Date(),
+        next_run_at: nextRunAt || schedule.next_run_at,
+        updated_at: new Date(),
+      },
+      { where: { id: scheduleId } }
+    );
+  }
+
+  private async recoverRunningExecutions(): Promise<void> {
+    const runningResults = await this.models.ScheduledRunResult.findAll({
+      where: { status: 'running' },
+    });
+    if (!runningResults.length) {
+      return;
+    }
+    const now = new Date();
+    await Promise.all(
+      runningResults.map(async result => {
+        const startedAt = result.started_at ? new Date(result.started_at) : now;
+        const duration = now.getTime() - startedAt.getTime();
+        const existingMetadata = (result.metadata || {}) as Record<string, unknown>;
+        const retryCount =
+          typeof existingMetadata.retryCount === 'number' ? existingMetadata.retryCount : 0;
+        await this.models.ScheduledRunResult.update(
+          {
+            status: 'failed',
+            completed_at: now,
+            duration,
+            error_count: 1,
+            logs: [...(result.logs || []), 'Marked failed due to service restart'],
+            metadata: {
+              ...existingMetadata,
+              error: 'Marked failed due to service restart',
+              retryCount,
+              recoveredAt: now.toISOString(),
+            },
+            updated_at: now,
+          },
+          { where: { id: result.id } }
+        );
+      })
+    );
+  }
+
+  private async resumeScheduledRetries(): Promise<void> {
+    const failedResults = await this.models.ScheduledRunResult.findAll({
+      where: { status: 'failed' },
+    });
+    if (!failedResults.length) {
+      return;
+    }
+    const now = new Date();
+    for (const result of failedResults) {
+      const metadata = (result.metadata || {}) as Record<string, unknown>;
+      const retryCount = typeof metadata.retryCount === 'number' ? metadata.retryCount : 0;
+      const nextRetryAtRaw = metadata.nextRetryAt as string | undefined;
+      const nextRetryAt = nextRetryAtRaw ? new Date(nextRetryAtRaw) : null;
+      if (!nextRetryAt || retryCount >= this.maxRetries || nextRetryAt > now) {
+        continue;
+      }
+      this.scheduleRetry(result.scheduled_run_id, retryCount + 1, now, {
+        ...metadata,
+        resumedFromExecutionId: result.id,
+      });
+    }
+  }
+
+  private async compensateMissedRuns(schedules: ScheduledRunRecord[]): Promise<void> {
+    const now = new Date();
+    for (const schedule of schedules) {
+      const lastRunAt = schedule.last_run_at ? new Date(schedule.last_run_at) : null;
+      const previousRunAt = this.getPreviousRunAt(schedule, now);
+      if (previousRunAt && (!lastRunAt || lastRunAt < previousRunAt)) {
+        await this.executeSchedule(schedule.id, {
+          metadata: {
+            triggeredBy: 'recovery',
+            recoveryFor: previousRunAt.toISOString(),
+          },
+        });
+      }
+      await this.updateScheduleNextRunAt(schedule);
+    }
   }
 
   /**

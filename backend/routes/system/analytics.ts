@@ -311,12 +311,12 @@ router.get(
         });
       }
 
-      res.json({
+      return res.json({
         success: true,
         data: report,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取分析报告详情失败',
         error: error instanceof Error ? error.message : String(error),
@@ -350,7 +350,7 @@ router.post(
 
       return res.send(exportData);
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '导出分析报告失败',
         error: error instanceof Error ? error.message : String(error),

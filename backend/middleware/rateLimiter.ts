@@ -16,10 +16,7 @@ interface RateLimitOptions {
 }
 
 interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    role: string;
-  };
+  user?: (Request['user'] & { id?: string; role?: string }) | undefined;
   rateLimit?: RateLimitInfo;
 }
 
@@ -166,7 +163,7 @@ const testEngineRateLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5分钟窗口
   limit: async (req: AuthenticatedRequest) => {
     // 根据用户类型和测试类型动态设置限制
-    const testType = getBodyString(req.body, 'testType');
+    const testType = getBodyString(req.body, 'testType') ?? 'api';
     const userRole = req.user?.role || 'guest';
 
     const limits: Record<string, number> = {
@@ -261,7 +258,7 @@ const uploadRateLimiter = rateLimit({
   keyGenerator: (req: Request) => {
     // 基于IP和文件类型的组合键
     const fileType = getBodyString(req.body, 'type') || 'unknown';
-    return `upload_${req.ip}_${fileType}`;
+    return `upload_${req.ip || 'unknown'}_${fileType}`;
   },
   handler: (req: RateLimitRequest, res: Response) => {
     securityLogger(
@@ -337,12 +334,8 @@ function createEndpointBasedRateLimiter(
       const config = endpoints[endpoint];
       return config ? config.max : 100;
     },
-    windowMs: async (req: Request) => {
-      const endpoint = req.path;
-      const config = endpoints[endpoint];
-      return config?.windowMs || 15 * 60 * 1000;
-    },
-    keyGenerator: (req: Request) => `endpoint_${req.path}_${req.ip}`,
+    windowMs: 15 * 60 * 1000,
+    keyGenerator: (req: Request) => `endpoint_${req.path}_${req.ip || 'unknown'}`,
     message: {
       success: false,
       message: '此端点请求过于频繁，请稍后再试',
@@ -359,7 +352,7 @@ function createProgressiveRateLimiter(baseLimit: number, multiplier: number = 1.
   return rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: async (req: Request) => {
-      const key = req.ip;
+      const key = req.ip || 'unknown';
       const now = Date.now();
       const record = attempts.get(key);
 
@@ -372,7 +365,7 @@ function createProgressiveRateLimiter(baseLimit: number, multiplier: number = 1.
       const progressiveLimit = Math.floor(baseLimit / Math.pow(multiplier, record.count - 1));
       return Math.max(progressiveLimit, 1);
     },
-    keyGenerator: (req: Request) => req.ip,
+    keyGenerator: (req: Request) => req.ip || 'unknown',
     message: {
       success: false,
       message: '检测到异常请求频率，限制已收紧',

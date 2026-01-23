@@ -20,9 +20,10 @@ import {
   Zap,
 } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import { useAuthCheck } from '../components/auth/WithAuthCheck';
+import OnlineEditorsList from '../components/collaboration/OnlineEditorsList';
 import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
+import { useAuth } from '../contexts/AuthContext';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import { TestType } from '../types/enums';
@@ -119,8 +120,8 @@ interface WebsiteTestResult {
 
 const WebsiteTest: React.FC = () => {
   // 认证检查
-  const _authCheck = useAuthCheck();
   const { recordTestCompletion } = useUserStats();
+  const { user } = useAuth();
 
   // 状态管理
   const [config, setConfig] = useState<WebsiteConfig>({
@@ -420,12 +421,21 @@ const WebsiteTest: React.FC = () => {
         <div className="space-y-6">
           {/* 配置区域 */}
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 shadow-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-              <Settings className="w-5 h-5 mr-2 text-blue-400" />
-              测试配置
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center justify-between">
+              <div className="flex items-center">
+                <Settings className="w-5 h-5 mr-2 text-blue-400" />
+                测试配置
+              </div>
+              <OnlineEditorsList
+                resourceId={`website-test-${config.targetUrl || 'new'}`}
+                currentUser={user ? {
+                  id: user.id,
+                  name: user.profile.fullName || user.username || user.email,
+                  avatar: user.profile.avatar,
+                } : undefined}
+                className="ml-4"
+              />
             </h3>
-
-            <div className="space-y-4">
               {/* 目标URL */}
               <div>
                 <label className="block text-sm font-medium themed-text-secondary mb-2">

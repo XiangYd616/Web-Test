@@ -5,17 +5,14 @@
   "main": "dist/server.js",
   "scripts": {
     "_comment_main": "🚀 主要启动命令",
-    "prestart": "npm run build:ts",
+    "prestart": "npm run build",
     "start": "cross-env NODE_ENV=production node dist/server.js",
-    "dev": "npm run build:ts && node dist/server.js",
+    "dev": "npm run build && node dist/server.js",
     "dev:ts": "node -r ts-node/register server.js",
     "_comment_test": "🧪 测试相关",
     "test": "jest",
-    "test:ui": "jest --watch",
-    "test:run": "jest --run",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "type-check": "node -e \"console.log('backend: no TypeScript type-check (JS workspace)')\"",
     "_comment_maintenance": "🔧 代码维护",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
@@ -31,8 +28,8 @@
     "_comment_docker": "🐳 Docker操作",
     "docker:build": "docker build -f ../deploy/Dockerfile.api -t testweb-api .",
     "docker:run": "docker run -p 3001:3001 testweb-api",
-    "build": "tsc",
-    "build:ts": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@socket.io/redis-adapter": "^8.3.0",

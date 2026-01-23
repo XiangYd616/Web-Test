@@ -407,7 +407,7 @@ export class EngineSystemError extends CustomError {
 
   constructor(
     message: string,
-    systemInfo: SystemError['systemInfo'],
+    systemInfo: EngineSystemError['systemInfo'],
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
@@ -441,7 +441,10 @@ export class EngineSystemError extends CustomError {
     const systemInfo = {
       hostname: require('os').hostname(),
       pid: process.pid,
-      memory: process.memoryUsage(),
+      memory: {
+        used: process.memoryUsage().heapUsed,
+        total: process.memoryUsage().heapTotal,
+      },
       uptime: process.uptime(),
     };
 
@@ -603,7 +606,7 @@ export class ErrorUtils {
    * 判断是否为可重试错误
    */
   static isRetryable(error: ExtendedError): boolean {
-    return error.retryable && error.canRetry();
+    return Boolean(error.retryable);
   }
 
   /**
@@ -638,7 +641,7 @@ export class ErrorUtils {
    * 序列化错误
    */
   static serialize(error: ExtendedError): string {
-    return JSON.stringify(error.toJSON());
+    return JSON.stringify(error);
   }
 
   /**

@@ -125,7 +125,14 @@ class ApiAnalyzer {
       const urlObj = new URL(endpoint.url);
       const client = urlObj.protocol === 'https:' ? https : http;
 
-      const options: Record<string, unknown> = {
+      const options: {
+        hostname: string;
+        port: string | number;
+        path: string;
+        method: string;
+        timeout: number;
+        headers: Record<string, string>;
+      } = {
         hostname: urlObj.hostname,
         port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
         path: urlObj.pathname + urlObj.search,
@@ -517,7 +524,7 @@ class ApiAnalyzer {
         responseTime,
         category: 'slow',
         metrics: {
-          total: responseTime,
+          firstByte: responseTime,
         },
       },
       recommendations: ['检查网络连接', '验证URL格式', '确认服务器状态'],

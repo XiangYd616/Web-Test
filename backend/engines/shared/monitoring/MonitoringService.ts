@@ -152,7 +152,9 @@ class EngineMonitoringService extends BaseService {
 
       this.log('info', 'EngineMonitoringService shutdown successfully');
     } catch (error) {
-      this.log('error', 'Error during EngineMonitoringService shutdown', error);
+      this.log('error', 'Error during EngineMonitoringService shutdown', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -607,7 +609,9 @@ class EngineMonitoringService extends BaseService {
           await this.triggerAlert(rule, currentValue);
         }
       } catch (error) {
-        this.log('error', `Failed to check alert rule: ${rule.name}`, error);
+        this.log('error', `Failed to check alert rule: ${rule.name}`, {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
   }
@@ -689,7 +693,9 @@ class EngineMonitoringService extends BaseService {
       try {
         await this.sendNotification(channel, event);
       } catch (error) {
-        this.log('error', `Failed to send notification via channel: ${channel.name}`, error);
+        this.log('error', `Failed to send notification via channel: ${channel.name}`, {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
   }

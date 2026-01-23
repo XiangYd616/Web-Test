@@ -11,6 +11,7 @@ export interface WebSocketConfig {
   protocols?: string[];
   reconnectAttempts?: number;
   reconnectInterval?: number;
+  reconnectIntervalRange?: [number, number];
   heartbeatInterval?: number;
   messageQueueLimit?: number;
   timeout?: number;
@@ -388,10 +389,10 @@ export class WebSocketManager {
     this.isReconnecting = true;
     this.stats.reconnectAttempts++;
 
-    const delay = Math.min(
-      this.config.reconnectInterval * Math.pow(2, this.stats.reconnectAttempts - 1),
-      30000 // 最大30秒
-    );
+    const delayBase = this.config.reconnectIntervalRange
+      ? this.getRandomDelay(this.config.reconnectIntervalRange)
+      : this.config.reconnectInterval * Math.pow(2, this.stats.reconnectAttempts - 1);
+    const delay = Math.min(delayBase, 30000); // 最大30秒
 
     this.emit('reconnecting', {
       attempt: this.stats.reconnectAttempts,
@@ -423,6 +424,13 @@ export class WebSocketManager {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
+  }
+
+  private getRandomDelay(range: [number, number]): number {
+    const [min, max] = range;
+    const safeMin = Math.min(min, max);
+    const safeMax = Math.max(min, max);
+    return Math.floor(Math.random() * (safeMax - safeMin + 1)) + safeMin;
   }
 
   /**

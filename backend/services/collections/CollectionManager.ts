@@ -8,6 +8,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import Logger from '../../utils/logger';
 
 // 集合配置接口
 export interface CollectionManagerConfig {
@@ -103,6 +104,39 @@ export interface AuthConfig {
     addTo: 'header' | 'query' | 'cookie';
   };
 }
+
+type PostmanHeader = { key?: string; value?: string };
+
+type PostmanUrl =
+  | string
+  | {
+      raw?: string;
+      protocol?: string;
+      host?: string[] | string;
+      path?: string[] | string;
+      query?: Array<{ key: string; value: string }>;
+    };
+
+type PostmanBody = {
+  mode?: 'raw' | 'urlencoded' | 'formdata' | string;
+  raw?: string;
+  urlencoded?: Array<{ key?: string; value?: string }>;
+  formdata?: Array<{ key?: string; value?: string }>;
+};
+
+type PostmanRequest = {
+  method?: string;
+  header?: PostmanHeader[];
+  url?: PostmanUrl;
+  body?: PostmanBody;
+};
+
+type PostmanItem = {
+  name?: string;
+  description?: string;
+  request?: PostmanRequest;
+  item?: PostmanItem[];
+};
 
 // 文件夹接口
 export interface Folder {
@@ -914,7 +948,8 @@ class CollectionManager {
    * 导出集合
    */
   async exportCollection(collectionId: string): Promise<CollectionExport> {
-    const collection = this.collections.get(collectionId);
+    const collection =
+      this.collections.get(collectionId) || (await this.getCollection(collectionId));
     if (!collection) {
       throw new Error('Collection not found');
     }
@@ -967,6 +1002,102 @@ class CollectionManager {
     return collection.id;
   }
 
+  async importPostmanCollection(
+    postmanData: {
+      info?: { name?: string; description?: string };
+      item?: PostmanItem[];
+    },
+    workspaceId: string,
+    userId?: string
+  ): Promise<ApiCollection> {
+    const { name, description, requests } = this.parsePostmanCollection(postmanData);
+
+    const collection = await this.createCollection(
+      {
+        workspaceId,
+        name,
+        description,
+        requests,
+        variables: {},
+        tags: ['postman-import'],
+        metadata: {
+          source: 'postman',
+          importedAt: new Date().toISOString(),
+        },
+      },
+      userId
+    );
+
+    return collection;
+  }
+
+  async addRequestToCollection(
+    collectionId: string,
+    requestData: Omit<ApiRequest, 'id' | 'metadata'> & { metadata?: Record<string, unknown> }
+  ): Promise<ApiCollection> {
+    const record = await this.models.Collection.findByPk(collectionId);
+    if (!record) {
+      throw new Error('Collection not found');
+    }
+
+    const definition = record.definition || {};
+    const requests = (definition.requests as ApiRequest[]) || [];
+    const newRequest: ApiRequest = {
+      ...requestData,
+      id: uuidv4(),
+      description: requestData.description || '',
+      metadata: requestData.metadata || {},
+    };
+
+    return this.updateCollection(collectionId, {
+      requests: [...requests, newRequest],
+    });
+  }
+
+  async createFolder(params: {
+    name: string;
+    description?: string;
+    parentId?: string;
+    collectionId?: string;
+    createdBy: string;
+  }): Promise<Folder> {
+    if (!params.name || params.name.trim().length === 0) {
+      throw new Error('Folder name is required');
+    }
+
+    const folder: Folder = {
+      id: uuidv4(),
+      name: params.name,
+      description: params.description || '',
+      parentId: params.parentId,
+      collections: [],
+      subfolders: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: params.createdBy,
+    };
+
+    if (params.parentId) {
+      const parentFolder = this.folders.get(params.parentId);
+      if (!parentFolder) {
+        throw new Error('Parent folder not found');
+      }
+      parentFolder.subfolders.push(folder.id);
+      parentFolder.updatedAt = new Date();
+      await this.saveFolderToFile(parentFolder);
+    }
+
+    if (params.collectionId) {
+      folder.collections.push(params.collectionId);
+      await this.assignCollectionToFolder(params.collectionId, folder.id);
+    }
+
+    this.folders.set(folder.id, folder);
+    await this.saveFolderToFile(folder);
+
+    return folder;
+  }
+
   /**
    * 执行请求
    */
@@ -997,6 +1128,7 @@ class CollectionManager {
 
       return result;
     } catch (error) {
+      Logger.error('集合请求执行失败', error, { requestId: request.id, requestName: request.name });
       return {
         requestId: request.id,
         status: 'failed',
@@ -1023,7 +1155,7 @@ class CollectionManager {
       await fs.mkdir(path.join(baseDir, 'versions'), { recursive: true });
       await fs.mkdir(path.join(baseDir, 'shares'), { recursive: true });
     } catch (error) {
-      console.error('Failed to create storage directories:', error);
+      Logger.error('创建集合存储目录失败', error);
     }
   }
 
@@ -1249,32 +1381,137 @@ class CollectionManager {
         });
       }
     }
-
     return results;
   }
 
-  /**
-   * 获取统计信息
-   */
-  async getStatistics(): Promise<{
-    totalCollections: number;
-    totalFolders: number;
-    totalEnvironments: number;
-    totalVersions: number;
-    totalShares: number;
-  }> {
-    let totalVersions = 0;
-    for (const versions of this.versions.values()) {
-      totalVersions += versions.length;
+  private parsePostmanCollection(postmanData: {
+    info?: { name?: string; description?: string };
+    item?: PostmanItem[];
+  }): {
+    name: string;
+    description: string;
+    requests: ApiRequest[];
+  } {
+    const name = postmanData.info?.name || 'Imported Collection';
+    const description = postmanData.info?.description || 'Imported from Postman';
+    const requests: ApiRequest[] = [];
+
+    const items = postmanData.item || [];
+    items.forEach(item => this.flattenPostmanItems(item, requests));
+
+    return { name, description, requests };
+  }
+
+  private flattenPostmanItems(item: PostmanItem, requests: ApiRequest[]): void {
+    if (item.item && Array.isArray(item.item)) {
+      item.item.forEach((child: PostmanItem) => this.flattenPostmanItems(child, requests));
+      return;
     }
 
-    return {
-      totalCollections: this.collections.size,
-      totalFolders: this.folders.size,
-      totalEnvironments: this.environments.size,
-      totalVersions,
-      totalShares: this.shares.size,
-    };
+    if (!item.request) {
+      return;
+    }
+
+    const request = item.request;
+    const url = this.normalizePostmanUrl(request.url);
+    const headers = this.normalizePostmanHeaders(request.header || []);
+    const body = this.normalizePostmanBody(request.body);
+
+    requests.push({
+      id: uuidv4(),
+      name: item.name || request.method || 'Unnamed Request',
+      description: (item.description as string) || '',
+      method: (request.method || 'GET') as ApiRequest['method'],
+      url,
+      headers,
+      body,
+      metadata: {
+        source: 'postman',
+      },
+    });
+  }
+
+  private normalizePostmanUrl(url: PostmanRequest['url']): string {
+    if (!url) {
+      return '';
+    }
+    if (typeof url === 'string') {
+      return url;
+    }
+    if (typeof url === 'object') {
+      if (url.raw) {
+        return String(url.raw);
+      }
+      const protocol = url.protocol ? `${url.protocol}://` : '';
+      const host = Array.isArray(url.host) ? url.host.join('.') : url.host || '';
+      const path = Array.isArray(url.path) ? `/${url.path.join('/')}` : url.path || '';
+      const query = Array.isArray(url.query)
+        ? `?${url.query.map((q: { key: string; value: string }) => `${q.key}=${q.value}`).join('&')}`
+        : '';
+      return `${protocol}${host}${path}${query}`;
+    }
+    return '';
+  }
+
+  private normalizePostmanHeaders(
+    headers: Array<{ key?: string; value?: string }>
+  ): Record<string, string> {
+    return headers.reduce<Record<string, string>>((acc, header) => {
+      if (header.key) {
+        acc[header.key] = header.value || '';
+      }
+      return acc;
+    }, {});
+  }
+
+  private normalizePostmanBody(body?: PostmanRequest['body']): unknown {
+    if (!body) {
+      return undefined;
+    }
+    if (body.mode === 'raw') {
+      return body.raw;
+    }
+    if (body.mode === 'urlencoded' || body.mode === 'formdata') {
+      const items = body[body.mode] || [];
+      if (Array.isArray(items)) {
+        return items.reduce<Record<string, string>>((acc, item) => {
+          if (item.key) {
+            acc[item.key] = item.value || '';
+          }
+          return acc;
+        }, {});
+      }
+    }
+    return body;
+  }
+
+  /**
+   * 将集合分配到文件夹
+   */
+  private async assignCollectionToFolder(collectionId: string, folderId: string): Promise<void> {
+    const record = await this.models.Collection.findByPk(collectionId);
+    if (!record) {
+      throw new Error('Collection not found');
+    }
+
+    const metadata = record.metadata || {};
+    await this.models.Collection.update(
+      {
+        metadata: {
+          ...metadata,
+          folderId,
+        },
+        updated_at: new Date(),
+      },
+      { where: { id: collectionId }, returning: true }
+    );
+
+    const updated = await this.models.Collection.findByPk(collectionId);
+    if (updated) {
+      const updatedCollection = this.toApiCollection(updated);
+      this.collections.set(collectionId, updatedCollection);
+      await this.saveCollectionToFile(updatedCollection);
+    }
   }
 
   /**

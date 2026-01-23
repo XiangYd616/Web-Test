@@ -356,7 +356,7 @@ class ApiSecurity {
         });
       }
 
-      next();
+      return next();
     };
   }
 

@@ -61,7 +61,11 @@ class TestDataTransformer {
       url: dbRecord.url || dbRecord.target_url,
       timestamp: dbRecord.created_at || dbRecord.createdAt,
       totalTime:
-        dbRecord.duration || this.calculateDuration(dbRecord.start_time, dbRecord.end_time),
+        dbRecord.duration ||
+        this.calculateDuration(
+          dbRecord.start_time as string | Date | null,
+          dbRecord.end_time as string | Date | null
+        ),
       summary: {
         score: dbRecord.overall_score || dbRecord.score || 0,
         totalChecks: dbRecord.total_issues || this.calculateTotalChecks(results),
@@ -178,16 +182,16 @@ class TestDataTransformer {
   /**
    * 从结果中提取检查项
    */
-  static extractChecks(results: TestResultRecord | null) {
+  static extractChecks(results: TestResultRecord | null): Record<string, unknown> {
     if (!results) return {};
 
     // 尝试不同的结果结构
     if ((results as Record<string, unknown>).checks)
-      return (results as Record<string, unknown>).checks;
+      return (results as Record<string, unknown>).checks as Record<string, unknown>;
     if ((results as Record<string, unknown>).tests)
-      return (results as Record<string, unknown>).tests;
+      return (results as Record<string, unknown>).tests as Record<string, unknown>;
     if ((results as Record<string, unknown>).audits)
-      return (results as Record<string, unknown>).audits;
+      return (results as Record<string, unknown>).audits as Record<string, unknown>;
 
     // 如果结果本身就是检查项对象
     if (typeof results === 'object' && !Array.isArray(results)) {

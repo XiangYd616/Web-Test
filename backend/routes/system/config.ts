@@ -22,12 +22,13 @@ const router = express.Router();
  * 获取所有配置
  * GET /api/config
  */
-router.get('/', async (req: Request, res: ApiResponse) => {
+router.get('/', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const includeSensitive = req.query.includeSensitive === 'true';
     const configs = configCenter.getAll(includeSensitive);
 
-    res.success(
+    apiRes.success(
       {
         configs,
         status: configCenter.getStatus(),
@@ -36,7 +37,7 @@ router.get('/', async (req: Request, res: ApiResponse) => {
     );
   } catch (error) {
     console.error('获取配置失败:', error);
-    res.error('获取配置失败', 500, (error as Error).message);
+    apiRes.error('获取配置失败', 500, (error as Error).message);
   }
 });
 
@@ -44,18 +45,19 @@ router.get('/', async (req: Request, res: ApiResponse) => {
  * 获取单个配置
  * GET /api/config/:key
  */
-router.get('/:key', async (req: Request, res: ApiResponse) => {
+router.get('/:key', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const { key } = req.params;
     const value = configCenter.get(key);
 
     if (value === undefined) {
-      return res.error('配置项不存在', 404);
+      return apiRes.error('配置项不存在', 404);
     }
 
     const schema = configCenter.getSchema()[key] as ConfigSchemaEntry | undefined;
 
-    res.success(
+    apiRes.success(
       {
         key,
         value: schema && schema.sensitive ? '***' : value,
@@ -65,7 +67,7 @@ router.get('/:key', async (req: Request, res: ApiResponse) => {
     );
   } catch (error) {
     console.error('获取配置项失败:', error);
-    res.error('获取配置项失败', 500, (error as Error).message);
+    apiRes.error('获取配置项失败', 500, (error as Error).message);
   }
 });
 
@@ -73,30 +75,31 @@ router.get('/:key', async (req: Request, res: ApiResponse) => {
  * 更新配置
  * PUT /api/config/:key
  */
-router.put('/:key', async (req: Request, res: ApiResponse) => {
+router.put('/:key', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const { key } = req.params;
     const { value } = req.body as { value?: unknown };
 
     if (value === undefined) {
-      return res.error('配置值不能为空', 400);
+      return apiRes.error('配置值不能为空', 400);
     }
 
     // 检查配置项是否存在
     const schema = configCenter.getSchema()[key] as ConfigSchemaEntry | undefined;
     if (!schema) {
-      return res.error('配置项不存在', 404);
+      return apiRes.error('配置项不存在', 404);
     }
 
     // 检查是否支持热更新
     if (!schema.hotReload) {
-      return res.error('此配置项不支持热更新，需要重启应用', 400);
+      return apiRes.error('此配置项不支持热更新，需要重启应用', 400);
     }
 
     const oldValue = configCenter.get(key);
     configCenter.set(key, value, 'api');
 
-    res.success(
+    apiRes.success(
       {
         key,
         oldValue: schema.sensitive ? '***' : oldValue,
@@ -107,7 +110,7 @@ router.put('/:key', async (req: Request, res: ApiResponse) => {
     );
   } catch (error) {
     console.error('更新配置失败:', error);
-    res.error('更新配置失败', 400, (error as Error).message);
+    apiRes.error('更新配置失败', 400, (error as Error).message);
   }
 });
 
@@ -115,12 +118,13 @@ router.put('/:key', async (req: Request, res: ApiResponse) => {
  * 批量更新配置
  * PUT /api/config
  */
-router.put('/', async (req: Request, res: ApiResponse) => {
+router.put('/', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const { configs } = req.body as { configs?: Record<string, unknown> };
 
     if (!configs || typeof configs !== 'object') {
-      return res.error('配置数据格式错误', 400);
+      return apiRes.error('配置数据格式错误', 400);
     }
 
     const results: Array<Record<string, unknown>> = [];
@@ -164,7 +168,7 @@ router.put('/', async (req: Request, res: ApiResponse) => {
     );
   } catch (error) {
     console.error('批量更新配置失败:', error);
-    res.error('批量更新配置失败', 500, (error as Error).message);
+    apiRes.error('批量更新配置失败', 500, (error as Error).message);
   }
 });
 
@@ -172,7 +176,8 @@ router.put('/', async (req: Request, res: ApiResponse) => {
  * 获取配置模式
  * GET /api/config/schema
  */
-router.get('/meta/schema', async (req: Request, res: ApiResponse) => {
+router.get('/meta/schema', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const schema = configCenter.getSchema();
 
@@ -187,7 +192,7 @@ router.get('/meta/schema', async (req: Request, res: ApiResponse) => {
       };
     }
 
-    res.success(
+    apiRes.success(
       {
         schema: publicSchema,
         totalConfigs: Object.keys(schema).length,
@@ -196,7 +201,7 @@ router.get('/meta/schema', async (req: Request, res: ApiResponse) => {
     );
   } catch (error) {
     console.error('获取配置模式失败:', error);
-    res.error('获取配置模式失败', 500, (error as Error).message);
+    apiRes.error('获取配置模式失败', 500, (error as Error).message);
   }
 });
 
@@ -204,7 +209,8 @@ router.get('/meta/schema', async (req: Request, res: ApiResponse) => {
  * 获取配置历史
  * GET /api/config/history
  */
-router.get('/meta/history', async (req: Request, res: ApiResponse) => {
+router.get('/meta/history', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const { key, limit = '50' } = req.query as { key?: string; limit?: string };
     const history = configCenter.getHistory(key ?? null, Number.parseInt(limit ?? '50', 10));
@@ -222,7 +228,7 @@ router.get('/meta/history', async (req: Request, res: ApiResponse) => {
       return change;
     });
 
-    res.success(
+    apiRes.success(
       {
         history: filteredHistory,
         totalCount: filteredHistory.length,
@@ -232,7 +238,7 @@ router.get('/meta/history', async (req: Request, res: ApiResponse) => {
     );
   } catch (error) {
     console.error('获取配置历史失败:', error);
-    res.error('获取配置历史失败', 500, (error as Error).message);
+    apiRes.error('获取配置历史失败', 500, (error as Error).message);
   }
 });
 
@@ -240,18 +246,19 @@ router.get('/meta/history', async (req: Request, res: ApiResponse) => {
  * 回滚配置
  * POST /api/config/rollback
  */
-router.post('/meta/rollback', async (req: Request, res: ApiResponse) => {
+router.post('/meta/rollback', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const { changeId } = req.body as { changeId?: string };
 
     if (!changeId) {
-      return res.error('变更ID不能为空', 400);
+      return apiRes.error('变更ID不能为空', 400);
     }
 
     const rollbackInfo = configCenter.rollback(changeId);
     const schema = configCenter.getSchema()[rollbackInfo.key] as ConfigSchemaEntry | undefined;
 
-    res.success(
+    apiRes.success(
       {
         key: rollbackInfo.key,
         rolledBackTo: schema && schema.sensitive ? '***' : rollbackInfo.value,
@@ -261,7 +268,7 @@ router.post('/meta/rollback', async (req: Request, res: ApiResponse) => {
     );
   } catch (error) {
     console.error('配置回滚失败:', error);
-    res.error('配置回滚失败', 400, (error as Error).message);
+    apiRes.error('配置回滚失败', 400, (error as Error).message);
   }
 });
 
@@ -269,7 +276,8 @@ router.post('/meta/rollback', async (req: Request, res: ApiResponse) => {
  * 重置配置
  * POST /api/config/reset
  */
-router.post('/meta/reset', async (req: Request, res: ApiResponse) => {
+router.post('/meta/reset', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const { key } = req.body as { key?: string };
 
@@ -277,18 +285,18 @@ router.post('/meta/reset', async (req: Request, res: ApiResponse) => {
       // 重置单个配置
       const schema = configCenter.getSchema()[key] as ConfigSchemaEntry | undefined;
       if (!schema) {
-        return res.error('配置项不存在', 404);
+        return apiRes.error('配置项不存在', 404);
       }
 
       if (!schema.hotReload) {
-        return res.error('此配置项不支持热更新，需要重启应用', 400);
+        return apiRes.error('此配置项不支持热更新，需要重启应用', 400);
       }
 
       const oldValue = configCenter.get(key);
       configCenter.reset(key);
       const newValue = configCenter.get(key);
 
-      res.success(
+      apiRes.success(
         {
           key,
           oldValue: schema.sensitive ? '***' : oldValue,
@@ -316,7 +324,7 @@ router.post('/meta/reset', async (req: Request, res: ApiResponse) => {
         }
       }
 
-      res.success(
+      apiRes.success(
         {
           resetConfigs: resetResults,
           resetCount: resetResults.length,
@@ -326,7 +334,7 @@ router.post('/meta/reset', async (req: Request, res: ApiResponse) => {
     }
   } catch (error) {
     console.error('配置重置失败:', error);
-    res.error('配置重置失败', 500, (error as Error).message);
+    apiRes.error('配置重置失败', 500, (error as Error).message);
   }
 });
 
@@ -334,11 +342,12 @@ router.post('/meta/reset', async (req: Request, res: ApiResponse) => {
  * 获取配置状态
  * GET /api/config/status
  */
-router.get('/meta/status', async (req: Request, res: ApiResponse) => {
+router.get('/meta/status', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const status = configCenter.getStatus();
 
-    res.success(
+    apiRes.success(
       {
         ...status,
         environment: process.env.NODE_ENV || 'development',
@@ -349,7 +358,7 @@ router.get('/meta/status', async (req: Request, res: ApiResponse) => {
     );
   } catch (error) {
     console.error('获取配置状态失败:', error);
-    res.error('获取配置状态失败', 500, (error as Error).message);
+    apiRes.error('获取配置状态失败', 500, (error as Error).message);
   }
 });
 
@@ -357,12 +366,13 @@ router.get('/meta/status', async (req: Request, res: ApiResponse) => {
  * 验证配置
  * POST /api/config/validate
  */
-router.post('/meta/validate', async (req: Request, res: ApiResponse) => {
+router.post('/meta/validate', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const { configs } = req.body as { configs?: Record<string, unknown> };
 
     if (!configs || typeof configs !== 'object') {
-      return res.error('配置数据格式错误', 400);
+      return apiRes.error('配置数据格式错误', 400);
     }
 
     const validationResults: Array<Record<string, unknown>> = [];
@@ -399,7 +409,7 @@ router.post('/meta/validate', async (req: Request, res: ApiResponse) => {
     );
   } catch (error) {
     console.error('配置验证失败:', error);
-    res.error('配置验证失败', 500, (error as Error).message);
+    apiRes.error('配置验证失败', 500, (error as Error).message);
   }
 });
 
@@ -407,7 +417,8 @@ router.post('/meta/validate', async (req: Request, res: ApiResponse) => {
  * 导出配置
  * GET /api/config/export
  */
-router.get('/meta/export', async (req: Request, res: ApiResponse) => {
+router.get('/meta/export', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const { format = 'json', includeSensitive = false } = req.query as {
       format?: string;
@@ -431,11 +442,11 @@ router.get('/meta/export', async (req: Request, res: ApiResponse) => {
 
       res.send(envContent);
     } else {
-      res.error('不支持的导出格式', 400);
+      apiRes.error('不支持的导出格式', 400);
     }
   } catch (error) {
     console.error('配置导出失败:', error);
-    res.error('配置导出失败', 500, (error as Error).message);
+    apiRes.error('配置导出失败', 500, (error as Error).message);
   }
 });
 
@@ -443,7 +454,8 @@ router.get('/meta/export', async (req: Request, res: ApiResponse) => {
  * 导入配置
  * POST /api/config/import
  */
-router.post('/meta/import', async (req: Request, res: ApiResponse) => {
+router.post('/meta/import', async (req: Request, res: Response) => {
+  const apiRes = res as ApiResponse;
   try {
     const { configs, overwrite = false } = req.body as {
       configs?: Record<string, unknown>;
@@ -451,7 +463,7 @@ router.post('/meta/import', async (req: Request, res: ApiResponse) => {
     };
 
     if (!configs || typeof configs !== 'object') {
-      return res.error('配置数据格式错误', 400);
+      return apiRes.error('配置数据格式错误', 400);
     }
 
     const importResults: Array<Record<string, unknown>> = [];
@@ -498,7 +510,7 @@ router.post('/meta/import', async (req: Request, res: ApiResponse) => {
     );
   } catch (error) {
     console.error('配置导入失败:', error);
-    res.error('配置导入失败', 500, (error as Error).message);
+    apiRes.error('配置导入失败', 500, (error as Error).message);
   }
 });
 

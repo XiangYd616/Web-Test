@@ -7,7 +7,7 @@ import express from 'express';
 import multer from 'multer';
 import { authMiddleware } from '../../middleware/auth';
 import { asyncHandler } from '../../middleware/errorHandler';
-import dataManagementService from '../../services/data/DataManagementService';
+import { dataManagementService } from '../../services/data/DataManagementService';
 
 // 配置文件上传
 const upload = multer({
@@ -28,9 +28,7 @@ const upload = multer({
 const router = express.Router();
 
 interface AuthenticatedRequest extends express.Request {
-  user?: {
-    id: string;
-  };
+  user?: Express.User;
 }
 
 const getUserId = (req: AuthenticatedRequest): string => {
@@ -56,12 +54,12 @@ router.get(
     try {
       const overview = await dataManagementService.getDataOverview(userId);
 
-      res.json({
+      return res.json({
         success: true,
         data: overview,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取数据概览失败',
         error: error instanceof Error ? error.message : String(error),
@@ -86,12 +84,12 @@ router.get(
         type: type as string,
       });
 
-      res.json({
+      return res.json({
         success: true,
         data: statistics,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取数据统计失败',
         error: error instanceof Error ? error.message : String(error),
@@ -113,13 +111,13 @@ router.post(
     try {
       const result = await dataManagementService.createDataRecord(userId, data);
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: '数据记录创建成功',
         data: result,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '创建数据记录失败',
         error: error instanceof Error ? error.message : String(error),
@@ -181,12 +179,12 @@ router.get(
         });
       }
 
-      res.json({
+      return res.json({
         success: true,
         data: record,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取数据记录失败',
         error: error instanceof Error ? error.message : String(error),
@@ -209,13 +207,13 @@ router.put(
     try {
       const result = await dataManagementService.updateDataRecord(userId, id, data);
 
-      res.json({
+      return res.json({
         success: true,
         message: '数据记录更新成功',
         data: result,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '更新数据记录失败',
         error: error instanceof Error ? error.message : String(error),
@@ -237,12 +235,12 @@ router.delete(
     try {
       await dataManagementService.deleteDataRecord(userId, id);
 
-      res.json({
+      return res.json({
         success: true,
         message: '数据记录删除成功',
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '删除数据记录失败',
         error: error instanceof Error ? error.message : String(error),
@@ -262,7 +260,7 @@ router.post(
     const { operation, ids, data } = req.body;
 
     try {
-      const result = await dataManagementService.batchOperation(userId, {
+      const result = await dataManagementService.batchOperationForUser(userId, {
         operation,
         ids,
         data,
@@ -332,13 +330,13 @@ router.post(
         options: options || {},
       });
 
-      res.json({
+      return res.json({
         success: true,
         message: '数据导出任务创建成功',
         data: result,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '数据导出失败',
         error: error instanceof Error ? error.message : String(error),
@@ -367,18 +365,20 @@ router.post(
     }
 
     try {
-      const result = await dataManagementService.importData(userId, {
+      const result = await dataManagementService.importDataForUpload(userId, {
         file,
         options: options || {},
+        type: req.body.type as string | undefined,
+        format: req.body.format as string | undefined,
       });
 
-      res.json({
+      return res.json({
         success: true,
         message: '数据导入任务创建成功',
         data: result,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '数据导入失败',
         error: error instanceof Error ? error.message : String(error),
@@ -394,22 +394,22 @@ router.post(
 router.post(
   '/backup',
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const userId = getUserId(req);
+    void getUserId(req);
     const { type = 'full', options } = req.body;
 
     try {
-      const result = await dataManagementService.createBackup(userId, {
-        type,
-        options: options || {},
-      });
+      const result = await dataManagementService.createBackup(
+        type === 'full' ? null : [String(type)],
+        { name: options?.name as string | undefined }
+      );
 
-      res.json({
+      return res.json({
         success: true,
         message: '数据备份任务创建成功',
         data: result,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '数据备份失败',
         error: error instanceof Error ? error.message : String(error),
@@ -443,13 +443,13 @@ router.post(
         options: options || {},
       });
 
-      res.json({
+      return res.json({
         success: true,
         message: '数据恢复任务创建成功',
         data: result,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '数据恢复失败',
         error: error instanceof Error ? error.message : String(error),
@@ -471,14 +471,14 @@ router.get(
     try {
       const versions = await dataManagementService.getDataVersions(userId, id);
 
-      res.json({
+      return res.json({
         success: true,
         data: versions,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
-        message: '获取数据版本历史失败',
+        message: '获取版本历史失败',
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -496,7 +496,7 @@ router.post(
     const { data, schema } = req.body;
 
     try {
-      const result = await dataManagementService.validateData(userId, {
+      const result = await dataManagementService.validateDataRequest(userId, {
         data,
         schema,
       });

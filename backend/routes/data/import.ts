@@ -7,15 +7,10 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import winston from 'winston';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
 import { asyncHandler } from '../../middleware/errorHandler';
 import DataImportService, { ImportConfig } from '../../services/dataManagement/dataImportService';
 const { authMiddleware } = require('../../middleware/auth');
-
-const formatResponse = (success: boolean, message: string, data: Record<string, unknown> = {}) => ({
-  success,
-  message,
-  data,
-});
 
 const resolveFormat = (fileType: string): ImportConfig['format'] => {
   if (fileType === 'xlsx') {
@@ -34,6 +29,23 @@ interface ImportOptions {
   batchSize?: number;
   updateExisting?: boolean;
 }
+
+type ApiResponse = express.Response & {
+  success: (
+    data?: unknown,
+    message?: string,
+    statusCode?: number,
+    meta?: unknown
+  ) => express.Response;
+  error: (
+    code: string,
+    message?: string,
+    details?: unknown,
+    statusCode?: number,
+    meta?: unknown
+  ) => express.Response;
+  created: (data?: unknown, message?: string, meta?: unknown) => express.Response;
+};
 
 // 创建日志记录器
 const logger = winston.createLogger({
@@ -99,13 +111,13 @@ router.post(
   '/',
   authMiddleware,
   upload.single('file'),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const userId = getUserId(req);
     const file = req.file;
     const { options = {} } = req.body;
 
     if (!file) {
-      return res.status(400).json(formatResponse(false, '没有上传文件'));
+      return res.error(StandardErrorCode.INVALID_INPUT, '没有上传文件');
     }
 
     try {
@@ -140,20 +152,19 @@ router.post(
 
       logger.info('创建导入任务', { jobId: taskId, userId, fileName: file.originalname });
 
-      return res.status(201).json(
-        formatResponse(true, '导入任务创建成功', {
+      return res.created(
+        {
           jobId: taskId,
           status: 'pending',
-        })
+        },
+        '导入任务创建成功'
       );
     } catch (error) {
       logger.error('创建导入任务失败', { userId, fileName: file?.originalname, error });
 
-      return res.status(500).json(
-        formatResponse(false, '创建导入任务失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '创建导入任务失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -165,7 +176,7 @@ router.post(
 router.get(
   '/:jobId/status',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const { jobId } = req.params;
     const userId = getUserId(req);
 
@@ -175,24 +186,20 @@ router.get(
 
       // 验证用户权限
       if (!status) {
-        return res.status(404).json(formatResponse(false, '导入任务不存在'));
+        return res.error(StandardErrorCode.NOT_FOUND, '导入任务不存在');
       }
 
       if (status.createdBy !== userId) {
-        return res.status(403).json(formatResponse(false, '无权访问此导入任务'));
+        return res.error(StandardErrorCode.FORBIDDEN, '无权访问此导入任务');
       }
 
-      return res.json(
-        formatResponse(true, '获取导入状态成功', status as unknown as Record<string, unknown>)
-      );
+      return res.success(status as unknown as Record<string, unknown>, '获取导入状态成功');
     } catch (error) {
       logger.error('获取导入状态失败', { jobId, userId, error });
 
-      return res.status(500).json(
-        formatResponse(false, '获取导入状态失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '获取导入状态失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -215,15 +222,15 @@ router.delete(
       const status = await service.getTaskStatus(jobId);
 
       if (!status) {
-        return res.status(404).json(formatResponse(false, '导入任务不存在'));
+        return res.error(StandardErrorCode.NOT_FOUND, '导入任务不存在');
       }
 
       if (status.createdBy !== userId) {
-        return res.status(403).json(formatResponse(false, '无权取消此导入任务'));
+        return res.error(StandardErrorCode.FORBIDDEN, '无权取消此导入任务');
       }
 
       if (status.status === 'completed') {
-        return res.status(400).json(formatResponse(false, '无法取消已完成的导入任务'));
+        return res.error(StandardErrorCode.INVALID_INPUT, '无法取消已完成的导入任务');
       }
 
       // 取消导入任务
@@ -231,15 +238,13 @@ router.delete(
 
       logger.info('取消导入任务', { jobId, userId });
 
-      return res.json(formatResponse(true, '导入任务已取消', { jobId }));
+      return res.success({ jobId }, '导入任务已取消');
     } catch (error) {
       logger.error('取消导入任务失败', { jobId, userId, error });
 
-      return res.status(500).json(
-        formatResponse(false, '取消导入任务失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '取消导入任务失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -251,7 +256,7 @@ router.delete(
 router.get(
   '/history',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const userId = getUserId(req);
     const { page = 1, limit = 10, status } = req.query;
 
@@ -274,15 +279,13 @@ router.get(
         },
       };
 
-      return res.json(formatResponse(true, '获取导入历史成功', history));
+      return res.success(history, '获取导入历史成功');
     } catch (error) {
       logger.error('获取导入历史失败', { userId, error });
 
-      return res.status(500).json(
-        formatResponse(false, '获取导入历史失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '获取导入历史失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -294,7 +297,7 @@ router.get(
 router.get(
   '/template/:type',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const { type } = req.params;
 
     try {
@@ -302,7 +305,7 @@ router.get(
       const template = await service.getTemplate(type);
 
       if (!template) {
-        return res.status(404).json(formatResponse(false, '不支持的导入类型'));
+        return res.error(StandardErrorCode.INVALID_INPUT, '不支持的导入类型');
       }
 
       res.setHeader('Content-Type', 'application/octet-stream');
@@ -312,11 +315,9 @@ router.get(
     } catch (error) {
       logger.error('获取导入模板失败', { type, error });
 
-      return res.status(500).json(
-        formatResponse(false, '获取导入模板失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '获取导入模板失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -329,13 +330,13 @@ router.post(
   '/validate',
   authMiddleware,
   upload.single('file'),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const userId = getUserId(req);
     const file = req.file;
     const { options = {} } = req.body;
 
     if (!file) {
-      return res.status(400).json(formatResponse(false, '没有上传文件'));
+      return res.error(StandardErrorCode.INVALID_INPUT, '没有上传文件');
     }
 
     try {
@@ -355,17 +356,13 @@ router.post(
         delimiter: importOptions.delimiter,
       });
 
-      return res.json(
-        formatResponse(true, '文件验证完成', validation as unknown as Record<string, unknown>)
-      );
+      return res.success(validation as unknown as Record<string, unknown>, '文件验证完成');
     } catch (error) {
       logger.error('验证导入文件失败', { userId, fileName: file?.originalname, error });
 
-      return res.status(500).json(
-        formatResponse(false, '验证导入文件失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '验证导入文件失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -377,19 +374,17 @@ router.post(
 router.get(
   '/formats',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     try {
       const formats = ['csv', 'xlsx', 'json', 'xml'];
 
-      return res.json(formatResponse(true, '获取支持的导入格式成功', { formats }));
+      return res.success({ formats }, '获取支持的导入格式成功');
     } catch (error) {
       logger.error('获取支持的导入格式失败', { error });
 
-      return res.status(500).json(
-        formatResponse(false, '获取支持的导入格式失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '获取支持的导入格式失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -401,24 +396,20 @@ router.get(
 router.get(
   '/stats',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const userId = getUserId(req);
 
     try {
       const service = initializeImportService();
       const stats = await service.getStatistics();
 
-      return res.json(
-        formatResponse(true, '获取导入统计成功', stats as unknown as Record<string, unknown>)
-      );
+      return res.success(stats as unknown as Record<string, unknown>, '获取导入统计成功');
     } catch (error) {
       logger.error('获取导入统计失败', { userId, error });
 
-      return res.status(500).json(
-        formatResponse(false, '获取导入统计失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '获取导入统计失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );
@@ -441,36 +432,35 @@ router.post(
       const status = await service.getTaskStatus(jobId);
 
       if (!status) {
-        return res.status(404).json(formatResponse(false, '导入任务不存在'));
+        return res.error(StandardErrorCode.NOT_FOUND, '导入任务不存在');
       }
 
       if (status.createdBy !== userId) {
-        return res.status(403).json(formatResponse(false, '无权重试此导入任务'));
+        return res.error(StandardErrorCode.FORBIDDEN, '无权重试此导入任务');
       }
 
       if (status.status !== 'failed') {
-        return res.status(400).json(formatResponse(false, '只能重试失败的导入任务'));
+        return res.error(StandardErrorCode.INVALID_INPUT, '只能重试失败的导入任务');
       }
 
       const retried = await service.retryTask(jobId);
 
       logger.info('重试导入任务', { jobId, userId });
 
-      return res.json(
-        formatResponse(true, '导入任务已重试', {
+      return res.success(
+        {
           jobId: retried.id,
           status: retried.status,
           progress: retried.progress,
-        })
+        },
+        '导入任务已重试'
       );
     } catch (error) {
       logger.error('重试导入任务失败', { jobId, userId, error });
 
-      return res.status(500).json(
-        formatResponse(false, '重试导入任务失败', {
-          error: error instanceof Error ? error.message : String(error),
-        })
-      );
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '重试导入任务失败', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   })
 );

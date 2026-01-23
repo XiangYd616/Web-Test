@@ -156,7 +156,7 @@ function createPathCacheMiddleware(patterns: string[], options: CacheMiddlewareO
       return createCacheMiddleware(options)(req, res, next);
     }
 
-    next();
+    return next();
   };
 }
 
@@ -181,7 +181,7 @@ function createHeaderBasedCacheMiddleware(
       return createCacheMiddleware(cacheOptions)(req, res, next);
     }
 
-    next();
+    return next();
   };
 }
 
@@ -204,15 +204,16 @@ function createSmartCacheMiddleware(
 
       if (responseSize <= maxResponseSize) {
         // 响应大小合适，使用缓存中间件
-        return createCacheMiddleware(cacheOptions)(req, res, () => {
-          return originalJson.call(this, data);
+        createCacheMiddleware(cacheOptions)(req, res, () => {
+          originalJson.call(this, data);
         });
+        return res;
       }
 
       return originalJson.call(this, data);
     };
 
-    next();
+    return next();
   };
 }
 

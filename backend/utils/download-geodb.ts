@@ -98,9 +98,10 @@ class GeoDBDownloader {
           pipe: (dest: NodeJS.WritableStream) => void;
         }) => {
           if (response.statusCode === 302 || response.statusCode === 301) {
-            return this.downloadFileOnce(response.headers.location as string, outputPath)
+            this.downloadFileOnce(response.headers.location as string, outputPath)
               .then(resolve)
               .catch(reject);
+            return;
           }
 
           if (response.statusCode !== 200) {
@@ -113,7 +114,8 @@ class GeoDBDownloader {
 
           const fileStream = fs.createWriteStream(outputPath);
 
-          response.on('data', (chunk: Buffer) => {
+          response.on('data', (chunk?: Buffer) => {
+            if (!chunk) return;
             downloadedSize += chunk.length;
             if (totalSize > 0) {
               const progress = Math.round((downloadedSize / totalSize) * 100);

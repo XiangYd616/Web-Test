@@ -330,13 +330,13 @@ class RBACService {
       case 'lte':
         return typeof fieldValue === 'number' && typeof value === 'number' && fieldValue <= value;
       case 'in':
-        return Array.isArray(value) && value.includes(fieldValue as never);
+        return Array.isArray(value) && (value as unknown[]).includes(fieldValue as unknown);
       case 'nin':
-        return Array.isArray(value) && !value.includes(fieldValue as never);
+        return Array.isArray(value) && !(value as unknown[]).includes(fieldValue as unknown);
       case 'contains':
-        return (
-          typeof fieldValue === 'string' && typeof value === 'string' && fieldValue.includes(value)
-        );
+        return typeof fieldValue === 'string' && typeof value === 'string'
+          ? fieldValue.includes(value)
+          : false;
       case 'regex':
         return (
           typeof fieldValue === 'string' &&
@@ -351,15 +351,15 @@ class RBACService {
   /**
    * 获取嵌套对象值
    */
-  getNestedValue(obj: Record<string, unknown>, path: string) {
-    return path.split('.').reduce(
+  getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+    return path.split('.').reduce<unknown>(
       (current, key) => {
         if (!current || typeof current !== 'object') {
           return undefined;
         }
         return (current as Record<string, unknown>)[key];
       },
-      obj as Record<string, unknown> | undefined
+      obj as Record<string, unknown>
     );
   }
 

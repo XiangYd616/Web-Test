@@ -7,6 +7,7 @@ import axios, { AxiosResponse } from 'axios';
 import * as crypto from 'crypto';
 import { query } from '../../config/database';
 import { logSecurityEvent, SecurityEventType } from '../../src/utils/securityLogger';
+import Logger from '../../utils/logger';
 import JwtService from '../core/jwtService';
 
 // OAuth2提供商配置接口
@@ -426,7 +427,7 @@ class OAuthService {
     } catch (error) {
       // 记录错误但不抛出异常
       const message = error instanceof Error ? error.message : String(error);
-      console.error('Failed to update last login time:', message);
+      Logger.error('Failed to update last login time', message);
     }
   }
 
@@ -510,7 +511,7 @@ class OAuthService {
       return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error('Failed to revoke token:', message);
+      Logger.error('Failed to revoke token', message);
       return false;
     }
   }
@@ -544,7 +545,7 @@ class OAuthService {
       return response.data;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error('Failed to refresh token:', message);
+      Logger.error('Failed to refresh token', message);
       return null;
     }
   }

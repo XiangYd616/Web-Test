@@ -4,9 +4,11 @@
  */
 
 import {
+  AggregationTypeType,
   MetricAlert,
   MetricAlertEvent,
   MetricCategory,
+  MetricCategoryType,
   MetricConfig,
   MetricDataPoint,
   MetricPerformance,
@@ -15,9 +17,12 @@ import {
   MetricStatistics,
   MetricTimeSeries,
   MetricType,
+  MetricTypeType,
   MetricUnit,
+  MetricUnitType,
   MetricUtils,
   PredefinedMetrics,
+  TimeWindowType,
 } from './MetricTypes';
 
 // 存储接口
@@ -27,8 +32,8 @@ export interface MetricStorage {
   delete(query: MetricQuery): Promise<number>;
   aggregate(
     metricName: string,
-    aggregation: AggregationType,
-    timeWindow: TimeWindow
+    aggregation: AggregationTypeType,
+    timeWindow: TimeWindowType
   ): Promise<number>;
   getStatistics(): Promise<MetricStatistics>;
 }
@@ -53,14 +58,20 @@ export class MemoryMetricStorage implements MetricStorage {
 
     const points = this.data.get(key);
     if (!points) {
-      this.data.set(key, [metric]);
+      const createdPoints = [metric];
+      this.data.set(key, createdPoints);
+
+      // 限制存储大小
+      if (createdPoints.length > this.maxSize) {
+        createdPoints.splice(0, createdPoints.length - this.maxSize);
+      }
     } else {
       points.push(metric);
-    }
 
-    // 限制存储大小
-    if (points.length > this.maxSize) {
-      points.splice(0, points.length - this.maxSize);
+      // 限制存储大小
+      if (points.length > this.maxSize) {
+        points.splice(0, points.length - this.maxSize);
+      }
     }
   }
 
@@ -88,7 +99,10 @@ export class MemoryMetricStorage implements MetricStorage {
 
       if (filteredPoints.length > 0) {
         // 聚合计算
-        const aggregation: Record<string, number> = {};
+        const aggregation: Record<AggregationTypeType, number> = {} as Record<
+          AggregationTypeType,
+          number
+        >;
         if (query.aggregation) {
           for (const agg of query.aggregation) {
             aggregation[agg] = MetricUtils.aggregate(filteredPoints, agg);
@@ -161,8 +175,8 @@ export class MemoryMetricStorage implements MetricStorage {
 
   async aggregate(
     metricName: string,
-    aggregation: AggregationType,
-    timeWindow: TimeWindow
+    aggregation: AggregationTypeType,
+    timeWindow: TimeWindowType
   ): Promise<number> {
     const windowMs = MetricUtils.getTimeWindowMs(timeWindow);
     const endTime = new Date();
@@ -267,17 +281,17 @@ export class MemoryMetricStorage implements MetricStorage {
     return true;
   }
 
-  private getMetricType(name: string): string {
+  private getMetricType(name: string): MetricTypeType {
     const definition = PredefinedMetrics[name];
     return definition?.type || MetricType.GAUGE;
   }
 
-  private getMetricCategory(name: string): string {
+  private getMetricCategory(name: string): MetricCategoryType {
     const definition = PredefinedMetrics[name];
     return definition?.category || MetricCategory.SYSTEM;
   }
 
-  private getMetricUnit(name: string): string {
+  private getMetricUnit(name: string): MetricUnitType {
     const definition = PredefinedMetrics[name];
     return definition?.unit || MetricUnit.NONE;
   }
@@ -343,8 +357,7 @@ export class MetricCollector {
     const startTime = Date.now();
 
     try {
-      const dataPoint = MetricUtils.createDataPoint(value, labels);
-      dataPoint.name = name; // 确保名称正确设置
+      const dataPoint = MetricUtils.createDataPoint(name, value, labels);
 
       await this.storage.store(dataPoint);
 
@@ -435,8 +448,8 @@ export class MetricCollector {
    */
   async getAggregatedValue(
     name: string,
-    aggregation: AggregationType,
-    timeWindow: TimeWindow,
+    aggregation: AggregationTypeType,
+    timeWindow: TimeWindowType,
     _labels?: Record<string, string>
   ): Promise<number> {
     return this.storage.aggregate(name, aggregation, timeWindow);
@@ -537,7 +550,10 @@ export class MetricCollector {
       await this.record('system.memory.usage', memoryPercent);
 
       // 活跃句柄数
-      await this.record('system.handles.active', process.getActiveHandlesInfo().length);
+      const handleGetter = (process as NodeJS.Process & { _getActiveHandles?: () => unknown[] })
+        ._getActiveHandles;
+      const activeHandles = typeof handleGetter === 'function' ? handleGetter.call(process) : [];
+      await this.record('system.handles.active', activeHandles.length);
 
       // 请求延迟
       await this.record(
@@ -575,19 +591,23 @@ export class MetricCollector {
     condition: { operator?: string; threshold?: number },
     value: number
   ): boolean {
+    const threshold = condition.threshold;
+    if (threshold === undefined) {
+      return false;
+    }
     switch (condition.operator) {
       case 'gt':
-        return value > condition.threshold;
+        return value > threshold;
       case 'gte':
-        return value >= condition.threshold;
+        return value >= threshold;
       case 'lt':
-        return value < condition.threshold;
+        return value < threshold;
       case 'lte':
-        return value <= condition.threshold;
+        return value <= threshold;
       case 'eq':
-        return value === condition.threshold;
+        return value === threshold;
       case 'ne':
-        return value !== condition.threshold;
+        return value !== threshold;
       default:
         return false;
     }

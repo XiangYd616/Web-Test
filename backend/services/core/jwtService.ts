@@ -150,7 +150,7 @@ class JwtService {
         },
       };
     } catch (error) {
-      throw ErrorFactory.fromError(error);
+      throw ErrorFactory.fromError(error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -178,7 +178,7 @@ class JwtService {
       } else if ((error as Error).name === 'JsonWebTokenError') {
         throw ErrorFactory.token('invalid');
       }
-      throw ErrorFactory.fromError(error);
+      throw ErrorFactory.fromError(error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -206,7 +206,7 @@ class JwtService {
       } else if ((error as Error).name === 'JsonWebTokenError') {
         throw ErrorFactory.token('invalid');
       }
-      throw ErrorFactory.fromError(error);
+      throw ErrorFactory.fromError(error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -249,7 +249,7 @@ class JwtService {
       // 生成新的令牌对
       return await this.generateTokenPair(decoded.userId);
     } catch (error) {
-      throw ErrorFactory.fromError(error);
+      throw ErrorFactory.fromError(error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -265,8 +265,9 @@ class JwtService {
         throw ErrorFactory.token('invalid', '刷新令牌无效');
       }
 
-      const { exp, jti } = decoded as JwtPayload & { jti?: string };
-      if (!jti) {
+      const { jti } = decoded as JwtPayload & { jti?: string };
+      const exp = (decoded as JwtPayload).exp;
+      if (!jti || !exp) {
         throw ErrorFactory.token('invalid', '刷新令牌无效');
       }
 

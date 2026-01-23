@@ -215,6 +215,8 @@ class DatabaseMonitoringService extends EventEmitter {
     try {
       const status = this.connectionManager.getStatus();
       const poolStats = status.pool || {};
+      const totalCount = poolStats.totalCount ?? 0;
+      const idleCount = poolStats.idleCount ?? 0;
 
       const connectionStatsQuery = `
         SELECT
@@ -231,16 +233,13 @@ class DatabaseMonitoringService extends EventEmitter {
       const dbStats = result.rows[0] as Record<string, string>;
 
       return {
-        poolSize: poolStats.totalCount || 0,
+        poolSize: totalCount,
         activeConnections: Number.parseInt(dbStats.active_connections, 10) || 0,
         idleConnections: Number.parseInt(dbStats.idle_connections, 10) || 0,
         idleInTransaction: Number.parseInt(dbStats.idle_in_transaction, 10) || 0,
         waitingConnections: Number.parseInt(dbStats.waiting_connections, 10) || 0,
         totalDbConnections: Number.parseInt(dbStats.total_connections, 10) || 0,
-        poolUsagePercent:
-          poolStats.totalCount > 0
-            ? ((poolStats.totalCount - (poolStats.idleCount || 0)) / poolStats.totalCount) * 100
-            : 0,
+        poolUsagePercent: totalCount > 0 ? ((totalCount - idleCount) / totalCount) * 100 : 0,
       };
     } catch (error) {
       this.logger.error('收集连接池指标失败:', error);

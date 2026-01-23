@@ -1,7 +1,7 @@
 import express from 'express';
-import runController from '../controllers/runController';
 import { authMiddleware } from '../middleware/auth';
 import { asyncHandler } from '../middleware/errorHandler';
+const runController = require('../controllers/runController');
 
 const router = express.Router();
 

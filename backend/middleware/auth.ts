@@ -71,15 +71,16 @@ type UserRecord = {
  */
 const authMiddleware = async (
   req: AuthenticatedRequest,
-  res: ApiResponse,
+  res: Response,
   next: NextFunction
 ): Promise<void> => {
+  const apiRes = res as ApiResponse;
   try {
     const authHeader = req.header('Authorization');
     const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      res.unauthorized('访问被拒绝，需要认证令牌');
+      apiRes.unauthorized('访问被拒绝，需要认证令牌');
       return;
     }
 
@@ -93,14 +94,14 @@ const authMiddleware = async (
     );
 
     if (userResult.rows.length === 0) {
-      res.unauthorized('令牌无效，用户不存在');
+      apiRes.unauthorized('令牌无效，用户不存在');
       return;
     }
 
     const user = userResult.rows[0] as UserRecord;
 
     if (!user.is_active) {
-      res.forbidden('用户账户已被禁用');
+      apiRes.forbidden('用户账户已被禁用');
       return;
     }
 
@@ -191,9 +192,10 @@ const optionalAuth = async (
  * 权限检查中间件
  */
 const requirePermission = (permission: string) => {
-  return async (req: AuthenticatedRequest, res: ApiResponse, next: NextFunction): Promise<void> => {
+  return async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    const apiRes = res as ApiResponse;
     if (!req.user) {
-      res.unauthorized('需要登录才能访问此资源');
+      apiRes.unauthorized('需要登录才能访问此资源');
       return;
     }
 
@@ -201,14 +203,14 @@ const requirePermission = (permission: string) => {
       const hasPermission = await permissionService.checkUserPermission(req.user.id, permission);
 
       if (!hasPermission) {
-        res.forbidden('您没有权限访问此资源');
+        apiRes.forbidden('您没有权限访问此资源');
         return;
       }
 
       next();
     } catch (error) {
       console.error('权限检查错误:', error);
-      res.serverError('权限检查过程中发生错误');
+      apiRes.serverError('权限检查过程中发生错误');
       return;
     }
   };
@@ -220,14 +222,15 @@ const requirePermission = (permission: string) => {
 const requireRole = (roles: string | string[]) => {
   const allowedRoles = Array.isArray(roles) ? roles : [roles];
 
-  return (req: AuthenticatedRequest, res: ApiResponse, next: NextFunction): void => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+    const apiRes = res as ApiResponse;
     if (!req.user) {
-      res.unauthorized('需要登录才能访问此资源');
+      apiRes.unauthorized('需要登录才能访问此资源');
       return;
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      res.forbidden('您的角色无权访问此资源');
+      apiRes.forbidden('您的角色无权访问此资源');
       return;
     }
 
@@ -317,11 +320,12 @@ const apiKeyAuth = async (req: Request, res: ApiResponse, next: NextFunction): P
  */
 const require2FA = async (
   req: AuthenticatedRequest,
-  res: ApiResponse,
+  res: Response,
   next: NextFunction
 ): Promise<void> => {
+  const apiRes = res as ApiResponse;
   if (!req.user) {
-    res.unauthorized('需要登录才能访问此资源');
+    apiRes.unauthorized('需要登录才能访问此资源');
     return;
   }
 
@@ -330,7 +334,7 @@ const require2FA = async (
     const twoFaVerified = req.header('X-2FA-Verified');
 
     if (!twoFaVerified || twoFaVerified !== 'true') {
-      res.forbidden('需要完成双因素认证');
+      apiRes.forbidden('需要完成双因素认证');
       return;
     }
   }

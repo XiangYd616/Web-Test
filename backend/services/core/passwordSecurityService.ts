@@ -656,7 +656,12 @@ class PasswordSecurityService {
         return { success: false, message: tokenValidation.message };
       }
 
-      const { userId, email, username } = tokenValidation;
+      const { userId, email, username } = tokenValidation as {
+        userId: string;
+        email: string;
+        username: string;
+        valid: true;
+      };
 
       // 验证新密码强度
       const strengthCheck = this.validatePasswordStrength(newPassword, { username, email });
@@ -701,8 +706,9 @@ class PasswordSecurityService {
         );
 
         // 保存密码历史
-        if (currentPasswordResult.rows.length > 0) {
-          await this.savePasswordHistory(userId, currentPasswordResult.rows[0].password_hash);
+        const currentPasswordHash = currentPasswordResult.rows[0]?.password_hash;
+        if (currentPasswordHash) {
+          await this.savePasswordHistory(userId, currentPasswordHash);
         }
 
         // 标记令牌为已使用

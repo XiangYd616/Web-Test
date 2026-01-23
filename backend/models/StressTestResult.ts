@@ -10,7 +10,7 @@
  * - 性能统计分析
  */
 
-import { DataTypes, Model, ModelCtor, Op, Sequelize } from 'sequelize';
+import { DataTypes, Model, ModelCtor, Op, Sequelize, type Order } from 'sequelize';
 
 type StressTestResultInstance = Model & {
   status?: string;
@@ -30,14 +30,19 @@ type StressTestResultInstance = Model & {
   save: () => Promise<Model>;
 };
 
+type StressTestResultInstanceMethods = StressTestResultInstance & {
+  updateStatus: (status: string, errorMessage?: string | null) => Promise<Model>;
+  setResults: (results: Record<string, unknown>) => Promise<Model>;
+};
+
 type StressTestResultModel = ModelCtor<Model> & {
   findByUrl: (
     url: string,
-    options?: { limit?: number; offset?: number; order?: unknown }
+    options?: { limit?: number; offset?: number; order?: Order }
   ) => Promise<Model[]>;
   findByUserId: (
     userId: string,
-    options?: { limit?: number; offset?: number; order?: unknown }
+    options?: { limit?: number; offset?: number; order?: Order }
   ) => Promise<Model[]>;
   getRecent: (limit?: number) => Promise<Model[]>;
   getStatistics: (options?: {
@@ -228,6 +233,10 @@ const createStressTestResult = (sequelize: Sequelize): StressTestResultModel => 
     }
   ) as StressTestResultModel;
 
+  const StressTestResultWithInstance = StressTestResult as unknown as StressTestResultModel & {
+    prototype: StressTestResultInstanceMethods;
+  };
+
   // 类方法
 
   /**
@@ -235,7 +244,7 @@ const createStressTestResult = (sequelize: Sequelize): StressTestResultModel => 
    */
   StressTestResult.findByUrl = async function findByUrl(
     url: string,
-    options: { limit?: number; offset?: number; order?: unknown } = {}
+    options: { limit?: number; offset?: number; order?: Order } = {}
   ) {
     const { limit = 10, offset = 0, order = [['created_at', 'DESC']] } = options;
 
@@ -252,7 +261,7 @@ const createStressTestResult = (sequelize: Sequelize): StressTestResultModel => 
    */
   StressTestResult.findByUserId = async function findByUserId(
     userId: string,
-    options: { limit?: number; offset?: number; order?: unknown } = {}
+    options: { limit?: number; offset?: number; order?: Order } = {}
   ) {
     const { limit = 20, offset = 0, order = [['created_at', 'DESC']] } = options;
 
@@ -298,7 +307,7 @@ const createStressTestResult = (sequelize: Sequelize): StressTestResultModel => 
       where.userId = userId;
     }
 
-    const results = await this.findAll({ where });
+    const results = (await this.findAll({ where })) as StressTestResultInstance[];
 
     if (results.length === 0) {
       return {
@@ -333,7 +342,7 @@ const createStressTestResult = (sequelize: Sequelize): StressTestResultModel => 
   /**
    * 更新测试状态
    */
-  (StressTestResult as any).prototype.updateStatus = async function updateStatus(
+  StressTestResultWithInstance.prototype.updateStatus = async function updateStatus(
     this: StressTestResultInstance,
     status: string,
     errorMessage: string | null = null
@@ -354,7 +363,7 @@ const createStressTestResult = (sequelize: Sequelize): StressTestResultModel => 
   /**
    * 设置测试结果
    */
-  (StressTestResult as any).prototype.setResults = async function setResults(
+  StressTestResultWithInstance.prototype.setResults = async function setResults(
     this: StressTestResultInstance,
     results: Record<string, unknown>
   ) {

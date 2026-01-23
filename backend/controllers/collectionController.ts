@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 const { models } = require('../database/sequelize');
 const CollectionManager = require('../services/collections/CollectionManager');
 const { hasWorkspacePermission } = require('../utils/workspacePermissions');
+const Logger = require('../utils/logger');
 
 const collectionManager = new CollectionManager({ models });
 
@@ -12,6 +13,14 @@ type ApiResponse = Response & {
   created: (data?: unknown, message?: string) => Response;
   notFound: (message?: string) => Response;
   forbidden: (message?: string) => Response;
+};
+
+const resolveWorkspaceId = (req: Request) => {
+  return (
+    (req.params as { workspaceId?: string }).workspaceId ||
+    (req.body as { workspaceId?: string }).workspaceId ||
+    (req.query as { workspaceId?: string }).workspaceId
+  );
 };
 
 type AuthRequest = Request & { user: { id: string; role?: string } };
@@ -159,7 +168,10 @@ const _validateRequestInput = (data: RequestData, res: ApiResponse) => {
 
 const listCollections = async (req: AuthRequest, res: ApiResponse) => {
   try {
-    const { workspaceId } = req.params;
+    const workspaceId = resolveWorkspaceId(req);
+    if (!workspaceId) {
+      return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
+    }
     const { page, limit, offset } = parsePagination(req);
 
     const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
@@ -183,7 +195,7 @@ const listCollections = async (req: AuthRequest, res: ApiResponse) => {
       },
     });
   } catch (error) {
-    console.error('获取集合列表失败:', error);
+    Logger.error('获取集合列表失败', error, { userId: req.user.id });
     return res.status(500).json({
       success: false,
       error: '获取集合列表失败',
@@ -193,7 +205,10 @@ const listCollections = async (req: AuthRequest, res: ApiResponse) => {
 
 const createCollection = async (req: AuthRequest, res: ApiResponse) => {
   try {
-    const { workspaceId } = req.params;
+    const workspaceId = resolveWorkspaceId(req);
+    if (!workspaceId) {
+      return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
+    }
     const collectionData = { ...req.body, workspaceId };
 
     if (!validateCollectionInput(collectionData, res)) {
@@ -209,7 +224,7 @@ const createCollection = async (req: AuthRequest, res: ApiResponse) => {
 
     return res.created(collection, '集合创建成功');
   } catch (error) {
-    console.error('创建集合失败:', error);
+    Logger.error('创建集合失败', error, { userId: req.user.id });
     return res.status(500).json({
       success: false,
       error: '创建集合失败',
@@ -232,7 +247,10 @@ const getCollection = async (req: AuthRequest, res: ApiResponse) => {
 
     return res.success(collection);
   } catch (error) {
-    console.error('获取集合详情失败:', error);
+    Logger.error('获取集合详情失败', error, {
+      userId: req.user.id,
+      collectionId: req.params.collectionId,
+    });
     return res.status(500).json({
       success: false,
       error: '获取集合详情失败',
@@ -263,7 +281,10 @@ const updateCollection = async (req: AuthRequest, res: ApiResponse) => {
 
     return res.success(collection, '集合更新成功');
   } catch (error) {
-    console.error('更新集合失败:', error);
+    Logger.error('更新集合失败', error, {
+      userId: req.user.id,
+      collectionId: req.params.collectionId,
+    });
     return res.status(500).json({
       success: false,
       error: '更新集合失败',
@@ -290,7 +311,10 @@ const deleteCollection = async (req: AuthRequest, res: ApiResponse) => {
 
     return res.success(null, '集合删除成功');
   } catch (error) {
-    console.error('删除集合失败:', error);
+    Logger.error('删除集合失败', error, {
+      userId: req.user.id,
+      collectionId: req.params.collectionId,
+    });
     return res.status(500).json({
       success: false,
       error: '删除集合失败',
@@ -298,12 +322,205 @@ const deleteCollection = async (req: AuthRequest, res: ApiResponse) => {
   }
 };
 
-export { createCollection, deleteCollection, getCollection, listCollections, updateCollection };
+const importPostmanCollection = async (req: AuthRequest, res: ApiResponse) => {
+  try {
+    const workspaceId = resolveWorkspaceId(req);
+    if (!workspaceId) {
+      return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
+    }
+
+    const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'write');
+    if (permission.error) {
+      return res.forbidden(permission.error);
+    }
+
+    const postmanData = req.body as {
+      info?: { name?: string; description?: string };
+      item?: unknown[];
+    };
+    if (!postmanData || !Array.isArray(postmanData.item)) {
+      return res.validationError([{ field: 'item', message: 'Postman collection 数据不完整' }]);
+    }
+
+    const collection = await collectionManager.importPostmanCollection(
+      postmanData,
+      workspaceId,
+      req.user.id
+    );
+
+    return res.created(collection, '导入集合成功');
+  } catch (error) {
+    Logger.error('导入集合失败', error, { userId: req.user.id });
+    return res.status(500).json({
+      success: false,
+      error: '导入集合失败',
+    });
+  }
+};
+
+const exportCollection = async (req: AuthRequest, res: ApiResponse) => {
+  try {
+    const { collectionId } = req.params;
+    const access = await ensureCollectionAccess(collectionId, req.user.id);
+    if (access.error) {
+      return access.error === '集合不存在'
+        ? res.notFound('集合不存在')
+        : res.forbidden(access.error);
+    }
+
+    const exportData = await collectionManager.exportCollection(collectionId);
+    return res.success(exportData, '集合导出成功');
+  } catch (error) {
+    Logger.error('导出集合失败', error, {
+      userId: req.user.id,
+      collectionId: req.params.collectionId,
+    });
+    return res.status(500).json({
+      success: false,
+      error: '导出集合失败',
+    });
+  }
+};
+
+const addFolder = async (req: AuthRequest, res: ApiResponse) => {
+  try {
+    const { collectionId } = req.params;
+    const { name, description, parentId } = req.body as {
+      name?: string;
+      description?: string;
+      parentId?: string;
+    };
+
+    if (!name || name.trim().length === 0) {
+      return res.validationError([{ field: 'name', message: '文件夹名称不能为空' }]);
+    }
+
+    const access = await ensureCollectionAccess(collectionId, req.user.id);
+    if (access.error) {
+      return access.error === '集合不存在'
+        ? res.notFound('集合不存在')
+        : res.forbidden(access.error);
+    }
+
+    if (!hasWorkspacePermission(access.member.role, 'write')) {
+      return res.forbidden('当前角色无写入权限');
+    }
+
+    const folder = await collectionManager.createFolder({
+      name,
+      description,
+      parentId,
+      collectionId,
+      createdBy: req.user.id,
+    });
+
+    return res.created(folder, '文件夹创建成功');
+  } catch (error) {
+    Logger.error('创建文件夹失败', error, {
+      userId: req.user.id,
+      collectionId: req.params.collectionId,
+    });
+    return res.status(500).json({
+      success: false,
+      error: '创建文件夹失败',
+    });
+  }
+};
+
+const addRequest = async (req: AuthRequest, res: ApiResponse) => {
+  try {
+    const { collectionId } = req.params;
+
+    if (!_validateRequestInput(req.body, res)) {
+      return;
+    }
+
+    const access = await ensureCollectionAccess(collectionId, req.user.id);
+    if (access.error) {
+      return access.error === '集合不存在'
+        ? res.notFound('集合不存在')
+        : res.forbidden(access.error);
+    }
+
+    if (!hasWorkspacePermission(access.member.role, 'write')) {
+      return res.forbidden('当前角色无写入权限');
+    }
+
+    const requestData = req.body as RequestData & {
+      description?: string;
+      params?: Record<string, string>;
+      tests?: string[];
+      timeout?: number;
+    };
+
+    const normalizedUrl =
+      typeof requestData.url === 'string' ? requestData.url : String(requestData.url.raw || '');
+    const headers = Array.isArray(requestData.headers)
+      ? requestData.headers.reduce<Record<string, string>>((acc, header) => {
+          const headerObj = header as { key?: string; value?: string };
+          if (headerObj.key) {
+            acc[headerObj.key] = headerObj.value || '';
+          }
+          return acc;
+        }, {})
+      : (requestData.headers as Record<string, string> | undefined);
+
+    const updated = await collectionManager.addRequestToCollection(collectionId, {
+      name: requestData.name,
+      description: requestData.description || '',
+      method: (requestData.method || 'GET') as
+        | 'GET'
+        | 'POST'
+        | 'PUT'
+        | 'PATCH'
+        | 'DELETE'
+        | 'HEAD'
+        | 'OPTIONS',
+      url: normalizedUrl,
+      headers,
+      params: requestData.params,
+      body: requestData.body,
+      tests: requestData.tests,
+      timeout: requestData.timeout,
+      auth: requestData.auth ? { type: requestData.auth.type || 'none' } : undefined,
+      metadata: {
+        createdBy: req.user.id,
+      },
+    });
+
+    return res.success(updated, '请求添加成功');
+  } catch (error) {
+    Logger.error('添加请求失败', error, {
+      userId: req.user.id,
+      collectionId: req.params.collectionId,
+    });
+    return res.status(500).json({
+      success: false,
+      error: '添加请求失败',
+    });
+  }
+};
+
+export {
+  addFolder,
+  addRequest,
+  createCollection,
+  deleteCollection,
+  exportCollection,
+  getCollection,
+  importPostmanCollection,
+  listCollections,
+  updateCollection,
+};
 
 module.exports = {
+  addFolder,
+  addRequest,
   listCollections,
   createCollection,
+  importPostmanCollection,
   getCollection,
   updateCollection,
   deleteCollection,
+  exportCollection,
 };

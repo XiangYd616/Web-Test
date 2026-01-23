@@ -7,6 +7,7 @@ import crypto from 'crypto';
 import { EventEmitter } from 'events';
 import { configCenter } from '../config/ConfigCenter';
 import { ErrorSeverity } from '../middleware/errorHandler';
+import Logger from './logger';
 
 interface AlertChannelConfig {
   enabled?: boolean;
@@ -106,7 +107,7 @@ export class AlertChannel {
       await this.doSend(alert);
       this.updateRateLimit(alert);
     } catch (error) {
-      console.error(`告警发送失败 [${this.name}]:`, error);
+      Logger.error(`告警发送失败 [${this.name}]`, error);
     }
   }
 
@@ -442,7 +443,7 @@ export class AlertRuleEngine {
     this.addRule('authentication_failures', {
       condition: (_error, stats = {}) => {
         const authErrors = stats['AUTHENTICATION_ERROR_medium'] || { count: 0 };
-        return authErrors.count > 20;
+        return (authErrors.count ?? 0) > 20;
       },
       alertLevel: AlertLevels.MEDIUM,
       channels: [AlertChannels.EMAIL],
@@ -479,7 +480,7 @@ export class AlertRuleEngine {
 
         rule.lastTriggered = now;
       } catch (ruleError) {
-        console.error(`告警规则评估失败 [${name}]:`, ruleError);
+        Logger.error(`告警规则评估失败 [${name}]`, ruleError);
       }
     }
 
@@ -543,9 +544,9 @@ export class ErrorMonitoringSystem extends EventEmitter {
       await this.setupAlertChannels();
 
       this.isInitialized = true;
-      console.log('✅ 错误监控系统初始化完成');
+      Logger.system('error_monitoring_initialized', '错误监控系统初始化完成');
     } catch (error) {
-      console.error('❌ 错误监控系统初始化失败:', error);
+      Logger.error('错误监控系统初始化失败', error);
       throw error;
     }
   }
@@ -587,7 +588,7 @@ export class ErrorMonitoringSystem extends EventEmitter {
 
       this.emit('errorRecorded', { error, alerts });
     } catch (monitoringError) {
-      console.error('错误监控记录失败:', monitoringError);
+      Logger.error('错误监控记录失败', monitoringError);
     }
   }
 
@@ -600,7 +601,7 @@ export class ErrorMonitoringSystem extends EventEmitter {
         if (channel) {
           await channel.send(alert);
         } else {
-          console.warn(`告警通道未配置: ${channelType}`);
+          Logger.warn('告警通道未配置', { channelType });
         }
       });
 
@@ -608,7 +609,7 @@ export class ErrorMonitoringSystem extends EventEmitter {
 
       this.emit('alertSent', alert);
     } catch (error) {
-      console.error('发送告警失败:', error);
+      Logger.error('发送告警失败', error);
       this.emit('alertFailed', { alert, error });
     }
   }

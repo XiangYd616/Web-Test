@@ -8,6 +8,7 @@ import { EventEmitter } from 'events';
 import { createReadStream } from 'fs';
 import fs from 'fs/promises';
 import { query } from '../../config/database';
+import Logger from '../../utils/logger';
 
 const { createObjectCsvWriter } = require('csv-writer');
 
@@ -125,13 +126,190 @@ class DataManagementService extends EventEmitter {
       this.setupPeriodicBackup();
 
       this.isInitialized = true;
-      console.log('✅ 数据管理服务初始化完成');
+      Logger.system('data_management_initialized', '数据管理服务初始化完成');
 
       this.emit('initialized');
     } catch (error) {
-      console.error('❌ 数据管理服务初始化失败:', error);
+      Logger.error('数据管理服务初始化失败', error);
       throw error;
     }
+  }
+
+  private async getRecordTypeById(id: string): Promise<string | null> {
+    const result = await query('SELECT type FROM data_records WHERE id = $1', [id]);
+    const row = result.rows[0] as { type?: string } | undefined;
+    return row?.type || null;
+  }
+
+  async getDataOverview(userId: string) {
+    const result = await query(
+      `SELECT type, COUNT(*)::int AS count
+       FROM data_records
+       WHERE deleted_at IS NULL AND metadata->>'userId' = $1
+       GROUP BY type`,
+      [userId]
+    );
+    const summary = result.rows.reduce<Record<string, number>>((acc, row) => {
+      acc[String(row.type)] = Number(row.count) || 0;
+      return acc;
+    }, {});
+    return {
+      totalTypes: Object.keys(summary).length,
+      summary,
+    };
+  }
+
+  async getDataStatistics(userId: string, options: { period?: string; type?: string } = {}) {
+    const type = options.type || this.dataTypes.TEST_RESULTS;
+    const stats = await this.getStatistics(type, {});
+    return {
+      userId,
+      type,
+      period: options.period || 'all',
+      stats,
+    };
+  }
+
+  async createDataRecord(userId: string, data: Record<string, unknown>) {
+    const type = String(data.type || data.dataType || this.dataTypes.TEST_RESULTS);
+    return this.createData(type, data, { userId });
+  }
+
+  async getDataList(
+    _userId: string,
+    options: { page?: number; limit?: number; type?: string; status?: string; search?: string }
+  ) {
+    const type = options.type || this.dataTypes.TEST_RESULTS;
+    const filters: Record<string, unknown> = {};
+    if (options.status) {
+      filters.status = options.status;
+    }
+    return this.queryData(type, { filters, search: options.search }, options);
+  }
+
+  async getDataRecord(_userId: string, id: string) {
+    const type = await this.getRecordTypeById(id);
+    if (!type) return null;
+    return this.readData(type, id);
+  }
+
+  async updateDataRecord(userId: string, id: string, updates: Record<string, unknown>) {
+    const type = String(
+      updates.type || updates.dataType || (await this.getRecordTypeById(id)) || ''
+    );
+    if (!type) {
+      throw new Error('无法确定数据类型');
+    }
+    return this.updateData(type, id, updates, { userId });
+  }
+
+  async deleteDataRecord(userId: string, id: string) {
+    const type = await this.getRecordTypeById(id);
+    if (!type) {
+      throw new Error('数据记录不存在');
+    }
+    return this.deleteData(type, id, { userId, softDelete: true });
+  }
+
+  async batchOperationForUser(
+    userId: string,
+    payload: { operation: string; ids?: string[]; data?: Record<string, unknown> }
+  ) {
+    const operations: BatchOperation[] = [];
+    const dataType = String(
+      payload.data?.type || payload.data?.dataType || this.dataTypes.TEST_RESULTS
+    );
+
+    if (payload.operation === 'create' && payload.data) {
+      operations.push({
+        type: 'create',
+        dataType,
+        data: payload.data,
+        options: { userId },
+      });
+    } else if (payload.operation === 'update' && payload.ids?.length) {
+      payload.ids.forEach(id => {
+        operations.push({
+          type: 'update',
+          dataType,
+          id,
+          updates: payload.data || {},
+          options: { userId },
+        });
+      });
+    } else if (payload.operation === 'delete' && payload.ids?.length) {
+      payload.ids.forEach(id => {
+        operations.push({
+          type: 'delete',
+          dataType,
+          id,
+          options: { userId, softDelete: true },
+        });
+      });
+    }
+
+    return this.batchOperation(operations);
+  }
+
+  async searchData(
+    _userId: string,
+    payload: { query?: string; filters?: Record<string, unknown>; options?: PaginationOptions }
+  ) {
+    const filters = payload.filters || {};
+    const type = String(filters.type || this.dataTypes.TEST_RESULTS);
+    const { type: _type, ...restFilters } = filters;
+    return this.queryData(type, { filters: restFilters, search: payload.query }, payload.options);
+  }
+
+  async exportData(
+    userId: string,
+    payload: {
+      format?: string;
+      filters?: Record<string, unknown>;
+      options?: Record<string, unknown>;
+    }
+  ) {
+    return {
+      userId,
+      status: 'not_implemented',
+      format: payload.format || 'json',
+      filters: payload.filters || {},
+      options: payload.options || {},
+    };
+  }
+
+  async importDataForUpload(
+    userId: string,
+    payload: {
+      file: Express.Multer.File;
+      options?: Record<string, unknown>;
+      type?: string;
+      format?: string;
+    }
+  ) {
+    const type = payload.type || this.dataTypes.TEST_RESULTS;
+    const format = payload.format || 'json';
+    return this.importData(type, payload.file.path, format, { ...(payload.options || {}), userId });
+  }
+
+  async restoreData(_userId: string, payload: { file: Express.Multer.File; options?: unknown }) {
+    return {
+      status: 'not_implemented',
+      file: payload.file.originalname,
+    };
+  }
+
+  async getDataVersions(_userId: string, _id: string) {
+    return [] as Array<Record<string, unknown>>;
+  }
+
+  async validateDataRequest(
+    _userId: string,
+    payload: { data: Record<string, unknown>; schema?: { type?: string } }
+  ) {
+    const type = payload.schema?.type || String(payload.data.type || this.dataTypes.TEST_RESULTS);
+    this.validateData(type, payload.data);
+    return { valid: true };
   }
 
   /**
@@ -168,7 +346,7 @@ class DataManagementService extends EventEmitter {
 
       return { id, record };
     } catch (error) {
-      console.error('创建数据失败:', error);
+      Logger.error('创建数据失败', error);
       throw error;
     }
   }
@@ -201,7 +379,7 @@ class DataManagementService extends EventEmitter {
 
       return record;
     } catch (error) {
-      console.error('读取数据失败:', error);
+      Logger.error('读取数据失败', error);
       throw error;
     }
   }
@@ -244,7 +422,7 @@ class DataManagementService extends EventEmitter {
 
       return updatedRecord;
     } catch (error) {
-      console.error('更新数据失败:', error);
+      Logger.error('更新数据失败', error);
       throw error;
     }
   }
@@ -286,7 +464,7 @@ class DataManagementService extends EventEmitter {
 
       return { success: true, deletedRecord: record };
     } catch (error) {
-      console.error('删除数据失败:', error);
+      Logger.error('删除数据失败', error);
       throw error;
     }
   }
@@ -358,7 +536,7 @@ class DataManagementService extends EventEmitter {
         totalPages: limit ? Math.ceil(total / limit) : 1,
       };
     } catch (error) {
-      console.error('查询数据失败:', error);
+      Logger.error('查询数据失败', error);
       throw error;
     }
   }
@@ -419,7 +597,7 @@ class DataManagementService extends EventEmitter {
         },
       };
     } catch (error) {
-      console.error('批量操作失败:', error);
+      Logger.error('批量操作失败', error);
       throw error;
     }
   }
@@ -461,7 +639,7 @@ class DataManagementService extends EventEmitter {
         errors,
       };
     } catch (error) {
-      console.error('数据导入失败:', error);
+      Logger.error('数据导入失败', error);
       throw error;
     }
   }
@@ -500,7 +678,7 @@ class DataManagementService extends EventEmitter {
 
       return statistics;
     } catch (error) {
-      console.error('获取统计信息失败:', error);
+      Logger.error('获取统计信息失败', error);
       throw error;
     }
   }
@@ -539,7 +717,7 @@ class DataManagementService extends EventEmitter {
 
       return backupInfo;
     } catch (error) {
-      console.error('数据备份失败:', error);
+      Logger.error('数据备份失败', error);
       throw error;
     }
   }
@@ -603,7 +781,7 @@ class DataManagementService extends EventEmitter {
       try {
         await this.createBackup(null, { name: `auto_backup_${Date.now()}` });
       } catch (error) {
-        console.error('自动备份失败:', error);
+        Logger.error('自动备份失败', error);
       }
     }, backupInterval);
   }

@@ -224,7 +224,14 @@ class StressAnalyzer {
       const urlObj = new URL(url);
       const client = urlObj.protocol === 'https:' ? https : http;
 
-      const requestOptions: Record<string, unknown> = {
+      const requestOptions: {
+        hostname: string;
+        port: string | number;
+        path: string;
+        method: string;
+        timeout: number;
+        headers: Record<string, string>;
+      } = {
         hostname: urlObj.hostname,
         port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
         path: urlObj.pathname + urlObj.search,

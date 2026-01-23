@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import WebSocket from 'ws';
+import WebSocket, { Server as WebSocketServer } from 'ws';
 
 // 协作房间接口
 export interface CollaborationRoom {
@@ -24,6 +24,7 @@ export interface Participant {
   id: string;
   userId: string;
   username: string;
+  color?: string;
   role: 'owner' | 'editor' | 'viewer';
   status: 'online' | 'offline' | 'away';
   joinedAt: Date;
@@ -144,19 +145,41 @@ class CollaborationService extends EventEmitter {
   private comments: Map<string, Comment[]> = new Map();
   private shareLinks: Map<string, ShareLink> = new Map();
   private isInitialized: boolean = false;
-  private wsServer?: WebSocket.Server;
+  private wsServer?: WebSocketServer;
+  private connections: Map<string, WebSocket> = new Map();
+  private connectionParticipants: Map<string, string> = new Map();
+  private readonly participantColors = [
+    '#F97316',
+    '#22C55E',
+    '#3B82F6',
+    '#F43F5E',
+    '#A855F7',
+    '#14B8A6',
+    '#EAB308',
+  ];
 
   /**
    * 初始化协作服务
    */
-  async initialize(server?: unknown): Promise<void> {
+  async initialize(
+    options?:
+      | unknown
+      | {
+          server?: unknown;
+          path?: string;
+        }
+  ): Promise<void> {
     if (this.isInitialized) {
       return;
     }
 
     try {
+      const server =
+        typeof options === 'object' && options ? (options as { server?: unknown }).server : options;
+      const path =
+        typeof options === 'object' && options ? (options as { path?: string }).path : undefined;
       if (server) {
-        this.wsServer = new WebSocket.Server({ server });
+        this.wsServer = new WebSocketServer({ server, path });
         this.setupWebSocketServer();
       }
 
@@ -193,26 +216,77 @@ class CollaborationService extends EventEmitter {
    */
   async joinRoom(
     roomId: string,
-    participant: Omit<Participant, 'id' | 'joinedAt' | 'lastSeen'>
+    participant: Omit<Participant, 'id' | 'joinedAt' | 'lastSeen'>,
+    participantId?: string
   ): Promise<Participant> {
     const room = this.rooms.get(roomId);
     if (!room) {
+      const createdRoom = await this.createRoom({
+        name: `Room ${roomId}`,
+        type: 'document',
+        ownerId: participant.userId,
+        participants: [],
+        document: {
+          id: roomId,
+          title: `Document ${roomId}`,
+          content: '',
+          version: 1,
+          lastModified: new Date(),
+          modifiedBy: participant.userId,
+          history: [],
+          collaborators: [],
+        },
+        settings: {
+          allowAnonymous: false,
+          requireApproval: false,
+          maxParticipants: 20,
+          enableComments: true,
+          enableCursorTracking: true,
+          autoSave: true,
+          autoSaveInterval: 5000,
+        },
+      });
+      if (!this.rooms.get(createdRoom)) {
+        throw new Error('Room not found');
+      }
+    }
+
+    const activeRoom = this.rooms.get(roomId);
+    if (!activeRoom) {
       throw new Error('Room not found');
     }
 
-    if (room.participants.length >= room.settings.maxParticipants) {
+    const existingParticipant = participantId ? this.users.get(participantId) : undefined;
+    if (existingParticipant) {
+      existingParticipant.status = 'online';
+      existingParticipant.lastSeen = new Date();
+      if (!existingParticipant.color) {
+        existingParticipant.color = this.pickColor(existingParticipant.userId);
+      }
+      const targetRoom = this.rooms.get(roomId);
+      if (targetRoom && !targetRoom.participants.find(p => p.id === existingParticipant.id)) {
+        targetRoom.participants.push(existingParticipant);
+      }
+      return existingParticipant;
+    }
+
+    if (activeRoom.participants.length >= activeRoom.settings.maxParticipants) {
       throw new Error('Room is full');
     }
 
     const fullParticipant: Participant = {
       ...participant,
       id: this.generateId(),
+      color: participant.color || this.pickColor(participant.userId),
       joinedAt: new Date(),
       lastSeen: new Date(),
     };
 
-    room.participants.push(fullParticipant);
-    room.lastActivity = new Date();
+    const targetRoom = this.rooms.get(roomId);
+    if (targetRoom) {
+      targetRoom.participants.push(fullParticipant);
+      targetRoom.lastActivity = new Date();
+    }
 
     this.users.set(fullParticipant.id, fullParticipant);
     this.emit('user_joined', { roomId, participant: fullParticipant });
@@ -238,8 +312,14 @@ class CollaborationService extends EventEmitter {
     room.participants.splice(participantIndex, 1);
     room.lastActivity = new Date();
 
+    const participantColor = participant.color;
     this.users.delete(participantId);
     this.emit('user_left', { roomId, participant });
+
+    this.sendToRoom(roomId, {
+      type: 'participant_left',
+      data: { participantId, userId: participant.userId, color: participantColor },
+    });
 
     // 如果房间为空，删除房间
     if (room.participants.length === 0) {
@@ -315,6 +395,17 @@ class CollaborationService extends EventEmitter {
 
     this.documents.set(documentId, document);
     this.emit('document_updated', { documentId, document, changes, userId });
+
+    this.sendToRoom(documentId, {
+      type: 'document_updated',
+      data: {
+        documentId,
+        content: document.content,
+        version: document.version,
+        changes,
+        userId,
+      },
+    });
 
     return document;
   }
@@ -472,6 +563,20 @@ class CollaborationService extends EventEmitter {
       participant.cursor = cursor;
       participant.lastSeen = new Date();
       this.emit('cursor_moved', { participantId, cursor });
+
+      const roomId = this.findRoomByParticipant(participantId);
+      if (roomId) {
+        this.sendToRoom(roomId, {
+          type: 'cursor_moved',
+          data: {
+            participantId,
+            userId: participant.userId,
+            username: participant.username,
+            color: participant.color,
+            cursor,
+          },
+        });
+      }
     }
   }
 
@@ -593,8 +698,8 @@ class CollaborationService extends EventEmitter {
   private setupWebSocketServer(): void {
     if (!this.wsServer) return;
 
-    this.wsServer.on('connection', (ws: WebSocket, _req: unknown) => {
-      this.handleWebSocketConnection(ws, _req);
+    this.wsServer.on('connection', (socket, _req) => {
+      this.handleWebSocketConnection(socket as WebSocket, _req);
     });
   }
 
@@ -602,61 +707,318 @@ class CollaborationService extends EventEmitter {
    * 处理WebSocket连接
    */
   private handleWebSocketConnection(ws: WebSocket, _req: unknown): void {
-    const participantId = this.generateId();
+    const connectionId = this.generateId();
+    this.connections.set(connectionId, ws);
 
-    ws.on('message', (data: WebSocket.Data) => {
+    ws.on('message', (data: unknown) => {
       try {
-        const message = JSON.parse(data.toString());
-        this.handleWebSocketMessage(ws, participantId, message);
+        const messageText =
+          typeof data === 'string'
+            ? data
+            : Buffer.isBuffer(data)
+              ? data.toString()
+              : Array.isArray(data)
+                ? Buffer.concat(data).toString()
+                : Buffer.from(data as ArrayBuffer).toString();
+        const message = JSON.parse(messageText);
+        this.handleWebSocketMessage(ws, connectionId, message).catch(error => {
+          this.emit('error', error);
+        });
       } catch (error) {
         this.emit('error', error);
       }
     });
 
     ws.on('close', () => {
-      this.handleWebSocketClose(participantId);
+      this.connections.delete(connectionId);
+      this.handleWebSocketClose(connectionId);
     });
 
-    ws.on('error', (error: Error) => {
-      this.emit('error', error);
+    ws.on('error', (error: unknown) => {
+      this.emit('error', error instanceof Error ? error : new Error(String(error)));
     });
   }
 
   /**
    * 处理WebSocket消息
    */
-  private handleWebSocketMessage(ws: WebSocket, participantId: string, message: unknown): void {
+  private async handleWebSocketMessage(
+    ws: WebSocket,
+    connectionId: string,
+    message: unknown
+  ): Promise<void> {
     if (!isRecord(message) || typeof message.type !== 'string') {
       ws.send(JSON.stringify({ type: 'error', message: 'Invalid message format' }));
       return;
     }
 
+    const payload = isRecord(message.data) ? (message.data as Record<string, unknown>) : message;
+
     switch (message.type) {
       case 'join_room':
-        this.joinRoom(String(message.roomId || ''), message.participant as Participant)
+        this.joinRoom(
+          String(payload.roomId || ''),
+          payload.participant as Participant,
+          typeof payload.participantId === 'string' ? payload.participantId : undefined
+        )
           .then(participant => {
-            ws.send(JSON.stringify({ type: 'joined', participant }));
+            this.connectionParticipants.set(connectionId, participant.id);
+            this.connections.set(participant.id, ws);
+            const room = this.rooms.get(String(payload.roomId || ''));
+            ws.send(
+              JSON.stringify({
+                type: 'joined',
+                participant,
+                roomId: room?.id,
+                document: room?.document,
+                participants: room?.participants || [],
+              })
+            );
+
+            if (room) {
+              this.sendToRoom(room.id, {
+                type: 'participant_joined',
+                data: {
+                  participantId: participant.id,
+                  userId: participant.userId,
+                  username: participant.username,
+                  color: participant.color,
+                },
+              });
+            }
           })
           .catch(error => {
             ws.send(JSON.stringify({ type: 'error', message: error.message }));
           });
         break;
 
+      case 'sync_document': {
+        const documentId = String(payload.documentId || payload.roomId || '');
+        const document = this.documents.get(documentId) || this.rooms.get(documentId)?.document;
+        if (!document) {
+          ws.send(JSON.stringify({ type: 'error', message: 'Document not found' }));
+          return;
+        }
+        ws.send(
+          JSON.stringify({
+            type: 'document_sync',
+            data: {
+              documentId,
+              content: document.content,
+              version: document.version,
+            },
+          })
+        );
+        break;
+      }
+
       case 'leave_room':
-        this.leaveRoom(String(message.roomId || ''), participantId);
+        this.leaveRoom(
+          String(payload.roomId || ''),
+          this.connectionParticipants.get(connectionId) ?? connectionId
+        );
         break;
 
       case 'update_document':
         this.updateDocument(
-          String(message.documentId || ''),
-          message.changes as DocumentChange[],
-          participantId
+          String(payload.documentId || ''),
+          payload.changes as DocumentChange[],
+          this.connectionParticipants.get(connectionId) ?? connectionId
         );
         break;
 
       case 'update_cursor':
-        this.updateCursor(participantId, message.cursor as CursorPosition);
+        this.updateCursor(
+          this.connectionParticipants.get(connectionId) ?? connectionId,
+          payload.cursor as CursorPosition
+        );
         break;
+
+      case 'ping':
+        ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
+        break;
+
+      case 'add_annotation': {
+        const annotationData = payload as Omit<
+          Comment,
+          'id' | 'createdAt' | 'updatedAt' | 'replies'
+        >;
+        try {
+          const documentId = String(annotationData.documentId || payload.reportId || '');
+          const annotation = await this.addComment({
+            ...annotationData,
+            documentId,
+            userId: annotationData.userId,
+            username: annotationData.username,
+            content: annotationData.content,
+            position: annotationData.position,
+          });
+
+          ws.send(
+            JSON.stringify({
+              type: 'annotation_added',
+              data: annotation,
+            })
+          );
+
+          // 广播给房间内其他用户
+          this.sendToRoom(documentId, {
+            type: 'annotation_added',
+            data: annotation,
+          });
+        } catch (error) {
+          ws.send(
+            JSON.stringify({
+              type: 'error',
+              message: error instanceof Error ? error.message : '添加批注失败',
+            })
+          );
+        }
+        break;
+      }
+
+      case 'update_annotation': {
+        const { annotationId, content } = payload as { annotationId: string; content: string };
+        try {
+          // 查找并更新批注
+          for (const comments of this.comments.values()) {
+            const annotation = comments.find(c => c.id === annotationId);
+            if (annotation) {
+              annotation.content = content;
+              annotation.updatedAt = new Date();
+
+              ws.send(
+                JSON.stringify({
+                  type: 'annotation_updated',
+                  data: annotation,
+                })
+              );
+
+              // 广播给房间内其他用户
+              this.sendToRoom(annotation.documentId, {
+                type: 'annotation_updated',
+                data: annotation,
+              });
+              break;
+            }
+          }
+        } catch (error) {
+          ws.send(
+            JSON.stringify({
+              type: 'error',
+              message: error instanceof Error ? error.message : '更新批注失败',
+            })
+          );
+        }
+        break;
+      }
+
+      case 'delete_annotation': {
+        const { annotationId } = payload as { annotationId: string };
+        try {
+          let deletedAnnotation: Comment | null = null;
+
+          // 查找并删除批注
+          for (const [documentId, comments] of this.comments.entries()) {
+            const index = comments.findIndex(c => c.id === annotationId);
+            if (index !== -1) {
+              deletedAnnotation = comments[index];
+              comments.splice(index, 1);
+
+              ws.send(
+                JSON.stringify({
+                  type: 'annotation_deleted',
+                  data: { annotationId },
+                })
+              );
+
+              // 广播给房间内其他用户
+              this.sendToRoom(documentId, {
+                type: 'annotation_deleted',
+                data: { annotationId },
+              });
+              break;
+            }
+          }
+
+          if (!deletedAnnotation) {
+            ws.send(
+              JSON.stringify({
+                type: 'error',
+                message: '批注不存在',
+              })
+            );
+          }
+        } catch (error) {
+          ws.send(
+            JSON.stringify({
+              type: 'error',
+              message: error instanceof Error ? error.message : '删除批注失败',
+            })
+          );
+        }
+        break;
+      }
+
+      case 'load_annotations': {
+        const reportId = String(payload.reportId || payload.documentId || '');
+        try {
+          const annotations = await this.getDocumentComments(reportId);
+          ws.send(
+            JSON.stringify({
+              type: 'annotations_loaded',
+              data: annotations,
+            })
+          );
+        } catch (error) {
+          ws.send(
+            JSON.stringify({
+              type: 'error',
+              message: error instanceof Error ? error.message : '加载批注失败',
+            })
+          );
+        }
+        break;
+      }
+
+      case 'add_reply': {
+        const { parentId, reply } = payload as {
+          parentId: string;
+          reply: Omit<Comment, 'id' | 'createdAt' | 'updatedAt' | 'replies'>;
+        };
+        try {
+          const replyDocumentId = String(reply.documentId || '');
+          const replyComment = await this.replyToComment(parentId, {
+            ...reply,
+            documentId: replyDocumentId,
+            userId: reply.userId,
+            username: reply.username,
+            content: reply.content,
+            position: reply.position,
+          });
+
+          ws.send(
+            JSON.stringify({
+              type: 'reply_added',
+              data: { parentId, reply: replyComment },
+            })
+          );
+
+          // 广播给房间内其他用户
+          this.sendToRoom(replyDocumentId, {
+            type: 'reply_added',
+            data: { parentId, reply: replyComment },
+          });
+        } catch (error) {
+          ws.send(
+            JSON.stringify({
+              type: 'error',
+              message: error instanceof Error ? error.message : '添加回复失败',
+            })
+          );
+        }
+        break;
+      }
 
       default:
         ws.send(JSON.stringify({ type: 'error', message: 'Unknown message type' }));
@@ -666,14 +1028,55 @@ class CollaborationService extends EventEmitter {
   /**
    * 处理WebSocket关闭
    */
-  private handleWebSocketClose(participantId: string): void {
+  private handleWebSocketClose(connectionId: string): void {
+    const participantId = this.connectionParticipants.get(connectionId);
+    if (participantId) {
+      this.connections.delete(participantId);
+      this.connectionParticipants.delete(connectionId);
+    }
     // 从所有房间中移除用户
     for (const [roomId, room] of this.rooms.entries()) {
-      const participantIndex = room.participants.findIndex(p => p.id === participantId);
+      const resolvedParticipantId = participantId ?? connectionId;
+      const participantIndex = room.participants.findIndex(p => p.id === resolvedParticipantId);
       if (participantIndex !== -1) {
-        this.leaveRoom(roomId, participantId);
+        this.leaveRoom(roomId, resolvedParticipantId);
       }
     }
+  }
+
+  private findRoomByParticipant(participantId: string): string | null {
+    for (const [roomId, room] of this.rooms.entries()) {
+      if (room.participants.find(participant => participant.id === participantId)) {
+        return roomId;
+      }
+    }
+    return null;
+  }
+
+  private sendToRoom(roomId: string, payload: Record<string, unknown>): void {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      return;
+    }
+    room.participants.forEach(participant => {
+      const socket = this.connections.get(participant.id);
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(payload));
+      }
+    });
+  }
+
+  private pickColor(seed: string): string {
+    if (!seed) {
+      return this.participantColors[0];
+    }
+    let hash = 0;
+    for (let i = 0; i < seed.length; i += 1) {
+      hash = (hash << 5) - hash + seed.charCodeAt(i);
+      hash |= 0;
+    }
+    const index = Math.abs(hash) % this.participantColors.length;
+    return this.participantColors[index];
   }
 
   /**

@@ -6,6 +6,7 @@ import type { NextFunction, Request, Response } from 'express';
 
 const fs = require('fs');
 const path = require('path');
+const Logger = require('../utils/logger');
 
 type RequestWithUser = Request & { user?: { id?: string } };
 type RequestWithStats = Request & { stats?: Record<string, unknown> };
@@ -40,10 +41,12 @@ const requestLogger = (req: RequestWithUser, res: Response, next: NextFunction) 
 
     // 控制台输出（开发环境）
     if (process.env.NODE_ENV === 'development') {
-      const statusColor = getStatusColor(res.statusCode);
-      console.log(
-        `${timestamp} ${req.method} ${req.originalUrl} ${statusColor}${res.statusCode}\x1b[0m ${duration}ms`
-      );
+      Logger.info('HTTP 请求完成', {
+        method: req.method,
+        url: req.originalUrl,
+        statusCode: res.statusCode,
+        duration,
+      });
     }
   });
 
@@ -69,17 +72,6 @@ const sanitizeBody = (body: Record<string, unknown> | null) => {
 };
 
 /**
- * 获取状态码颜色
- */
-const getStatusColor = (statusCode: number) => {
-  if (statusCode >= 500) return '\x1b[31m'; // 红色
-  if (statusCode >= 400) return '\x1b[33m'; // 黄色
-  if (statusCode >= 300) return '\x1b[36m'; // 青色
-  if (statusCode >= 200) return '\x1b[32m'; // 绿色
-  return '\x1b[0m'; // 默认
-};
-
-/**
  * 写入日志文件
  */
 const writeLog = (logEntry: Record<string, unknown>) => {
@@ -88,7 +80,7 @@ const writeLog = (logEntry: Record<string, unknown>) => {
 
   fs.appendFile(logPath, logString, (err: Error) => {
     if (err) {
-      console.error('写入日志失败:', err);
+      Logger.error('写入日志失败', err);
     }
   });
 };
@@ -112,11 +104,11 @@ const securityLogger = (event: string, details: Record<string, unknown>, req?: R
 
   fs.appendFile(logPath, logString, (err: Error) => {
     if (err) {
-      console.error('写入安全日志失败:', err);
+      Logger.error('写入安全日志失败', err);
     }
   });
 
-  console.warn(`[SECURITY] ${event}:`, details);
+  Logger.warn(`SECURITY ${event}`, { details });
 };
 
 /**
@@ -136,7 +128,7 @@ const dbLogger = (query: string, duration: number, error: Error | null = null) =
 
   fs.appendFile(logPath, logString, (err: Error) => {
     if (err) {
-      console.error('写入数据库日志失败:', err);
+      Logger.error('写入数据库日志失败', err);
     }
   });
 };
@@ -153,8 +145,10 @@ const performanceMonitor = (req: Request, res: Response, next: NextFunction) => 
 
     // 记录慢请求
     if (duration > 1000) {
-      // 超过1秒的请求
-      console.warn(`[SLOW REQUEST] ${req.method} ${req.originalUrl} - ${duration.toFixed(2)}ms`);
+      Logger.perf('slow_request', duration, {
+        method: req.method,
+        url: req.originalUrl,
+      });
 
       const logEntry = {
         timestamp: new Date().toISOString(),

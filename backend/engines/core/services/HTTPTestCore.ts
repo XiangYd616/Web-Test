@@ -177,6 +177,9 @@ class HTTPTestCore {
     const requestId = this.generateRequestId();
     const abortController = new AbortController();
 
+    let response: AxiosResponse | null = null;
+    let retries = 0;
+
     this.activeRequests.set(requestId, abortController);
 
     try {
@@ -190,7 +193,7 @@ class HTTPTestCore {
         },
         timeout: config.timeout || 30000,
         maxRedirects: config.maxRedirects || 5,
-        validateStatus: false,
+        validateStatus: () => true,
         signal: abortController.signal,
       };
 
@@ -199,8 +202,6 @@ class HTTPTestCore {
         axiosConfig.data = endpoint.body;
       }
 
-      let response: AxiosResponse;
-      let retries = 0;
       const maxRetries = config.retries || 0;
 
       // 重试逻辑
@@ -222,6 +223,10 @@ class HTTPTestCore {
       const responseTime = endTime - startTime;
 
       // 验证响应
+      if (!response) {
+        throw new Error('No response received');
+      }
+
       const validation = this.validateResponse(response, endpoint);
 
       const result: TestResult = {
@@ -480,8 +485,9 @@ class HTTPTestCore {
     let history = [...this.requestHistory];
 
     // 过滤条件
-    if (options.endpoint) {
-      history = history.filter(h => h.endpoint.includes(options.endpoint));
+    const endpointFilter = options.endpoint;
+    if (endpointFilter) {
+      history = history.filter(h => h.endpoint.includes(endpointFilter));
     }
     if (options.method) {
       history = history.filter(h => h.method === options.method);
@@ -489,8 +495,9 @@ class HTTPTestCore {
     if (options.status) {
       history = history.filter(h => h.status === options.status);
     }
-    if (options.since) {
-      history = history.filter(h => h.timestamp >= options.since);
+    const since = options.since;
+    if (since) {
+      history = history.filter(h => h.timestamp >= since);
     }
 
     // 排序和限制

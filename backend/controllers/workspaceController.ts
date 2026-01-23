@@ -92,8 +92,8 @@ const listWorkspaces = async (req: AuthRequest, res: ApiResponse) => {
   });
 
   const data = rows
-    .filter(member => member.workspace)
-    .map(member => ({
+    .filter((member: { workspace?: (typeof rows)[number]['workspace'] }) => member.workspace)
+    .map((member: { workspace: (typeof rows)[number]['workspace']; role: string }) => ({
       id: member.workspace.id,
       name: member.workspace.name,
       description: member.workspace.description,

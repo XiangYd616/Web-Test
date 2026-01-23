@@ -250,8 +250,8 @@ class StatisticsService {
         failed: Number(totalResult.rows[0]?.failed) || 0,
         averageScore: Number(totalResult.rows[0]?.average_score) || 0,
         averageDuration: Number(totalResult.rows[0]?.average_duration) || 0,
-        byType: this.arrayToObject(typeResults, 'test_type', 'count'),
-        byStatus: this.arrayToObject(statusResults, 'status', 'count'),
+        byType: this.arrayToObject(typeResults.rows || [], 'test_type', 'count'),
+        byStatus: this.arrayToObject(statusResults.rows || [], 'status', 'count'),
         byDay,
         trends,
       };
@@ -519,8 +519,8 @@ class StatisticsService {
         totalImports: Number(usageStats.rows[0]?.total_imports) || 0,
         storageUsed: Number(usageStats.rows[0]?.storage_used) || 0,
         apiCalls: Number(usageStats.rows[0]?.api_calls) || 0,
-        byModule: this.arrayToObject(moduleStats, 'module', 'count'),
-        byFeature: this.arrayToObject(featureStats, 'feature', 'count'),
+        byModule: this.arrayToObject(moduleStats.rows || [], 'module', 'count'),
+        byFeature: this.arrayToObject(featureStats.rows || [], 'feature', 'count'),
         growth,
       };
 
@@ -598,7 +598,7 @@ class StatisticsService {
         [metric, period]
       );
 
-      const typedData = data as Array<{ date: string; value: number }>;
+      const typedData = (data.rows || []) as Array<{ date: string; value: number }>;
       const values = typedData.map(item => Number(item.value) || 0);
       const trend = this.calculateTrend(values);
       const prediction = this.generatePrediction(typedData, 7);
@@ -606,7 +606,7 @@ class StatisticsService {
       return {
         metric,
         period,
-        data: data.rows || [],
+        data: typedData,
         trend: trend.direction,
         changeRate: trend.changeRate,
         prediction,
@@ -747,10 +747,23 @@ class StatisticsService {
 
     return {
       responseTime:
-        responseTrend.direction === 'increasing' ? 'degrading' : responseTrend.direction,
+        responseTrend.direction === 'increasing'
+          ? 'degrading'
+          : responseTrend.direction === 'decreasing'
+            ? 'improving'
+            : 'stable',
       throughput:
-        throughputTrend.direction === 'increasing' ? 'improving' : throughputTrend.direction,
-      errorRate: errorRateTrend.direction === 'decreasing' ? 'improving' : errorRateTrend.direction,
+        throughputTrend.direction === 'increasing'
+          ? 'improving'
+          : throughputTrend.direction === 'decreasing'
+            ? 'degrading'
+            : 'stable',
+      errorRate:
+        errorRateTrend.direction === 'decreasing'
+          ? 'improving'
+          : errorRateTrend.direction === 'increasing'
+            ? 'degrading'
+            : 'stable',
     };
   }
 

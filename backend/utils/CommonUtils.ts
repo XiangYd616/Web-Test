@@ -132,7 +132,7 @@ class CommonUtils {
   static deepMerge<T extends Record<string, unknown>>(
     target: T,
     ...sources: Array<Record<string, unknown>>
-  ) {
+  ): T {
     if (!sources.length) return target;
     const source = sources.shift();
 

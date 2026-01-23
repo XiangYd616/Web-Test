@@ -1,5 +1,5 @@
 import https from 'https';
-import emailService from '../email/emailService';
+import { sendEmail } from '../email/emailService';
 
 const Logger = require('../../utils/logger');
 
@@ -80,7 +80,7 @@ class NotificationService {
     const subject = `【${alert.severity.toUpperCase()}】${alert.type}告警`;
     const message = alert.data?.message || '检测到新的系统告警';
 
-    await emailService.sendEmail({
+    await sendEmail({
       to,
       subject,
       template: 'default',

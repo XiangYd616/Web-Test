@@ -29,6 +29,14 @@ type ScheduledTaskInstance = Model & {
   save: () => Promise<Model>;
 };
 
+type ScheduledTaskInstanceMethods = ScheduledTaskInstance & {
+  enable: () => Promise<Model>;
+  disable: () => Promise<Model>;
+  updateExecutionStats: (success?: boolean) => Promise<Model>;
+  updateNextExecution: (nextTime: Date) => Promise<Model>;
+  getSuccessRate: () => string | number;
+};
+
 type ScheduledTaskModel = ModelCtor<Model> & {
   findEnabled: () => Promise<Model[]>;
   findByType: (type: string) => Promise<Model[]>;
@@ -172,6 +180,10 @@ const createScheduledTask = (sequelize: Sequelize): ScheduledTaskModel => {
     }
   ) as ScheduledTaskModel;
 
+  const ScheduledTaskWithInstance = ScheduledTask as unknown as ScheduledTaskModel & {
+    prototype: ScheduledTaskInstanceMethods;
+  };
+
   // 类方法：查找启用的任务
   ScheduledTask.findEnabled = function findEnabled() {
     return this.findAll({
@@ -197,19 +209,21 @@ const createScheduledTask = (sequelize: Sequelize): ScheduledTaskModel => {
   };
 
   // 实例方法：启用任务
-  (ScheduledTask as any).prototype.enable = async function enable(this: ScheduledTaskInstance) {
+  ScheduledTaskWithInstance.prototype.enable = async function enable(this: ScheduledTaskInstance) {
     this.enabled = true;
     return this.save();
   };
 
   // 实例方法：禁用任务
-  (ScheduledTask as any).prototype.disable = async function disable(this: ScheduledTaskInstance) {
+  ScheduledTaskWithInstance.prototype.disable = async function disable(
+    this: ScheduledTaskInstance
+  ) {
     this.enabled = false;
     return this.save();
   };
 
   // 实例方法：更新执行统计
-  (ScheduledTask as any).prototype.updateExecutionStats = async function updateExecutionStats(
+  ScheduledTaskWithInstance.prototype.updateExecutionStats = async function updateExecutionStats(
     this: ScheduledTaskInstance,
     success = true
   ) {
@@ -222,7 +236,7 @@ const createScheduledTask = (sequelize: Sequelize): ScheduledTaskModel => {
   };
 
   // 实例方法：更新下次执行时间
-  (ScheduledTask as any).prototype.updateNextExecution = async function updateNextExecution(
+  ScheduledTaskWithInstance.prototype.updateNextExecution = async function updateNextExecution(
     this: ScheduledTaskInstance,
     nextTime: Date
   ) {
@@ -231,7 +245,7 @@ const createScheduledTask = (sequelize: Sequelize): ScheduledTaskModel => {
   };
 
   // 实例方法：获取成功率
-  (ScheduledTask as any).prototype.getSuccessRate = function getSuccessRate(
+  ScheduledTaskWithInstance.prototype.getSuccessRate = function getSuccessRate(
     this: ScheduledTaskInstance
   ) {
     if (!this.executionCount) return 0;

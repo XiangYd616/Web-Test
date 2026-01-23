@@ -459,6 +459,58 @@ class ComparisonAnalyzer {
   }
 
   /**
+   * 基准测试对比（占位实现）
+   */
+  async compareToBenchmark(testResult: Record<string, unknown>, benchmarkType: string) {
+    return {
+      benchmarkType,
+      testResult,
+      comparison: {
+        status: 'not_implemented',
+        message: '基准对比逻辑尚未实现，返回原始数据',
+      },
+    };
+  }
+
+  /**
+   * 获取可用基准测试（占位实现）
+   */
+  async getAvailableBenchmarks(_testType?: string) {
+    return [] as string[];
+  }
+
+  /**
+   * 生成对比摘要（占位实现）
+   */
+  async generateComparisonSummary(comparisons: unknown[], groupBy?: string) {
+    return {
+      total: comparisons.length,
+      groupBy: groupBy || 'none',
+      comparisons,
+    };
+  }
+
+  /**
+   * 获取对比指标（占位实现）
+   */
+  async getComparisonMetrics(_testType?: string) {
+    return [] as string[];
+  }
+
+  /**
+   * 导出对比报告（占位实现）
+   */
+  async exportComparisonReport(comparisonId: string, format = 'json', options?: unknown) {
+    const payload = {
+      comparisonId,
+      format,
+      options,
+      message: '导出功能尚未实现，返回基础信息',
+    };
+    return Buffer.from(JSON.stringify(payload, null, 2));
+  }
+
+  /**
    * 分析压力测试趋势
    * @private
    */

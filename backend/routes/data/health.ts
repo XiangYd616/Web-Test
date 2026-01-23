@@ -3,7 +3,9 @@
  */
 
 import express from 'express';
-import { getConnectionManager, getStats, healthCheck } from '../../config/database';
+
+const { getConnectionManager, getStats, healthCheck } = require('../../config/database');
+const { asyncHandler } = require('../../middleware/errorHandler');
 
 interface HealthStatus {
   status: 'healthy' | 'unhealthy' | 'degraded';
@@ -68,8 +70,8 @@ router.get(
   '/status',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const connectionManager = getConnectionManager();
-      const stats = getStats();
+      const connectionManager = await getConnectionManager();
+      const stats = await getStats();
 
       const status: HealthStatus = {
         status: connectionManager.isConnectionActive() ? 'healthy' : 'unhealthy',
@@ -143,7 +145,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const startTime = Date.now();
-      const connectionManager = getConnectionManager();
+      const connectionManager = await getConnectionManager();
 
       // 执行简单查询测试连接
       await connectionManager.getSequelize().authenticate();

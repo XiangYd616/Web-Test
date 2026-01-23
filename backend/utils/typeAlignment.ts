@@ -435,6 +435,7 @@ const validateRequestTypes = (expectedTypes: Record<string, string>) => {
         timestamp: new Date().toISOString(),
       });
     }
+    return undefined;
   };
 };
 

@@ -460,11 +460,11 @@ class CacheService {
 
       // 删除内存缓存匹配的键
       const memoryKeys = this.memoryCache.keys();
-      const matchingKeys = memoryKeys.filter(key =>
+      const matchingKeys = memoryKeys.filter((key: string) =>
         new RegExp(pattern.replace(/\*/g, '.*')).test(key)
       );
 
-      matchingKeys.forEach(key => {
+      matchingKeys.forEach((key: string) => {
         this.memoryCache.del(key);
         count += 1;
       });

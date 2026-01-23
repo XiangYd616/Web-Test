@@ -39,6 +39,7 @@ const runRoutes = require('./routes/runs');
 const scheduledRunRoutes = require('./routes/scheduledRuns');
 const scheduledRunController = require('./controllers/scheduledRunController');
 const ScheduledRunService = require('./services/runs/ScheduledRunService');
+const CollaborationService = require('./services/collaboration/CollaborationService');
 const registerTestEngines = require('./engines/core/registerEngines');
 const testEngineRegistry = require('./core/TestEngineRegistry');
 const { startWorker } = require('./services/testing/TestQueueService');
@@ -310,6 +311,16 @@ const startServer = async (): Promise<Server> => {
         console.log('🔧 Development mode - CORS enabled for all origins');
       }
     });
+
+    const collaborationService = new CollaborationService();
+    collaborationService
+      .initialize({
+        server,
+        path: '/ws/collaboration',
+      })
+      .catch((error: unknown) => {
+        console.error('启动协作服务失败:', error);
+      });
 
     // 设置服务器超时
     server.timeout = 30000; // 30秒超时

@@ -188,7 +188,7 @@ class PermissionService {
 
       return permissions;
     } catch (error) {
-      throw ErrorFactory.fromError(error);
+      throw ErrorFactory.fromError(error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -310,7 +310,9 @@ class PermissionService {
   async addUserPermission(userId: number | string, permission: string) {
     try {
       if (!this.isValidPermission(permission)) {
-        throw ErrorFactory.validation([{ field: 'permission', message: '无效的权限' }]);
+        throw ErrorFactory.validation('无效的权限', [
+          { field: 'permission', message: '无效的权限' },
+        ]);
       }
 
       await query(
@@ -335,7 +337,7 @@ class PermissionService {
         console.warn('用户权限表不存在，跳过自定义权限添加');
         return false;
       }
-      throw ErrorFactory.fromError(error);
+      throw ErrorFactory.fromError(error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -363,7 +365,7 @@ class PermissionService {
         console.warn('用户权限表不存在，跳过自定义权限移除');
         return false;
       }
-      throw ErrorFactory.fromError(error);
+      throw ErrorFactory.fromError(error instanceof Error ? error : new Error(String(error)));
     }
   }
 

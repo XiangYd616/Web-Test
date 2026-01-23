@@ -22,6 +22,16 @@ interface ComparisonRequest {
   previousTestId: string;
 }
 
+type TestResult = {
+  id: string;
+  testType: string;
+  url: string;
+  score: number;
+  timestamp: Date;
+  metrics: Record<string, unknown>;
+  issues: unknown[];
+};
+
 interface TrendAnalysisRequest {
   testId: string;
   period: string;
@@ -32,30 +42,7 @@ interface ComparisonResult {
   id: string;
   currentResult: TestResult;
   previousResult: TestResult;
-  comparison: {
-    scoreChange: number;
-    scoreChangePercent: number;
-    improved: boolean;
-    newIssues: Array<{
-      type: string;
-      severity: string;
-      description: string;
-    }>;
-    resolvedIssues: Array<{
-      type: string;
-      severity: string;
-      description: string;
-    }>;
-    metricChanges: Record<
-      string,
-      {
-        current: unknown;
-        previous: unknown;
-        change: number;
-        changePercent: number;
-      }
-    >;
-  };
+  comparison: ReturnType<ComparisonAnalyzer['compare']>;
   timestamp: Date;
 }
 
@@ -95,7 +82,7 @@ const buildComparisonResult = (row: TestResultRow) => ({
   result: row.summary || {},
   metrics: row.summary || {},
   score: row.score || 0,
-  createdAt: row.completed_at || row.created_at,
+  createdAt: (row.completed_at || row.created_at).toISOString(),
 });
 
 const buildTrendRecord = (row: TestResultRow, metrics?: string[]) => {
@@ -113,7 +100,7 @@ const buildTrendRecord = (row: TestResultRow, metrics?: string[]) => {
     result: filtered,
     metrics: filtered,
     score: row.score || 0,
-    createdAt: row.completed_at || row.created_at,
+    createdAt: (row.completed_at || row.created_at).toISOString(),
   };
 };
 
@@ -318,21 +305,23 @@ router.post(
         }
       }
 
+      const scoreChange = result.currentResult.score - result.previousResult.score;
+
       Logger.info('测试对比完成', {
         comparisonId: result.id,
         currentScore: result.currentResult.score,
         previousScore: result.previousResult.score,
-        scoreChange: comparison.scoreChange,
+        scoreChange,
       });
 
-      res.json({
+      return res.json({
         success: true,
         data: result,
       });
     } catch (error) {
       Logger.error('测试对比失败', { error, body: req.body });
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '测试对比失败',
         error: error instanceof Error ? error.message : String(error),
@@ -351,30 +340,28 @@ router.get(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { limit = 20, offset = 0 } = req.query;
     const userId = (req as { user: { id: string } }).user.id;
+    const limitValue = Number(limit) || 20;
+    const offsetValue = Number(offset) || 0;
 
     try {
-      const history = await getComparisonHistory(
-        userId,
-        parseInt(limit as string),
-        parseInt(offset as string)
-      );
+      const history = await getComparisonHistory(userId, limitValue, offsetValue);
 
-      res.json({
+      return res.json({
         success: true,
         data: {
           records: history.records,
           total: history.total,
           pagination: {
-            limit: parseInt(limit as string),
-            offset: parseInt(offset as string),
-            hasMore: offset + Number(limit) < history.total,
+            limit: limitValue,
+            offset: offsetValue,
+            hasMore: offsetValue + limitValue < history.total,
           },
         },
       });
     } catch (error) {
       Logger.error('获取对比记录失败', { error, userId });
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取对比记录失败',
         error: error instanceof Error ? error.message : String(error),
@@ -414,17 +401,28 @@ router.post(
         history.map(record => buildTrendRecord(record, metrics))
       );
 
+      if ('error' in trendAnalysis) {
+        return res.status(400).json({
+          success: false,
+          message: trendAnalysis.error,
+        });
+      }
+
       const result: TrendAnalysisResult = {
         testId,
         period,
-        dataPoints: trendAnalysis.dataPoints || [],
-        trend: trendAnalysis.trend || {
+        dataPoints: history.map(record => ({
+          timestamp: record.completed_at || record.created_at,
+          score: record.score || 0,
+          metrics: record.summary || {},
+        })),
+        trend: {
           direction: 'stable',
           scoreTrend: 0,
           confidence: 0,
         },
-        insights: trendAnalysis.insights || [],
-        recommendations: trendAnalysis.recommendations || [],
+        insights: [],
+        recommendations: [],
       };
 
       Logger.info('趋势分析完成', {
@@ -434,14 +432,14 @@ router.post(
         scoreTrend: result.trend.scoreTrend,
       });
 
-      res.json({
+      return res.json({
         success: true,
         data: result,
       });
     } catch (error) {
       Logger.error('趋势分析失败', { error, testId: req.body.testId });
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '趋势分析失败',
         error: error instanceof Error ? error.message : String(error),
@@ -514,14 +512,14 @@ router.post(
 
       const benchmarkComparison = await analyzer.compareToBenchmark(testResult, benchmarkType);
 
-      res.json({
+      return res.json({
         success: true,
         data: benchmarkComparison,
       });
     } catch (error) {
       Logger.error('基准测试对比失败', { error, benchmarkType: req.body.benchmarkType });
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '基准测试对比失败',
         error: error instanceof Error ? error.message : String(error),
@@ -542,14 +540,14 @@ router.get(
     try {
       const benchmarks = await analyzer.getAvailableBenchmarks(testType as string);
 
-      res.json({
+      return res.json({
         success: true,
         data: benchmarks,
       });
     } catch (error) {
       Logger.error('获取基准测试失败', { error, testType: req.query.testType });
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取基准测试失败',
         error: error instanceof Error ? error.message : String(error),
@@ -577,14 +575,14 @@ router.post(
 
       const summary = await analyzer.generateComparisonSummary(comparisons, groupBy);
 
-      res.json({
+      return res.json({
         success: true,
         data: summary,
       });
     } catch (error) {
       Logger.error('生成对比摘要失败', { error, comparisonsCount: req.body.comparisons?.length });
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '生成对比摘要失败',
         error: error instanceof Error ? error.message : String(error),
@@ -605,14 +603,14 @@ router.get(
     try {
       const metrics = await analyzer.getComparisonMetrics(testType as string);
 
-      res.json({
+      return res.json({
         success: true,
         data: metrics,
       });
     } catch (error) {
       Logger.error('获取对比指标失败', { error, testType: req.query.testType });
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取对比指标失败',
         error: error instanceof Error ? error.message : String(error),
@@ -646,11 +644,11 @@ router.post(
         `attachment; filename="comparison_${comparisonId}.${format}"`
       );
 
-      res.send(exportData);
+      return res.send(exportData);
     } catch (error) {
       Logger.error('导出对比报告失败', { error, comparisonId: req.body.comparisonId });
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '导出对比报告失败',
         error: error instanceof Error ? error.message : String(error),

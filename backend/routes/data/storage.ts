@@ -867,7 +867,7 @@ router.post(
           size: Number(file.size || 0),
           path: targetFilePath,
         },
-        userId
+        ensuredUserId
       );
 
       return res.status(201).json({

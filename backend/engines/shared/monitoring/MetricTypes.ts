@@ -89,14 +89,14 @@ export interface BaseMetric {
 
 // 计数器指标
 export interface CounterMetric extends BaseMetric {
-  type: MetricType.COUNTER;
+  type: typeof MetricType.COUNTER;
   value: number;
   total: number;
 }
 
 // 仪表盘指标
 export interface GaugeMetric extends BaseMetric {
-  type: MetricType.GAUGE;
+  type: typeof MetricType.GAUGE;
   value: number;
   min?: number;
   max?: number;
@@ -104,7 +104,7 @@ export interface GaugeMetric extends BaseMetric {
 
 // 直方图指标
 export interface HistogramMetric extends BaseMetric {
-  type: MetricType.HISTOGRAM;
+  type: typeof MetricType.HISTOGRAM;
   buckets: Array<{
     upperBound: number;
     count: number;
@@ -115,7 +115,7 @@ export interface HistogramMetric extends BaseMetric {
 
 // 定时器指标
 export interface TimerMetric extends BaseMetric {
-  type: MetricType.TIMER;
+  type: typeof MetricType.TIMER;
   duration: number;
   count: number;
   sum: number;
@@ -129,18 +129,18 @@ export interface TimerMetric extends BaseMetric {
 
 // 速率指标
 export interface RateMetric extends BaseMetric {
-  type: MetricType.RATE;
+  type: typeof MetricType.RATE;
   value: number;
   interval: number;
   unit:
-    | MetricUnitType.RATE_PER_SECOND
-    | MetricUnitType.RATE_PER_MINUTE
-    | MetricUnitType.RATE_PER_HOUR;
+    | typeof MetricUnit.RATE_PER_SECOND
+    | typeof MetricUnit.RATE_PER_MINUTE
+    | typeof MetricUnit.RATE_PER_HOUR;
 }
 
 // 百分比指标
 export interface PercentageMetric extends BaseMetric {
-  type: MetricType.PERCENTAGE;
+  type: typeof MetricType.PERCENTAGE;
   value: number;
   total: number;
   current: number;
@@ -173,6 +173,7 @@ export interface MetricDefinition {
 
 // 指标数据点接口
 export interface MetricDataPoint {
+  name: string;
   timestamp: Date;
   value: number;
   labels?: Record<string, string>;
@@ -216,7 +217,7 @@ export interface MetricAlert {
   description: string;
   metricName: string;
   condition: AlertCondition;
-  severity: AlertSeverity;
+  severity: AlertSeverityType;
   enabled: boolean;
   createdAt: Date;
   lastTriggered?: Date;
@@ -598,8 +599,13 @@ export class MetricUtils {
   /**
    * 创建指标数据点
    */
-  static createDataPoint(value: number, labels?: Record<string, string>): MetricDataPoint {
+  static createDataPoint(
+    name: string,
+    value: number,
+    labels?: Record<string, string>
+  ): MetricDataPoint {
     return {
+      name,
       timestamp: new Date(),
       value,
       labels,
@@ -610,15 +616,13 @@ export class MetricUtils {
    * 合并标签
    */
   static mergeLabels(...labelSets: (Record<string, string> | undefined)[]): Record<string, string> {
-    return labelSets.reduce(
-      (merged, labels) => {
-        if (labels) {
-          Object.assign(merged, labels);
-        }
-        return merged;
-      },
-      {} as Record<string, string>
-    );
+    const merged: Record<string, string> = {};
+    for (const labels of labelSets) {
+      if (labels) {
+        Object.assign(merged, labels);
+      }
+    }
+    return merged;
   }
 }
 

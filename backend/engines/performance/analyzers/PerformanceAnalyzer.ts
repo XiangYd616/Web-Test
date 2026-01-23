@@ -350,7 +350,7 @@ class PerformanceAnalyzer {
       // 时间指标
       const navEntry = perfEntries.find(entry => entry.entryType === 'navigation');
       const firstPaintEntry = perfEntries.find(entry => entry.name === 'first-paint');
-      const clsValue = (win.__clsEntries || []).reduce((sum, value) => sum + value, 0);
+      const clsValue = (win.__clsEntries || []).reduce((sum, value) => sum + Number(value), 0);
       const navTiming = navEntry as
         | {
             startTime: number;
