@@ -4,12 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
-const { createGunzip } = require('zlib');
-const { pipeline } = require('stream');
-const { promisify } = require('util');
 const tar = require('tar');
-
-const pipelineAsync = promisify(pipeline);
 
 /**
  * MaxMind GeoLite2 数据库下载脚本
@@ -226,7 +221,6 @@ class GeoDBDownloader {
 
     if (successCount > 0) {
       console.log('🚀 重启服务器以使用本地数据库查询');
-    } else {
     }
 
     return successCount > 0;

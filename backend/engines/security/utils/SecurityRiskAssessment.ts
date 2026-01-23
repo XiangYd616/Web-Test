@@ -218,7 +218,7 @@ class SecurityRiskAssessment {
   ): Promise<RiskAssessmentResult> {
     const {
       framework = 'ISO27001',
-      businessContext = 'general',
+      businessContext: _businessContext = 'general',
       riskTolerance = 'medium',
       includeRecommendations = true,
       generateTimeline = true,
@@ -341,10 +341,12 @@ class SecurityRiskAssessment {
 
     // 按类别分组
     vulnerabilities.forEach(vuln => {
-      if (!categories.has(vuln.category)) {
-        categories.set(vuln.category, []);
+      const existing = categories.get(vuln.category);
+      if (existing) {
+        existing.push(vuln);
+      } else {
+        categories.set(vuln.category, [vuln]);
       }
-      categories.get(vuln.category)!.push(vuln);
     });
 
     // 评估每个类别
@@ -421,8 +423,6 @@ class SecurityRiskAssessment {
     vulnerabilities: SecurityVulnerability[],
     category: string
   ): string[] {
-    const recommendations: string[] = [];
-
     // 基于类别生成通用建议
     const categoryRecommendations: Record<string, string[]> = {
       authentication: [
@@ -624,7 +624,16 @@ class SecurityRiskAssessment {
     categories: string[];
     severityLevels: ('critical' | 'high' | 'medium' | 'low' | 'info')[];
   }> {
-    const frameworks: Record<string, any> = {
+    type FrameworkRequirement = {
+      id: string;
+      name: string;
+      description: string;
+      category: string;
+      categories: string[];
+      severityLevels: ('critical' | 'high' | 'medium' | 'low' | 'info')[];
+    };
+
+    const frameworks: Record<string, FrameworkRequirement[]> = {
       ISO27001: [
         {
           id: 'A.9.1.1',
@@ -696,7 +705,7 @@ class SecurityRiskAssessment {
    * 获取合规建议
    */
   private getComplianceRecommendations(
-    req: any,
+    req: { name: string },
     vulnerabilities: SecurityVulnerability[]
   ): string[] {
     const recommendations: string[] = [];
@@ -855,7 +864,7 @@ class SecurityRiskAssessment {
    */
   private generateSummary(
     vulnerabilities: SecurityVulnerability[],
-    overall: any,
+    overall: ReturnType<SecurityRiskAssessment['calculateOverallRisk']>,
     categories: CategoryRiskAssessment[]
   ): RiskSummary {
     const keyFindings: string[] = [];

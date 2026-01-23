@@ -4,7 +4,7 @@
  * 分析页面的Meta标签，包括title、description、keywords等
  */
 
-import puppeteer from 'puppeteer';
+import puppeteer, { type Page } from 'puppeteer';
 
 interface MetaTagRules {
   title: {
@@ -21,6 +21,21 @@ interface MetaTagRules {
     maxCount: number;
     maxLength: number;
   };
+}
+
+interface MetaTagData {
+  title: string;
+  description: string;
+  keywords: string;
+  canonical: string;
+  robots: string;
+  viewport: string;
+  language: string;
+  author: string;
+  favicon: string;
+  openGraph: Array<{ property: string; content: string }>;
+  twitter: Array<{ name: string; content: string }>;
+  other: Array<{ name: string; content: string }>;
 }
 
 interface MetaTagAnalysisResult {
@@ -284,20 +299,7 @@ class MetaTagAnalyzer {
   /**
    * 提取Meta标签数据
    */
-  private async extractMetaTags(page: any): Promise<{
-    title: string;
-    description: string;
-    keywords: string;
-    canonical: string;
-    robots: string;
-    viewport: string;
-    language: string;
-    author: string;
-    favicon: string;
-    openGraph: Array<{ property: string; content: string }>;
-    twitter: Array<{ name: string; content: string }>;
-    other: Array<{ name: string; content: string }>;
-  }> {
+  private async extractMetaTags(page: Page): Promise<MetaTagData> {
     return await page.evaluate(() => {
       // 获取页面标题
       const title = document.title || '';
@@ -395,7 +397,7 @@ class MetaTagAnalyzer {
   /**
    * 分析标题
    */
-  private analyzeTitle(metaData: any): TitleAnalysis {
+  private analyzeTitle(metaData: MetaTagData): TitleAnalysis {
     const content = metaData.title || '';
     const length = content.length;
     const optimized = length >= this.rules.title.minLength && length <= this.rules.title.maxLength;
@@ -467,7 +469,7 @@ class MetaTagAnalyzer {
   /**
    * 分析描述
    */
-  private analyzeDescription(metaData: any): DescriptionAnalysis {
+  private analyzeDescription(metaData: MetaTagData): DescriptionAnalysis {
     const content = metaData.description || '';
     const length = content.length;
     const optimized =
@@ -550,7 +552,7 @@ class MetaTagAnalyzer {
   /**
    * 分析关键词
    */
-  private analyzeKeywords(metaData: any): KeywordsAnalysis {
+  private analyzeKeywords(metaData: MetaTagData): KeywordsAnalysis {
     const content = metaData.keywords || '';
     const keywords = content
       ? content
@@ -633,7 +635,7 @@ class MetaTagAnalyzer {
   /**
    * 分析Open Graph
    */
-  private analyzeOpenGraph(metaData: any): OpenGraphAnalysis {
+  private analyzeOpenGraph(metaData: MetaTagData): OpenGraphAnalysis {
     const tags = metaData.openGraph || [];
     const present = tags.length > 0;
 
@@ -683,7 +685,7 @@ class MetaTagAnalyzer {
   /**
    * 分析Twitter Cards
    */
-  private analyzeTwitter(metaData: any): TwitterAnalysis {
+  private analyzeTwitter(metaData: MetaTagData): TwitterAnalysis {
     const tags = metaData.twitter || [];
     const present = tags.length > 0;
 
@@ -733,7 +735,7 @@ class MetaTagAnalyzer {
   /**
    * 分析其他Meta标签
    */
-  private analyzeOtherMeta(metaData: any): OtherMetaAnalysis {
+  private analyzeOtherMeta(metaData: MetaTagData): OtherMetaAnalysis {
     const issues: string[] = [];
     let score = 100;
 

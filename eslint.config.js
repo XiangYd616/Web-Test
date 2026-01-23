@@ -1,11 +1,11 @@
 import js from '@eslint/js';
-import globals from 'globals';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import reactRefreshPlugin from 'eslint-plugin-react-refresh';
-import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
+import globals from 'globals';
 
 export default [
   {
@@ -17,6 +17,7 @@ export default [
       '*.min.js',
       'public/**',
       'backend/node_modules/**',
+      'backend/dist/**',
       'server/node_modules/**',
     ],
   },

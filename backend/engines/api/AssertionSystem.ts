@@ -32,10 +32,11 @@ const normalizePath = (path: string) =>
 const getValueByPath = (value: unknown, path: string) => {
   if (!path) return value;
   const segments = normalizePath(path);
-  let current: any = value;
+  let current: unknown = value;
   for (const segment of segments) {
     if (current === null || current === undefined) return undefined;
-    current = current[segment];
+    if (typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[segment];
   }
   return current;
 };

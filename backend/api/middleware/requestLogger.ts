@@ -34,17 +34,24 @@ interface RequestLoggerOptions {
   logLevel?: 'debug' | 'info' | 'warn' | 'error';
 }
 
+const logs: RequestLog[] = [];
+const maxLogs = 1000; // 最大日志数量
+
 /**
  * 获取客户端IP地址
  */
 const getClientIP = (req: Request): string => {
+  const forwardedFor = req.headers['x-forwarded-for'];
+  const forwardedIp = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor?.split(',')[0];
+  const realIpHeader = req.headers['x-real-ip'];
+  const realIp = Array.isArray(realIpHeader) ? realIpHeader[0] : realIpHeader;
+
   return (
     req.ip ||
     req.connection.remoteAddress ||
     req.socket.remoteAddress ||
-    (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
-    req.headers['x-forwarded-for']?.split(',')[0] ||
-    req.headers['x-real-ip'] ||
+    forwardedIp ||
+    realIp ||
     'unknown'
   );
 };
@@ -106,9 +113,6 @@ const requestLogger = (options: RequestLoggerOptions = {}) => {
     logLevel = 'info',
   } = options;
 
-  const logs: RequestLog[] = [];
-  const maxLogs = 1000; // 最大日志数量
-
   return (req: Request, res: Response, next: NextFunction) => {
     // 检查是否排除此路径
     if (excludePaths.some(path => req.path.startsWith(path))) {
@@ -119,6 +123,11 @@ const requestLogger = (options: RequestLoggerOptions = {}) => {
     const requestId = uuidv4();
 
     // 创建请求日志
+    const authReq = req as Request & {
+      user?: { id?: string };
+      session?: { id?: string };
+    };
+
     const log: RequestLog = {
       id: requestId,
       timestamp: new Date(),
@@ -130,8 +139,8 @@ const requestLogger = (options: RequestLoggerOptions = {}) => {
       body: includeBody ? req.body : undefined,
       ip: getClientIP(req),
       userAgent: getUserAgent(req),
-      userId: (req as any).user?.id,
-      sessionId: (req as any).session?.id,
+      userId: authReq.user?.id,
+      sessionId: authReq.session?.id,
       requestSize: getRequestSize(req),
     };
 

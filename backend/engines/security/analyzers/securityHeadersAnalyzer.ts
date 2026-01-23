@@ -176,7 +176,6 @@ class SecurityHeadersAnalyzer {
 
       const req = httpModule.request(requestOptions, res => {
         let redirectCount = 0;
-        let finalUrl = url;
 
         // 处理重定向
         if (
@@ -214,7 +213,7 @@ class SecurityHeadersAnalyzer {
         resolve({
           statusCode: res.statusCode || 0,
           headers,
-          url: finalUrl,
+          url,
         });
       });
 
@@ -237,7 +236,7 @@ class SecurityHeadersAnalyzer {
   private analyzeHeaders(headers: Record<string, string>): SecurityHeaderResult[] {
     const results: SecurityHeaderResult[] = [];
 
-    Object.keys(this.securityHeaders).forEach(headerKey => {
+    (Object.keys(this.securityHeaders) as Array<keyof SecurityHeadersConfig>).forEach(headerKey => {
       const headerName = this.securityHeaders[headerKey];
       const headerValue = headers[headerKey.toLowerCase()];
       const present = !!headerValue;

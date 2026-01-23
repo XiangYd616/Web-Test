@@ -183,7 +183,7 @@ export class FileLogOutput extends LogOutput {
       if (stats.size > this.maxFileSize) {
         await this.rotateFile(filePath);
       }
-    } catch (error) {
+    } catch {
       this.currentFileSize = 0;
     }
   }
@@ -199,7 +199,7 @@ export class FileLogOutput extends LogOutput {
 
       try {
         await fs.rename(oldFile, newFile);
-      } catch (error) {
+      } catch {
         // ignore
       }
     }
@@ -272,24 +272,27 @@ export class RemoteLogOutput extends LogOutput {
         const url = new URL(this.endpoint as string);
         const data = JSON.stringify({ logs: batch });
 
-        const request = https.request({
-          method: 'POST',
-          hostname: url.hostname,
-          port: url.port || 443,
-          path: `${url.pathname}${url.search}`,
-          headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(data),
-            Authorization: `Bearer ${this.apiKey ?? ''}`
+        const request = https.request(
+          {
+            method: 'POST',
+            hostname: url.hostname,
+            port: url.port || 443,
+            path: `${url.pathname}${url.search}`,
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(data),
+              Authorization: `Bearer ${this.apiKey ?? ''}`,
+            },
+          },
+          res => {
+            if (res.statusCode && res.statusCode >= 400) {
+              reject(new Error(`远程日志服务响应错误: ${res.statusCode}`));
+              return;
+            }
+            res.on('data', () => undefined);
+            res.on('end', () => resolve());
           }
-        }, res => {
-          if (res.statusCode && res.statusCode >= 400) {
-            reject(new Error(`远程日志服务响应错误: ${res.statusCode}`));
-            return;
-          }
-          res.on('data', () => undefined);
-          res.on('end', () => resolve());
-        });
+        );
 
         request.on('error', reject);
         request.write(data);
@@ -547,7 +550,7 @@ export class ErrorLogAggregator extends EventEmitter {
                 if (this.matchesCriteria(logEntry, criteria)) {
                   results.push(logEntry);
                 }
-              } catch (error) {
+              } catch {
                 // ignore parse errors
               }
             }

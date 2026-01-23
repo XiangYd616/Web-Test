@@ -138,7 +138,7 @@ class SSLAnalyzer {
           ],
           recommendations: [
             {
-              priority: 'critical',
+              priority: 'high',
               title: '启用HTTPS',
               description: '配置SSL证书启用HTTPS加密传输',
               category: 'encryption',
@@ -174,11 +174,15 @@ class SSLAnalyzer {
       }
 
       // 获取SSL证书信息
-      const certificate = await this.getCertificate(urlObj.hostname, urlObj.port || 443);
+      const port = Number(urlObj.port) || 443;
+
+      const certificate = checkCertificate
+        ? await this.getCertificate(urlObj.hostname, port, timeout)
+        : this.createEmptyCertificate();
 
       // 分析协议版本
       const protocol = checkProtocols
-        ? await this.analyzeProtocol(urlObj.hostname, urlObj.port || 443)
+        ? await this.analyzeProtocol(urlObj.hostname, port)
         : {
             version: certificate.protocol,
             secure: this.isSecureProtocol(certificate.protocol),
@@ -187,7 +191,7 @@ class SSLAnalyzer {
 
       // 分析加密套件
       const cipher = checkCiphers
-        ? await this.analyzeCipher(urlObj.hostname, urlObj.port || 443)
+        ? await this.analyzeCipher(urlObj.hostname, port)
         : {
             name: certificate.cipher,
             secure: this.isSecureCipher(certificate.cipher),
@@ -233,12 +237,16 @@ class SSLAnalyzer {
   /**
    * 获取SSL证书信息
    */
-  private async getCertificate(hostname: string, port: number): Promise<SSLCertificate> {
+  private async getCertificate(
+    hostname: string,
+    port: number,
+    timeout: number
+  ): Promise<SSLCertificate> {
     return new Promise((resolve, reject) => {
       const socket = tls.connect(
         {
           host: hostname,
-          port: port,
+          port,
           servername: hostname,
         },
         () => {
@@ -293,7 +301,7 @@ class SSLAnalyzer {
         reject(error);
       });
 
-      socket.setTimeout(this.timeout, () => {
+      socket.setTimeout(timeout, () => {
         socket.destroy();
         reject(new Error('SSL连接超时'));
       });
@@ -340,7 +348,7 @@ class SSLAnalyzer {
         secure: this.isSecureProtocol(currentProtocol),
         issues,
       };
-    } catch (error) {
+    } catch {
       return {
         version: 'unknown',
         secure: false,
@@ -376,7 +384,7 @@ class SSLAnalyzer {
       const socket = tls.connect(
         {
           host: hostname,
-          port: port,
+          port,
           servername: hostname,
           secureProtocol: protocol,
         },
@@ -435,7 +443,7 @@ class SSLAnalyzer {
       }
 
       const cipherName = cipher.name;
-      const keySize = cipher.keySize || 0;
+      const keySize = this.getCipherKeySize(cipherName);
 
       // 检查加密套件安全性
       if (insecureCiphers.some(insecure => cipherName.includes(insecure))) {
@@ -462,7 +470,7 @@ class SSLAnalyzer {
         keySize,
         issues,
       };
-    } catch (error) {
+    } catch {
       return {
         name: 'unknown',
         secure: false,
@@ -480,7 +488,7 @@ class SSLAnalyzer {
       const socket = tls.connect(
         {
           host: hostname,
-          port: port,
+          port,
           servername: hostname,
         },
         () => {

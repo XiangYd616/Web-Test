@@ -569,7 +569,7 @@ class ApiTestEngine {
     };
   }
 
-  safeParseJson(body: string) {
+  safeParseJson(body: string): unknown | null {
     try {
       return JSON.parse(body);
     } catch {
@@ -577,7 +577,7 @@ class ApiTestEngine {
     }
   }
 
-  resolveTemplate(value: unknown, variables: Record<string, string>) {
+  resolveTemplate(value: unknown, variables: Record<string, string>): unknown {
     if (typeof value === 'string') {
       return value.replace(/\{\{\s*(\w+)\s*\}\}/g, (_match, key) => variables[key] ?? '');
     }
@@ -595,7 +595,10 @@ class ApiTestEngine {
     return value;
   }
 
-  resolveAssertion(assertion: Record<string, unknown>, variables: Record<string, string>) {
+  resolveAssertion(
+    assertion: Record<string, unknown>,
+    variables: Record<string, string>
+  ): Record<string, unknown> {
     return this.resolveTemplate(assertion, variables) as Record<string, unknown>;
   }
 
@@ -648,10 +651,11 @@ class ApiTestEngine {
       .replace(/\[(\d+)\]/g, '.$1')
       .split('.')
       .filter(Boolean);
-    let current: any = value;
+    let current: unknown = value;
     for (const segment of segments) {
       if (current === null || current === undefined) return undefined;
-      current = current[segment];
+      if (typeof current !== 'object') return undefined;
+      current = (current as Record<string, unknown>)[segment];
     }
     return current;
   }

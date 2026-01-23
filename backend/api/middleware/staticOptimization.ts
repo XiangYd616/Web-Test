@@ -119,7 +119,7 @@ const createCacheMiddleware = (options: CacheOptions = {}) => {
       return res.status(304).end();
     }
 
-    next();
+    return next();
   };
 };
 
@@ -191,11 +191,11 @@ const updateFileStats = (filePath: string, stats: Partial<FileStats>) => {
  */
 const compressionStatsMiddleware = () => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const startTime = Date.now();
+    const _startTime = Date.now();
     const originalSize = parseInt((res.getHeader('content-length') as string) || '0', 10);
 
     res.on('finish', () => {
-      const endTime = Date.now();
+      const _endTime = Date.now();
       const compressedSize = parseInt((res.getHeader('content-length') as string) || '0', 10);
       const filePath = req.path;
 
@@ -252,7 +252,7 @@ const imageOptimizationMiddleware = (
     sizes?: number[];
   } = {}
 ) => {
-  const { quality = 80, format = 'auto', sizes = [1920, 1280, 960, 640, 480] } = options;
+  const { quality = 80, format = 'auto', sizes: _sizes = [1920, 1280, 960, 640, 480] } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
     // 检查是否为图片请求
@@ -262,9 +262,9 @@ const imageOptimizationMiddleware = (
 
     // 解析请求参数
     const urlParams = new URLSearchParams(req.url.split('?')[1] || '');
-    const requestedQuality = parseInt(urlParams.get('quality') || quality.toString(), 10);
+    const _requestedQuality = parseInt(urlParams.get('quality') || quality.toString(), 10);
     const requestedFormat = urlParams.get('format') || format;
-    const requestedSize = parseInt(urlParams.get('size') || '', 10);
+    const _requestedSize = parseInt(urlParams.get('size') || '', 10);
 
     // 设置图片优化头
     res.setHeader('Vary', 'Accept');
@@ -286,14 +286,10 @@ const createOptimizationMiddleware = (options: OptimizationOptions = {}) => {
   const middlewares = [];
 
   // 添加压缩中间件
-  if (options.compression !== false) {
-    middlewares.push(createCompressionMiddleware(options.compression));
-  }
+  middlewares.push(createCompressionMiddleware(options.compression));
 
   // 添加缓存中间件
-  if (options.cache !== false) {
-    middlewares.push(createCacheMiddleware(options.cache));
-  }
+  middlewares.push(createCacheMiddleware(options.cache));
 
   // 添加CDN中间件
   if (options.cdn?.enabled) {

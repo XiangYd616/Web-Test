@@ -376,7 +376,7 @@ class PerformanceMetricsService extends BaseService {
       throw ErrorFactory.createSystemError(
         `Performance analysis failed: ${error instanceof Error ? error.message : String(error)}`,
         {
-          code: ErrorCode.PROCESSING_FAILED,
+          code: ErrorCode.CONTENT_PROCESSING_FAILED,
           severity: ErrorSeverity.MEDIUM,
           context: { url },
         }
@@ -396,23 +396,23 @@ class PerformanceMetricsService extends BaseService {
     const threshold = thresholds.coreWebVitals;
 
     // Largest Contentful Paint
-    const lcpValue = vitals.lcp || 0;
+    const lcpValue = Number(vitals.lcp ?? 0);
     const lcpRating = this.getRating(lcpValue, threshold.lcp.good, threshold.lcp.needsImprovement);
 
     // First Input Delay
-    const fidValue = vitals.fid || 0;
+    const fidValue = Number(vitals.fid ?? 0);
     const fidRating = this.getRating(fidValue, threshold.fid.good, threshold.fid.needsImprovement);
 
     // Cumulative Layout Shift
-    const clsValue = vitals.cls || 0;
+    const clsValue = Number(vitals.cls ?? 0);
     const clsRating = this.getRating(clsValue, threshold.cls.good, threshold.cls.needsImprovement);
 
     // First Contentful Paint
-    const fcpValue = vitals.fcp || 0;
+    const fcpValue = Number(vitals.fcp ?? 0);
     const fcpRating = this.getRating(fcpValue, threshold.fcp.good, threshold.fcp.needsImprovement);
 
     // Time to First Byte
-    const ttfbValue = vitals.ttfb || 0;
+    const ttfbValue = Number(vitals.ttfb ?? 0);
     const ttfbRating = this.getRating(
       ttfbValue,
       threshold.ttfb.good,
@@ -463,11 +463,10 @@ class PerformanceMetricsService extends BaseService {
    */
   private analyzeNavigationTiming(
     performanceData: Record<string, unknown>,
-    thresholds: PerformanceThresholds
+    _thresholds: PerformanceThresholds
   ): NavigationTimingMetrics {
     const nav =
       (performanceData as { navigationTiming?: Record<string, number> }).navigationTiming || {};
-    const threshold = thresholds.performance;
 
     // 计算各阶段持续时间
     const dnsLookup = nav.domainLookupEnd - nav.domainLookupStart;
@@ -519,7 +518,7 @@ class PerformanceMetricsService extends BaseService {
    */
   private analyzeResourceTiming(
     performanceData: Record<string, unknown>,
-    thresholds: PerformanceThresholds
+    _thresholds: PerformanceThresholds
   ): ResourceTimingMetrics {
     const resources =
       (performanceData as { resources?: Array<Record<string, unknown>> }).resources || [];
@@ -660,9 +659,13 @@ class PerformanceMetricsService extends BaseService {
         }
       ).layoutShift || {};
 
+    const layoutShifts = Array.isArray(layoutShift.layoutShifts)
+      ? (layoutShift.layoutShifts as LayoutShiftMetrics['layoutShifts'])
+      : [];
+
     return {
       cls: layoutShift.cls || 0,
-      layoutShifts: layoutShift.layoutShifts || [],
+      layoutShifts,
       totalShifts: layoutShift.totalShifts || 0,
     };
   }

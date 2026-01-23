@@ -163,7 +163,17 @@ class DatabaseManager extends EventEmitter {
     }
 
     // 使用 Sequelize 的连接池 API
-    const pool = (this.sequelize as any).connectionManager.pool;
+    const pool = (
+      this.sequelize as Sequelize & {
+        connectionManager?: {
+          pool?: {
+            numUsed: () => number;
+            numFree: () => number;
+            numPendingAcquires: () => number;
+          };
+        };
+      }
+    ).connectionManager?.pool;
     if (!pool) {
       return null;
     }

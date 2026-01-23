@@ -4,7 +4,17 @@
  * 实现LCP、FID、CLS等核心性能指标的本地计算
  */
 
-import puppeteer from 'puppeteer';
+import puppeteer, { type Page } from 'puppeteer';
+
+declare global {
+  interface Window {
+    __lcp?: number;
+    __fid?: number;
+    __clsEntries?: CLSEntry[];
+    __fcp?: number;
+    __ttfb?: number;
+  }
+}
 
 interface WebVitalsThresholds {
   lcp: {
@@ -151,14 +161,14 @@ class CoreWebVitalsAnalyzer {
       await page.setUserAgent(userAgent);
 
       // 开始监控性能指标
-      const metrics = await this.startMetricsMonitoring(page);
+      await this.startMetricsMonitoring(page);
 
       // 导航到页面
       const navigationStart = Date.now();
       await page.goto(url, { waitUntil: 'networkidle0', timeout });
 
       // 等待页面完全加载
-      await page.waitFor(waitTime);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
 
       // 收集性能指标
       const performanceMetrics = await this.collectMetrics(page, navigationStart);
@@ -180,14 +190,18 @@ class CoreWebVitalsAnalyzer {
   /**
    * 开始监控性能指标
    */
-  private async startMetricsMonitoring(page: any): Promise<void> {
+  private async startMetricsMonitoring(page: Page): Promise<void> {
     // 监控LCP
     await page.evaluateOnNewDocument(() => {
+      type FirstInputEntry = PerformanceEntry & { processingStart?: number };
+      type LayoutShiftEntry = PerformanceEntry & { hadRecentInput?: boolean; value?: number };
+      type NavigationEntry = PerformanceEntry & { responseStart?: number; requestStart?: number };
+
       new PerformanceObserver(entryList => {
         const entries = entryList.getEntries();
         const lcpEntry = entries.find(entry => entry.entryType === 'largest-contentful-paint');
         if (lcpEntry) {
-          (window as any).__lcp = lcpEntry.startTime;
+          window.__lcp = lcpEntry.startTime;
         }
       }).observe({ entryTypes: ['largest-contentful-paint'] });
 
@@ -196,7 +210,8 @@ class CoreWebVitalsAnalyzer {
         const entries = entryList.getEntries();
         entries.forEach(entry => {
           if (entry.entryType === 'first-input') {
-            (window as any).__fid = entry.processingStart - entry.startTime;
+            const firstInputEntry = entry as FirstInputEntry;
+            window.__fid = (firstInputEntry.processingStart ?? 0) - firstInputEntry.startTime;
           }
         });
       }).observe({ entryTypes: ['first-input'] });
@@ -205,13 +220,17 @@ class CoreWebVitalsAnalyzer {
       new PerformanceObserver(entryList => {
         const entries = entryList.getEntries();
         entries.forEach(entry => {
-          if (entry.entryType === 'layout-shift' && !entry.hadRecentInput) {
-            if (!(window as any).__clsEntries) {
-              (window as any).__clsEntries = [];
+          if (entry.entryType === 'layout-shift') {
+            const layoutShiftEntry = entry as LayoutShiftEntry;
+            if (layoutShiftEntry.hadRecentInput) {
+              return;
             }
-            (window as any).__clsEntries.push({
-              value: entry.value,
-              timestamp: entry.startTime,
+            if (!window.__clsEntries) {
+              window.__clsEntries = [];
+            }
+            window.__clsEntries.push({
+              value: layoutShiftEntry.value ?? 0,
+              timestamp: layoutShiftEntry.startTime,
             });
           }
         });
@@ -222,7 +241,7 @@ class CoreWebVitalsAnalyzer {
         const entries = entryList.getEntries();
         const fcpEntry = entries.find(entry => entry.name === 'first-contentful-paint');
         if (fcpEntry) {
-          (window as any).__fcp = fcpEntry.startTime;
+          window.__fcp = fcpEntry.startTime;
         }
       }).observe({ entryTypes: ['paint'] });
 
@@ -231,7 +250,10 @@ class CoreWebVitalsAnalyzer {
         const entries = entryList.getEntries();
         const navEntry = entries.find(entry => entry.entryType === 'navigation');
         if (navEntry) {
-          (window as any).__ttfb = navEntry.responseStart - navEntry.requestStart;
+          const navigationEntry = navEntry as NavigationEntry;
+          const responseStart = navigationEntry.responseStart ?? 0;
+          const requestStart = navigationEntry.requestStart ?? 0;
+          window.__ttfb = responseStart - requestStart;
         }
       }).observe({ entryTypes: ['navigation'] });
     });
@@ -240,24 +262,24 @@ class CoreWebVitalsAnalyzer {
   /**
    * 收集性能指标
    */
-  private async collectMetrics(page: any, navigationStart: number): Promise<PerformanceMetrics> {
+  private async collectMetrics(page: Page, _navigationStart: number): Promise<PerformanceMetrics> {
     const metrics = await page.evaluate(() => {
-      const perfData = performance.getEntriesByType('navigation')[0];
-
       return {
         timestamp: Date.now(),
-        lcp: (window as any).__lcp,
-        fid: (window as any).__fid,
-        cls: (window as any).__clsEntries || [],
-        fcp: (window as any).__fcp,
-        ttfb: (window as any).__ttfb,
+        lcp: window.__lcp,
+        fid: window.__fid,
+        clsEntries: window.__clsEntries || [],
+        fcp: window.__fcp,
+        ttfb: window.__ttfb,
       };
     });
 
+    const clsEntries = Array.isArray(metrics.clsEntries) ? metrics.clsEntries : [];
+
     // 处理CLS数据
     let clsValue = 0;
-    if (metrics.cls && Array.isArray(metrics.cls)) {
-      clsValue = metrics.cls.reduce((sum: number, entry: CLSEntry) => sum + entry.value, 0);
+    if (clsEntries.length > 0) {
+      clsValue = clsEntries.reduce((sum: number, entry: CLSEntry) => sum + entry.value, 0);
     }
 
     return {

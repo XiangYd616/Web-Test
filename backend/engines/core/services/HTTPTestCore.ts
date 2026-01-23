@@ -59,9 +59,10 @@ interface BatchTestResult {
   totalSize: number;
   results: TestResult[];
   errors: Array<{
-    endpoint: string;
-    error: string;
+    type: string;
     count: number;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    message: string;
   }>;
   summary: {
     successRate: number;
@@ -141,15 +142,18 @@ class HTTPTestCore {
    * 测试API端点 - 统一实现
    * 消除在API测试、压力测试等工具中的重复实现
    */
-  async testAPIEndpoints(endpoints: APIEndpoint[], config: TestConfig = {}): Promise<BatchTestResult> {
+  async testAPIEndpoints(
+    endpoints: APIEndpoint[],
+    config: TestConfig = {}
+  ): Promise<BatchTestResult> {
     const results: TestResult[] = [];
     const concurrency = config.concurrency || 5;
-    
+
     // 分批并发测试
     for (let i = 0; i < endpoints.length; i += concurrency) {
       const batch = endpoints.slice(i, i + concurrency);
       const batchPromises = batch.map(endpoint => this.testSingleEndpoint(endpoint, config));
-      
+
       try {
         const batchResults = await Promise.all(batchPromises);
         results.push(...batchResults);
@@ -165,11 +169,14 @@ class HTTPTestCore {
   /**
    * 测试单个端点
    */
-  private async testSingleEndpoint(endpoint: APIEndpoint, config: TestConfig = {}): Promise<TestResult> {
+  private async testSingleEndpoint(
+    endpoint: APIEndpoint,
+    config: TestConfig = {}
+  ): Promise<TestResult> {
     const startTime = performance.now();
     const requestId = this.generateRequestId();
     const abortController = new AbortController();
-    
+
     this.activeRequests.set(requestId, abortController);
 
     try {
@@ -179,12 +186,12 @@ class HTTPTestCore {
         headers: {
           'User-Agent': config.userAgent || 'HTTPTestCore/1.0',
           ...endpoint.headers,
-          ...config.headers
+          ...config.headers,
         },
         timeout: config.timeout || 30000,
         maxRedirects: config.maxRedirects || 5,
         validateStatus: false,
-        signal: abortController.signal
+        signal: abortController.signal,
       };
 
       // 添加请求体
@@ -227,7 +234,7 @@ class HTTPTestCore {
         responseTime,
         size: this.calculateResponseSize(response),
         retries,
-        validation
+        validation,
       };
 
       // 添加到历史记录
@@ -241,7 +248,7 @@ class HTTPTestCore {
         timestamp: new Date(),
         size: result.size,
         success: result.success,
-        error: result.success ? undefined : 'Validation failed'
+        error: result.success ? undefined : 'Validation failed',
       });
 
       return result;
@@ -262,9 +269,9 @@ class HTTPTestCore {
           statusValid: false,
           headersValid: false,
           bodyValid: false,
-          issues: [error instanceof Error ? error.message : String(error)]
+          issues: [error instanceof Error ? error.message : String(error)],
         },
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
 
       // 添加失败记录到历史
@@ -278,7 +285,7 @@ class HTTPTestCore {
         timestamp: new Date(),
         size: 0,
         success: false,
-        error: result.error
+        error: result.error,
       });
 
       return result;
@@ -322,7 +329,10 @@ class HTTPTestCore {
     // 压力测试主循环
     while (Date.now() < endTime) {
       const promises: Promise<TestResult>[] = [];
-      const currentBatchSize = Math.min(maxConcurrent, Math.ceil(targetRPS / (1000 / intervalTime)));
+      const currentBatchSize = Math.min(
+        maxConcurrent,
+        Math.ceil(targetRPS / (1000 / intervalTime))
+      );
 
       // 创建请求批次
       for (let i = 0; i < currentBatchSize; i++) {
@@ -341,28 +351,30 @@ class HTTPTestCore {
             successfulRequests++;
           } else {
             failedRequests++;
-            
+
             // 错误分类
             const errorType = this.categorizeError(result.error || 'Unknown error');
             const existingError = errors.find(e => e.type === errorType);
-            
+
             if (existingError) {
               existingError.count++;
               existingError.samples.push({
                 timestamp: new Date(),
                 error: result.error || '',
-                endpoint: result.endpoint.url
+                endpoint: result.endpoint.url,
               });
             } else {
               errors.push({
                 type: errorType,
                 count: 1,
                 percentage: 0,
-                samples: [{
-                  timestamp: new Date(),
-                  error: result.error || '',
-                  endpoint: result.endpoint.url
-                }]
+                samples: [
+                  {
+                    timestamp: new Date(),
+                    error: result.error || '',
+                    endpoint: result.endpoint.url,
+                  },
+                ],
               });
             }
           }
@@ -377,7 +389,9 @@ class HTTPTestCore {
           await this.delay(thinkTime);
         }
       } catch (error) {
-        console.error(`压力测试批次失败: ${error instanceof Error ? error.message : String(error)}`);
+        console.error(
+          `压力测试批次失败: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
 
       // 控制请求频率
@@ -403,11 +417,12 @@ class HTTPTestCore {
       failedRequests,
       averageRPS: totalRequests / config.duration,
       peakRPS,
-      averageResponseTime: responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length,
+      averageResponseTime:
+        responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length,
       minResponseTime: Math.min(...responseTimes),
       maxResponseTime: Math.max(...responseTimes),
       errors,
-      performance
+      performance,
     };
 
     return stressResult;
@@ -420,7 +435,7 @@ class HTTPTestCore {
     const endpoints: APIEndpoint[] = urls.map(url => ({
       url,
       method: 'GET',
-      timeout: config.timeout || 10000
+      timeout: config.timeout || 10000,
     }));
 
     return this.testAPIEndpoints(endpoints, config);
@@ -453,13 +468,15 @@ class HTTPTestCore {
   /**
    * 获取请求历史
    */
-  getRequestHistory(options: {
-    limit?: number;
-    endpoint?: string;
-    method?: string;
-    status?: number;
-    since?: Date;
-  } = {}): RequestHistory[] {
+  getRequestHistory(
+    options: {
+      limit?: number;
+      endpoint?: string;
+      method?: string;
+      status?: number;
+      since?: Date;
+    } = {}
+  ): RequestHistory[] {
     let history = [...this.requestHistory];
 
     // 过滤条件
@@ -478,7 +495,7 @@ class HTTPTestCore {
 
     // 排序和限制
     history.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-    
+
     return options.limit ? history.slice(0, options.limit) : history;
   }
 
@@ -499,7 +516,10 @@ class HTTPTestCore {
     const failed = total - successful;
 
     const responseTimes = history.map(h => h.responseTime).sort((a, b) => a - b);
-    const averageResponseTime = responseTimes.length > 0 ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length : 0;
+    const averageResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
+        : 0;
 
     return {
       total,
@@ -510,7 +530,7 @@ class HTTPTestCore {
       minResponseTime: responseTimes.length > 0 ? Math.min(...responseTimes) : 0,
       maxResponseTime: responseTimes.length > 0 ? Math.max(...responseTimes) : 0,
       activeRequests: this.activeRequests.size,
-      historySize: this.requestHistory.length
+      historySize: this.requestHistory.length,
     };
   }
 
@@ -523,7 +543,8 @@ class HTTPTestCore {
     const failed = total - successful;
 
     const responseTimes = results.map(r => r.responseTime);
-    const averageResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+    const averageResponseTime =
+      responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
     const minResponseTime = Math.min(...responseTimes);
     const maxResponseTime = Math.max(...responseTimes);
     const totalSize = results.reduce((sum, r) => sum + r.size, 0);
@@ -548,8 +569,10 @@ class HTTPTestCore {
         successRate: (successful / total) * 100,
         averageSpeed,
         totalErrors: errors.reduce((sum, e) => sum + e.count, 0),
-        criticalErrors: errors.filter(e => e.severity === 'critical').reduce((sum, e) => sum + e.count, 0)
-      }
+        criticalErrors: errors
+          .filter(e => e.severity === 'critical')
+          .reduce((sum, e) => sum + e.count, 0),
+      },
     };
   }
 
@@ -562,17 +585,20 @@ class HTTPTestCore {
     severity: 'low' | 'medium' | 'high' | 'critical';
     message: string;
   }> {
-    const errors: Record<string, { count: number; severity: string; message: string }> = {};
+    const errors: Record<
+      string,
+      { count: number; severity: 'low' | 'medium' | 'high' | 'critical'; message: string }
+    > = {};
 
     results.forEach(result => {
       if (!result.success && result.error) {
         const errorType = this.categorizeError(result.error);
-        
+
         if (!errors[errorType]) {
           errors[errorType] = {
             count: 0,
             severity: this.getErrorSeverity(errorType),
-            message: result.error
+            message: result.error,
           };
         }
         errors[errorType].count++;
@@ -581,7 +607,7 @@ class HTTPTestCore {
 
     return Object.entries(errors).map(([type, data]) => ({
       type,
-      ...data
+      ...data,
     }));
   }
 
@@ -601,7 +627,7 @@ class HTTPTestCore {
     if (errorLower.includes('403')) return 'forbidden';
     if (errorLower.includes('400')) return 'bad_request';
     if (errorLower.includes('connection')) return 'connection';
-    
+
     return 'unknown';
   }
 
@@ -612,7 +638,7 @@ class HTTPTestCore {
     const criticalErrors = ['timeout', 'server_error', 'connection'];
     const highErrors = ['ssl', 'network', 'dns'];
     const mediumErrors = ['not_found', 'unauthorized', 'forbidden'];
-    
+
     if (criticalErrors.includes(errorType)) return 'critical';
     if (highErrors.includes(errorType)) return 'high';
     if (mediumErrors.includes(errorType)) return 'medium';
@@ -622,7 +648,10 @@ class HTTPTestCore {
   /**
    * 验证响应
    */
-  private validateResponse(response: AxiosResponse, endpoint: APIEndpoint): {
+  private validateResponse(
+    response: AxiosResponse,
+    endpoint: APIEndpoint
+  ): {
     statusValid: boolean;
     headersValid: boolean;
     bodyValid: boolean;
@@ -665,7 +694,7 @@ class HTTPTestCore {
       } else {
         bodyValid = response.data === endpoint.expectedBody;
       }
-      
+
       if (!bodyValid) {
         issues.push(`Response body does not match expected value`);
       }
@@ -675,7 +704,7 @@ class HTTPTestCore {
       statusValid,
       headersValid,
       bodyValid,
-      issues
+      issues,
     };
   }
 
@@ -695,6 +724,14 @@ class HTTPTestCore {
    * 计算性能指标
    */
   private calculatePerformanceMetrics(responseTimes: number[]): {
+    throughput: number;
+    latency: {
+      p50: number;
+      p90: number;
+      p95: number;
+      p99: number;
+    };
+  } {
     const sortedTimes = responseTimes.sort((a, b) => a - b);
     const len = sortedTimes.length;
 
@@ -704,8 +741,8 @@ class HTTPTestCore {
         p50: this.getPercentile(sortedTimes, 50),
         p90: this.getPercentile(sortedTimes, 90),
         p95: this.getPercentile(sortedTimes, 95),
-        p99: this.getPercentile(sortedTimes, 99)
-      }
+        p99: this.getPercentile(sortedTimes, 99),
+      },
     };
   }
 

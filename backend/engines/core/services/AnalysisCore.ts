@@ -62,7 +62,7 @@ interface AnalysisResult {
   metrics: Record<string, unknown>;
   summary: {
     status: 'excellent' | 'good' | 'fair' | 'poor';
-    grade: 'A+' | 'A' | 'B+' | 'B' | 'C+' | 'C' | 'D' | 'F';
+    grade: 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-' | 'D+' | 'D' | 'F';
     passRate: number;
     issuesCount: number;
   };
@@ -176,9 +176,9 @@ class AnalysisCore {
     results: Record<string, unknown>,
     metrics: Record<string, unknown>
   ): Promise<AnalysisResult> {
-    const issues = [];
-    const recommendations = [];
-    const categoryScores = {};
+    const issues: AnalysisResult['issues'] = [];
+    const recommendations: AnalysisResult['recommendations'] = [];
+    const categoryScores: Record<string, number> = {};
 
     // Core Web Vitals 分析
     const webVitals = metrics.webVitals as Record<string, unknown>;
@@ -282,9 +282,9 @@ class AnalysisCore {
     results: Record<string, unknown>,
     metrics: Record<string, unknown>
   ): Promise<AnalysisResult> {
-    const issues = [];
-    const recommendations = [];
-    const categoryScores = {};
+    const issues: AnalysisResult['issues'] = [];
+    const recommendations: AnalysisResult['recommendations'] = [];
+    const categoryScores: Record<string, number> = {};
 
     // SSL/TLS 分析
     const ssl = metrics.ssl as Record<string, unknown>;
@@ -388,9 +388,9 @@ class AnalysisCore {
     results: Record<string, unknown>,
     metrics: Record<string, unknown>
   ): Promise<AnalysisResult> {
-    const issues = [];
-    const recommendations = [];
-    const categoryScores = {};
+    const issues: AnalysisResult['issues'] = [];
+    const recommendations: AnalysisResult['recommendations'] = [];
+    const categoryScores: Record<string, number> = {};
 
     // 内容分析
     const content = metrics.content as Record<string, unknown>;
@@ -494,9 +494,9 @@ class AnalysisCore {
     results: Record<string, unknown>,
     metrics: Record<string, unknown>
   ): Promise<AnalysisResult> {
-    const issues = [];
-    const recommendations = [];
-    const categoryScores = {};
+    const issues: AnalysisResult['issues'] = [];
+    const recommendations: AnalysisResult['recommendations'] = [];
+    const categoryScores: Record<string, number> = {};
 
     // 导航分析
     const navigation = metrics.navigation as Record<string, unknown>;
@@ -590,9 +590,9 @@ class AnalysisCore {
     results: Record<string, unknown>,
     metrics: Record<string, unknown>
   ): Promise<AnalysisResult> {
-    const issues = [];
-    const recommendations = [];
-    const categoryScores = {};
+    const issues: AnalysisResult['issues'] = [];
+    const recommendations: AnalysisResult['recommendations'] = [];
+    const categoryScores: Record<string, number> = {};
 
     // 功能性分析
     const functionality = metrics.functionality as Record<string, unknown>;
@@ -707,9 +707,9 @@ class AnalysisCore {
     results: Record<string, unknown>,
     metrics: Record<string, unknown>
   ): Promise<AnalysisResult> {
-    const issues = [];
-    const recommendations = [];
-    const categoryScores = {};
+    const issues: AnalysisResult['issues'] = [];
+    const recommendations: AnalysisResult['recommendations'] = [];
+    const categoryScores: Record<string, number> = {};
 
     // 基础评分
     const score = (metrics.score as number) || 0;
@@ -774,20 +774,16 @@ class AnalysisCore {
    */
   private calculateOverallScore(
     categoryScores: Record<string, number>,
-    weights: Record<string, Record<string, number>>
+    weights: Record<string, number>
   ): number {
     let totalScore = 0;
     let totalWeight = 0;
 
     for (const [category, score] of Object.entries(categoryScores)) {
-      const categoryWeights = weights[category as keyof typeof weights];
-      if (categoryWeights) {
-        for (const [subCategory, weight] of Object.entries(categoryWeights)) {
-          if (subCategory === category) {
-            totalScore += score * weight;
-            totalWeight += weight;
-          }
-        }
+      const weight = weights[category as keyof typeof weights];
+      if (typeof weight === 'number') {
+        totalScore += score * weight;
+        totalWeight += weight;
       }
     }
 
@@ -797,7 +793,10 @@ class AnalysisCore {
   /**
    * 生成建议
    */
-  private generateRecommendations(issues: Array<any>, category: string): Array<any> {
+  private generateRecommendations(
+    issues: AnalysisResult['issues'],
+    category: string
+  ): AnalysisResult['recommendations'] {
     return issues.map(issue => ({
       priority: this.getPriority(issue.severity),
       title: issue.title,
@@ -828,7 +827,7 @@ class AnalysisCore {
   /**
    * 获取工作量
    */
-  private getEffort(type: string, category: string): 'low' | 'medium' | 'high' {
+  private getEffort(type: string, _category: string): 'low' | 'medium' | 'high' {
     // 简单的工作量评估逻辑
     if (type.includes('header') || type.includes('meta')) return 'low';
     if (type.includes('ssl') || type.includes('auth')) return 'high';
@@ -844,8 +843,8 @@ class AnalysisCore {
     url: string,
     overallScore: number,
     categoryScores: Record<string, number>,
-    issues: Array<any>,
-    recommendations: Array<any>,
+    issues: AnalysisResult['issues'],
+    recommendations: AnalysisResult['recommendations'],
     metrics: Record<string, unknown>
   ): AnalysisResult {
     const status = this.getStatus(overallScore);
@@ -890,7 +889,7 @@ class AnalysisCore {
   /**
    * 获取等级
    */
-  private getGrade(score: number): string {
+  private getGrade(score: number): AnalysisResult['summary']['grade'] {
     if (score >= 97) return 'A+';
     if (score >= 93) return 'A';
     if (score >= 90) return 'A-';
@@ -1009,8 +1008,14 @@ class AnalysisCore {
   /**
    * 计算趋势
    */
-  private calculateTrends() {
-    const trends = {};
+  private calculateTrends(): Record<
+    string,
+    { direction: 'improving' | 'declining'; change: number; recent: number; older: number }
+  > {
+    const trends: Record<
+      string,
+      { direction: 'improving' | 'declining'; change: number; recent: number; older: number }
+    > = {};
 
     for (const testType of ['performance', 'security', 'seo', 'accessibility', 'api']) {
       const typeHistory = this.analysisHistory.filter(h => h.testType === testType);

@@ -336,7 +336,7 @@ class ApiAnalyzer {
         try {
           structure = JSON.parse(body);
           valid = true;
-        } catch (jsonError) {
+        } catch {
           error = '无效的JSON格式';
         }
       } else if (contentType.includes('text/html')) {
@@ -346,7 +346,7 @@ class ApiAnalyzer {
         structure = { type: 'other', length: body.length };
         valid = true;
       }
-    } catch (readError) {
+    } catch {
       error = '读取响应体失败';
     }
 

@@ -9,7 +9,22 @@ const TestHistoryService = require('../services/testing/TestHistoryService');
 const { TestDataTransformer } = require('../utils/testDataTransformer');
 const { validationResult } = require('express-validator');
 
-let testHistoryService: any;
+type TestHistoryServiceType = {
+  getTestHistory: (...args: unknown[]) => Promise<unknown>;
+  createTestRecord: (...args: unknown[]) => Promise<unknown>;
+  getSessionForUser: (...args: unknown[]) => Promise<unknown>;
+  updateTestRecord: (...args: unknown[]) => Promise<unknown>;
+  startTest: (...args: unknown[]) => Promise<unknown>;
+  updateTestProgress: (...args: unknown[]) => Promise<unknown>;
+  completeTest: (...args: unknown[]) => Promise<unknown>;
+  failTest: (...args: unknown[]) => Promise<unknown>;
+  cancelTest: (...args: unknown[]) => Promise<unknown>;
+  getTestProgress: (...args: unknown[]) => Promise<unknown>;
+  getTestDetails: (...args: unknown[]) => Promise<unknown>;
+  deleteTestSession: (...args: unknown[]) => Promise<unknown>;
+};
+
+let testHistoryService: TestHistoryServiceType | null = null;
 try {
   const dbModule = require('../config/database');
   testHistoryService = new TestHistoryService(dbModule);
@@ -36,6 +51,15 @@ type TestHistoryQuery = {
   sortBy?: string;
   sortOrder?: string;
   format?: string;
+};
+
+type TestHistoryResult = {
+  success: boolean;
+  data?: {
+    tests?: Array<Record<string, unknown>>;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
 };
 
 const ensureHistoryService = (res: ApiResponse) => {
@@ -85,9 +109,13 @@ class TestHistoryController {
         sortOrder: normalizedSortOrder,
       };
 
-      let result;
+      let result: TestHistoryResult;
       if (testHistoryService) {
-        result = await testHistoryService.getTestHistory(userId, testType, queryParams);
+        result = (await testHistoryService.getTestHistory(
+          userId,
+          testType,
+          queryParams
+        )) as TestHistoryResult;
       } else {
         result = {
           success: true,
@@ -108,7 +136,6 @@ class TestHistoryController {
       if (result.success && result.data?.tests) {
         result.data.tests = TestDataTransformer.transformHistoryList(result.data.tests);
       }
-
       return res.json(result);
     } catch (error) {
       console.error('获取测试历史失败:', error);
@@ -123,13 +150,15 @@ class TestHistoryController {
   async createRecord(req: AuthRequest, res: ApiResponse) {
     try {
       if (!ensureHistoryService(res)) return null;
+      const service = testHistoryService;
+      if (!service) return null;
 
       const testData = {
         ...req.body,
         userId: req.user.id,
       };
 
-      const result = await testHistoryService.createTestRecord(testData);
+      const result = await service.createTestRecord(testData);
       return res.json(result);
     } catch (error) {
       console.error('创建测试记录失败:', error);
@@ -143,11 +172,13 @@ class TestHistoryController {
   async updateRecord(req: AuthRequest, res: ApiResponse) {
     try {
       if (!ensureHistoryService(res)) return null;
+      const service = testHistoryService;
+      if (!service) return null;
 
       const { testId } = req.params;
       const userId = req.user.id;
 
-      const session = await testHistoryService.getSessionForUser(testId, userId);
+      const session = await service.getSessionForUser(testId, userId);
       if (!session) {
         return res.status(404).json({
           success: false,
@@ -155,7 +186,7 @@ class TestHistoryController {
         });
       }
 
-      const result = await testHistoryService.updateTestRecord(testId, req.body);
+      const result = await service.updateTestRecord(testId, req.body);
       return res.json(result);
     } catch (error) {
       console.error('更新测试记录失败:', error);
@@ -169,10 +200,12 @@ class TestHistoryController {
   async startTest(req: AuthRequest, res: ApiResponse) {
     try {
       if (!ensureHistoryService(res)) return null;
+      const service = testHistoryService;
+      if (!service) return null;
 
       const { testId } = req.params;
       const userId = req.user.id;
-      const result = await testHistoryService.startTest(testId, userId);
+      const result = await service.startTest(testId, userId);
       return res.json(result);
     } catch (error) {
       console.error('开始测试失败:', error);
@@ -186,10 +219,12 @@ class TestHistoryController {
   async updateProgress(req: AuthRequest, res: ApiResponse) {
     try {
       if (!ensureHistoryService(res)) return null;
+      const service = testHistoryService;
+      if (!service) return null;
 
       const { testId } = req.params;
       const userId = req.user.id;
-      const result = await testHistoryService.updateTestProgress(testId, req.body, userId);
+      const result = await service.updateTestProgress(testId, req.body, userId);
       return res.json(result);
     } catch (error) {
       console.error('更新测试进度失败:', error);
@@ -203,10 +238,12 @@ class TestHistoryController {
   async completeTest(req: AuthRequest, res: ApiResponse) {
     try {
       if (!ensureHistoryService(res)) return null;
+      const service = testHistoryService;
+      if (!service) return null;
 
       const { testId } = req.params;
       const userId = req.user.id;
-      const result = await testHistoryService.completeTest(testId, req.body, userId);
+      const result = await service.completeTest(testId, req.body, userId);
       return res.json(result);
     } catch (error) {
       console.error('完成测试失败:', error);
@@ -220,12 +257,14 @@ class TestHistoryController {
   async failTest(req: AuthRequest, res: ApiResponse) {
     try {
       if (!ensureHistoryService(res)) return null;
+      const service = testHistoryService;
+      if (!service) return null;
 
       const { testId } = req.params;
       const userId = req.user.id;
       const { errorMessage, errorDetails } = req.body || {};
 
-      const result = await testHistoryService.failTest(
+      const result = await service.failTest(
         testId,
         { ...req.body, errorMessage, errorDetails },
         userId
@@ -244,11 +283,13 @@ class TestHistoryController {
   async cancelTest(req: AuthRequest, res: ApiResponse) {
     try {
       if (!ensureHistoryService(res)) return null;
+      const service = testHistoryService;
+      if (!service) return null;
 
       const { testId } = req.params;
       const userId = req.user.id;
       const reason = (req.body as Record<string, unknown>)?.reason || '用户取消';
-      const result = await testHistoryService.cancelTest(
+      const result = await service.cancelTest(
         testId,
         { ...(req.body as Record<string, unknown>), reason },
         userId
@@ -267,10 +308,12 @@ class TestHistoryController {
   async getProgress(req: AuthRequest, res: ApiResponse) {
     try {
       if (!ensureHistoryService(res)) return null;
+      const service = testHistoryService;
+      if (!service) return null;
 
       const { testId } = req.params;
       const userId = req.user.id;
-      const result = await testHistoryService.getTestProgress(testId, userId);
+      const result = await service.getTestProgress(testId, userId);
       return res.json(result);
     } catch (error) {
       console.error('获取测试进度失败:', error);
@@ -284,6 +327,8 @@ class TestHistoryController {
   async exportHistory(req: AuthRequest, res: ApiResponse) {
     try {
       if (!ensureHistoryService(res)) return null;
+      const service = testHistoryService;
+      if (!service) return null;
 
       const {
         testType: testTypeParam,
@@ -314,9 +359,9 @@ class TestHistoryController {
         sortOrder: normalizedSortOrder,
       };
 
-      let result;
-      if (testHistoryService) {
-        result = await testHistoryService.getTestHistory(userId, testType, queryParams);
+      let result: TestHistoryResult;
+      if (service) {
+        result = (await service.getTestHistory(userId, testType, queryParams)) as TestHistoryResult;
       } else {
         return res.status(503).json({
           success: false,
@@ -328,7 +373,7 @@ class TestHistoryController {
         return res.status(500).json(result);
       }
 
-      const data = TestDataTransformer.transformHistoryList(result.data.tests || []);
+      const data = TestDataTransformer.transformHistoryList(result.data?.tests || []);
 
       switch (format) {
         case 'json':
@@ -340,18 +385,18 @@ class TestHistoryController {
           return res.json(data);
         case 'csv': {
           const csvHeaders = ['ID', '测试名称', '测试类型', 'URL', '状态', '评分', '创建时间'];
-          const csvRows = data.map((item: any) => [
-            item.id,
-            item.test_name || item.testName || '',
-            item.test_type || item.testType || '',
-            item.url || '',
-            item.status || '',
-            item.overall_score || item.overallScore || '',
-            item.created_at || item.createdAt || '',
+          const csvRows = data.map((item: Record<string, unknown>) => [
+            String(item.id ?? ''),
+            String(item.test_name ?? item.testName ?? ''),
+            String(item.test_type ?? item.testType ?? ''),
+            String(item.url ?? ''),
+            String(item.status ?? ''),
+            String(item.overall_score ?? item.overallScore ?? ''),
+            String(item.created_at ?? item.createdAt ?? ''),
           ]);
 
           const csvContent = [csvHeaders, ...csvRows]
-            .map(row => row.map(field => `"${field}"`).join(','))
+            .map((row: string[]) => row.map((field: string) => `"${field}"`).join(','))
             .join('\n');
 
           res.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -379,6 +424,10 @@ class TestHistoryController {
 
   async getRecordDetail(req: AuthRequest, res: ApiResponse) {
     try {
+      if (!ensureHistoryService(res)) return null;
+      const service = testHistoryService;
+      if (!service) return null;
+
       const { testId } = req.params;
       const userId = req.user?.id;
 
@@ -391,13 +440,13 @@ class TestHistoryController {
         });
       }
 
-      let result;
-      if (testHistoryService) {
-        result = await testHistoryService.getTestDetails(testId, userId);
+      let result: TestHistoryResult;
+      if (service) {
+        result = (await service.getTestDetails(testId, userId)) as TestHistoryResult;
       } else {
         result = {
           success: false,
-          error: '历史服务不可用',
+          error: '获取测试详情失败',
         };
       }
 
@@ -421,6 +470,10 @@ class TestHistoryController {
 
   async deleteRecord(req: AuthRequest, res: ApiResponse) {
     try {
+      if (!ensureHistoryService(res)) return null;
+      const service = testHistoryService;
+      if (!service) return null;
+
       const { testId } = req.params;
       const userId = req.user.id;
 
@@ -433,16 +486,7 @@ class TestHistoryController {
         });
       }
 
-      let result;
-      if (testHistoryService) {
-        result = await testHistoryService.deleteTestSession(testId, userId);
-      } else {
-        result = {
-          success: false,
-          error: '历史服务不可用',
-        };
-      }
-
+      const result = await service.deleteTestSession(testId, userId);
       return res.json(result);
     } catch (error) {
       console.error('删除测试记录失败:', error);

@@ -3,7 +3,7 @@
  * OpenAPI 3.0规范
  */
 
-interface TestRequest {
+export interface TestRequest {
   url: string;
   testType: 'seo' | 'performance' | 'security' | 'api' | 'stress' | 'website' | 'accessibility';
   testName?: string;
@@ -20,7 +20,7 @@ interface TestRequest {
   };
 }
 
-interface TestResponse {
+export interface TestResponse {
   success: boolean;
   testId: string;
   status: 'pending' | 'running' | 'completed' | 'failed';
@@ -452,13 +452,3 @@ interface APIResult {
  *                 type: string
  *                 enum: [high, medium, low]
  */
-export default {
-  TestRequest,
-  TestResponse,
-  TestResult,
-  SEOResult,
-  PerformanceResult,
-  SecurityResult,
-  AccessibilityResult,
-  APIResult,
-};
