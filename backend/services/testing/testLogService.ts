@@ -83,6 +83,7 @@ export const getLogsByTraceId = async (
   traceId: string,
   options: {
     userId?: string;
+    workspaceId?: string;
     isAdmin?: boolean;
     enforceUserId?: boolean;
     startTime?: string;
@@ -91,11 +92,15 @@ export const getLogsByTraceId = async (
     offset?: number;
   } = {}
 ) => {
-  const { userId, isAdmin, enforceUserId, startTime, endTime, limit, offset } = options;
+  const { userId, workspaceId, isAdmin, enforceUserId, startTime, endTime, limit, offset } =
+    options;
   const params: Array<string | number> = [traceId];
   const filters: string[] = [];
 
-  if (userId && (!isAdmin || enforceUserId)) {
+  if (workspaceId) {
+    params.push(workspaceId);
+    filters.push(`te.workspace_id = $${params.length}`);
+  } else if (userId && (!isAdmin || enforceUserId)) {
     params.push(userId);
     filters.push(`te.user_id = $${params.length}`);
   }

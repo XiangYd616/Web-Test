@@ -8,8 +8,35 @@ import type { NextFunction, Request, Response } from 'express';
 import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 
 const { query } = require('../config/database');
+const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 
 type AuthRequest = Request & { user: { id: string } };
+
+const resolveWorkspaceRole = async (workspaceId: string, userId: string) => {
+  const result = await query(
+    `SELECT role
+     FROM workspace_members
+     WHERE workspace_id = $1 AND user_id = $2 AND status = 'active'
+     LIMIT 1`,
+    [workspaceId, userId]
+  );
+  return result.rows[0]?.role as 'owner' | 'admin' | 'member' | 'viewer' | undefined;
+};
+
+const ensureWorkspacePermission = async (
+  workspaceId: string,
+  userId: string,
+  action: 'read' | 'write' | 'delete' | 'invite' | 'manage' | 'execute'
+) => {
+  const role = await resolveWorkspaceRole(workspaceId, userId);
+  if (!role) {
+    throw new Error('没有权限访问该工作空间');
+  }
+  if (!hasWorkspacePermission(role, action)) {
+    throw new Error('当前工作空间角色无此操作权限');
+  }
+  return role;
+};
 
 type ApiResponse = Response & {
   success: (data?: unknown, message?: string, statusCode?: number, meta?: unknown) => Response;
@@ -151,6 +178,21 @@ class UserController {
   async getStats(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const userId = req.user.id;
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
+      }
+
+      const filters: string[] = [];
+      const params: Array<string | number> = [];
+      if (workspaceId) {
+        params.push(workspaceId);
+        filters.push(`te.workspace_id = $${params.length}`);
+      } else {
+        params.push(userId);
+        filters.push(`te.user_id = $${params.length}`);
+      }
+      const whereClause = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
 
       const sql = `
         SELECT 
@@ -160,10 +202,10 @@ class UserController {
           AVG(tr.score) as averageScore
         FROM test_executions te
         LEFT JOIN test_results tr ON tr.execution_id = te.id
-        WHERE te.user_id = $1
+        ${whereClause}
       `;
 
-      const [stats] = (await query(sql, [userId])) as unknown as UserStats[];
+      const [stats] = (await query(sql, params)) as unknown as UserStats[];
 
       return res.success({
         totalTests: Number(stats.totalTests) || 0,

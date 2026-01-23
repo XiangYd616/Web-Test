@@ -200,6 +200,7 @@ const getQueueStats = async (
   options: {
     userId?: string;
     isAdmin?: boolean;
+    workspaceId?: string;
     startTime?: string;
     endTime?: string;
     limit?: number;
@@ -207,7 +208,7 @@ const getQueueStats = async (
   } = {}
 ) => {
   const stats: Record<string, unknown> = {};
-  const { userId, isAdmin, startTime, endTime, limit, offset } = options;
+  const { userId, isAdmin, workspaceId, startTime, endTime, limit, offset } = options;
   const useDbAggregation =
     !isAdmin ||
     startTime !== undefined ||
@@ -217,6 +218,7 @@ const getQueueStats = async (
   const statusResult = useDbAggregation
     ? await testRepository.getQueueStatusCounts({
         userId: isAdmin ? undefined : userId,
+        workspaceId,
         startTime,
         endTime,
         limit,

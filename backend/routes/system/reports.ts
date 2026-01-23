@@ -9,6 +9,7 @@ import path from 'path';
 import { query } from '../../config/database';
 import type { ReportTemplate as ServiceReportTemplate } from '../../services/reporting/AutomatedReportingService';
 import Logger from '../../utils/logger';
+const { hasWorkspacePermission } = require('../../utils/workspacePermissions');
 const { authMiddleware } = require('../../middleware/auth');
 const { asyncHandler } = require('../../middleware/errorHandler');
 const AutomatedReportingService = require('../../services/reporting/AutomatedReportingService');
@@ -114,6 +115,32 @@ const hashPassword = (password: string) =>
 
 const buildShareDownloadUrl = (token: string) => `/api/system/reports/share/${token}/download`;
 
+const resolveWorkspaceRole = async (workspaceId: string, userId: string) => {
+  const result = await query(
+    `SELECT role
+     FROM workspace_members
+     WHERE workspace_id = $1 AND user_id = $2 AND status = 'active'
+     LIMIT 1`,
+    [workspaceId, userId]
+  );
+  return result.rows[0]?.role as 'owner' | 'admin' | 'member' | 'viewer' | undefined;
+};
+
+const ensureWorkspacePermission = async (
+  workspaceId: string,
+  userId: string,
+  action: 'read' | 'write' | 'delete' | 'invite' | 'manage' | 'execute'
+) => {
+  const role = await resolveWorkspaceRole(workspaceId, userId);
+  if (!role) {
+    throw new Error('没有权限访问该工作空间');
+  }
+  if (!hasWorkspacePermission(role, action)) {
+    throw new Error('当前工作空间角色无此操作权限');
+  }
+  return role;
+};
+
 const validateShareAccess = (
   share: Record<string, unknown>,
   ip: string,
@@ -161,7 +188,7 @@ router.get(
   '/',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { type, format, status, page = 1, limit = 20 } = req.query;
+    const { type, format, status, page = 1, limit = 20, workspaceId } = req.query;
     const userId = (req as AuthRequest).user.id;
 
     try {
@@ -169,8 +196,16 @@ router.get(
       const limitNumber = Number(limit) || 20;
       const offset = (pageNumber - 1) * limitNumber;
 
-      const filters: string[] = ['te.user_id = $1'];
-      const params: Array<string | number> = [userId];
+      const filters: string[] = [];
+      const params: Array<string | number> = [];
+      if (workspaceId) {
+        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+        params.push(String(workspaceId));
+        filters.push(`tr.workspace_id = $${params.length}`);
+      } else {
+        params.push(userId);
+        filters.push(`te.user_id = $${params.length}`);
+      }
       if (type) {
         params.push(type as string);
         filters.push(`tr.report_data -> 'metadata' ->> 'type' = $${params.length}`);
@@ -284,14 +319,26 @@ router.delete(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = (req as AuthRequest).user.id;
     const { id } = req.params;
+    const { workspaceId } = req.query as { workspaceId?: string };
 
     try {
+      const ownershipFilters: string[] = [];
+      const ownershipParams: Array<string | number> = [id];
+      ownershipFilters.push(`rse.id = $1`);
+      if (workspaceId) {
+        await ensureWorkspacePermission(String(workspaceId), userId, 'delete');
+        ownershipParams.push(String(workspaceId));
+        ownershipFilters.push(`tr.workspace_id = $${ownershipParams.length}`);
+      } else {
+        ownershipParams.push(userId);
+        ownershipFilters.push(`tr.user_id = $${ownershipParams.length}`);
+      }
       const ownership = await query(
         `SELECT rse.id, rse.status
          FROM report_share_emails rse
          LEFT JOIN test_reports tr ON tr.id = rse.report_id
-         WHERE rse.id = $1 AND tr.user_id = $2`,
-        [id, userId]
+         WHERE ${ownershipFilters.join(' AND ')}`,
+        ownershipParams
       );
       const ownedRow = ownership.rows?.[0];
       if (!ownedRow) {
@@ -333,27 +380,48 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = (req as AuthRequest).user.id;
-    const { reportId, shareId, status, onlyFailed = 'false', page = 1, limit = 20 } = req.query;
+    const {
+      reportId,
+      shareId,
+      status,
+      onlyFailed = 'false',
+      page = 1,
+      limit = 20,
+      workspaceId,
+    } = req.query;
     const pageNumber = Number(page) || 1;
     const limitNumber = Number(limit) || 20;
     const offset = (pageNumber - 1) * limitNumber;
-    const params: Array<string | number> = [userId];
+    const params: Array<string | number> = [];
+    const filters: string[] = [];
     let filterClause = '';
+
+    if (workspaceId) {
+      await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      params.push(String(workspaceId));
+      filters.push(`tr.workspace_id = $${params.length}`);
+    } else {
+      params.push(userId);
+      filters.push(`tr.user_id = $${params.length}`);
+    }
 
     if (reportId) {
       params.push(String(reportId));
-      filterClause = `${filterClause} AND rse.report_id = $${params.length}`;
+      filters.push(`rse.report_id = $${params.length}`);
     }
     if (shareId) {
       params.push(String(shareId));
-      filterClause = `${filterClause} AND rse.share_id = $${params.length}`;
+      filters.push(`rse.share_id = $${params.length}`);
     }
     if (status) {
       params.push(String(status));
-      filterClause = `${filterClause} AND rse.status = $${params.length}`;
+      filters.push(`rse.status = $${params.length}`);
     }
     if (String(onlyFailed) === 'true') {
-      filterClause = `${filterClause} AND rse.status = 'failed'`;
+      filters.push(`rse.status = 'failed'`);
+    }
+    if (filters.length > 0) {
+      filterClause = `AND ${filters.join(' AND ')}`;
     }
 
     try {
@@ -370,7 +438,7 @@ router.get(
          FROM report_share_emails rse
          LEFT JOIN report_shares rs ON rs.id = rse.share_id
          LEFT JOIN test_reports tr ON tr.id = rse.report_id
-         WHERE tr.user_id = $1 ${filterClause}
+         WHERE ${filters[0]} ${filterClause}
          ORDER BY rse.created_at DESC
          LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
         [...params, limitNumber, offset]
@@ -379,7 +447,7 @@ router.get(
         `SELECT COUNT(*)::int AS total
          FROM report_share_emails rse
          LEFT JOIN test_reports tr ON tr.id = rse.report_id
-         WHERE tr.user_id = $1 ${filterClause}`,
+         WHERE ${filters[0]} ${filterClause}`,
         params
       );
 
@@ -413,15 +481,26 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = (req as AuthRequest).user.id;
     const { id } = req.params;
-    const { force = 'false' } = req.query;
+    const { force = 'false', workspaceId } = req.query;
 
     try {
+      const ownershipFilters: string[] = [];
+      const ownershipParams: Array<string | number> = [id];
+      ownershipFilters.push(`rse.id = $1`);
+      if (workspaceId) {
+        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+        ownershipParams.push(String(workspaceId));
+        ownershipFilters.push(`tr.workspace_id = $${ownershipParams.length}`);
+      } else {
+        ownershipParams.push(userId);
+        ownershipFilters.push(`tr.user_id = $${ownershipParams.length}`);
+      }
       const ownership = await query(
         `SELECT rse.id, rse.status, rse.attempts
          FROM report_share_emails rse
          LEFT JOIN test_reports tr ON tr.id = rse.report_id
-         WHERE rse.id = $1 AND tr.user_id = $2`,
-        [id, userId]
+         WHERE ${ownershipFilters.join(' AND ')}`,
+        ownershipParams
       );
       const ownedRow = ownership.rows?.[0];
       if (!ownedRow) {
@@ -800,19 +879,31 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = (req as AuthRequest).user.id;
-    const { reportId, shareId, page = 1, limit = 20 } = req.query;
+    const { reportId, shareId, page = 1, limit = 20, workspaceId } = req.query;
     const pageNumber = Number(page) || 1;
     const limitNumber = Number(limit) || 20;
     const offset = (pageNumber - 1) * limitNumber;
-    const params: Array<string | number> = [userId];
+    const params: Array<string | number> = [];
+    const filters: string[] = [];
     let filterClause = '';
+    if (workspaceId) {
+      await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      params.push(String(workspaceId));
+      filters.push(`tr.workspace_id = $${params.length}`);
+    } else {
+      params.push(userId);
+      filters.push(`tr.user_id = $${params.length}`);
+    }
     if (reportId) {
       params.push(String(reportId));
-      filterClause = `AND ral.report_id = $${params.length}`;
+      filters.push(`ral.report_id = $${params.length}`);
     }
     if (shareId) {
       params.push(String(shareId));
-      filterClause = `${filterClause} AND ral.share_id = $${params.length}`;
+      filters.push(`ral.share_id = $${params.length}`);
+    }
+    if (filters.length > 0) {
+      filterClause = `AND ${filters.join(' AND ')}`;
     }
 
     try {
@@ -820,7 +911,7 @@ router.get(
         `SELECT ral.*
          FROM report_access_logs ral
          LEFT JOIN test_reports tr ON tr.id = ral.report_id
-         WHERE tr.user_id = $1 ${filterClause}
+         WHERE ${filters[0]} ${filterClause}
          ORDER BY ral.accessed_at DESC
          LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
         [...params, limitNumber, offset]
@@ -829,7 +920,7 @@ router.get(
         `SELECT COUNT(*)::int AS total
          FROM report_access_logs ral
          LEFT JOIN test_reports tr ON tr.id = ral.report_id
-         WHERE tr.user_id = $1 ${filterClause}`,
+         WHERE ${filters[0]} ${filterClause}`,
         params
       );
 
@@ -874,6 +965,7 @@ router.get(
            tr.file_path,
            tr.file_size,
            tr.report_data,
+           tr.workspace_id,
            te.test_id,
            te.user_id,
            ri.status AS instance_status,
@@ -902,6 +994,16 @@ router.get(
         return res.status(404).json({
           success: false,
           message: '报告不存在',
+        });
+      }
+
+      const reportWorkspaceId = reportRow?.workspace_id as string | null | undefined;
+      if (reportWorkspaceId) {
+        await ensureWorkspacePermission(reportWorkspaceId, userId, 'read');
+      } else if (String(reportRow.user_id) !== String(userId)) {
+        return res.status(403).json({
+          success: false,
+          message: '无权访问此报告',
         });
       }
 
@@ -1253,13 +1355,12 @@ router.delete(
 
     try {
       const reportResult = await query(
-        `SELECT tr.file_path, te.user_id
+        `SELECT tr.file_path, tr.workspace_id, te.user_id
          FROM test_reports tr
          LEFT JOIN test_executions te ON te.id = tr.execution_id
          WHERE tr.id = $1`,
         [id]
       );
-
       const reportRow = reportResult.rows[0];
       if (!reportRow) {
         return res.status(404).json({
@@ -1268,7 +1369,10 @@ router.delete(
         });
       }
 
-      if (String(reportRow.user_id) !== String(userId)) {
+      const reportWorkspaceId = reportRow?.workspace_id as string | null | undefined;
+      if (reportWorkspaceId) {
+        await ensureWorkspacePermission(reportWorkspaceId, userId, 'delete');
+      } else if (String(reportRow.user_id) !== String(userId)) {
         return res.status(403).json({
           success: false,
           message: '无权删除此报告',
@@ -1514,8 +1618,12 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = (req as AuthRequest).user.id;
+    const { workspaceId } = req.query as { workspaceId?: string };
 
     try {
+      if (workspaceId) {
+        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      }
       const statsResult = await query(
         `SELECT
            tr.id,
@@ -1536,8 +1644,8 @@ router.get(
            WHERE access_type = 'download' AND success = true
            GROUP BY report_id
          ) al ON al.report_id = tr.id
-         WHERE te.user_id = $1`,
-        [userId]
+         WHERE ${workspaceId ? 'tr.workspace_id = $1' : 'te.user_id = $1'}`,
+        [workspaceId ?? userId]
       );
 
       const reportRows = statsResult.rows || [];

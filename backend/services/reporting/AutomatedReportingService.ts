@@ -790,9 +790,10 @@ class AutomatedReportingService extends EventEmitter {
 
       const generatorData = this.buildGeneratorData(config, template, data, resolvedVariables);
       const reportPath = await this.generateReportFile(generatorData, template, config, instanceId);
-      const executionId = await this.resolveExecutionId(config.filters || []);
+      const { executionId, workspaceId } = await this.resolveExecutionId(config.filters || []);
       const reportRecordId = await this.saveReportRecord(
         executionId,
+        workspaceId,
         template,
         config.format.type,
         generatorData,
@@ -1961,22 +1962,28 @@ class AutomatedReportingService extends EventEmitter {
     return rows.join('\n');
   }
 
-  private async resolveExecutionId(filters: ReportFilter[]): Promise<number | null> {
+  private async resolveExecutionId(
+    filters: ReportFilter[]
+  ): Promise<{ executionId: number | null; workspaceId: string | null }> {
     const testIdFilter = filters.find(
       filter => filter.field === 'test_id' && filter.operator === 'equals'
     );
     if (!testIdFilter) {
-      return null;
+      return { executionId: null, workspaceId: null };
     }
 
-    const result = await query('SELECT id FROM test_executions WHERE test_id = $1', [
+    const result = await query('SELECT id, workspace_id FROM test_executions WHERE test_id = $1', [
       testIdFilter.value,
     ]);
-    return result.rows[0]?.id ?? null;
+    return {
+      executionId: result.rows[0]?.id ?? null,
+      workspaceId: result.rows[0]?.workspace_id ?? null,
+    };
   }
 
   private async saveReportRecord(
     executionId: number | null,
+    workspaceId: string | null,
     template: ReportTemplate,
     format: string,
     data: GeneratorReportData,
@@ -1985,10 +1992,10 @@ class AutomatedReportingService extends EventEmitter {
   ): Promise<string> {
     const result = await query(
       `INSERT INTO test_reports (
-         execution_id, report_type, format, report_data, file_path, file_size
-       ) VALUES ($1, $2, $3, $4, $5, $6)
+         execution_id, workspace_id, report_type, format, report_data, file_path, file_size
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
-      [executionId, template.type, format, JSON.stringify(data), filePath, fileSize]
+      [executionId, workspaceId, template.type, format, JSON.stringify(data), filePath, fileSize]
     );
     return String(result.rows[0]?.id);
   }

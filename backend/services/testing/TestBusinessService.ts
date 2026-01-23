@@ -14,6 +14,7 @@ import { TestTypeValues } from '../../../shared/types/test.types';
 import { query } from '../../config/database';
 import { ErrorFactory } from '../../middleware/errorHandler';
 import testRepository from '../../repositories/testRepository';
+import { hasWorkspacePermission } from '../../utils/workspacePermissions';
 import { markFailedWithLog, markStartedWithLog, updateStatusWithLog } from './testLogService';
 import testTemplateService from './testTemplateService';
 
@@ -60,6 +61,7 @@ interface TestConfig {
   batchId?: string;
   templateId?: string;
   scheduleId?: string | number;
+  workspaceId?: string;
 }
 
 interface User {
@@ -245,7 +247,25 @@ class TestBusinessService {
   private async checkUserPermissions(user: User, config: TestConfig): Promise<ValidationResult> {
     const errors: string[] = [];
 
-    // 免费用户限制
+    if (config.workspaceId) {
+      const workspaceResult = await query(
+        `SELECT role
+         FROM workspace_members
+         WHERE workspace_id = $1 AND user_id = $2 AND status = 'active'
+         LIMIT 1`,
+        [config.workspaceId, user.userId]
+      );
+      const role = workspaceResult.rows[0]?.role as string | undefined;
+      if (!role) {
+        errors.push('没有权限访问该工作空间');
+      } else if (
+        !hasWorkspacePermission(role as 'owner' | 'admin' | 'member' | 'viewer', 'execute')
+      ) {
+        errors.push('当前工作空间角色无执行测试权限');
+      }
+    }
+
+    // 全局角色限制（作为上限约束）
     if (user.role === 'free') {
       if (config.testType === 'security') {
         errors.push('免费用户无法使用安全测试功能');
@@ -318,6 +338,7 @@ class TestBusinessService {
       await testRepository.create({
         testId,
         userId: user.userId,
+        workspaceId: normalizedConfig.workspaceId,
         engineType: normalizedConfig.testType,
         engineName: engineMeta.engineName,
         testName: engineMeta.testName,
@@ -364,11 +385,19 @@ class TestBusinessService {
     let template = null as { id: string | number; config: Record<string, unknown> } | null;
 
     if (config.templateId) {
-      const resolved = await testTemplateService.getTemplateForUser(user.userId, config.templateId);
+      const resolved = await testTemplateService.getTemplateForUser(
+        user.userId,
+        config.templateId,
+        config.workspaceId
+      );
       template = { id: resolved.id, config: resolved.config };
       templateId = String(resolved.id);
     } else if (config.testType) {
-      const resolved = await testTemplateService.getDefaultTemplate(user.userId, config.testType);
+      const resolved = await testTemplateService.getDefaultTemplate(
+        user.userId,
+        config.testType,
+        config.workspaceId
+      );
       if (resolved) {
         template = { id: resolved.id, config: resolved.config };
         templateId = String(resolved.id);

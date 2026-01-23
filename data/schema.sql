@@ -155,6 +155,44 @@ CREATE TABLE IF NOT EXISTS user_sessions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- 工作空间表（用于团队协作）
+CREATE TABLE IF NOT EXISTS workspaces (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    visibility VARCHAR(20) DEFAULT 'private' CHECK (visibility IN ('private', 'team', 'public')),
+    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_workspaces_created_by ON workspaces(created_by);
+CREATE INDEX IF NOT EXISTS idx_workspaces_visibility ON workspaces(visibility);
+CREATE INDEX IF NOT EXISTS idx_workspaces_metadata_gin ON workspaces USING GIN (metadata);
+
+-- 工作空间成员表
+CREATE TABLE IF NOT EXISTS workspace_members (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(20) DEFAULT 'member' CHECK (role IN ('owner', 'admin', 'member', 'viewer')),
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('pending', 'active', 'inactive')),
+    permissions JSONB DEFAULT '[]',
+    invited_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    invited_at TIMESTAMP WITH TIME ZONE,
+    joined_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(workspace_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_workspace_members_workspace_id ON workspace_members(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_workspace_members_user_id ON workspace_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_workspace_members_role ON workspace_members(role);
+CREATE INDEX IF NOT EXISTS idx_workspace_members_status ON workspace_members(status);
+CREATE INDEX IF NOT EXISTS idx_workspace_members_permissions_gin ON workspace_members USING GIN (permissions);
+
 -- =====================================================
 -- 2. 测试管理模块
 -- =====================================================
@@ -164,6 +202,7 @@ CREATE TABLE IF NOT EXISTS test_executions (
     id SERIAL PRIMARY KEY,
     test_id VARCHAR(100) UNIQUE NOT NULL,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
     engine_type VARCHAR(50) NOT NULL,
     engine_name VARCHAR(100) NOT NULL,
     test_name VARCHAR(255) NOT NULL,
@@ -188,6 +227,13 @@ CREATE TABLE IF NOT EXISTS test_executions (
 
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_test_executions_user_id ON test_executions(user_id);
+CREATE INDEX IF NOT EXISTS idx_test_executions_workspace_id ON test_executions(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_test_executions_engine_type ON test_executions(engine_type);
+CREATE INDEX IF NOT EXISTS idx_test_executions_status ON test_executions(status);
+CREATE INDEX IF NOT EXISTS idx_test_executions_created_at ON test_executions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_test_executions_test_id ON test_executions(test_id);
 
 -- 执行日志表
 CREATE TABLE IF NOT EXISTS test_logs (
@@ -284,6 +330,7 @@ CREATE INDEX IF NOT EXISTS idx_login_attempts_created_at ON login_attempts(creat
 
 -- 测试执行表索引
 CREATE INDEX IF NOT EXISTS idx_test_executions_user_id ON test_executions(user_id);
+CREATE INDEX IF NOT EXISTS idx_test_executions_workspace_id ON test_executions(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_test_executions_engine_type ON test_executions(engine_type);
 CREATE INDEX IF NOT EXISTS idx_test_executions_status ON test_executions(status);
 CREATE INDEX IF NOT EXISTS idx_test_executions_created_at ON test_executions(created_at DESC);
@@ -440,6 +487,7 @@ CREATE TRIGGER update_workspace_resources_updated_at
 CREATE TABLE IF NOT EXISTS test_templates (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
 
     -- 模板信息
     template_name VARCHAR(200) NOT NULL,
@@ -461,11 +509,19 @@ CREATE TABLE IF NOT EXISTS test_templates (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE INDEX IF NOT EXISTS idx_test_templates_user_id ON test_templates(user_id);
+CREATE INDEX IF NOT EXISTS idx_test_templates_workspace_id ON test_templates(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_test_templates_engine_type ON test_templates(engine_type);
+CREATE INDEX IF NOT EXISTS idx_test_templates_is_public ON test_templates(is_public);
+CREATE INDEX IF NOT EXISTS idx_test_templates_is_default ON test_templates(is_default);
+CREATE INDEX IF NOT EXISTS idx_test_templates_usage_count ON test_templates(usage_count);
+
 -- 测试报告表（以当前代码使用为准）
 CREATE TABLE IF NOT EXISTS test_reports (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     execution_id INTEGER REFERENCES test_executions(id) ON DELETE SET NULL,
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
 
     report_type VARCHAR(50) NOT NULL,
     format VARCHAR(20) NOT NULL,
@@ -478,6 +534,13 @@ CREATE TABLE IF NOT EXISTS test_reports (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_test_reports_execution_id ON test_reports(execution_id);
+CREATE INDEX IF NOT EXISTS idx_test_reports_user_id ON test_reports(user_id);
+CREATE INDEX IF NOT EXISTS idx_test_reports_workspace_id ON test_reports(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_test_reports_type ON test_reports(report_type);
+CREATE INDEX IF NOT EXISTS idx_test_reports_format ON test_reports(format);
+CREATE INDEX IF NOT EXISTS idx_test_reports_generated_at ON test_reports(generated_at DESC);
 
 -- 报告分享表
 CREATE TABLE IF NOT EXISTS report_shares (
@@ -796,6 +859,7 @@ CREATE TABLE IF NOT EXISTS engine_status (
 
 -- 扩展功能表索引
 CREATE INDEX IF NOT EXISTS idx_test_templates_user_id ON test_templates(user_id);
+CREATE INDEX IF NOT EXISTS idx_test_templates_workspace_id ON test_templates(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_test_templates_engine_type ON test_templates(engine_type);
 CREATE INDEX IF NOT EXISTS idx_test_templates_is_public ON test_templates(is_public);
 CREATE INDEX IF NOT EXISTS idx_test_templates_is_default ON test_templates(is_default);
@@ -803,6 +867,7 @@ CREATE INDEX IF NOT EXISTS idx_test_templates_usage_count ON test_templates(usag
 
 CREATE INDEX IF NOT EXISTS idx_test_reports_execution_id ON test_reports(execution_id);
 CREATE INDEX IF NOT EXISTS idx_test_reports_user_id ON test_reports(user_id);
+CREATE INDEX IF NOT EXISTS idx_test_reports_workspace_id ON test_reports(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_test_reports_type ON test_reports(report_type);
 CREATE INDEX IF NOT EXISTS idx_test_reports_format ON test_reports(format);
 CREATE INDEX IF NOT EXISTS idx_test_reports_generated_at ON test_reports(generated_at DESC);

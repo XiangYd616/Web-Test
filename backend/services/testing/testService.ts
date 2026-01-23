@@ -30,6 +30,7 @@ interface TestExecutionRecord {
   id: number;
   test_id: string;
   user_id: string;
+  workspace_id?: string | null;
   engine_type: string;
   engine_name: string;
   test_name: string;
@@ -66,6 +67,7 @@ interface TestConfig {
   batchId?: string;
   templateId?: string;
   scheduleId?: string | number;
+  workspaceId?: string;
 }
 
 type TestHistoryResponse = {
@@ -132,24 +134,32 @@ class TestService {
   /**
    * 获取测试结果
    */
-  async getTestResults(testId: string, userId: string): Promise<TestResult> {
+  async getTestResults(testId: string, userId: string, workspaceId?: string): Promise<TestResult> {
     // 检查权限
-    const hasAccess = await testRepository.checkOwnership(testId, userId);
+    const hasAccess = await testRepository.checkOwnership(testId, userId, workspaceId);
     if (!hasAccess) {
       throw new Error('无权访问此测试');
     }
 
-    const execution = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+    const execution = (await testRepository.findById(
+      testId,
+      userId,
+      workspaceId
+    )) as TestExecutionRecord | null;
     if (!execution) {
       throw new Error('测试不存在');
     }
 
-    const result = (await testRepository.findResults(testId, userId)) as TestResultRecord | null;
+    const result = (await testRepository.findResults(
+      testId,
+      userId,
+      workspaceId
+    )) as TestResultRecord | null;
     if (!result) {
       throw new Error('测试结果不存在');
     }
 
-    const metrics = await testRepository.findMetrics(testId, userId);
+    const metrics = await testRepository.findMetrics(testId, userId, workspaceId);
     const metricsPayload = metrics.map(metric => ({ ...metric }));
 
     return this.formatResults(execution, result, metricsPayload);
@@ -158,8 +168,17 @@ class TestService {
   /**
    * 重新运行测试
    */
-  async rerunTest(testId: string, userId: string, role = 'free'): Promise<Record<string, unknown>> {
-    const execution = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+  async rerunTest(
+    testId: string,
+    userId: string,
+    role = 'free',
+    workspaceId?: string
+  ): Promise<Record<string, unknown>> {
+    const execution = (await testRepository.findById(
+      testId,
+      userId,
+      workspaceId
+    )) as TestExecutionRecord | null;
     if (!execution) {
       throw new Error('测试不存在');
     }
@@ -174,14 +193,19 @@ class TestService {
   async updateTest(
     testId: string,
     userId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
+    workspaceId?: string
   ): Promise<Record<string, unknown>> {
-    const execution = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+    const execution = (await testRepository.findById(
+      testId,
+      userId,
+      workspaceId
+    )) as TestExecutionRecord | null;
     if (!execution) {
       throw new Error('测试不存在');
     }
 
-    if (execution.user_id !== userId) {
+    if (!workspaceId && execution.user_id !== userId) {
       throw new Error('无权访问此测试');
     }
 
@@ -200,8 +224,8 @@ class TestService {
            test_url = $2,
            test_config = $3,
            updated_at = NOW()
-       WHERE test_id = $4 AND user_id = $5`,
-      [nextTestName, nextTestUrl || null, JSON.stringify(nextConfig), testId, userId]
+       WHERE test_id = $4 AND ${workspaceId ? 'workspace_id = $5' : 'user_id = $5'}`,
+      [nextTestName, nextTestUrl || null, JSON.stringify(nextConfig), testId, workspaceId ?? userId]
     );
 
     await insertExecutionLog(testId, 'info', '测试配置已更新', {
@@ -240,13 +264,14 @@ class TestService {
   /**
    * 获取批量测试状态
    */
-  async getBatchTestStatus(batchId: string, userId: string) {
+  async getBatchTestStatus(batchId: string, userId: string, workspaceId?: string) {
     const result = await query(
       `SELECT test_id, status, progress, created_at, updated_at
        FROM test_executions
-       WHERE user_id = $1 AND (test_config->>'batchId') = $2
+       WHERE ${workspaceId ? 'workspace_id = $1' : 'user_id = $1'}
+         AND (test_config->>'batchId') = $2
        ORDER BY created_at DESC`,
-      [userId, batchId]
+      [workspaceId ?? userId, batchId]
     );
 
     const tests = result.rows.map(row => ({
@@ -267,11 +292,12 @@ class TestService {
   /**
    * 删除批量测试
    */
-  async deleteBatchTests(batchId: string, userId: string): Promise<void> {
+  async deleteBatchTests(batchId: string, userId: string, workspaceId?: string): Promise<void> {
     const testIdsResult = await query(
       `SELECT test_id FROM test_executions
-       WHERE user_id = $1 AND (test_config->>'batchId') = $2`,
-      [userId, batchId]
+       WHERE ${workspaceId ? 'workspace_id = $1' : 'user_id = $1'}
+         AND (test_config->>'batchId') = $2`,
+      [workspaceId ?? userId, batchId]
     );
 
     for (const row of testIdsResult.rows) {
@@ -292,10 +318,17 @@ class TestService {
     userId: string,
     testType?: string,
     page = 1,
-    limit = 20
+    limit = 20,
+    workspaceId?: string
   ): Promise<TestHistoryResponse> {
     const offset = (page - 1) * limit;
-    const result = await testRepository.getTestHistory(userId, testType, limit, offset);
+    const result = await testRepository.getTestHistory(
+      userId,
+      testType,
+      limit,
+      offset,
+      workspaceId
+    );
     return {
       tests: result.tests,
       pagination: {
@@ -310,12 +343,24 @@ class TestService {
   /**
    * 获取测试详情
    */
-  async getTestDetail(userId: string, testId: string): Promise<TestDetailResponse> {
-    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+  async getTestDetail(
+    userId: string,
+    testId: string,
+    workspaceId?: string
+  ): Promise<TestDetailResponse> {
+    const test = (await testRepository.findById(
+      testId,
+      userId,
+      workspaceId
+    )) as TestExecutionRecord | null;
     if (!test) {
       throw new Error('测试不存在');
     }
-    const result = (await testRepository.findResults(testId, userId)) as TestResultRecord | null;
+    const result = (await testRepository.findResults(
+      testId,
+      userId,
+      workspaceId
+    )) as TestResultRecord | null;
     return {
       id: test.test_id,
       userId: test.user_id,
@@ -336,15 +381,20 @@ class TestService {
     testId: string,
     limit = 100,
     offset = 0,
-    level?: string
+    level?: string,
+    workspaceId?: string
   ): Promise<{ logs: TestLogEntry[]; total: number; hasMore: boolean }> {
-    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+    const test = (await testRepository.findById(
+      testId,
+      userId,
+      workspaceId
+    )) as TestExecutionRecord | null;
     if (!test) {
       throw new Error('测试不存在');
     }
 
-    const params: Array<string | number> = [testId, userId];
-    let whereClause = 'te.test_id = $1 AND te.user_id = $2';
+    const params: Array<string | number> = [testId, workspaceId ?? userId];
+    let whereClause = `te.test_id = $1 AND te.${workspaceId ? 'workspace_id' : 'user_id'} = $2`;
 
     const normalizedLevel = level ? normalizeTestLogLevel(level, 'info') : undefined;
     if (normalizedLevel) {
@@ -389,8 +439,15 @@ class TestService {
   /**
    * 取消测试
    */
-  async cancelTest(userId: string, testId: string): Promise<void> {
-    await this.updateAndStopTest(userId, testId, 'cancelled', '测试已取消');
+  async cancelTest(userId: string, testId: string, workspaceId?: string): Promise<void> {
+    await this.updateAndStopTest(userId, testId, 'cancelled', '测试已取消', workspaceId);
+  }
+
+  /**
+   * 停止测试
+   */
+  async stopTest(userId: string, testId: string, workspaceId?: string): Promise<void> {
+    await this.updateAndStopTest(userId, testId, 'stopped', '测试已停止', workspaceId);
   }
 
   /**
@@ -483,18 +540,26 @@ class TestService {
   /**
    * 获取测试状态
    */
-  async getStatus(userId: string, testId: string): Promise<TestStatusResponse> {
-    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+  async getStatus(
+    userId: string,
+    testId: string,
+    workspaceId?: string
+  ): Promise<TestStatusResponse> {
+    const test = (await testRepository.findById(
+      testId,
+      userId,
+      workspaceId
+    )) as TestExecutionRecord | null;
 
     if (!test) {
       throw new Error('测试不存在');
     }
 
-    if (test.user_id !== userId) {
+    if (!workspaceId && test.user_id !== userId) {
       throw new Error('无权访问此测试');
     }
 
-    const result = await testRepository.findResults(testId, userId);
+    const result = await testRepository.findResults(testId, userId, workspaceId);
     const results = result?.summary ?? null;
 
     return {
@@ -510,23 +575,24 @@ class TestService {
   /**
    * 停止测试
    */
-  async stopTest(userId: string, testId: string): Promise<void> {
-    await this.updateAndStopTest(userId, testId, 'stopped', '测试已停止');
-  }
-
-  private async updateAndStopTest(
+  async updateAndStopTest(
     userId: string,
     testId: string,
     status: 'cancelled' | 'stopped',
-    message: string
+    message: string,
+    workspaceId?: string
   ): Promise<void> {
-    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+    const test = (await testRepository.findById(
+      testId,
+      userId,
+      workspaceId
+    )) as TestExecutionRecord | null;
 
     if (!test) {
       throw new Error('测试不存在');
     }
 
-    if (test.user_id !== userId) {
+    if (!workspaceId && test.user_id !== userId) {
       throw new Error('无权访问此测试');
     }
 
@@ -547,14 +613,18 @@ class TestService {
   /**
    * 删除测试
    */
-  async deleteTest(userId: string, testId: string): Promise<void> {
-    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+  async deleteTest(userId: string, testId: string, workspaceId?: string): Promise<void> {
+    const test = (await testRepository.findById(
+      testId,
+      userId,
+      workspaceId
+    )) as TestExecutionRecord | null;
 
     if (!test) {
       throw new Error('测试不存在');
     }
 
-    if (test.user_id !== userId) {
+    if (!workspaceId && test.user_id !== userId) {
       throw new Error('无权访问此测试');
     }
 
@@ -565,15 +635,21 @@ class TestService {
   /**
    * 获取测试列表
    */
-  async getTestList(userId: string, page = 1, limit = 10): Promise<TestListResponse> {
+  async getTestList(
+    userId: string,
+    page = 1,
+    limit = 10,
+    workspaceId?: string
+  ): Promise<TestListResponse> {
     const offset = (page - 1) * limit;
 
     const tests = (await testRepository.findByUserId(
       userId,
       limit,
-      offset
+      offset,
+      workspaceId
     )) as TestExecutionRecord[];
-    const total = await testRepository.countByUserId(userId);
+    const total = await testRepository.countByUserId(userId, workspaceId);
 
     return {
       tests: tests.map(test => ({

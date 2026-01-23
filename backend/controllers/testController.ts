@@ -5,9 +5,11 @@
 
 import type { NextFunction, Request, Response } from 'express';
 import { StandardErrorCode } from '../../shared/types/standardApiResponse';
+import { query } from '../config/database';
 
 const testService = require('../services/testing/testService');
 const testTemplateService = require('../services/testing/testTemplateService');
+const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 const { configManager } = require('../src/ConfigManager');
 const {
   getQueueStats,
@@ -19,6 +21,32 @@ const {
 const { getLogsByTraceId } = require('../services/testing/testLogService');
 
 type AuthRequest = Request & { user: { id: string; role?: string } };
+
+const resolveWorkspaceRole = async (workspaceId: string, userId: string) => {
+  const result = await query(
+    `SELECT role
+     FROM workspace_members
+     WHERE workspace_id = $1 AND user_id = $2 AND status = 'active'
+     LIMIT 1`,
+    [workspaceId, userId]
+  );
+  return result.rows[0]?.role as 'owner' | 'admin' | 'member' | 'viewer' | undefined;
+};
+
+const ensureWorkspacePermission = async (
+  workspaceId: string,
+  userId: string,
+  action: 'read' | 'write' | 'delete' | 'invite' | 'manage' | 'execute'
+) => {
+  const role = await resolveWorkspaceRole(workspaceId, userId);
+  if (!role) {
+    throw new Error('没有权限访问该工作空间');
+  }
+  if (!hasWorkspacePermission(role, action)) {
+    throw new Error('当前工作空间角色无此操作权限');
+  }
+  return role;
+};
 
 const buildZipReadme = (traceId: string, format: string) => {
   return [
@@ -170,6 +198,10 @@ class TestController {
   async createAndStart(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
+      const workspaceId = (config.workspaceId as string | undefined) || undefined;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
       const user = {
         userId: req.user.id,
         role: req.user.role || 'free',
@@ -216,16 +248,18 @@ class TestController {
   async getQueueTraceLogs(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const { traceId } = req.params as { traceId: string };
-      const { format, userId, startTime, endTime, limit, offset, batchSize, all } = req.query as {
-        format?: string;
-        userId?: string;
-        startTime?: string;
-        endTime?: string;
-        limit?: string;
-        offset?: string;
-        batchSize?: string;
-        all?: string;
-      };
+      const { format, userId, startTime, endTime, limit, offset, batchSize, all, workspaceId } =
+        req.query as {
+          format?: string;
+          userId?: string;
+          startTime?: string;
+          endTime?: string;
+          limit?: string;
+          offset?: string;
+          batchSize?: string;
+          all?: string;
+          workspaceId?: string;
+        };
       const isAdmin = this.isAdminRole(req.user.role);
       const isSuperAdmin = req.user.role === 'superadmin';
       const exportAll = all === 'true' || all === '1';
@@ -250,6 +284,9 @@ class TestController {
           : undefined;
       if (exportAll && !isAdmin) {
         return _errorResponse(res, '无权限导出全部日志', 403);
+      }
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
       }
       if (userId && !isAdmin && userId !== req.user.id) {
         return _errorResponse(res, '无权限访问该用户日志', 403);
@@ -313,6 +350,7 @@ class TestController {
       }
       const logsResult = await getLogsByTraceId(traceId, {
         userId: isAdmin ? targetUserId : req.user.id,
+        workspaceId,
         isAdmin,
         enforceUserId: !(exportAll && isAdmin),
         startTime,
@@ -535,15 +573,20 @@ class TestController {
   async getQueueStats(_req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const isAdmin = this.isAdminRole(_req.user.role);
-      const { startTime, endTime, limit, offset } = _req.query as {
+      const { startTime, endTime, limit, offset, workspaceId } = _req.query as {
         startTime?: string;
         endTime?: string;
         limit?: string;
         offset?: string;
+        workspaceId?: string;
       };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, _req.user.id, 'read');
+      }
       const stats = await getQueueStats({
         userId: _req.user.id,
         isAdmin,
+        workspaceId,
         startTime,
         endTime,
         limit: limit ? Number(limit) : undefined,
@@ -564,8 +607,12 @@ class TestController {
     try {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
+      }
 
-      const status = await testService.getStatus(userId, testId);
+      const status = await testService.getStatus(userId, testId, workspaceId);
       return successResponse(res, status);
     } catch (error) {
       next(error);
@@ -581,8 +628,12 @@ class TestController {
     try {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
+      }
 
-      const result = await testService.getTestResults(testId, userId);
+      const result = await testService.getTestResults(testId, userId, workspaceId);
       return successResponse(res, result);
     } catch (error) {
       next(error);
@@ -598,8 +649,12 @@ class TestController {
     try {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, userId, 'execute');
+      }
 
-      await testService.stopTest(userId, testId);
+      await testService.stopTest(userId, testId, workspaceId);
       return successResponse(res, { testId }, '测试已停止');
     } catch (error) {
       next(error);
@@ -615,8 +670,12 @@ class TestController {
     try {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, userId, 'delete');
+      }
 
-      await testService.deleteTest(testId, userId);
+      await testService.deleteTest(userId, testId, workspaceId);
       return successResponse(res, { testId }, '测试已删除');
     } catch (error) {
       next(error);
@@ -676,6 +735,10 @@ class TestController {
   async createWebsiteTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
+      const workspaceId = (config.workspaceId as string | undefined) || undefined;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
       const user = {
         userId: req.user.id,
         role: req.user.role || 'free',
@@ -704,6 +767,10 @@ class TestController {
   async createPerformanceTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
+      const workspaceId = (config.workspaceId as string | undefined) || undefined;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
       const user = {
         userId: req.user.id,
         role: req.user.role || 'free',
@@ -732,6 +799,10 @@ class TestController {
   async createSecurityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
+      const workspaceId = (config.workspaceId as string | undefined) || undefined;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
       const user = {
         userId: req.user.id,
         role: req.user.role || 'free',
@@ -760,6 +831,10 @@ class TestController {
   async createSEOTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
+      const workspaceId = (config.workspaceId as string | undefined) || undefined;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
       const user = {
         userId: req.user.id,
         role: req.user.role || 'free',
@@ -788,6 +863,10 @@ class TestController {
   async createStressTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
+      const workspaceId = (config.workspaceId as string | undefined) || undefined;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
       const user = {
         userId: req.user.id,
         role: req.user.role || 'free',
@@ -816,6 +895,10 @@ class TestController {
   async createAPITest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
+      const workspaceId = (config.workspaceId as string | undefined) || undefined;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
       const user = {
         userId: req.user.id,
         role: req.user.role || 'free',
@@ -844,6 +927,10 @@ class TestController {
   async createAccessibilityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
+      const workspaceId = (config.workspaceId as string | undefined) || undefined;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
       const user = {
         userId: req.user.id,
         role: req.user.role || 'free',
@@ -872,6 +959,10 @@ class TestController {
   async createCompatibilityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
+      const workspaceId = (config.workspaceId as string | undefined) || undefined;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
       const user = {
         userId: req.user.id,
         role: req.user.role || 'free',
@@ -900,6 +991,10 @@ class TestController {
   async createUXTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
+      const workspaceId = (config.workspaceId as string | undefined) || undefined;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
       const user = {
         userId: req.user.id,
         role: req.user.role || 'free',
@@ -929,8 +1024,17 @@ class TestController {
     try {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, userId, 'execute');
+      }
 
-      const result = await testService.rerunTest(testId, userId);
+      const result = await testService.rerunTest(
+        testId,
+        userId,
+        req.user.role || 'free',
+        workspaceId
+      );
       return successResponse(res, result, '测试重新运行成功');
     } catch (error) {
       next(error);
@@ -947,8 +1051,12 @@ class TestController {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
       const updates = req.body as Record<string, unknown>;
+      const workspaceId = (updates.workspaceId as string | undefined) || undefined;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, userId, 'write');
+      }
 
-      const result = await testService.updateTest(testId, userId, updates);
+      const result = await testService.updateTest(testId, userId, updates, workspaceId);
       return successResponse(res, result, '测试更新成功');
     } catch (error) {
       next(error);
@@ -975,6 +1083,17 @@ class TestController {
         });
       }
 
+      const workspaceIds = new Set<string>();
+      tests.forEach(test => {
+        const workspaceId = test.workspaceId as string | undefined;
+        if (workspaceId) {
+          workspaceIds.add(workspaceId);
+        }
+      });
+      for (const workspaceId of workspaceIds) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
+
       const result = await testService.createBatchTests(tests, user);
       return createdResponse(res, result, '批量测试创建成功');
     } catch (error) {
@@ -991,8 +1110,12 @@ class TestController {
     try {
       const { batchId } = req.params as { batchId: string };
       const userId = req.user.id;
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
+      }
 
-      const result = await testService.getBatchTestStatus(batchId, userId);
+      const result = await testService.getBatchTestStatus(batchId, userId, workspaceId);
       return successResponse(res, result);
     } catch (error) {
       next(error);
@@ -1008,8 +1131,12 @@ class TestController {
     try {
       const { batchId } = req.params as { batchId: string };
       const userId = req.user.id;
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, userId, 'delete');
+      }
 
-      await testService.deleteBatchTests(batchId, userId);
+      await testService.deleteBatchTests(batchId, userId, workspaceId);
       return successResponse(res, { batchId }, '批量测试删除成功');
     } catch (error) {
       next(error);
@@ -1023,11 +1150,15 @@ class TestController {
    */
   async getTestList(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
-      const { page = '1', limit = '10' } = req.query as Record<string, string>;
+      const { page = '1', limit = '10', workspaceId } = req.query as Record<string, string>;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+      }
       const result = await testService.getTestList(
         req.user.id,
         parseInt(page, 10) || 1,
-        parseInt(limit, 10) || 10
+        parseInt(limit, 10) || 10,
+        workspaceId
       );
       return successResponse(res, result);
     } catch (error) {
@@ -1042,12 +1173,21 @@ class TestController {
    */
   async getTestHistory(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
-      const { testType, page = '1', limit = '20' } = req.query as Record<string, string>;
+      const {
+        testType,
+        page = '1',
+        limit = '20',
+        workspaceId,
+      } = req.query as Record<string, string>;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+      }
       const result = await testService.getTestHistory(
         req.user.id,
         testType,
         parseInt(page, 10) || 1,
-        parseInt(limit, 10) || 20
+        parseInt(limit, 10) || 20,
+        workspaceId
       );
       return successResponse(res, result);
     } catch (error) {
@@ -1063,7 +1203,11 @@ class TestController {
   async getProgress(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
-      const status = await testService.getStatus(req.user.id, testId);
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+      }
+      const status = await testService.getStatus(req.user.id, testId, workspaceId);
       return successResponse(res, { testId, progress: status.progress, status: status.status });
     } catch (error) {
       next(error);
@@ -1078,8 +1222,14 @@ class TestController {
   async exportTestResult(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
-      const { format = 'json' } = req.query as { format?: string };
-      const result = await testService.getTestResults(testId, req.user.id);
+      const { format = 'json', workspaceId } = req.query as {
+        format?: string;
+        workspaceId?: string;
+      };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+      }
+      const result = await testService.getTestResults(testId, req.user.id, workspaceId);
 
       if (format === 'csv') {
         const csvRows: string[][] = [['section', 'field', 'value']];
@@ -1127,7 +1277,11 @@ class TestController {
   async cancelTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
-      await testService.cancelTest(req.user.id, testId);
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
+      }
+      await testService.cancelTest(req.user.id, testId, workspaceId);
       return successResponse(res, { testId }, '测试已取消');
     } catch (error) {
       next(error);
@@ -1142,7 +1296,11 @@ class TestController {
   async getHistoryDetail(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
-      const result = await testService.getTestDetail(req.user.id, testId);
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+      }
+      const result = await testService.getTestDetail(req.user.id, testId, workspaceId);
       return successResponse(res, result);
     } catch (error) {
       next(error);
@@ -1157,13 +1315,22 @@ class TestController {
   async getTestLogs(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
-      const { limit = '100', offset = '0', level } = req.query as Record<string, string>;
+      const {
+        limit = '100',
+        offset = '0',
+        level,
+        workspaceId,
+      } = req.query as Record<string, string>;
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+      }
       const result = await testService.getTestLogs(
         req.user.id,
         testId,
         parseInt(limit, 10) || 100,
         parseInt(offset, 10) || 0,
-        level
+        level,
+        workspaceId
       );
       return successResponse(res, result);
     } catch (error) {
@@ -1178,8 +1345,18 @@ class TestController {
    */
   async getTemplates(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
-      const { engineType } = req.query as { engineType?: string };
-      const templates = await testTemplateService.listTemplates(req.user.id, engineType);
+      const { engineType, workspaceId } = req.query as {
+        engineType?: string;
+        workspaceId?: string;
+      };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+      }
+      const templates = await testTemplateService.listTemplates(
+        req.user.id,
+        engineType,
+        workspaceId
+      );
       return successResponse(res, templates);
     } catch (error) {
       next(error);
@@ -1200,7 +1377,12 @@ class TestController {
         config?: Record<string, unknown>;
         isPublic?: boolean;
         isDefault?: boolean;
+        workspaceId?: string;
       };
+
+      if (payload.workspaceId) {
+        await ensureWorkspacePermission(payload.workspaceId, req.user.id, 'write');
+      }
 
       if (!payload.name || !payload.engineType) {
         return res.status(400).json({
@@ -1216,6 +1398,7 @@ class TestController {
         config: payload.config || {},
         isPublic: payload.isPublic,
         isDefault: payload.isDefault,
+        workspaceId: payload.workspaceId,
       });
 
       return createdResponse(res, { id: templateId }, '模板创建成功');
@@ -1239,9 +1422,18 @@ class TestController {
         config?: Record<string, unknown>;
         isPublic?: boolean;
         isDefault?: boolean;
+        workspaceId?: string;
       };
+      if (updates.workspaceId) {
+        await ensureWorkspacePermission(updates.workspaceId, req.user.id, 'write');
+      }
 
-      await testTemplateService.updateTemplate(req.user.id, templateId, updates);
+      await testTemplateService.updateTemplate(
+        req.user.id,
+        templateId,
+        updates,
+        updates.workspaceId
+      );
       return successResponse(res, { templateId }, '模板更新成功');
     } catch (error) {
       next(error);
@@ -1256,7 +1448,11 @@ class TestController {
   async deleteTemplate(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const { templateId } = req.params as { templateId: string };
-      await testTemplateService.deleteTemplate(req.user.id, templateId);
+      const { workspaceId } = req.query as { workspaceId?: string };
+      if (workspaceId) {
+        await ensureWorkspacePermission(workspaceId, req.user.id, 'delete');
+      }
+      await testTemplateService.deleteTemplate(req.user.id, templateId, workspaceId);
       return successResponse(res, { templateId }, '模板删除成功');
     } catch (error) {
       next(error);

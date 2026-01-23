@@ -12,11 +12,13 @@ export interface TestTemplateInput {
   config: Record<string, unknown>;
   isPublic?: boolean;
   isDefault?: boolean;
+  workspaceId?: string;
 }
 
 export interface TestTemplateRecord {
   id: string;
   user_id: string | null;
+  workspace_id?: string | null;
   engine_type: string;
   template_name: string;
   description?: string | null;
@@ -29,13 +31,21 @@ export interface TestTemplateRecord {
 }
 
 class TestTemplateService {
-  async getTemplateForUser(userId: string, templateId: string): Promise<TestTemplateRecord> {
+  async getTemplateForUser(
+    userId: string,
+    templateId: string,
+    workspaceId?: string
+  ): Promise<TestTemplateRecord> {
     const result = await query('SELECT * FROM test_templates WHERE id = $1', [templateId]);
     const template = result.rows[0] as TestTemplateRecord | undefined;
     if (!template) {
       throw new Error('模板不存在');
     }
-    if (!template.is_public && String(template.user_id) !== String(userId)) {
+    const isOwner = String(template.user_id) === String(userId);
+    const isWorkspaceMatch = Boolean(
+      workspaceId && String(template.workspace_id) === String(workspaceId)
+    );
+    if (!template.is_public && !isOwner && !isWorkspaceMatch) {
       throw new Error('无权访问此模板');
     }
     return {
@@ -44,13 +54,20 @@ class TestTemplateService {
     };
   }
 
-  async getDefaultTemplate(userId: string, engineType: string): Promise<TestTemplateRecord | null> {
+  async getDefaultTemplate(
+    userId: string,
+    engineType: string,
+    workspaceId?: string
+  ): Promise<TestTemplateRecord | null> {
+    const scopeClause = workspaceId
+      ? 'AND (user_id = $1 OR is_public = true OR workspace_id = $3)'
+      : 'AND (user_id = $1 OR is_public = true)';
     const result = await query(
       `SELECT * FROM test_templates
-       WHERE engine_type = $2 AND is_default = true AND (user_id = $1 OR is_public = true)
+       WHERE engine_type = $2 AND is_default = true ${scopeClause}
        ORDER BY CASE WHEN user_id = $1 THEN 0 ELSE 1 END, updated_at DESC
        LIMIT 1`,
-      [userId, engineType]
+      workspaceId ? [userId, engineType, workspaceId] : [userId, engineType]
     );
     const template = result.rows[0] as TestTemplateRecord | undefined;
     if (!template) {
@@ -62,9 +79,18 @@ class TestTemplateService {
     };
   }
 
-  async listTemplates(userId: string, engineType?: string): Promise<TestTemplateRecord[]> {
+  async listTemplates(
+    userId: string,
+    engineType?: string,
+    workspaceId?: string
+  ): Promise<TestTemplateRecord[]> {
     const params: Array<string | number> = [userId];
     let whereClause = '(is_public = true OR user_id = $1)';
+
+    if (workspaceId) {
+      params.push(workspaceId);
+      whereClause = `(${whereClause} OR workspace_id = $${params.length})`;
+    }
 
     if (engineType) {
       params.push(engineType);
@@ -93,11 +119,12 @@ class TestTemplateService {
 
     const result = await query(
       `INSERT INTO test_templates
-        (user_id, engine_type, template_name, description, config, is_public, is_default)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+        (user_id, workspace_id, engine_type, template_name, description, config, is_public, is_default)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id`,
       [
         userId,
+        input.workspaceId ?? null,
         input.engineType,
         input.name,
         input.description || null,
@@ -113,16 +140,24 @@ class TestTemplateService {
   async updateTemplate(
     userId: string,
     templateId: string,
-    updates: Partial<TestTemplateInput>
+    updates: Partial<TestTemplateInput>,
+    workspaceId?: string
   ): Promise<void> {
-    const existing = await query('SELECT id, user_id FROM test_templates WHERE id = $1', [
-      templateId,
-    ]);
-    const template = existing.rows[0] as { id: string; user_id: string | null } | undefined;
+    const existing = await query(
+      'SELECT id, user_id, workspace_id FROM test_templates WHERE id = $1',
+      [templateId]
+    );
+    const template = existing.rows[0] as
+      | { id: string; user_id: string | null; workspace_id?: string | null }
+      | undefined;
     if (!template) {
       throw new Error('模板不存在');
     }
-    if (String(template.user_id) !== String(userId)) {
+    const isOwner = String(template.user_id) === String(userId);
+    const isWorkspaceMatch = Boolean(
+      workspaceId && String(template.workspace_id) === String(workspaceId)
+    );
+    if (!isOwner && !isWorkspaceMatch) {
       throw new Error('无权更新此模板');
     }
 
@@ -148,8 +183,9 @@ class TestTemplateService {
            config = COALESCE($4, config),
            is_public = COALESCE($5, is_public),
            is_default = COALESCE($6, is_default),
+           workspace_id = COALESCE($7, workspace_id),
            updated_at = NOW()
-       WHERE id = $7 AND user_id = $8`,
+       WHERE id = $8`,
       [
         updates.name ?? null,
         updates.description ?? null,
@@ -157,25 +193,32 @@ class TestTemplateService {
         nextConfig ?? null,
         updates.isPublic ?? null,
         updates.isDefault ?? null,
+        updates.workspaceId ?? null,
         templateId,
-        userId,
       ]
     );
   }
 
-  async deleteTemplate(userId: string, templateId: string): Promise<void> {
-    const existing = await query('SELECT id, user_id FROM test_templates WHERE id = $1', [
-      templateId,
-    ]);
-    const template = existing.rows[0] as { id: string; user_id: string | null } | undefined;
+  async deleteTemplate(userId: string, templateId: string, workspaceId?: string): Promise<void> {
+    const existing = await query(
+      'SELECT id, user_id, workspace_id FROM test_templates WHERE id = $1',
+      [templateId]
+    );
+    const template = existing.rows[0] as
+      | { id: string; user_id: string | null; workspace_id?: string | null }
+      | undefined;
     if (!template) {
       throw new Error('模板不存在');
     }
-    if (String(template.user_id) !== String(userId)) {
+    const isOwner = String(template.user_id) === String(userId);
+    const isWorkspaceMatch = Boolean(
+      workspaceId && String(template.workspace_id) === String(workspaceId)
+    );
+    if (!isOwner && !isWorkspaceMatch) {
       throw new Error('无权删除此模板');
     }
 
-    await query('DELETE FROM test_templates WHERE id = $1 AND user_id = $2', [templateId, userId]);
+    await query('DELETE FROM test_templates WHERE id = $1', [templateId]);
   }
 
   async incrementUsage(templateId: string): Promise<void> {

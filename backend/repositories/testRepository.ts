@@ -9,6 +9,7 @@ interface TestExecutionRecord {
   id: number;
   test_id: string;
   user_id: string;
+  workspace_id?: string | null;
   engine_type: string;
   engine_name: string;
   test_name: string;
@@ -32,6 +33,7 @@ interface QueueStatusCount {
 
 type QueueStatusCountOptions = {
   userId?: string;
+  workspaceId?: string;
   startTime?: string;
   endTime?: string;
   limit?: number;
@@ -53,6 +55,7 @@ interface TestResultRecord {
 interface TestCreateData {
   testId: string;
   userId: string;
+  workspaceId?: string;
   engineType: string;
   engineName: string;
   testName: string;
@@ -91,11 +94,16 @@ class TestRepository {
   /**
    * 根据ID查找测试
    */
-  async findById(testId: string, userId: string): Promise<TestExecutionRecord | null> {
-    const result = await query(
-      'SELECT * FROM test_executions WHERE test_id = $1 AND user_id = $2',
-      [testId, userId]
-    );
+  async findById(
+    testId: string,
+    userId: string,
+    workspaceId?: string
+  ): Promise<TestExecutionRecord | null> {
+    const { clause, params } = this.buildScopeClause(userId, workspaceId);
+    const result = await query(`SELECT * FROM test_executions WHERE test_id = $1 AND ${clause}`, [
+      testId,
+      ...params,
+    ]);
     return result.rows[0] || null;
   }
 
@@ -105,11 +113,17 @@ class TestRepository {
   async getQueueStatusCounts(
     options: QueueStatusCountOptions
   ): Promise<{ rows: QueueStatusCount[]; total: number }> {
-    const { userId, startTime, endTime, limit, offset } = options;
+    const { userId, startTime, endTime, limit, offset, workspaceId } =
+      options as QueueStatusCountOptions & {
+        workspaceId?: string;
+      };
     const params: Array<string | number> = [];
     const filters: string[] = [];
 
-    if (userId) {
+    if (workspaceId) {
+      params.push(workspaceId);
+      filters.push(`workspace_id = $${params.length}`);
+    } else if (userId) {
       params.push(userId);
       filters.push(`user_id = $${params.length}`);
     }
@@ -166,16 +180,21 @@ class TestRepository {
     };
   }
 
-  async findMetrics(testId: string, userId: string): Promise<TestMetricRecord[]> {
+  async findMetrics(
+    testId: string,
+    userId: string,
+    workspaceId?: string
+  ): Promise<TestMetricRecord[]> {
+    const { clause, params } = this.buildScopeClause(userId, workspaceId);
     const result = await query(
       `SELECT tm.id, tm.metric_name, tm.metric_value, tm.metric_unit, tm.metric_type,
               tm.passed, tm.severity, tm.recommendation, tm.created_at
        FROM test_metrics tm
        INNER JOIN test_results tr ON tr.id = tm.result_id
        INNER JOIN test_executions te ON te.id = tr.execution_id
-       WHERE te.test_id = $1 AND te.user_id = $2
+       WHERE te.test_id = $1 AND ${clause}
        ORDER BY tm.created_at DESC`,
-      [testId, userId]
+      [testId, ...params]
     );
     return result.rows as TestMetricRecord[];
   }
@@ -183,15 +202,20 @@ class TestRepository {
   /**
    * 获取测试结果
    */
-  async findResults(testId: string, userId: string): Promise<TestResultRecord | null> {
+  async findResults(
+    testId: string,
+    userId: string,
+    workspaceId?: string
+  ): Promise<TestResultRecord | null> {
+    const { clause, params } = this.buildScopeClause(userId, workspaceId);
     const result = await query(
       `SELECT tr.*
        FROM test_results tr
        INNER JOIN test_executions te ON te.id = tr.execution_id
-       WHERE te.test_id = $1 AND te.user_id = $2
+       WHERE te.test_id = $1 AND ${clause}
        ORDER BY tr.created_at DESC
        LIMIT 1`,
-      [testId, userId]
+      [testId, ...params]
     );
     return result.rows[0] || null;
   }
@@ -199,11 +223,12 @@ class TestRepository {
   /**
    * 检查所有权
    */
-  async checkOwnership(testId: string, userId: string): Promise<boolean> {
-    const result = await query(
-      'SELECT 1 FROM test_executions WHERE test_id = $1 AND user_id = $2',
-      [testId, userId]
-    );
+  async checkOwnership(testId: string, userId: string, workspaceId?: string): Promise<boolean> {
+    const { clause, params } = this.buildScopeClause(userId, workspaceId);
+    const result = await query(`SELECT 1 FROM test_executions WHERE test_id = $1 AND ${clause}`, [
+      testId,
+      ...params,
+    ]);
     return result.rows.length > 0;
   }
 
@@ -213,14 +238,15 @@ class TestRepository {
   async create(data: TestCreateData): Promise<{ id: number; testId: string }> {
     const result = await query(
       `INSERT INTO test_executions (
-         test_id, user_id, engine_type, engine_name, test_name, test_url, test_config,
+         test_id, user_id, workspace_id, engine_type, engine_name, test_name, test_url, test_config,
          status, created_at
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING id, test_id`,
       [
         data.testId,
         data.userId,
+        data.workspaceId ?? null,
         data.engineType,
         data.engineName,
         data.testName,
@@ -367,14 +393,16 @@ class TestRepository {
   async findByUserId(
     userId: string,
     limit: number,
-    offset: number
+    offset: number,
+    workspaceId?: string
   ): Promise<TestExecutionRecord[]> {
+    const { clause, params } = this.buildScopeClause(userId, workspaceId);
     const result = await query(
       `SELECT * FROM test_executions
-       WHERE user_id = $1
+       WHERE ${clause}
        ORDER BY created_at DESC
-       LIMIT $2 OFFSET $3`,
-      [userId, limit, offset]
+       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, limit, offset]
     );
     return result.rows;
   }
@@ -382,38 +410,44 @@ class TestRepository {
   /**
    * 统计用户测试数量
    */
-  async countByUserId(userId: string): Promise<number> {
-    const result = await query('SELECT COUNT(*) as count FROM test_executions WHERE user_id = $1', [
-      userId,
-    ]);
+  async countByUserId(userId: string, workspaceId?: string): Promise<number> {
+    const { clause, params } = this.buildScopeClause(userId, workspaceId);
+    const result = await query(
+      `SELECT COUNT(*) as count FROM test_executions WHERE ${clause}`,
+      params
+    );
     return parseInt(result.rows[0].count);
   }
 
   /**
    * 获取用户测试统计
    */
-  async getUserStats(userId: string): Promise<{
+  async getUserStats(
+    userId: string,
+    workspaceId?: string
+  ): Promise<{
     totalTests: number;
     completedTests: number;
     failedTests: number;
     averageScore: number;
   }> {
+    const { clause, params } = this.buildScopeClause(userId, workspaceId);
     const result = await query(
       `SELECT 
         COUNT(*) as total_tests,
         COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tests,
         COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests
        FROM test_executions 
-       WHERE user_id = $1`,
-      [userId]
+       WHERE ${clause}`,
+      params
     );
 
     const scoreResult = await query(
       `SELECT COALESCE(AVG(tr.score), 0) as average_score
        FROM test_results tr
        INNER JOIN test_executions te ON te.id = tr.execution_id
-       WHERE te.user_id = $1`,
-      [userId]
+       WHERE ${clause}`,
+      params
     );
 
     const stats = result.rows[0];
@@ -428,13 +462,18 @@ class TestRepository {
   /**
    * 获取最近的测试
    */
-  async getRecentTests(userId: string, limit = 5): Promise<TestExecutionRecord[]> {
+  async getRecentTests(
+    userId: string,
+    limit = 5,
+    workspaceId?: string
+  ): Promise<TestExecutionRecord[]> {
+    const { clause, params } = this.buildScopeClause(userId, workspaceId);
     const result = await query(
       `SELECT * FROM test_executions 
-       WHERE user_id = $1 
+       WHERE ${clause} 
        ORDER BY created_at DESC 
-       LIMIT $2`,
-      [userId, limit]
+       LIMIT $${params.length + 1}`,
+      [...params, limit]
     );
     return result.rows;
   }
@@ -446,16 +485,17 @@ class TestRepository {
     userId: string,
     testType?: string,
     limit = 20,
-    offset = 0
+    offset = 0,
+    workspaceId?: string
   ): Promise<{
     tests: TestExecutionRecord[];
     total: number;
   }> {
-    let whereClause = 'WHERE user_id = $1';
-    const params: (string | number)[] = [userId];
+    const { clause, params } = this.buildScopeClause(userId, workspaceId);
+    let whereClause = `WHERE ${clause}`;
 
     if (testType) {
-      whereClause += ' AND engine_type = $2';
+      whereClause += ` AND engine_type = $${params.length + 1}`;
       params.push(testType);
     }
 
@@ -477,6 +517,16 @@ class TestRepository {
       tests: testsResult.rows,
       total,
     };
+  }
+
+  private buildScopeClause(
+    userId: string,
+    workspaceId?: string
+  ): { clause: string; params: (string | number)[] } {
+    if (workspaceId) {
+      return { clause: 'workspace_id = $1', params: [workspaceId] };
+    }
+    return { clause: 'user_id = $1', params: [userId] };
   }
 }
 
