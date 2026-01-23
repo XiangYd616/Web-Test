@@ -238,6 +238,18 @@ class RedisCache<T = unknown> {
   }
 
   /**
+   * 健康检查
+   */
+  async ping(): Promise<boolean> {
+    try {
+      await this.redis.ping();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * 清空缓存
    */
   async clear(): Promise<void> {
@@ -324,7 +336,7 @@ class CacheService<T = unknown> {
       case CacheStrategy.REDIS_ONLY:
         return this.redisCache ? await this.redisCache.get(key) : null;
 
-      case CacheStrategy.MEMORY_FIRST:
+      case CacheStrategy.MEMORY_FIRST: {
         let value = this.memoryCache.get(key);
         if (value === null && this.redisCache) {
           value = await this.redisCache.get(key);
@@ -334,9 +346,10 @@ class CacheService<T = unknown> {
           }
         }
         return value;
+      }
 
-      case CacheStrategy.REDIS_FIRST:
-        value = null;
+      case CacheStrategy.REDIS_FIRST: {
+        let value = null;
         if (this.redisCache) {
           value = await this.redisCache.get(key);
         }
@@ -348,6 +361,7 @@ class CacheService<T = unknown> {
           }
         }
         return value;
+      }
 
       default:
         return null;
@@ -438,12 +452,7 @@ class CacheService<T = unknown> {
     let redis = false;
 
     if (this.redisCache) {
-      try {
-        await this.redisCache.redis.ping();
-        redis = true;
-      } catch {
-        redis = false;
-      }
+      redis = await this.redisCache.ping();
     }
 
     return { memory, redis };

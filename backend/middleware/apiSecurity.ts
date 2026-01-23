@@ -23,12 +23,14 @@ type SecurityConfig = {
 
 type RateLimiterType = 'strict' | 'moderate' | 'lenient';
 
+type RateLimiter = ReturnType<typeof rateLimit>;
+
 type AuthenticatedRequest = Request & { user?: { id: string } };
 
 class ApiSecurity {
   private securityConfig: SecurityConfig;
   private suspiciousPatterns: RegExp[];
-  private rateLimiters: Record<RateLimiterType, any>;
+  private rateLimiters: Record<RateLimiterType, RateLimiter>;
 
   constructor() {
     this.securityConfig = {

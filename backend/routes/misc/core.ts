@@ -1,29 +1,12 @@
 import express from 'express';
 import CoreTestEngine from '../../engines/core/CoreTestEngine';
+import { asyncHandler } from '../../middleware/errorHandler';
 
 interface CoreTestRequest {
   url: string;
   testType: string;
   options?: Record<string, unknown>;
   timeout?: number;
-}
-
-interface CoreTestResult {
-  testId: string;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
-  startTime: Date;
-  endTime?: Date;
-  duration?: number;
-  results: Record<string, unknown>;
-  errors: string[];
-  progress: number;
-}
-
-interface EngineStatus {
-  available: boolean;
-  version: string;
-  capabilities: string[];
-  systemInfo: Record<string, unknown>;
 }
 
 const router = express.Router();
@@ -48,6 +31,7 @@ router.get(
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
+      return;
     }
   })
 );
@@ -64,10 +48,11 @@ router.post(
 
       // 验证请求参数
       if (!testRequest.url || !testRequest.testType) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'URL和测试类型是必需的',
         });
+        return;
       }
 
       const result = await engine.runCoreTest(testRequest);
@@ -81,6 +66,7 @@ router.post(
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
+      return;
     }
   })
 );
@@ -98,10 +84,11 @@ router.get(
       const status = engine.getTestStatus(testId);
 
       if (!status) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: '测试不存在',
         });
+        return;
       }
 
       res.json({
@@ -113,6 +100,7 @@ router.get(
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
+      return;
     }
   })
 );
@@ -130,10 +118,11 @@ router.delete(
       const cancelled = engine.cancelTest(testId);
 
       if (!cancelled) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: '测试不存在或无法取消',
         });
+        return;
       }
 
       res.json({
@@ -145,6 +134,7 @@ router.delete(
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
+      return;
     }
   })
 );
@@ -173,6 +163,7 @@ router.get(
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
+      return;
     }
   })
 );
@@ -188,10 +179,11 @@ router.post(
       const { url, benchmarkType, options } = req.body;
 
       if (!url || !benchmarkType) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'URL和基准测试类型是必需的',
         });
+        return;
       }
 
       const result = await engine.runBenchmark(url, benchmarkType, options);
@@ -205,6 +197,7 @@ router.post(
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
+      return;
     }
   })
 );
@@ -216,13 +209,8 @@ router.post(
 router.get(
   '/benchmarks',
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { type, limit = 20 } = req.query;
-
     try {
-      const benchmarks = engine.getBenchmarks({
-        type: type as string,
-        limit: parseInt(limit as string),
-      });
+      const benchmarks = engine.getBenchmarks();
 
       res.json({
         success: true,
@@ -233,6 +221,7 @@ router.get(
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
+      return;
     }
   })
 );
@@ -248,10 +237,11 @@ router.post(
       const { testConfig } = req.body;
 
       if (!testConfig) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: '测试配置是必需的',
         });
+        return;
       }
 
       const validation = await engine.validateTestConfig(testConfig);
@@ -265,6 +255,7 @@ router.post(
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
+      return;
     }
   })
 );
@@ -288,6 +279,7 @@ router.get(
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
+      return;
     }
   })
 );
@@ -312,6 +304,7 @@ router.post(
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
+      return;
     }
   })
 );
@@ -335,6 +328,7 @@ router.get(
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
+      return;
     }
   })
 );

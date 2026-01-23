@@ -8,6 +8,18 @@ import os from 'os';
 import path from 'path';
 
 type CoreTestConfig = Record<string, unknown>;
+type CoreTestRequest = {
+  url: string;
+  testType: string;
+  options?: Record<string, unknown>;
+  timeout?: number;
+};
+
+type BenchmarkRequest = {
+  url: string;
+  benchmarkType: string;
+  options?: Record<string, unknown>;
+};
 type CoreTestResult = {
   testId: string;
   timestamp: string;
@@ -39,6 +51,14 @@ type CoreTestRecord = {
   endTime?: number;
   config?: CoreTestConfig;
   results?: CoreTestResult;
+  error?: string;
+};
+
+type CoreTestListItem = {
+  testId: string;
+  status: CoreTestRecord['status'];
+  startTime?: number;
+  endTime?: number;
   error?: string;
 };
 
@@ -176,6 +196,86 @@ class CoreTestEngine {
         timestamp: new Date().toISOString(),
       };
     }
+  }
+
+  /**
+   * 兼容旧API: 运行核心测试
+   */
+  async runCoreTest(request: CoreTestRequest) {
+    return this.executeTest({
+      url: request.url,
+      testType: request.testType,
+      ...(request.options || {}),
+      timeout: request.timeout,
+    });
+  }
+
+  /**
+   * 获取所有测试记录
+   */
+  getAllTests(filters: { status?: string; limit?: number } = {}): CoreTestListItem[] {
+    const items: CoreTestListItem[] = [];
+    for (const [testId, record] of this.activeTests.entries()) {
+      if (filters.status && record.status !== filters.status) {
+        continue;
+      }
+      items.push({
+        testId,
+        status: record.status,
+        startTime: record.startTime,
+        endTime: record.endTime,
+        error: record.error,
+      });
+    }
+    const limit = filters.limit ?? items.length;
+    return items.slice(0, limit);
+  }
+
+  /**
+   * 运行基准测试（简化实现）
+   */
+  async runBenchmark(url: string, benchmarkType: string, options?: Record<string, unknown>) {
+    const request: BenchmarkRequest = { url, benchmarkType, options };
+    return this.executeTest({
+      url: request.url,
+      benchmarkType: request.benchmarkType,
+      ...(request.options || {}),
+    });
+  }
+
+  /**
+   * 获取基准测试结果（当前仅返回空列表）
+   */
+  getBenchmarks(): CoreTestRecord[] {
+    return [];
+  }
+
+  /**
+   * 验证测试配置
+   */
+  async validateTestConfig(config: CoreTestConfig) {
+    const hasUrl = Boolean((config as { url?: string }).url);
+    const hasType = Boolean((config as { testType?: string }).testType);
+    return {
+      valid: hasUrl && hasType,
+      errors: [...(hasUrl ? [] : ['缺少url']), ...(hasType ? [] : ['缺少testType'])],
+    };
+  }
+
+  /**
+   * 获取引擎指标
+   */
+  getEngineMetrics() {
+    return this.getEngineStats();
+  }
+
+  /**
+   * 重置引擎状态
+   */
+  async resetEngine() {
+    const cleared = this.activeTests.size;
+    this.activeTests.clear();
+    return { cleared };
   }
 
   /**

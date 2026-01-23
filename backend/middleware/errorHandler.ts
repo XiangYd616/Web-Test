@@ -19,7 +19,7 @@ const ErrorSeverity = {
   LOW: 'low',
 } as const;
 
-type ErrorSeverityType = (typeof ErrorSeverity)[keyof typeof ErrorSeverity];
+type ErrorSeverityValue = (typeof ErrorSeverity)[keyof typeof ErrorSeverity];
 
 type ErrorContext = Record<string, unknown>;
 
@@ -47,7 +47,7 @@ const handleError = (error: AppError, context: ErrorContext = {}) => {
       code: error?.code,
       context,
     });
-  } catch (_e) {
+  } catch {
     // ignore logging failures
   }
   return error;
@@ -235,11 +235,12 @@ class ErrorFactory {
     }
 
     // 根据错误类型创建相应的 ApiError
-    if ((error as any).code === '23505') {
+    const errorCode = (error as { code?: string }).code;
+    if (errorCode === '23505') {
       return new ApiError('数据冲突', 409, ErrorCode.CONFLICT, error.message);
     }
 
-    if ((error as any).code === '23503') {
+    if (errorCode === '23503') {
       return new ApiError('外键约束失败', 400, ErrorCode.INVALID_INPUT, error.message);
     }
 
@@ -274,7 +275,7 @@ class ErrorLogger {
     }
   }
 
-  static determineSeverity(error: AppError): ErrorSeverity {
+  static determineSeverity(error: AppError): ErrorSeverityValue {
     const statusCode = error.statusCode || 500;
 
     if (statusCode >= 500) {
@@ -299,7 +300,7 @@ const enhancedErrorHandler = (error: AppError, req: Request, res: Response, next
     method: req.method,
     ip: req.ip,
     userAgent: req.headers['user-agent'],
-    userId: (req as any).user?.id,
+    userId: (req as { user?: { id?: string } }).user?.id,
   });
 
   // 如果响应已经发送，交给默认错误处理器
@@ -320,7 +321,7 @@ const enhancedErrorHandler = (error: AppError, req: Request, res: Response, next
 
   // 在开发环境中包含堆栈跟踪
   if (process.env.NODE_ENV === 'development') {
-    (errorResponse.error as any).stack = error.stack;
+    (errorResponse.error as { stack?: string }).stack = error.stack;
   }
 
   res.status(error.statusCode || 500).json(errorResponse);

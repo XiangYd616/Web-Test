@@ -103,7 +103,6 @@ router.get(
     try {
       const connectionManager = getConnectionManager();
       const poolStatus = connectionManager.getPoolStatus();
-      const stats = getStats();
 
       const memUsage = process.memoryUsage();
       const systemStats: SystemStats = {

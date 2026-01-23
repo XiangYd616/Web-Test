@@ -7,8 +7,14 @@
 export interface DataPoint {
   timestamp: Date;
   value: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
+
+type RegressionResult = {
+  slope: number;
+  intercept: number;
+  r2: number;
+};
 
 // 趋势分析选项接口
 export interface TrendAnalysisOptions {
@@ -44,11 +50,14 @@ export interface ComparisonAnalysisOptions {
 export interface ComparisonAnalysisResult {
   baseline: Record<string, number>;
   comparison: Record<string, number>;
-  changes: Record<string, {
-    absolute: number;
-    percentage: number;
-    significance: 'high' | 'medium' | 'low';
-  }>;
+  changes: Record<
+    string,
+    {
+      absolute: number;
+      percentage: number;
+      significance: 'high' | 'medium' | 'low';
+    }
+  >;
   insights: string[];
 }
 
@@ -66,13 +75,16 @@ export interface PerformanceAnalysisResult {
     grade: 'A' | 'B' | 'C' | 'D' | 'F';
     status: 'excellent' | 'good' | 'fair' | 'poor' | 'critical';
   };
-  metrics: Record<string, {
-    current: number;
-    benchmark: number;
-    score: number;
-    grade: 'A' | 'B' | 'C' | 'D' | 'F';
-    trend: 'improving' | 'stable' | 'declining';
-  }>;
+  metrics: Record<
+    string,
+    {
+      current: number;
+      benchmark: number;
+      score: number;
+      grade: 'A' | 'B' | 'C' | 'D' | 'F';
+      trend: 'improving' | 'stable' | 'declining';
+    }
+  >;
   insights: string[];
   recommendations: string[];
 }
@@ -102,29 +114,39 @@ export interface Insight {
   severity: 'high' | 'medium' | 'low';
   title: string;
   description: string;
-  data: any;
+  data: Record<string, unknown>;
   confidence: number;
   timestamp: Date;
   actionable: boolean;
 }
 
+type ComparisonChange = {
+  absolute: number;
+  percentage: number;
+  significance: 'high' | 'medium' | 'low';
+};
+
+type PerformanceMetricSummary = {
+  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+  trend: 'improving' | 'stable' | 'declining';
+  score: number;
+};
+
 class AdvancedAnalyticsService {
   /**
    * 执行趋势分析
    */
-  async performTrendAnalysis(dataPoints: DataPoint[], options: TrendAnalysisOptions = {}): Promise<TrendAnalysisResult> {
-    const {
-      predictionDays = 7,
-      smoothing = true,
-      seasonality = false
-    } = options;
+  async performTrendAnalysis(
+    dataPoints: DataPoint[],
+    options: TrendAnalysisOptions = {}
+  ): Promise<TrendAnalysisResult> {
+    const { predictionDays = 7, smoothing = true } = options;
 
     const processedData = smoothing ? this.applySmoothing(dataPoints) : dataPoints;
     const regression = this.calculateLinearRegression(processedData);
 
-    const trend = regression.slope > 0.1 ? 'increasing'
-      : regression.slope < -0.1 ? 'decreasing'
-      : 'stable';
+    const trend =
+      regression.slope > 0.1 ? 'increasing' : regression.slope < -0.1 ? 'decreasing' : 'stable';
 
     const trendStrength = Math.min(Math.abs(regression.slope) / 10, 1);
     const firstValue = processedData[0].value;
@@ -142,7 +164,7 @@ class AdvancedAnalyticsService {
       regression,
       prediction,
       confidence,
-      insights
+      insights,
     };
   }
 
@@ -158,29 +180,32 @@ class AdvancedAnalyticsService {
       baselinePeriod = 30,
       comparisonPeriod = 30,
       metrics = ['value'],
-      aggregation = 'avg'
+      aggregation = 'avg',
     } = options;
 
     // 聚合基线数据
     const baseline = this.aggregateData(baselineData.slice(-baselinePeriod), aggregation);
-    
+
     // 聚合对比数据
     const comparison = this.aggregateData(comparisonData.slice(-comparisonPeriod), aggregation);
 
     // 计算变化
-    const changes: Record<string, {
-      absolute: number;
-      percentage: number;
-      significance: 'high' | 'medium' | 'low';
-    }> = {};
+    const changes: Record<
+      string,
+      {
+        absolute: number;
+        percentage: number;
+        significance: 'high' | 'medium' | 'low';
+      }
+    > = {};
 
     metrics.forEach(metric => {
       const baselineValue = baseline[metric] || 0;
       const comparisonValue = comparison[metric] || 0;
-      
+
       const absolute = comparisonValue - baselineValue;
       const percentage = baselineValue !== 0 ? (absolute / baselineValue) * 100 : 0;
-      
+
       let significance: 'high' | 'medium' | 'low' = 'low';
       if (Math.abs(percentage) > 20) {
         significance = 'high';
@@ -191,7 +216,7 @@ class AdvancedAnalyticsService {
       changes[metric] = {
         absolute,
         percentage,
-        significance
+        significance,
       };
     });
 
@@ -202,7 +227,7 @@ class AdvancedAnalyticsService {
       baseline,
       comparison,
       changes,
-      insights
+      insights,
     };
   }
 
@@ -219,21 +244,24 @@ class AdvancedAnalyticsService {
       benchmarks = {
         response_time: 1000,
         throughput: 1000,
-        error_rate: 1
-      }
+        error_rate: 1,
+      },
     } = options;
 
     // 聚合性能数据
     const aggregated = this.aggregateData(performanceData.slice(-timeRange), 'avg');
 
     // 计算各指标分数
-    const metricsResult: Record<string, {
-      current: number;
-      benchmark: number;
-      score: number;
-      grade: 'A' | 'B' | 'C' | 'D' | 'F';
-      trend: 'improving' | 'stable' | 'declining';
-    }> = {};
+    const metricsResult: Record<
+      string,
+      {
+        current: number;
+        benchmark: number;
+        score: number;
+        grade: 'A' | 'B' | 'C' | 'D' | 'F';
+        trend: 'improving' | 'stable' | 'declining';
+      }
+    > = {};
 
     let totalScore = 0;
     const validMetrics = metrics.filter(metric => aggregated[metric] !== undefined);
@@ -241,7 +269,7 @@ class AdvancedAnalyticsService {
     metrics.forEach(metric => {
       const current = aggregated[metric] || 0;
       const benchmark = benchmarks[metric] || 100;
-      
+
       let score = 100;
       if (current > benchmark) {
         score = Math.max(0, 100 - ((current - benchmark) / benchmark) * 100);
@@ -250,14 +278,14 @@ class AdvancedAnalyticsService {
       }
 
       const grade = this.getGrade(score);
-      const trend = this.calculateTrend(performanceData, metric);
+      const trend = this.calculateTrend(performanceData);
 
       metricsResult[metric] = {
         current,
         benchmark,
         score,
         grade,
-        trend
+        trend,
       };
 
       totalScore += score;
@@ -268,7 +296,7 @@ class AdvancedAnalyticsService {
     const overall = {
       score: overallScore,
       grade: this.getGrade(overallScore),
-      status: this.getPerformanceStatus(overallScore)
+      status: this.getPerformanceStatus(overallScore),
     };
 
     // 生成洞察和建议
@@ -279,22 +307,21 @@ class AdvancedAnalyticsService {
       overall,
       metrics: metricsResult,
       insights,
-      recommendations
+      recommendations,
     };
   }
 
   /**
    * 生成洞察
    */
-  async generateInsights(dataPoints: DataPoint[], options: InsightGenerationOptions = {}): Promise<InsightResult> {
-    const {
-      context = '',
-      type = 'trend',
-      severity = 'medium'
-    } = options;
+  async generateInsights(
+    dataPoints: DataPoint[],
+    options: InsightGenerationOptions = {}
+  ): Promise<InsightResult> {
+    const { type = 'trend', severity = 'medium' } = options;
 
     const insights: Insight[] = [];
-    
+
     // 根据类型生成不同的洞察
     switch (type) {
       case 'trend':
@@ -312,20 +339,20 @@ class AdvancedAnalyticsService {
     }
 
     // 按严重程度过滤
-    const filteredInsights = insights.filter(insight => 
-      severity === 'high' || insight.severity === severity
+    const filteredInsights = insights.filter(
+      insight => severity === 'high' || insight.severity === severity
     );
 
     // 生成摘要
     const summary = {
       total: filteredInsights.length,
       byType: this.groupInsightsByType(filteredInsights),
-      bySeverity: this.groupInsightsBySeverity(filteredInsights)
+      bySeverity: this.groupInsightsBySeverity(filteredInsights),
     };
 
     return {
       insights: filteredInsights,
-      summary
+      summary,
     };
   }
 
@@ -335,7 +362,7 @@ class AdvancedAnalyticsService {
   private applySmoothing(dataPoints: DataPoint[]): DataPoint[] {
     const smoothed: DataPoint[] = [];
     const windowSize = 3;
-    
+
     for (let i = 0; i < dataPoints.length; i++) {
       if (i < windowSize - 1) {
         smoothed.push(dataPoints[i]);
@@ -344,10 +371,10 @@ class AdvancedAnalyticsService {
         const end = i + 1;
         const window = dataPoints.slice(start, end);
         const average = window.reduce((sum, point) => sum + point.value, 0) / window.length;
-        
+
         smoothed.push({
           ...dataPoints[i],
-          value: average
+          value: average,
         });
       }
     }
@@ -358,7 +385,7 @@ class AdvancedAnalyticsService {
   /**
    * 计算线性回归
    */
-  private calculateLinearRegression(dataPoints: DataPoint[]): {
+  private calculateLinearRegression(dataPoints: DataPoint[]): RegressionResult {
     const n = dataPoints.length;
     if (n < 2) {
       return { slope: 0, intercept: 0, r2: 0 };
@@ -380,9 +407,8 @@ class AdvancedAnalyticsService {
 
     const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
     const intercept = (sumY - slope * sumX) / n;
-    
+
     const yMean = sumY / n;
-    const xMean = sumX / n;
     let ssRes = 0;
     let ssTot = 0;
 
@@ -394,7 +420,7 @@ class AdvancedAnalyticsService {
       ssTot += Math.pow(y - yMean, 2);
     });
 
-    const r2 = ssTot > 0 ? 1 - (ssRes / ssTot) : 0;
+    const r2 = ssTot > 0 ? 1 - ssRes / ssTot : 0;
 
     return { slope, intercept, r2 };
   }
@@ -402,7 +428,11 @@ class AdvancedAnalyticsService {
   /**
    * 生成预测
    */
-  private generatePrediction(dataPoints: DataPoint[], regression: any, days: number): DataPoint[] {
+  private generatePrediction(
+    dataPoints: DataPoint[],
+    regression: RegressionResult,
+    days: number
+  ): DataPoint[] {
     const prediction: DataPoint[] = [];
     const lastIndex = dataPoints.length - 1;
     const lastTimestamp = dataPoints[lastIndex].timestamp;
@@ -414,7 +444,7 @@ class AdvancedAnalyticsService {
 
       prediction.push({
         timestamp: futureTimestamp,
-        value: predictedValue
+        value: predictedValue,
       });
     }
 
@@ -424,7 +454,7 @@ class AdvancedAnalyticsService {
   /**
    * 计算置信度
    */
-  private calculateConfidence(dataPoints: DataPoint[], regression: any): number {
+  private calculateConfidence(dataPoints: DataPoint[], regression: RegressionResult): number {
     return Math.max(0, regression.r2);
   }
 
@@ -437,38 +467,42 @@ class AdvancedAnalyticsService {
     changeRate: number,
     confidence: number
   ): string[] {
-      const insights: string[] = [];
+    const insights: string[] = [];
 
-      if (trend === 'increasing') {
-        insights.push(`数据显示上升趋势，强度为${(trendStrength * 100).toFixed(1)}%`);
-        insights.push(`变化率为${changeRate.toFixed(2)}%`);
-      } else if (trend === 'decreasing') {
-        insights.push(`数据显示下降趋势，强度为${(trendStrength * 100).toFixed(1)}%`);
-        insights.push(`变化率为${changeRate.toFixed(2)}%`);
-      } else {
-        insights.push('数据保持稳定');
-      }
+    if (trend === 'increasing') {
+      insights.push(`数据显示上升趋势，强度为${(trendStrength * 100).toFixed(1)}%`);
+      insights.push(`变化率为${changeRate.toFixed(2)}%`);
+    } else if (trend === 'decreasing') {
+      insights.push(`数据显示下降趋势，强度为${(trendStrength * 100).toFixed(1)}%`);
+      insights.push(`变化率为${changeRate.toFixed(2)}%`);
+    } else {
+      insights.push('数据保持稳定');
+    }
 
-      if (confidence < 0.5) {
-        insights.push('预测置信度较低，建议收集更多数据');
-      } else if (confidence > 0.8) {
-        insights.push('预测置信度较高，趋势分析可靠');
-      }
+    if (confidence < 0.5) {
+      insights.push('预测置信度较低，建议收集更多数据');
+    } else if (confidence > 0.8) {
+      insights.push('预测置信度较高，趋势分析可靠');
+    }
 
-      return insights;
+    return insights;
   }
 
   /**
    * 生成对比洞察
    */
-  private generateComparisonInsights(changes: Record<string, any>): string[] {
+  private generateComparisonInsights(changes: Record<string, ComparisonChange>): string[] {
     const insights: string[] = [];
 
     Object.entries(changes).forEach(([metric, change]) => {
       if (change.significance === 'high') {
-        insights.push(`${metric}发生${change.absolute > 0 ? '显著增加' : '显著减少'}，变化幅度为${change.percentage.toFixed(2)}%`);
+        insights.push(
+          `${metric}发生${change.absolute > 0 ? '显著增加' : '显著减少'}，变化幅度为${change.percentage.toFixed(2)}%`
+        );
       } else if (change.significance === 'medium') {
-        insights.push(`${metric}发生${change.absolute > 0 ? '中等增加' : '中等减少'}，变化幅度为${change.percentage.toFixed(2)}%`);
+        insights.push(
+          `${metric}发生${change.absolute > 0 ? '中等增加' : '中等减少'}，变化幅度为${change.percentage.toFixed(2)}%`
+        );
       }
     });
 
@@ -478,7 +512,7 @@ class AdvancedAnalyticsService {
   /**
    * 生成性能洞察
    */
-  private generatePerformanceInsights(metrics: Record<string, any>): string[] {
+  private generatePerformanceInsights(metrics: Record<string, PerformanceMetricSummary>): string[] {
     const insights: string[] = [];
 
     Object.entries(metrics).forEach(([metric, data]) => {
@@ -499,7 +533,9 @@ class AdvancedAnalyticsService {
   /**
    * 生成性能建议
    */
-  private generatePerformanceRecommendations(metrics: Record<string, any>): string[] {
+  private generatePerformanceRecommendations(
+    metrics: Record<string, PerformanceMetricSummary>
+  ): string[] {
     const recommendations: string[] = [];
 
     Object.entries(metrics).forEach(([metric, data]) => {
@@ -516,13 +552,12 @@ class AdvancedAnalyticsService {
    */
   private generateTrendInsightsFromData(dataPoints: DataPoint[]): Insight[] {
     const insights: Insight[] = [];
-    
+
     if (dataPoints.length < 2) return insights;
 
     const regression = this.calculateLinearRegression(dataPoints);
-    const trend = regression.slope > 0.1 ? 'increasing' 
-      : regression.slope < -0.1 ? 'decreasing' 
-      : 'stable';
+    const trend =
+      regression.slope > 0.1 ? 'increasing' : regression.slope < -0.1 ? 'decreasing' : 'stable';
 
     insights.push({
       id: this.generateId(),
@@ -533,7 +568,7 @@ class AdvancedAnalyticsService {
       data: { trend, r2: regression.r2 },
       confidence: regression.r2,
       timestamp: new Date(),
-      actionable: regression.r2 > 0.5
+      actionable: regression.r2 > 0.5,
     });
 
     return insights;
@@ -544,19 +579,19 @@ class AdvancedAnalyticsService {
    */
   private detectAnomalies(dataPoints: DataPoint[]): Insight[] {
     const insights: Insight[] = [];
-    
+
     if (dataPoints.length < 3) return insights;
 
     const values = dataPoints.map(p => p.value);
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-    const stdDev = Math.sqrt(values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length);
+    const stdDev = Math.sqrt(
+      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length
+    );
 
     // 使用3σ规则检测异常
-    const threshold = 3 * stdDev;
-
-    dataPoints.forEach((point, index) => {
+    dataPoints.forEach(point => {
       const zScore = Math.abs((point.value - mean) / stdDev);
-      
+
       if (zScore > 3) {
         insights.push({
           id: this.generateId(),
@@ -567,7 +602,7 @@ class AdvancedAnalyticsService {
           data: { value: point.value, zScore, mean, stdDev },
           confidence: Math.min(0.9, zScore / 5),
           timestamp: point.timestamp,
-          actionable: true
+          actionable: true,
         });
       }
     });
@@ -580,12 +615,12 @@ class AdvancedAnalyticsService {
    */
   private identifyOpportunities(dataPoints: DataPoint[]): Insight[] {
     const insights: Insight[] = [];
-    
+
     if (dataPoints.length < 2) return insights;
 
     // 寻找增长机会
     const regression = this.calculateLinearRegression(dataPoints);
-    
+
     if (regression.slope > 0.5 && regression.r2 > 0.6) {
       insights.push({
         id: this.generateId(),
@@ -596,7 +631,7 @@ class AdvancedAnalyticsService {
         data: { slope: regression.slope, r2: regression.r2 },
         confidence: regression.r2,
         timestamp: new Date(),
-        actionable: true
+        actionable: true,
       });
     }
 
@@ -608,11 +643,11 @@ class AdvancedAnalyticsService {
    */
   private identifyRisks(dataPoints: DataPoint[]): Insight[] {
     const insights: Insight[] = [];
-    
+
     if (dataPoints.length < 2) return insights;
 
     const regression = this.calculateLinearRegression(dataPoints);
-    
+
     if (regression.slope < -0.5 && regression.r2 > 0.6) {
       insights.push({
         id: this.generateId(),
@@ -623,7 +658,7 @@ class AdvancedAnalyticsService {
         data: { slope: regression.slope, r2: regression.r2 },
         confidence: regression.r2,
         timestamp: new Date(),
-        actionable: true
+        actionable: true,
       });
     }
 
@@ -633,14 +668,18 @@ class AdvancedAnalyticsService {
   /**
    * 聚合数据
    */
-  private aggregateData(dataPoints: DataPoint[], aggregation: 'avg' | 'sum' | 'max' | 'min'): Record<string, number> {
+  private aggregateData(
+    dataPoints: DataPoint[],
+    aggregation: 'avg' | 'sum' | 'max' | 'min'
+  ): Record<string, number> {
     const result: Record<string, number> = {};
-    
+
     switch (aggregation) {
-      case 'avg':
+      case 'avg': {
         const sum = dataPoints.reduce((sum, point) => sum + point.value, 0);
         result.value = sum / dataPoints.length;
         break;
+      }
       case 'sum':
         result.value = dataPoints.reduce((sum, point) => sum + point.value, 0);
         break;
@@ -658,13 +697,15 @@ class AdvancedAnalyticsService {
   /**
    * 计算趋势
    */
-  private calculateTrend(dataPoints: DataPoint[], metric: string): 'improving' | 'stable' | 'declining' {
+  private calculateTrend(dataPoints: DataPoint[]): 'improving' | 'stable' | 'declining' {
     if (dataPoints.length < 2) return 'stable';
 
     const regression = this.calculateLinearRegression(dataPoints);
-    return regression.slope > 0.05 ? 'improving' 
-      : regression.slope < -0.05 ? 'declining' 
-      : 'stable';
+    return regression.slope > 0.05
+      ? 'improving'
+      : regression.slope < -0.05
+        ? 'declining'
+        : 'stable';
   }
 
   /**
@@ -694,7 +735,7 @@ class AdvancedAnalyticsService {
    */
   private groupInsightsByType(insights: Insight[]): Record<string, number> {
     const grouped: Record<string, number> = {};
-    
+
     insights.forEach(insight => {
       grouped[insight.type] = (grouped[insight.type] || 0) + 1;
     });
@@ -707,9 +748,9 @@ class AdvancedAnalyticsService {
    */
   private groupInsightsBySeverity(insights: Insight[]): Record<string, number> {
     const grouped: Record<string, number> = {};
-    
+
     insights.forEach(insight => {
-      grouped[insight.severity] = (grouped[insight.severity] || 0) + 1);
+      grouped[insight.severity] = (grouped[insight.severity] || 0) + 1;
     });
 
     return grouped;

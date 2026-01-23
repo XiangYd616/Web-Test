@@ -23,11 +23,8 @@ interface FileInfo {
   path: string;
 }
 
-interface UploadResponse {
-  success: boolean;
-  file?: FileInfo;
-  error?: string;
-}
+type AuthenticatedRequest = express.Request & { user?: Express.User };
+const auth = authMiddleware as unknown as express.RequestHandler;
 
 const router = express.Router();
 
@@ -97,17 +94,25 @@ const upload = multer({
  */
 router.post(
   '/upload',
-  authMiddleware,
+  auth,
   upload.single('file'),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: '未授权访问',
+      });
+      return;
+    }
     const file = req.file;
 
     if (!file) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: '没有上传文件',
       });
+      return;
     }
 
     try {
@@ -173,9 +178,16 @@ router.post(
  */
 router.get(
   '/',
-  authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  auth,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: '未授权访问',
+      });
+      return;
+    }
     const { page = 1, limit = 10, type } = req.query;
 
     try {
@@ -184,7 +196,7 @@ router.get(
       FROM uploaded_files
       WHERE user_id = $1
     `;
-      const params = [userId];
+      const params: Array<string | number> = [userId];
 
       if (type) {
         sql += ' AND mimetype LIKE $2';
@@ -242,10 +254,17 @@ router.get(
  */
 router.get(
   '/:fileId/download',
-  authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  auth,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { fileId } = req.params;
-    const userId = (req as any).user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: '未授权访问',
+      });
+      return;
+    }
 
     try {
       // 获取文件信息
@@ -258,10 +277,11 @@ router.get(
       const result = await query(sql, [fileId, userId]);
 
       if (result.rows.length === 0) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: '文件不存在或无权访问',
         });
+        return;
       }
 
       const file = result.rows[0];
@@ -270,10 +290,11 @@ router.get(
       try {
         await fs.access(file.file_path);
       } catch {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: '文件不存在',
         });
+        return;
       }
 
       // 设置下载响应头
@@ -302,10 +323,17 @@ router.get(
  */
 router.delete(
   '/:fileId',
-  authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  auth,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { fileId } = req.params;
-    const userId = (req as any).user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: '未授权访问',
+      });
+      return;
+    }
 
     try {
       // 获取文件信息
@@ -318,10 +346,11 @@ router.delete(
       const result = await query(sql, [fileId, userId]);
 
       if (result.rows.length === 0) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: '文件不存在或无权访问',
         });
+        return;
       }
 
       const file = result.rows[0];
@@ -360,10 +389,17 @@ router.delete(
  */
 router.get(
   '/:fileId',
-  authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  auth,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { fileId } = req.params;
-    const userId = (req as any).user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: '未授权访问',
+      });
+      return;
+    }
 
     try {
       const sql = `
@@ -375,10 +411,11 @@ router.get(
       const result = await query(sql, [fileId, userId]);
 
       if (result.rows.length === 0) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: '文件不存在或无权访问',
         });
+        return;
       }
 
       const file = result.rows[0];
@@ -405,9 +442,16 @@ router.get(
  */
 router.get(
   '/stats',
-  authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  auth,
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: '未授权访问',
+      });
+      return;
+    }
 
     try {
       const sql = `

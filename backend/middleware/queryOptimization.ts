@@ -26,30 +26,66 @@ interface QueryResult {
   optimized: boolean;
 }
 
+interface DatabasePool {
+  connect: () => Promise<DatabaseClient>;
+  totalCount?: number;
+  idleCount?: number;
+  waitingCount?: number;
+}
+
 interface DatabaseClient {
   query: (sql: string, params?: unknown[]) => Promise<QueryResult>;
-  pool: {
-    connect: () => Promise<DatabaseClient>;
-  };
+  pool: DatabasePool;
+  release?: () => void;
 }
+
+type TransactionClient = DatabaseClient & {
+  optimizedQuery: (sql: string, params?: unknown[]) => Promise<QueryResult>;
+  release: () => void;
+};
+
+type QueryPlanAnalysis = {
+  analysis?: { issues: unknown[] };
+  suggestions?: unknown[];
+};
+
+type PerformanceOptimizer = {
+  initialize: () => Promise<void>;
+  recordSlowQuery: (sql: string, duration: number, params?: unknown[]) => void;
+  analyzeQueryPlan: (sql: string, params?: unknown[]) => Promise<QueryPlanAnalysis>;
+};
+
+type QueryStats = {
+  totalQueries: number;
+  totalDuration: number;
+  slowQueries: number;
+  errorQueries: number;
+  queries: Array<{
+    sql: string;
+    duration: number;
+    timestamp: number;
+    success: boolean;
+  }>;
+};
 
 interface OptimizedRequest extends Request {
   db: DatabaseClient;
   optimizedQuery: (sql: string, params?: unknown[], options?: QueryOptions) => Promise<QueryResult>;
   batchQuery: (queries: QueryRequest[]) => Promise<QueryResult[]>;
   transaction: (callback: (client: DatabaseClient) => Promise<unknown>) => Promise<unknown>;
+  queryStats?: QueryStats;
 }
 
 // 全局性能优化器实例
-let performanceOptimizer: unknown = null;
+let performanceOptimizer: PerformanceOptimizer | null = null;
 
 /**
  * 初始化性能优化器
  */
 async function initializeOptimizer() {
   if (!performanceOptimizer) {
-    performanceOptimizer = new DatabasePerformanceOptimizer();
-    await (performanceOptimizer as any).initialize();
+    performanceOptimizer = new DatabasePerformanceOptimizer() as PerformanceOptimizer;
+    await performanceOptimizer.initialize();
   }
   return performanceOptimizer;
 }
@@ -77,12 +113,12 @@ function queryPerformanceMiddleware() {
         const duration = Date.now() - startTime;
 
         // 记录查询性能
-        (optimizer as any).recordSlowQuery(sql, duration, params);
+        optimizer.recordSlowQuery(sql, duration, params);
 
         // 在开发环境分析查询计划
         if (process.env.NODE_ENV === 'development' && duration > 100) {
-          const analysis = await (optimizer as any).analyzeQueryPlan(sql, params);
-          if (analysis && analysis.analysis.issues.length > 0) {
+          const analysis = await optimizer.analyzeQueryPlan(sql, params);
+          if (analysis?.analysis?.issues?.length) {
             console.warn('查询性能问题:', {
               sql: sql.substring(0, 100) + '...',
               duration: `${duration}ms`,
@@ -133,22 +169,20 @@ function queryPerformanceMiddleware() {
         await client.query('BEGIN');
 
         // 为事务客户端添加优化查询方法
-        (client as OptimizedRequest).optimizedQuery = async (
-          sql: string,
-          params: unknown[] = []
-        ) => {
+        const transactionClient = client as TransactionClient;
+        transactionClient.optimizedQuery = async (sql: string, params: unknown[] = []) => {
           const startTime = Date.now();
           const result = await client.query(sql, params);
           const duration = Date.now() - startTime;
 
           // 记录事务中的查询性能
           const optimizer = await initializeOptimizer();
-          (optimizer as any).recordSlowQuery(sql, duration, params);
+          optimizer.recordSlowQuery(sql, duration, params);
 
           return { ...result, queryTime: duration };
         };
 
-        const result = await callback(client);
+        const result = await callback(transactionClient);
         await client.query('COMMIT');
 
         return result;
@@ -156,7 +190,9 @@ function queryPerformanceMiddleware() {
         await client.query('ROLLBACK');
         throw error;
       } finally {
-        client.release();
+        if (client.release) {
+          client.release();
+        }
       }
     };
 
@@ -187,7 +223,17 @@ function slowQueryDetection(
         const duration = Date.now() - startTime;
 
         if (duration > threshold) {
-          const logData = {
+          const logData: {
+            sql: string;
+            params: unknown[] | undefined;
+            duration: string;
+            threshold: string;
+            url: string;
+            method: string;
+            ip: string | undefined;
+            userAgent: string | undefined;
+            stack?: string;
+          } = {
             sql: sql.substring(0, 200) + (sql.length > 200 ? '...' : ''),
             params,
             duration: `${duration}ms`,
@@ -199,7 +245,7 @@ function slowQueryDetection(
           };
 
           if (includeStackTrace) {
-            (logData as any).stack = new Error().stack;
+            logData.stack = new Error().stack;
           }
 
           if (logLevel === 'error') {
@@ -283,17 +329,12 @@ function queryCache(
  * 查询统计中间件
  */
 function queryStatistics() {
-  const stats = {
+  const stats: QueryStats = {
     totalQueries: 0,
     totalDuration: 0,
     slowQueries: 0,
     errorQueries: 0,
-    queries: [] as Array<{
-      sql: string;
-      duration: number;
-      timestamp: number;
-      success: boolean;
-    }>,
+    queries: [],
   };
 
   return (req: OptimizedRequest, res: Response, next: NextFunction) => {
@@ -342,7 +383,7 @@ function queryStatistics() {
     };
 
     // 添加统计信息到请求对象
-    (req as any).queryStats = stats;
+    req.queryStats = stats;
 
     next();
   };
@@ -357,23 +398,18 @@ function queryOptimizationSuggestions() {
 
     req.db.query = async (sql: string, params?: unknown[]) => {
       const startTime = Date.now();
+      const result = await originalQuery.call(req.db, sql, params);
+      const duration = Date.now() - startTime;
 
-      try {
-        const result = await originalQuery.call(req.db, sql, params);
-        const duration = Date.now() - startTime;
-
-        // 分析查询并提供建议
-        if (process.env.NODE_ENV === 'development') {
-          const suggestions = analyzeQuery(sql, duration);
-          if (suggestions.length > 0) {
-            console.log('💡 查询优化建议:', suggestions);
-          }
+      // 分析查询并提供建议
+      if (process.env.NODE_ENV === 'development') {
+        const suggestions = analyzeQuery(sql, duration);
+        if (suggestions.length > 0) {
+          console.log('💡 查询优化建议:', suggestions);
         }
-
-        return result;
-      } catch (error) {
-        throw error;
       }
+
+      return result;
     };
 
     next();

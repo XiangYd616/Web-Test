@@ -7,6 +7,8 @@ import express from 'express';
 import { authMiddleware } from '../../middleware/auth';
 import { asyncHandler } from '../../middleware/errorHandler';
 
+const auth = authMiddleware as express.RequestHandler;
+
 // 简单的内存缓存实现
 class SimpleCache<T = unknown> {
   private cache = new Map<string, T>();
@@ -15,7 +17,10 @@ class SimpleCache<T = unknown> {
   set(key: string, value: T, ttl = 300): void {
     // 清除现有的定时器
     if (this.timers.has(key)) {
-      clearTimeout(this.timers.get(key)!);
+      const existingTimer = this.timers.get(key);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
     }
 
     // 设置缓存值
@@ -36,7 +41,10 @@ class SimpleCache<T = unknown> {
 
   delete(key: string): boolean {
     if (this.timers.has(key)) {
-      clearTimeout(this.timers.get(key)!);
+      const existingTimer = this.timers.get(key);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+      }
       this.timers.delete(key);
     }
     return this.cache.delete(key);
@@ -82,7 +90,7 @@ const router = express.Router();
  */
 router.get(
   '/info',
-  authMiddleware,
+  auth,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const info = {
       size: cache.size(),
@@ -94,7 +102,7 @@ router.get(
       })),
     };
 
-    res.json({
+    return res.json({
       success: true,
       data: info,
     });
@@ -107,7 +115,7 @@ router.get(
  */
 router.get(
   '/:key',
-  authMiddleware,
+  auth,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { key } = req.params;
     const value = cache.get(key);
@@ -119,7 +127,7 @@ router.get(
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         key,
@@ -136,7 +144,7 @@ router.get(
  */
 router.post(
   '/:key',
-  authMiddleware,
+  auth,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { key } = req.params;
     const { value, ttl } = req.body;
@@ -150,7 +158,7 @@ router.post(
 
     cache.set(key, value, ttl);
 
-    res.json({
+    return res.json({
       success: true,
       message: '缓存设置成功',
       data: {
@@ -167,7 +175,7 @@ router.post(
  */
 router.delete(
   '/:key',
-  authMiddleware,
+  auth,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { key } = req.params;
     const deleted = cache.delete(key);
@@ -179,7 +187,7 @@ router.delete(
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: '缓存删除成功',
     });
@@ -192,12 +200,12 @@ router.delete(
  */
 router.delete(
   '/',
-  authMiddleware,
+  auth,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const size = cache.size();
     cache.clear();
 
-    res.json({
+    return res.json({
       success: true,
       message: '缓存清空成功',
       data: {
@@ -213,7 +221,7 @@ router.delete(
  */
 router.post(
   '/batch',
-  authMiddleware,
+  auth,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { operation, items } = req.body;
 
@@ -267,7 +275,7 @@ router.post(
         });
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         operation,

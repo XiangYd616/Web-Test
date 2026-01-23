@@ -4,6 +4,20 @@
 
 import type { NextFunction, Request, Response } from 'express';
 
+declare global {
+  namespace Express {
+    interface User {
+      id: string;
+      email: string;
+      username: string;
+      role: string;
+      lastLogin?: Date;
+      emailVerified?: boolean;
+      twoFactorEnabled?: boolean;
+    }
+  }
+}
+
 const JwtService = require('../services/core/jwtService');
 const { PermissionService, PERMISSIONS } = require('../services/core/permissionService');
 const { query } = require('../config/database');
@@ -14,15 +28,7 @@ const jwtService = new JwtService();
 const permissionService = new PermissionService();
 
 type AuthenticatedRequest = Request & {
-  user?: {
-    id: string;
-    email: string;
-    username: string;
-    role: string;
-    lastLogin?: Date;
-    emailVerified?: boolean;
-    twoFactorEnabled?: boolean;
-  } | null;
+  user?: Express.User;
 };
 
 type ApiResponse = Response & {
@@ -63,13 +69,18 @@ type UserRecord = {
 /**
  * 验证JWT令牌 - 使用增强的JWT服务
  */
-const authMiddleware = async (req: AuthenticatedRequest, res: ApiResponse, next: NextFunction) => {
+const authMiddleware = async (
+  req: AuthenticatedRequest,
+  res: ApiResponse,
+  next: NextFunction
+): Promise<void> => {
   try {
     const authHeader = req.header('Authorization');
     const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      return res.unauthorized('访问被拒绝，需要认证令牌');
+      res.unauthorized('访问被拒绝，需要认证令牌');
+      return;
     }
 
     // 使用JWT服务验证令牌
@@ -82,13 +93,15 @@ const authMiddleware = async (req: AuthenticatedRequest, res: ApiResponse, next:
     );
 
     if (userResult.rows.length === 0) {
-      return res.unauthorized('令牌无效，用户不存在');
+      res.unauthorized('令牌无效，用户不存在');
+      return;
     }
 
     const user = userResult.rows[0] as UserRecord;
 
     if (!user.is_active) {
-      return res.forbidden('用户账户已被禁用');
+      res.forbidden('用户账户已被禁用');
+      return;
     }
 
     // 将用户信息添加到请求对象
@@ -103,35 +116,46 @@ const authMiddleware = async (req: AuthenticatedRequest, res: ApiResponse, next:
     };
 
     // 记录用户活动（异步，不阻塞请求）
-    recordUserActivity((req as AuthenticatedRequest).user!.id, req).catch((err: unknown) => {
+    const userId = user.id;
+    recordUserActivity(userId, req).catch((err: unknown) => {
       console.error('记录用户活动失败:', err);
     });
 
     next();
   } catch (error) {
     console.error('认证中间件错误:', error);
+    const errorCode = (error as { code?: string }).code;
 
-    if ((error as any).code === ErrorCode.TOKEN_EXPIRED) {
-      return res.error(ErrorCode.TOKEN_EXPIRED, '令牌已过期，请重新登录');
-    } else if ((error as any).code === ErrorCode.INVALID_TOKEN) {
-      return res.error(ErrorCode.INVALID_TOKEN, '令牌无效');
+    if (errorCode === ErrorCode.TOKEN_EXPIRED) {
+      res.error(ErrorCode.TOKEN_EXPIRED, '令牌已过期，请重新登录');
+      return;
+    }
+    if (errorCode === ErrorCode.INVALID_TOKEN) {
+      res.error(ErrorCode.INVALID_TOKEN, '令牌无效');
+      return;
     }
 
-    return res.serverError('认证过程中发生错误');
+    res.serverError('认证过程中发生错误');
+    return;
   }
 };
 
 /**
  * 可选认证中间件（不强制要求登录）
  */
-const optionalAuth = async (req: AuthenticatedRequest, res: ApiResponse, next: NextFunction) => {
+const optionalAuth = async (
+  req: AuthenticatedRequest,
+  res: ApiResponse,
+  next: NextFunction
+): Promise<void> => {
   try {
     const authHeader = req.header('Authorization');
     const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      req.user = null;
-      return next();
+      req.user = undefined;
+      next();
+      return;
     }
 
     // 使用JWT服务验证令牌
@@ -152,13 +176,13 @@ const optionalAuth = async (req: AuthenticatedRequest, res: ApiResponse, next: N
         emailVerified: user.email_verified,
       };
     } else {
-      (req as AuthenticatedRequest).user = null;
+      (req as AuthenticatedRequest).user = undefined;
     }
 
     next();
   } catch {
     // 可选认证失败时不返回错误，只是设置用户为null
-    (req as AuthenticatedRequest).user = null;
+    (req as AuthenticatedRequest).user = undefined;
     next();
   }
 };
@@ -167,22 +191,25 @@ const optionalAuth = async (req: AuthenticatedRequest, res: ApiResponse, next: N
  * 权限检查中间件
  */
 const requirePermission = (permission: string) => {
-  return async (req: AuthenticatedRequest, res: ApiResponse, next: NextFunction) => {
+  return async (req: AuthenticatedRequest, res: ApiResponse, next: NextFunction): Promise<void> => {
     if (!req.user) {
-      return res.unauthorized('需要登录才能访问此资源');
+      res.unauthorized('需要登录才能访问此资源');
+      return;
     }
 
     try {
       const hasPermission = await permissionService.checkUserPermission(req.user.id, permission);
 
       if (!hasPermission) {
-        return res.forbidden('您没有权限访问此资源');
+        res.forbidden('您没有权限访问此资源');
+        return;
       }
 
       next();
     } catch (error) {
       console.error('权限检查错误:', error);
-      return res.serverError('权限检查过程中发生错误');
+      res.serverError('权限检查过程中发生错误');
+      return;
     }
   };
 };
@@ -193,13 +220,15 @@ const requirePermission = (permission: string) => {
 const requireRole = (roles: string | string[]) => {
   const allowedRoles = Array.isArray(roles) ? roles : [roles];
 
-  return (req: AuthenticatedRequest, res: ApiResponse, next: NextFunction) => {
+  return (req: AuthenticatedRequest, res: ApiResponse, next: NextFunction): void => {
     if (!req.user) {
-      return res.unauthorized('需要登录才能访问此资源');
+      res.unauthorized('需要登录才能访问此资源');
+      return;
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      return res.forbidden('您的角色无权访问此资源');
+      res.forbidden('您的角色无权访问此资源');
+      return;
     }
 
     next();
@@ -234,12 +263,13 @@ async function recordUserActivity(userId: string, req: Request) {
 /**
  * API密钥认证中间件
  */
-const apiKeyAuth = async (req: Request, res: ApiResponse, next: NextFunction) => {
+const apiKeyAuth = async (req: Request, res: ApiResponse, next: NextFunction): Promise<void> => {
   try {
     const apiKey = req.header('X-API-Key');
 
     if (!apiKey) {
-      return res.unauthorized('需要API密钥');
+      res.unauthorized('需要API密钥');
+      return;
     }
 
     const result = await query(
@@ -248,7 +278,8 @@ const apiKeyAuth = async (req: Request, res: ApiResponse, next: NextFunction) =>
     );
 
     if (result.rows.length === 0) {
-      return res.unauthorized('无效的API密钥');
+      res.unauthorized('无效的API密钥');
+      return;
     }
 
     const keyData = result.rows[0];
@@ -260,7 +291,8 @@ const apiKeyAuth = async (req: Request, res: ApiResponse, next: NextFunction) =>
     );
 
     if (userResult.rows.length === 0) {
-      return res.unauthorized('API密钥对应的用户不存在或已被禁用');
+      res.unauthorized('API密钥对应的用户不存在或已被禁用');
+      return;
     }
 
     const user = userResult.rows[0] as UserRecord;
@@ -275,16 +307,22 @@ const apiKeyAuth = async (req: Request, res: ApiResponse, next: NextFunction) =>
     next();
   } catch (error) {
     console.error('API密钥认证错误:', error);
-    return res.serverError('API密钥认证过程中发生错误');
+    res.serverError('API密钥认证过程中发生错误');
+    return;
   }
 };
 
 /**
  * 双因素认证检查中间件
  */
-const require2FA = async (req: AuthenticatedRequest, res: ApiResponse, next: NextFunction) => {
+const require2FA = async (
+  req: AuthenticatedRequest,
+  res: ApiResponse,
+  next: NextFunction
+): Promise<void> => {
   if (!req.user) {
-    return res.unauthorized('需要登录才能访问此资源');
+    res.unauthorized('需要登录才能访问此资源');
+    return;
   }
 
   // 如果用户启用了2FA，检查是否已验证
@@ -292,7 +330,8 @@ const require2FA = async (req: AuthenticatedRequest, res: ApiResponse, next: Nex
     const twoFaVerified = req.header('X-2FA-Verified');
 
     if (!twoFaVerified || twoFaVerified !== 'true') {
-      return res.forbidden('需要完成双因素认证');
+      res.forbidden('需要完成双因素认证');
+      return;
     }
   }
 
@@ -309,4 +348,16 @@ module.exports = {
   apiKeyAuth,
   require2FA,
   PERMISSIONS,
+};
+
+export {
+  apiKeyAuth,
+  authMiddleware,
+  optionalAuth,
+  PERMISSIONS,
+  require2FA,
+  requireAdmin,
+  requirePermission,
+  requireRole,
+  requireSuperAdmin,
 };

@@ -126,7 +126,7 @@ async function validateURL(
   urlString: string,
   options: URLOptions = {}
 ): Promise<URLValidationResult> {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
+  const opts: URLOptions = { ...DEFAULT_OPTIONS, ...options };
   const result: URLValidationResult = {
     isValid: false,
     url: null,
@@ -152,9 +152,10 @@ async function validateURL(
     result.url = parsedUrl;
 
     // 协议验证
-    if (!opts.allowedProtocols.includes(parsedUrl.protocol)) {
+    const allowedProtocols = opts.allowedProtocols ?? DEFAULT_OPTIONS.allowedProtocols ?? [];
+    if (!allowedProtocols.includes(parsedUrl.protocol)) {
       result.errors.push(
-        `不支持的协议: ${parsedUrl.protocol}。支持的协议: ${opts.allowedProtocols.join(', ')}`
+        `不支持的协议: ${parsedUrl.protocol}。支持的协议: ${allowedProtocols.join(', ')}`
       );
     }
 
@@ -228,23 +229,24 @@ async function validateURL(
  * URL验证中间件
  */
 function urlValidator(options: URLOptions = {}) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const urlParam = (req.query.url as string) || (req.body.url as string);
 
     if (!urlParam) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: {
           code: 'MISSING_URL',
           message: 'URL参数是必需的',
         },
       });
+      return;
     }
 
     const validation = await validateURL(urlParam, options);
 
     if (!validation.isValid) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: {
           code: 'INVALID_URL',
@@ -256,10 +258,13 @@ function urlValidator(options: URLOptions = {}) {
           },
         },
       });
+      return;
     }
 
     // 将验证后的URL对象附加到请求中
-    (req as any).validatedURL = validation.url;
+    if (validation.url) {
+      (req as Request & { validatedURL?: URL }).validatedURL = validation.url;
+    }
 
     next();
   };
@@ -269,27 +274,29 @@ function urlValidator(options: URLOptions = {}) {
  * 批量URL验证中间件
  */
 function batchUrlValidator(options: URLOptions = {}) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const urls = (req.body.urls as string[]) || [];
 
     if (!Array.isArray(urls) || urls.length === 0) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: {
           code: 'MISSING_URLS',
           message: 'URLs数组是必需的',
         },
       });
+      return;
     }
 
     if (urls.length > 50) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: {
           code: 'BATCH_SIZE_EXCEEDED',
           message: '批量验证最多支持50个URL',
         },
       });
+      return;
     }
 
     const results = await Promise.all(urls.map(url => validateURL(url, options)));
@@ -297,7 +304,7 @@ function batchUrlValidator(options: URLOptions = {}) {
     const invalidResults = results.filter(result => !result.isValid);
 
     if (invalidResults.length > 0) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: {
           code: 'BATCH_VALIDATION_FAILED',
@@ -314,10 +321,11 @@ function batchUrlValidator(options: URLOptions = {}) {
           },
         },
       });
+      return;
     }
 
     // 将验证结果附加到请求中
-    (req as any).validationResults = results;
+    (req as Request & { validationResults?: URLValidationResult[] }).validationResults = results;
 
     next();
   };
@@ -327,9 +335,10 @@ function batchUrlValidator(options: URLOptions = {}) {
  * 条件URL验证中间件
  */
 function conditionalUrlValidator(condition: (req: Request) => boolean, options: URLOptions = {}) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     if (condition(req)) {
-      return urlValidator(options)(req, res, next);
+      await urlValidator(options)(req, res, next);
+      return;
     }
     next();
   };
@@ -397,7 +406,7 @@ function urlFormatter() {
         if (req.body.url) {
           req.body.url = formattedUrl;
         }
-      } catch (error) {
+      } catch {
         // 如果格式化失败，保持原值
       }
     }
@@ -454,17 +463,18 @@ function urlSecurityCheck() {
  * URL长度限制中间件
  */
 function urlLengthLimit(maxLength: number = 2048) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     const urlParam = (req.query.url as string) || (req.body.url as string);
 
     if (urlParam && urlParam.length > maxLength) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: {
           code: 'URL_TOO_LONG',
           message: `URL长度不能超过${maxLength}个字符`,
         },
       });
+      return;
     }
 
     next();
