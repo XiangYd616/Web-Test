@@ -3,9 +3,15 @@
  */
 
 import express from 'express';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
+import asyncHandler from '../../middleware/asyncHandler';
 
-const { getConnectionManager, getStats, healthCheck } = require('../../config/database');
-const { asyncHandler } = require('../../middleware/errorHandler');
+const {
+  getConnectionManager,
+  getStats,
+  healthCheck,
+  testConnection,
+} = require('../../config/database');
 
 interface HealthStatus {
   status: 'healthy' | 'unhealthy' | 'degraded';
@@ -49,16 +55,17 @@ router.get(
     try {
       const healthStatus = await healthCheck();
 
-      res.json({
-        success: true,
-        data: healthStatus,
-      });
+      return res.success(healthStatus);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString(),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取数据库健康状态失败',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date().toISOString(),
+        },
+        500
+      );
     }
   })
 );
@@ -82,16 +89,17 @@ router.get(
         timestamp: new Date().toISOString(),
       };
 
-      res.json({
-        success: true,
-        data: status,
-      });
+      return res.success(status);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString(),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取数据库连接状态失败',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date().toISOString(),
+        },
+        500
+      );
     }
   })
 );
@@ -123,16 +131,17 @@ router.get(
         timestamp: new Date().toISOString(),
       };
 
-      res.json({
-        success: true,
-        data: systemStats,
-      });
+      return res.success(systemStats);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString(),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取系统统计信息失败',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date().toISOString(),
+        },
+        500
+      );
     }
   })
 );
@@ -145,27 +154,25 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const startTime = Date.now();
-      const connectionManager = await getConnectionManager();
-
-      // 执行简单查询测试连接
-      await connectionManager.getSequelize().authenticate();
+      await testConnection();
       const responseTime = Date.now() - startTime;
 
-      res.json({
-        success: true,
-        data: {
-          connected: true,
-          responseTime,
-          timestamp: new Date().toISOString(),
-        },
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        connected: false,
+      return res.success({
+        connected: true,
+        responseTime,
         timestamp: new Date().toISOString(),
       });
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '数据库连接测试失败',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          connected: false,
+          timestamp: new Date().toISOString(),
+        },
+        500
+      );
     }
   })
 );
@@ -185,16 +192,17 @@ router.get(
         timestamp: new Date().toISOString(),
       };
 
-      res.json({
-        success: true,
-        data: cacheStatus,
-      });
+      return res.success(cacheStatus);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString(),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取缓存状态失败',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date().toISOString(),
+        },
+        500
+      );
     }
   })
 );
@@ -225,16 +233,17 @@ router.get(
         timestamp: new Date().toISOString(),
       };
 
-      res.json({
-        success: true,
-        data: performanceMetrics,
-      });
+      return res.success(performanceMetrics);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString(),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取性能指标失败',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date().toISOString(),
+        },
+        500
+      );
     }
   })
 );
@@ -250,26 +259,32 @@ router.get(
       const isReady = connectionManager.isConnectionActive();
 
       if (isReady) {
-        res.json({
-          success: true,
+        return res.success({
           ready: true,
           timestamp: new Date().toISOString(),
         });
       } else {
-        res.status(503).json({
-          success: false,
-          ready: false,
-          message: '系统未就绪',
-          timestamp: new Date().toISOString(),
-        });
+        return res.error(
+          StandardErrorCode.SERVICE_UNAVAILABLE,
+          '系统未就绪',
+          {
+            ready: false,
+            timestamp: new Date().toISOString(),
+          },
+          503
+        );
       }
     } catch (error) {
-      res.status(503).json({
-        success: false,
-        ready: false,
-        error: error instanceof Error ? error.message : String(error),
-        timestamp: new Date().toISOString(),
-      });
+      return res.error(
+        StandardErrorCode.SERVICE_UNAVAILABLE,
+        '系统未就绪',
+        {
+          ready: false,
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date().toISOString(),
+        },
+        503
+      );
     }
   })
 );
@@ -281,8 +296,7 @@ router.get(
   '/live',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     // 简单的存活检查，只返回200状态
-    res.json({
-      success: true,
+    return res.success({
       alive: true,
       timestamp: new Date().toISOString(),
     });

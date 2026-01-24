@@ -4,8 +4,9 @@
 
 const bcrypt = require('bcryptjs');
 import express from 'express';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 import { query } from '../config/database';
-import { asyncHandler } from '../middleware/errorHandler';
+import asyncHandler from '../middleware/asyncHandler';
 import { loginRateLimiter, registerRateLimiter } from '../middleware/rateLimiter';
 const { authMiddleware } = require('../middleware/auth');
 const JwtService = require('../services/core/jwtService');
@@ -54,10 +55,12 @@ router.post(
 
       // 验证输入
       if (!username || !email || !password) {
-        return res.status(400).json({
-          success: false,
-          message: '用户名、邮箱和密码都是必填项',
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '用户名、邮箱和密码都是必填项',
+          undefined,
+          400
+        );
       }
 
       // 检查用户是否已存在
@@ -67,10 +70,7 @@ router.post(
       ]);
 
       if (existingUser.rows.length > 0) {
-        return res.status(409).json({
-          success: false,
-          message: '用户名或邮箱已存在',
-        });
+        return res.error(StandardErrorCode.CONFLICT, '用户名或邮箱已存在', undefined, 409);
       }
 
       // 加密密码
@@ -84,10 +84,7 @@ router.post(
 
       const userId = result.rows[0]?.id;
       if (!userId) {
-        return res.status(500).json({
-          success: false,
-          message: '创建用户失败',
-        });
+        return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '创建用户失败', undefined, 500);
       }
 
       // 记录安全事件
@@ -110,10 +107,8 @@ router.post(
         req.get('User-Agent')
       );
 
-      return res.status(201).json({
-        success: true,
-        message: '注册成功',
-        data: {
+      return res.success(
+        {
           user: {
             id: userId,
             username,
@@ -122,7 +117,9 @@ router.post(
           },
           tokens,
         },
-      });
+        '注册成功',
+        201
+      );
     } catch (error) {
       securityLogger(
         'USER_REGISTER_FAILED',
@@ -133,10 +130,12 @@ router.post(
         req
       );
 
-      return res.status(500).json({
-        success: false,
-        message: '注册失败，请稍后重试',
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '注册失败，请稍后重试',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -153,10 +152,7 @@ router.post(
       const { username, password } = req.body;
 
       if (!username || !password) {
-        return res.status(400).json({
-          success: false,
-          message: '用户名和密码都是必填项',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '用户名和密码都是必填项', undefined, 400);
       }
 
       // 查找用户
@@ -166,10 +162,7 @@ router.post(
       );
 
       if (users.rows.length === 0) {
-        return res.status(401).json({
-          success: false,
-          message: '用户名或密码错误',
-        });
+        return res.error(StandardErrorCode.UNAUTHORIZED, '用户名或密码错误', undefined, 401);
       }
 
       const user = users.rows[0] as {
@@ -196,18 +189,17 @@ router.post(
           req
         );
 
-        return res.status(401).json({
-          success: false,
-          message: '用户名或密码错误',
-        });
+        return res.error(StandardErrorCode.UNAUTHORIZED, '用户名或密码错误', undefined, 401);
       }
 
       // 检查账户状态
       if (user.status === 'locked') {
-        return res.status(423).json({
-          success: false,
-          message: '账户已被锁定，请联系管理员',
-        });
+        return res.error(
+          StandardErrorCode.OPERATION_NOT_ALLOWED,
+          '账户已被锁定，请联系管理员',
+          undefined,
+          423
+        );
       }
 
       // 生成令牌
@@ -239,10 +231,8 @@ router.post(
         req
       );
 
-      return res.json({
-        success: true,
-        message: '登录成功',
-        data: {
+      return res.success(
+        {
           user: {
             id: user.id,
             username: user.username,
@@ -252,7 +242,8 @@ router.post(
           },
           tokens,
         },
-      });
+        '登录成功'
+      );
     } catch (error) {
       securityLogger(
         'LOGIN_FAILED_INTERNAL',
@@ -264,10 +255,12 @@ router.post(
         req
       );
 
-      return res.status(500).json({
-        success: false,
-        message: '登录失败，请稍后重试',
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '登录失败，请稍后重试',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -283,24 +276,19 @@ router.post(
       const { refreshToken: token } = req.body;
 
       if (!token) {
-        return res.status(401).json({
-          success: false,
-          message: '刷新令牌缺失',
-        });
+        return res.error(StandardErrorCode.UNAUTHORIZED, '刷新令牌缺失', undefined, 401);
       }
 
       const tokens = await jwtService.refreshAccessToken(token);
 
-      return res.json({
-        success: true,
-        message: '令牌刷新成功',
-        data: { tokens },
-      });
+      return res.success({ tokens }, '令牌刷新成功');
     } catch (error) {
-      return res.status(401).json({
-        success: false,
-        message: error instanceof Error ? error.message : '令牌刷新失败',
-      });
+      return res.error(
+        StandardErrorCode.UNAUTHORIZED,
+        error instanceof Error ? error.message : '令牌刷新失败',
+        undefined,
+        401
+      );
     }
   })
 );
@@ -337,10 +325,7 @@ router.post(
         req
       );
 
-      return res.json({
-        success: true,
-        message: '登出成功',
-      });
+      return res.success(null, '登出成功');
     } catch (error) {
       securityLogger(
         'LOGOUT_FAILED',
@@ -352,10 +337,12 @@ router.post(
         req
       );
 
-      return res.status(500).json({
-        success: false,
-        message: '登出失败',
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '登出失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -371,26 +358,20 @@ router.get(
     try {
       const user = getUser(req);
 
-      return res.json({
-        success: true,
-        data: {
-          user: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-            twoFactorEnabled: user.twoFactorEnabled,
-            emailVerified: user.emailVerified,
-            createdAt: user.createdAt,
-            lastLogin: user.lastLogin,
-          },
+      return res.success({
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          twoFactorEnabled: user.twoFactorEnabled,
+          emailVerified: user.emailVerified,
+          createdAt: user.createdAt,
+          lastLogin: user.lastLogin,
         },
       });
     } catch {
-      return res.status(500).json({
-        success: false,
-        message: '获取用户信息失败',
-      });
+      return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '获取用户信息失败', undefined, 500);
     }
   })
 );

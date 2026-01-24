@@ -9,6 +9,7 @@
  */
 
 import type { NextFunction, Request, Response } from 'express';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 
 const analyticsService = require('../services/analytics/analyticsService');
 
@@ -16,6 +17,16 @@ type AuthRequest = Request & { user?: { id: string } };
 
 type ApiResponse = Response & {
   success: (data?: unknown, message?: string, statusCode?: number, meta?: unknown) => Response;
+  error: (code: string, message?: string, details?: unknown, statusCode?: number) => Response;
+};
+
+const handleControllerError = (res: ApiResponse, error: unknown, message = '请求处理失败') => {
+  return res.error(
+    StandardErrorCode.INTERNAL_SERVER_ERROR,
+    message,
+    error instanceof Error ? error.message : String(error),
+    500
+  );
 };
 
 type AnalyticsQuery = {
@@ -35,7 +46,7 @@ class AnalyticsController {
    * 获取分析摘要
    * GET /api/analytics/summary
    */
-  async getSummary(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getSummary(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { dateRange = 30 } = req.query as AnalyticsQuery;
       const userId = req.user?.id;
@@ -47,8 +58,7 @@ class AnalyticsController {
 
       return res.success(summary);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -56,7 +66,7 @@ class AnalyticsController {
    * 获取性能趋势
    * GET /api/analytics/performance-trends
    */
-  async getPerformanceTrends(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getPerformanceTrends(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { period = '30d' } = req.query as AnalyticsQuery;
       const userId = req.user?.id;
@@ -68,8 +78,7 @@ class AnalyticsController {
 
       return res.success(trends);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -78,7 +87,7 @@ class AnalyticsController {
    * GET /api/analytics/recommendations
    * GET /api/analytics/recommendations/:testId
    */
-  async getRecommendations(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getRecommendations(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId?: string };
       const userId = req.user?.id;
@@ -90,8 +99,7 @@ class AnalyticsController {
 
       return res.success({ recommendations });
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -99,7 +107,7 @@ class AnalyticsController {
    * 导出分析报告
    * POST /api/analytics/export
    */
-  async exportReport(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async exportReport(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { format = 'json', dateRange = 30, includeCharts = true } = req.body as ExportBody;
       const userId = req.user?.id;
@@ -125,8 +133,7 @@ class AnalyticsController {
 
       return res.send(report);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -134,14 +141,13 @@ class AnalyticsController {
    * 获取实时统计
    * GET /api/analytics/realtime
    */
-  async getRealTimeStats(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getRealTimeStats(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const userId = req.user?.id;
       const stats = await analyticsService.getRealTimeStats({ userId });
       return res.success(stats);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 }

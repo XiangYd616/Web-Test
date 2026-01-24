@@ -4,7 +4,8 @@
  */
 
 import express from 'express';
-import { asyncHandler } from '../middleware/errorHandler';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
+import asyncHandler from '../middleware/asyncHandler';
 import OAuthService from '../services/oauth/OAuthService';
 
 const router = express.Router();
@@ -18,6 +19,12 @@ type OAuthRequest = express.Request & {
 type ApiResponse = express.Response & {
   success: (data?: unknown, message?: string) => express.Response;
   validationError: (errors: Array<{ field: string; message: string }>) => express.Response;
+  error: (
+    code: string,
+    message?: string,
+    details?: unknown,
+    statusCode?: number
+  ) => express.Response;
 };
 
 const handleUnsupportedProvider = (res: ApiResponse, provider: string, error: unknown) => {
@@ -67,10 +74,12 @@ router.post(
 
     const result = await oauthService.handleCallback(provider, code, state);
     if (!result.success) {
-      return res.status(400).json({
-        success: false,
-        error: result.error || 'OAuth 登录失败',
-      });
+      return res.error(
+        StandardErrorCode.INVALID_INPUT,
+        result.error || 'OAuth 登录失败',
+        undefined,
+        400
+      );
     }
 
     return res.success({

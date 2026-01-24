@@ -4,8 +4,9 @@
  */
 
 import express from 'express';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
 import { query } from '../../config/database';
-import { asyncHandler } from '../../middleware/errorHandler';
+import asyncHandler from '../../middleware/asyncHandler';
 import { dataManagementService } from '../../services/data/DataManagementService';
 import { errorMonitoringSystem } from '../../utils/ErrorMonitoringSystem';
 import Logger from '../../utils/logger';
@@ -147,21 +148,19 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const errorReport: ErrorReport = req.body;
-      const workspaceId = (req.body as { workspaceId?: string }).workspaceId;
-      if (workspaceId) {
+      const workspaceIdInput = (req.body as { workspaceId?: string }).workspaceId;
+      const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
+      if (workspaceIdInput) {
         const userId = (req as { user?: { id?: string } }).user?.id;
         if (!userId) {
-          return res.status(401).json({ success: false, message: '用户未认证' });
+          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
         }
-        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+        await ensureWorkspacePermission(workspaceId, userId, 'write');
       }
 
       // 验证必需字段
       if (!errorReport.type || !errorReport.message || !errorReport.timestamp) {
-        return res.status(400).json({
-          success: false,
-          message: '错误报告缺少必需字段',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '错误报告缺少必需字段', undefined, 400);
       }
 
       const { id } = await dataManagementService.createData(
@@ -169,7 +168,7 @@ router.post(
         { ...errorReport, id: undefined },
         {
           source: 'error-report',
-          workspaceId: workspaceId ? String(workspaceId) : undefined,
+          workspaceId,
         }
       );
 
@@ -194,19 +193,16 @@ router.post(
         details: errorReport.details,
       });
 
-      return res.status(201).json({
-        success: true,
-        message: '错误报告已记录',
-        data: { id },
-      });
+      return res.success({ id }, '错误报告已记录', 201);
     } catch (error) {
       Logger.error('处理错误报告失败', { error, body: req.body });
 
-      return res.status(500).json({
-        success: false,
-        message: '处理错误报告失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '处理错误报告失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -219,15 +215,16 @@ router.get(
   '/',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const query: ErrorQuery = req.query;
-    const workspaceId = query.workspaceId;
+    const workspaceIdInput = query.workspaceId;
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = (req as { user?: { id?: string } }).user?.id;
         if (!userId) {
-          return res.status(401).json({ success: false, message: '用户未认证' });
+          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
         }
-        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
       }
       const { results } = await dataManagementService.queryData(
         ERROR_REPORTS_TYPE,
@@ -238,7 +235,7 @@ router.get(
           },
           search: query.search,
           sort: { field: 'timestamp', direction: 'desc' },
-          workspaceId: workspaceId ? String(workspaceId) : undefined,
+          workspaceId,
         },
         {}
       );
@@ -255,24 +252,22 @@ router.get(
       const endIndex = startIndex + limit;
       const paginatedErrors = filteredErrors.slice(startIndex, endIndex);
 
-      return res.json({
-        success: true,
-        data: {
-          errors: paginatedErrors,
-          pagination: {
-            page,
-            limit,
-            total: filteredErrors.length,
-            totalPages: Math.ceil(filteredErrors.length / limit),
-          },
+      return res.success({
+        errors: paginatedErrors,
+        pagination: {
+          page,
+          limit,
+          total: filteredErrors.length,
+          totalPages: Math.ceil(filteredErrors.length / limit),
         },
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取错误列表失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取错误列表失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -285,39 +280,35 @@ router.get(
   '/:id',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
-    const { workspaceId } = req.query as { workspaceId?: string };
+    const { workspaceId: workspaceIdInput } = req.query as { workspaceId?: string };
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = (req as { user?: { id?: string } }).user?.id;
         if (!userId) {
-          return res.status(401).json({ success: false, message: '用户未认证' });
+          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
         }
-        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
       }
       const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, id, {
-        workspaceId: workspaceId ? String(workspaceId) : undefined,
+        workspaceId,
       });
       const errorReport = mapErrorRecord(
         errorRecord as { id: string; data: Record<string, unknown> }
       );
 
-      return res.json({
-        success: true,
-        data: errorReport,
-      });
+      return res.success(errorReport);
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '错误报告不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '错误报告不存在', undefined, 404);
       }
-      return res.status(500).json({
-        success: false,
-        message: '获取错误详情失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取错误详情失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -329,19 +320,20 @@ router.get(
 router.get(
   '/statistics',
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { timeRange = '24h', workspaceId } = req.query;
+    const { timeRange = '24h', workspaceId: workspaceIdInput } = req.query;
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = (req as { user?: { id?: string } }).user?.id;
         if (!userId) {
-          return res.status(401).json({ success: false, message: '用户未认证' });
+          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
         }
-        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
       }
       const { results } = await dataManagementService.queryData(
         ERROR_REPORTS_TYPE,
-        { workspaceId: workspaceId ? String(workspaceId) : undefined },
+        { workspaceId },
         {}
       );
       const now = new Date();
@@ -397,16 +389,14 @@ router.get(
           })),
       };
 
-      return res.json({
-        success: true,
-        data: statistics,
-      });
+      return res.success(statistics);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取错误统计失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取错误统计失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -420,18 +410,19 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const { comment, resolvedBy } = req.body;
-    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceIdInput = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = (req as { user?: { id?: string } }).user?.id;
         if (!userId) {
-          return res.status(401).json({ success: false, message: '用户未认证' });
+          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
         }
-        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+        await ensureWorkspacePermission(workspaceId, userId, 'write');
       }
       const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, id, {
-        workspaceId: workspaceId ? String(workspaceId) : undefined,
+        workspaceId,
       });
       const errorReport = mapErrorRecord(
         errorRecord as { id: string; data: Record<string, unknown> }
@@ -451,22 +442,20 @@ router.post(
         },
         {
           userId: resolvedBy,
-          workspaceId: workspaceId ? String(workspaceId) : undefined,
+          workspaceId,
         }
       );
 
       Logger.info('错误已标记为解决', { errorId: id, resolvedBy, comment });
 
-      return res.json({
-        success: true,
-        message: '错误已标记为解决',
-      });
+      return res.success(null, '错误已标记为解决');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '标记错误解决失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '标记错误解决失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -479,29 +468,27 @@ router.post(
   '/batch/resolve',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { errorIds, comment, resolvedBy } = req.body;
-    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceIdInput = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     if (!Array.isArray(errorIds) || errorIds.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: '错误ID列表不能为空',
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '错误ID列表不能为空', undefined, 400);
     }
 
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = (req as { user?: { id?: string } }).user?.id;
         if (!userId) {
-          return res.status(401).json({ success: false, message: '用户未认证' });
+          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
         }
-        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+        await ensureWorkspacePermission(workspaceId, userId, 'write');
       }
       const results = [];
 
       for (const errorId of errorIds) {
         try {
           const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, errorId, {
-            workspaceId: workspaceId ? String(workspaceId) : undefined,
+            workspaceId,
           });
           const errorReport = mapErrorRecord(
             errorRecord as { id: string; data: Record<string, unknown> }
@@ -521,7 +508,7 @@ router.post(
             },
             {
               userId: resolvedBy,
-              workspaceId: workspaceId ? String(workspaceId) : undefined,
+              workspaceId,
             }
           );
 
@@ -546,10 +533,8 @@ router.post(
         resolvedBy,
       });
 
-      return res.json({
-        success: true,
-        message: '批量标记完成',
-        data: {
+      return res.success(
+        {
           results,
           summary: {
             total: errorIds.length,
@@ -557,13 +542,15 @@ router.post(
             failed: results.filter(r => !r.success).length,
           },
         },
-      });
+        '批量标记完成'
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '批量标记错误解决失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '批量标记错误解决失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -576,32 +563,31 @@ router.delete(
   '/:id',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
-    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceIdInput = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = (req as { user?: { id?: string } }).user?.id;
         if (!userId) {
-          return res.status(401).json({ success: false, message: '用户未认证' });
+          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
         }
-        await ensureWorkspacePermission(String(workspaceId), userId, 'delete');
+        await ensureWorkspacePermission(workspaceId, userId, 'delete');
       }
       await dataManagementService.deleteData(ERROR_REPORTS_TYPE, id, {
-        workspaceId: workspaceId ? String(workspaceId) : undefined,
+        workspaceId,
       });
 
       Logger.info('删除错误报告', { errorId: id });
 
-      return res.json({
-        success: true,
-        message: '错误报告已删除',
-      });
+      return res.success(null, '错误报告已删除');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '删除错误报告失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '删除错误报告失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -613,32 +599,31 @@ router.delete(
 router.get(
   '/types',
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { workspaceId } = req.query as { workspaceId?: string };
+    const { workspaceId: workspaceIdInput } = req.query as { workspaceId?: string };
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = (req as { user?: { id?: string } }).user?.id;
         if (!userId) {
-          return res.status(401).json({ success: false, message: '用户未认证' });
+          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
         }
-        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
       }
       const { results } = await dataManagementService.queryData(
         ERROR_REPORTS_TYPE,
-        { workspaceId: workspaceId ? String(workspaceId) : undefined },
+        { workspaceId },
         {}
       );
       const types = Array.from(new Set(results.map(record => mapErrorRecord(record).type)));
 
-      return res.json({
-        success: true,
-        data: types,
-      });
+      return res.success(types);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取错误类型失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取错误类型失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -650,24 +635,25 @@ router.get(
 router.get(
   '/health',
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { workspaceId } = req.query as { workspaceId?: string };
+    const { workspaceId: workspaceIdInput } = req.query as { workspaceId?: string };
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = (req as { user?: { id?: string } }).user?.id;
         if (!userId) {
-          return res.status(401).json({ success: false, message: '用户未认证' });
+          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
         }
-        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
       }
       const health = errorMonitoringSystem.getStatus();
       const { total } = await dataManagementService.queryData(
         ERROR_REPORTS_TYPE,
-        { workspaceId: workspaceId ? String(workspaceId) : undefined },
+        { workspaceId },
         {}
       );
       const { results } = await dataManagementService.queryData(
         ERROR_REPORTS_TYPE,
-        { workspaceId: workspaceId ? String(workspaceId) : undefined },
+        { workspaceId },
         {}
       );
       const lastRecord = results
@@ -675,21 +661,19 @@ router.get(
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
         .pop();
 
-      return res.json({
-        success: true,
-        data: {
-          status: 'healthy',
-          errorReports: total,
-          lastReport: lastRecord?.timestamp ?? null,
-          ...health,
-        },
+      return res.success({
+        status: 'healthy',
+        errorReports: total,
+        lastReport: lastRecord?.timestamp ?? null,
+        ...health,
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '错误监控健康检查失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '错误监控健康检查失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );

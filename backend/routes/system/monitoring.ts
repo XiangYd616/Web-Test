@@ -4,8 +4,9 @@
 
 import express from 'express';
 import Joi from 'joi';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
 import { query } from '../../config/database';
-import { asyncHandler } from '../../middleware/errorHandler';
+import asyncHandler from '../../middleware/asyncHandler';
 const { authMiddleware } = require('../../middleware/auth');
 const { validateRequest } = require('../../middleware/validation');
 const { hasWorkspacePermission } = require('../../utils/workspacePermissions');
@@ -206,20 +207,18 @@ router.get(
         workspaceId ? String(workspaceId) : undefined
       );
 
-      return res.json({
-        success: true,
-        data: {
-          sites: result.data,
-          pagination: result.pagination,
-          summary,
-        },
+      return res.success({
+        sites: result.data,
+        pagination: result.pagination,
+        summary,
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取监控站点列表失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取监控站点列表失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -264,17 +263,14 @@ router.post(
         },
       });
 
-      return res.status(201).json({
-        success: true,
-        message: '监控站点添加成功',
-        data: newSite,
-      });
+      return res.success(newSite, '监控站点添加成功', 201);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '添加监控站点失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '添加监控站点失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -303,22 +299,17 @@ router.get(
       );
 
       if (!site) {
-        return res.status(404).json({
-          success: false,
-          message: '监控站点不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '监控站点不存在', undefined, 404);
       }
 
-      return res.json({
-        success: true,
-        data: site,
-      });
+      return res.success(site);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取监控站点详情失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取监控站点详情失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -349,23 +340,17 @@ router.put(
       );
 
       if (!updated) {
-        return res.status(404).json({
-          success: false,
-          message: '监控站点不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '监控站点不存在', undefined, 404);
       }
 
-      return res.json({
-        success: true,
-        message: '监控站点更新成功',
-        data: updated,
-      });
+      return res.success(updated, '监控站点更新成功');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '更新监控站点失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '更新监控站点失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -393,23 +378,17 @@ router.delete(
       );
 
       if (!removed) {
-        return res.status(404).json({
-          success: false,
-          message: '监控站点不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '监控站点不存在', undefined, 404);
       }
 
-      return res.json({
-        success: true,
-        message: '监控站点删除成功',
-        data: { id },
-      });
+      return res.success({ id }, '监控站点删除成功');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '删除监控站点失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '删除监控站点失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -437,17 +416,14 @@ router.post(
         workspaceId ? String(workspaceId) : undefined
       );
 
-      return res.json({
-        success: true,
-        message: '站点检查完成',
-        data: checkResult,
-      });
+      return res.success(checkResult, '站点检查完成');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '站点检查失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '站点检查失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -476,23 +452,17 @@ router.post(
       );
 
       if (!updated) {
-        return res.status(404).json({
-          success: false,
-          message: '监控站点不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '监控站点不存在', undefined, 404);
       }
 
-      return res.json({
-        success: true,
-        message: '监控已暂停',
-        data: updated,
-      });
+      return res.success(updated, '监控已暂停');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '暂停监控失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '暂停监控失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -521,23 +491,17 @@ router.post(
       );
 
       if (!updated) {
-        return res.status(404).json({
-          success: false,
-          message: '监控站点不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '监控站点不存在', undefined, 404);
       }
 
-      return res.json({
-        success: true,
-        message: '监控已恢复',
-        data: updated,
-      });
+      return res.success(updated, '监控已恢复');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '恢复监控失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '恢复监控失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -568,19 +532,17 @@ router.get(
         workspaceId: workspaceId ? String(workspaceId) : null,
       });
 
-      return res.json({
-        success: true,
-        data: {
-          alerts: alerts.data,
-          pagination: alerts.pagination,
-        },
+      return res.success({
+        alerts: alerts.data,
+        pagination: alerts.pagination,
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取监控告警失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取监控告警失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -606,16 +568,14 @@ router.get(
         workspaceId ? String(workspaceId) : undefined
       );
 
-      return res.json({
-        success: true,
-        data: stats,
-      });
+      return res.success(stats);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取监控统计失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取监控统计失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -631,16 +591,14 @@ router.get(
     try {
       const health = await ensureMonitoringService().healthCheck();
 
-      return res.json({
-        success: true,
-        data: health,
-      });
+      return res.success(health);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '监控服务健康检查失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '监控服务健康检查失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );

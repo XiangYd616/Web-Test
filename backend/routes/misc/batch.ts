@@ -5,7 +5,8 @@
 
 import express from 'express';
 import path from 'path';
-import { asyncHandler } from '../../middleware/errorHandler';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
+import asyncHandler from '../../middleware/asyncHandler';
 import { dataManagementService } from '../../services/data/DataManagementService';
 import DataExportService, {
   ExportJobRequest,
@@ -179,10 +180,7 @@ router.post(
     const { testConfigs, options } = req.body;
 
     if (!Array.isArray(testConfigs) || testConfigs.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: '测试配置数组不能为空',
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '测试配置数组不能为空', undefined, 400);
     }
 
     try {
@@ -196,28 +194,26 @@ router.post(
       // 异步执行批量测试
       executeBatchTest(operation.id, testConfigs, options || {});
 
-      return res.status(201).json({
-        success: true,
-        message: '批量测试任务已创建',
-        data: {
+      return res.success(
+        {
           operationId: operation.id,
           totalItems: operation.totalItems,
           estimatedTime: testConfigs.length * 30, // 估算每个测试30秒
         },
-      });
+        '批量测试任务已创建',
+        201
+      );
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '批量操作不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '批量操作不存在', undefined, 404);
       }
 
-      return res.status(500).json({
-        success: false,
-        message: '创建批量测试任务失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '创建批量测试任务失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -234,10 +230,7 @@ router.post(
     const { exportConfigs, format = 'json', options } = req.body;
 
     if (!Array.isArray(exportConfigs) || exportConfigs.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: '导出配置数组不能为空',
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '导出配置数组不能为空', undefined, 400);
     }
 
     try {
@@ -251,21 +244,22 @@ router.post(
       // 异步执行批量导出
       executeBatchExport(operation.id, exportConfigs, format, options || {});
 
-      return res.status(201).json({
-        success: true,
-        message: '批量导出任务已创建',
-        data: {
+      return res.success(
+        {
           operationId: operation.id,
           totalItems: operation.totalItems,
           format,
         },
-      });
+        '批量导出任务已创建',
+        201
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '创建批量导出任务失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '创建批量导出任务失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -282,10 +276,7 @@ router.post(
     const { deleteConfigs, options } = req.body;
 
     if (!Array.isArray(deleteConfigs) || deleteConfigs.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: '删除配置数组不能为空',
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '删除配置数组不能为空', undefined, 400);
     }
 
     try {
@@ -299,20 +290,21 @@ router.post(
       // 异步执行批量删除
       executeBatchDelete(operation.id, deleteConfigs, options || {});
 
-      return res.status(201).json({
-        success: true,
-        message: '批量删除任务已创建',
-        data: {
+      return res.success(
+        {
           operationId: operation.id,
           totalItems: operation.totalItems,
         },
-      });
+        '批量删除任务已创建',
+        201
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '创建批量删除任务失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '创建批量删除任务失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -332,29 +324,21 @@ router.get(
       const operation = await fetchOperationById(operationId);
 
       if (operation.userId !== userId) {
-        return res.status(403).json({
-          success: false,
-          message: '无权访问此批量操作',
-        });
+        return res.error(StandardErrorCode.FORBIDDEN, '无权访问此批量操作', undefined, 403);
       }
 
-      return res.json({
-        success: true,
-        data: operation,
-      });
+      return res.success(operation);
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '批量操作不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '批量操作不存在', undefined, 404);
       }
 
-      return res.status(500).json({
-        success: false,
-        message: '获取批量操作状态失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取批量操作状态失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -374,31 +358,28 @@ router.delete(
       const operation = await fetchOperationById(operationId);
 
       if (operation.userId !== userId) {
-        return res.status(403).json({
-          success: false,
-          message: '无权取消此批量操作',
-        });
+        return res.error(StandardErrorCode.FORBIDDEN, '无权取消此批量操作', undefined, 403);
       }
 
       if (operation.status === 'completed') {
-        return res.status(400).json({
-          success: false,
-          message: '无法取消已完成的批量操作',
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '无法取消已完成的批量操作',
+          undefined,
+          400
+        );
       }
 
       await completeOperation(operationId, 'cancelled');
 
-      return res.json({
-        success: true,
-        message: '批量操作已取消',
-      });
+      return res.success(null, '批量操作已取消');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '取消批量操作失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '取消批量操作失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -430,24 +411,22 @@ router.get(
 
       const operations = queryResult.results.map(record => mapBatchRecord(record));
 
-      return res.json({
-        success: true,
-        data: {
-          operations,
-          pagination: {
-            page: queryResult.page,
-            limit: queryResult.limit,
-            total: queryResult.total,
-            totalPages: queryResult.totalPages,
-          },
+      return res.success({
+        operations,
+        pagination: {
+          page: queryResult.page,
+          limit: queryResult.limit,
+          total: queryResult.total,
+          totalPages: queryResult.totalPages,
         },
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取批量操作列表失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取批量操作列表失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -482,19 +461,19 @@ router.delete(
         }
       }
 
-      return res.json({
-        success: true,
-        message: '清理完成',
-        data: {
+      return res.success(
+        {
           cleanedCount,
         },
-      });
+        '清理完成'
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '清理失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '清理失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -543,16 +522,14 @@ router.get(
         averageProcessingTime,
       };
 
-      return res.json({
-        success: true,
-        data: statistics,
-      });
+      return res.success(statistics);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取批量操作统计失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取批量操作统计失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );

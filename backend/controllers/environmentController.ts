@@ -1,7 +1,9 @@
 import type { Request, Response } from 'express';
+import { toDate } from '../utils/dateUtils';
 
-const { models } = require('../database/sequelize');
 const EnvironmentManager = require('../services/environments/EnvironmentManager');
+const { query } = require('../config/database');
+const { models } = require('../database/pgModels');
 const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 
 import type { EnvironmentManager as EnvironmentManagerType } from '../services/environments/EnvironmentManager';
@@ -25,7 +27,7 @@ type ApiResponse = Response & {
 
 type AuthRequest = Request & { user: { id: string; role?: string } };
 
-const environmentManager: EnvironmentManagerType = new EnvironmentManager({ models });
+const environmentManager: EnvironmentManagerType = new EnvironmentManager();
 
 const parsePagination = (req: Request) => {
   const page = Math.max(Number.parseInt(String(req.query.page || 1), 10) || 1, 1);
@@ -38,10 +40,11 @@ const parsePagination = (req: Request) => {
 };
 
 const ensureWorkspaceMember = async (workspaceId: string, userId: string) => {
-  const { WorkspaceMember } = models;
-  return WorkspaceMember.findOne({
-    where: { workspace_id: workspaceId, user_id: userId, status: 'active' },
-  });
+  const result = await query(
+    'SELECT * FROM workspace_members WHERE workspace_id = $1 AND user_id = $2 AND status = $3',
+    [workspaceId, userId, 'active']
+  );
+  return result.rows?.[0] || null;
 };
 
 const ensureWorkspacePermission = async (workspaceId: string, userId: string, action: string) => {
@@ -56,8 +59,8 @@ const ensureWorkspacePermission = async (workspaceId: string, userId: string, ac
 };
 
 const ensureEnvironmentAccess = async (environmentId: string, userId: string) => {
-  const { Environment } = models;
-  const environment = await Environment.findByPk(environmentId);
+  const result = await query('SELECT * FROM environments WHERE id = $1', [environmentId]);
+  const environment = result.rows?.[0];
   if (!environment) {
     return { error: '环境不存在' };
   }
@@ -129,8 +132,8 @@ const listEnvironments = async (req: AuthRequest, res: ApiResponse) => {
       variableCount,
       isActive: environment.metadata?.isActive || false,
       color: environment.metadata?.color || null,
-      createdAt: environment.createdAt?.toISOString?.() || environment.created_at,
-      updatedAt: environment.updatedAt?.toISOString?.() || environment.updated_at,
+      createdAt: toDate(environment.createdAt || environment.created_at),
+      updatedAt: toDate(environment.updatedAt || environment.updated_at),
     });
   }
 
@@ -271,11 +274,59 @@ const getGlobalVariables = async (req: AuthRequest, res: ApiResponse) => {
   return res.success(globals, '获取全局变量成功');
 };
 
+const exportEnvironment = async (req: AuthRequest, res: ApiResponse) => {
+  const access = await ensureEnvironmentAccess(req.params.environmentId, req.user.id);
+  if (access.error) {
+    return access.error === '环境不存在' ? res.notFound(access.error) : res.forbidden(access.error);
+  }
+  if (!hasWorkspacePermission(access.member.role, 'read')) {
+    return res.forbidden('当前角色无读取权限');
+  }
+
+  const format = String(req.query.format || 'testweb');
+  const includeSecrets = String(req.query.includeSecrets || 'false') === 'true';
+
+  const payload = await environmentManager.exportEnvironment(req.params.environmentId, format);
+  let responsePayload = payload;
+  if (!includeSecrets && payload && 'variables' in payload && Array.isArray(payload.variables)) {
+    responsePayload = {
+      ...payload,
+      variables: payload.variables.map(variable =>
+        variable.secret ? { ...variable, value: '[ENCRYPTED]' } : variable
+      ),
+    };
+  }
+
+  return res.success(responsePayload, '导出环境成功');
+};
+
+const importEnvironment = async (req: AuthRequest, res: ApiResponse) => {
+  const { workspaceId } = req.body as { workspaceId?: string };
+  if (!workspaceId) {
+    return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
+  }
+
+  const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'write');
+  if (permission.error) {
+    return res.forbidden(permission.error);
+  }
+
+  const environment = await environmentManager.importEnvironment({
+    ...(req.body || {}),
+    workspaceId,
+    createdBy: req.user.id,
+  });
+
+  return res.created(environment, '导入环境成功');
+};
+
 export {
   createEnvironment,
   deleteEnvironment,
+  exportEnvironment,
   getEnvironment,
   getGlobalVariables,
+  importEnvironment,
   listEnvironments,
   setActiveEnvironment,
   setVariable,
@@ -286,7 +337,9 @@ module.exports = {
   createEnvironment,
   getEnvironment,
   deleteEnvironment,
+  exportEnvironment,
   setActiveEnvironment,
   setVariable,
   getGlobalVariables,
+  importEnvironment,
 };

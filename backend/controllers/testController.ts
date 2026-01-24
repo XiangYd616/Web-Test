@@ -124,29 +124,13 @@ const mapStatusToErrorCode = (statusCode?: number) => {
   return StandardErrorCode.INTERNAL_SERVER_ERROR;
 };
 
-const successResponse = (res: ApiResponse, data?: unknown, message?: string) => {
-  return res.success(data, message);
-};
-
-const createdResponse = (res: ApiResponse, data?: unknown, message?: string) => {
-  return res.created(data, message);
-};
-
-const _errorResponse = (
-  res: ApiResponse,
-  messageOrStatus: string | number,
-  statusOrMessage?: number | string
-) => {
-  const message =
-    typeof messageOrStatus === 'string' ? messageOrStatus : String(statusOrMessage ?? '请求失败');
-  const statusCode =
-    typeof messageOrStatus === 'number'
-      ? messageOrStatus
-      : typeof statusOrMessage === 'number'
-        ? statusOrMessage
-        : undefined;
-  const code = mapStatusToErrorCode(statusCode);
-  return res.error(code, message, undefined, statusCode);
+const handleControllerError = (res: ApiResponse, error: unknown, message = '请求处理失败') => {
+  return res.error(
+    StandardErrorCode.INTERNAL_SERVER_ERROR,
+    message,
+    error instanceof Error ? error.message : String(error),
+    500
+  );
 };
 
 const escapeCsvValue = (value: unknown) => {
@@ -195,7 +179,7 @@ class TestController {
    * 创建并启动测试
    * POST /api/test/create-and-start
    */
-  async createAndStart(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createAndStart(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
       const workspaceId = (config.workspaceId as string | undefined) || undefined;
@@ -208,10 +192,9 @@ class TestController {
       };
 
       const result = await testService.createAndStart(config, user);
-      return createdResponse(res, result, '测试创建成功');
+      return res.created(result, '测试创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -219,7 +202,7 @@ class TestController {
    * 按 traceId 查询队列任务
    * GET /api/test/queue/trace/:traceId
    */
-  async getQueueJobsByTraceId(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getQueueJobsByTraceId(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { traceId } = req.params as { traceId: string };
       const { start, end, userId } = req.query as {
@@ -234,10 +217,9 @@ class TestController {
         userId: isAdmin && userId ? userId : req.user.id,
         isAdmin,
       });
-      return successResponse(res, { jobs });
+      return res.success({ jobs });
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -245,7 +227,7 @@ class TestController {
    * 按 traceId 导出任务日志
    * GET /api/test/queue/trace/:traceId/logs
    */
-  async getQueueTraceLogs(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getQueueTraceLogs(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { traceId } = req.params as { traceId: string };
       const { format, userId, startTime, endTime, limit, offset, batchSize, all, workspaceId } =
@@ -283,21 +265,26 @@ class TestController {
           ? effectiveLimits.maxBatchSize
           : undefined;
       if (exportAll && !isAdmin) {
-        return _errorResponse(res, '无权限导出全部日志', 403);
+        return res.error(mapStatusToErrorCode(403), '无权限导出全部日志', undefined, 403);
       }
       if (workspaceId) {
         await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
       }
       if (userId && !isAdmin && userId !== req.user.id) {
-        return _errorResponse(res, '无权限访问该用户日志', 403);
+        return res.error(mapStatusToErrorCode(403), '无权限访问该用户日志', undefined, 403);
       }
       if (exportAll && isAdmin && !isSuperAdmin) {
         const limitValue = limit ? Number(limit) : undefined;
         if (limitValue === undefined || Number.isNaN(limitValue)) {
-          return _errorResponse(res, '管理员导出请设置 limit', 400);
+          return res.error(mapStatusToErrorCode(400), '管理员导出请设置 limit', undefined, 400);
         }
         if (typeof maxLimit === 'number' && limitValue > maxLimit) {
-          return _errorResponse(res, `管理员导出 limit 不应超过 ${maxLimit}`, 400);
+          return res.error(
+            mapStatusToErrorCode(400),
+            `管理员导出 limit 不应超过 ${maxLimit}`,
+            undefined,
+            400
+          );
         }
         const batchValue = batchSize ? Number(batchSize) : undefined;
         if (
@@ -306,7 +293,12 @@ class TestController {
           typeof maxBatchSize === 'number' &&
           batchValue > maxBatchSize
         ) {
-          return _errorResponse(res, `管理员导出 batchSize 不应超过 ${maxBatchSize}`, 400);
+          return res.error(
+            mapStatusToErrorCode(400),
+            `管理员导出 batchSize 不应超过 ${maxBatchSize}`,
+            undefined,
+            400
+          );
         }
       }
       let resolvedLimit = limit ? Number(limit) : undefined;
@@ -321,7 +313,12 @@ class TestController {
         if (resolvedLimit === undefined) {
           resolvedLimit = maxLimit;
         } else if (resolvedLimit > maxLimit) {
-          return _errorResponse(res, `导出 limit 不应超过 ${maxLimit}`, 400);
+          return res.error(
+            mapStatusToErrorCode(400),
+            `导出 limit 不应超过 ${maxLimit}`,
+            undefined,
+            400
+          );
         }
       }
       if (
@@ -330,13 +327,23 @@ class TestController {
         resolvedBatchSize !== undefined &&
         resolvedBatchSize > maxBatchSize
       ) {
-        return _errorResponse(res, `导出 batchSize 不应超过 ${maxBatchSize}`, 400);
+        return res.error(
+          mapStatusToErrorCode(400),
+          `导出 batchSize 不应超过 ${maxBatchSize}`,
+          undefined,
+          400
+        );
       }
       if (exportAll && isSuperAdmin && typeof maxLimit === 'number') {
         if (resolvedLimit === undefined) {
           resolvedLimit = maxLimit;
         } else if (resolvedLimit > maxLimit) {
-          return _errorResponse(res, `超出导出 limit 上限 ${maxLimit}`, 400);
+          return res.error(
+            mapStatusToErrorCode(400),
+            `超出导出 limit 上限 ${maxLimit}`,
+            undefined,
+            400
+          );
         }
       }
       if (
@@ -346,7 +353,12 @@ class TestController {
         resolvedBatchSize !== undefined &&
         resolvedBatchSize > maxBatchSize
       ) {
-        return _errorResponse(res, `超出导出 batchSize 上限 ${maxBatchSize}`, 400);
+        return res.error(
+          mapStatusToErrorCode(400),
+          `超出导出 batchSize 上限 ${maxBatchSize}`,
+          undefined,
+          400
+        );
       }
       const logsResult = await getLogsByTraceId(traceId, {
         userId: isAdmin ? targetUserId : req.user.id,
@@ -467,7 +479,7 @@ class TestController {
         zip.finalize();
         return;
       }
-      return successResponse(res, {
+      return res.success({
         logs,
         pagination: {
           total,
@@ -476,8 +488,7 @@ class TestController {
         },
       });
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -485,7 +496,7 @@ class TestController {
    * 重放死信队列任务
    * POST /api/test/queue/dead/:jobId/replay
    */
-  async replayDeadLetterJob(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async replayDeadLetterJob(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { jobId } = req.params as { jobId: string };
       const { priority, delay, queueName, maxReplays } = req.body as {
@@ -513,10 +524,9 @@ class TestController {
           configuredMaxReplays: limitFromConfig,
         },
       });
-      return successResponse(res, { job });
+      return res.success({ job });
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -524,7 +534,7 @@ class TestController {
    * 获取死信队列详情
    * GET /api/test/queue/dead
    */
-  async getDeadLetterQueue(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getDeadLetterQueue(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { start, end } = req.query as { start?: string; end?: string };
       const isAdmin = this.isAdminRole(req.user.role);
@@ -534,10 +544,9 @@ class TestController {
         userId: req.user.id,
         isAdmin,
       });
-      return successResponse(res, { jobs });
+      return res.success({ jobs });
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -545,11 +554,11 @@ class TestController {
    * 获取单个队列任务详情
    * GET /api/test/queue/:queueName/jobs/:jobId
    */
-  async getQueueJob(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getQueueJob(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { queueName, jobId } = req.params as { queueName: string; jobId: string };
       if (!this.queueNames.has(queueName)) {
-        return _errorResponse(res, 400, '无效的队列名称');
+        return res.error(mapStatusToErrorCode(400), '无效的队列名称', undefined, 400);
       }
       const isAdmin = this.isAdminRole(req.user.role);
       const job = await getJobDetail(queueName, jobId, {
@@ -557,12 +566,11 @@ class TestController {
         isAdmin,
       });
       if (!job) {
-        return _errorResponse(res, 404, '未找到任务');
+        return res.error(mapStatusToErrorCode(404), '未找到任务', undefined, 404);
       }
-      return successResponse(res, { job });
+      return res.success({ job });
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -570,7 +578,7 @@ class TestController {
    * 获取测试队列状态
    * GET /api/test/queue/stats
    */
-  async getQueueStats(_req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getQueueStats(_req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const isAdmin = this.isAdminRole(_req.user.role);
       const { startTime, endTime, limit, offset, workspaceId } = _req.query as {
@@ -592,10 +600,9 @@ class TestController {
         limit: limit ? Number(limit) : undefined,
         offset: offset ? Number(offset) : undefined,
       });
-      return successResponse(res, stats);
+      return res.success(stats);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -603,7 +610,7 @@ class TestController {
    * 获取测试状态
    * GET /api/test/:testId/status
    */
-  async getStatus(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getStatus(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
@@ -613,10 +620,9 @@ class TestController {
       }
 
       const status = await testService.getStatus(userId, testId, workspaceId);
-      return successResponse(res, status);
+      return res.success(status);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -624,7 +630,7 @@ class TestController {
    * 获取测试结果
    * GET /api/test/:testId/result
    */
-  async getResult(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getResult(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
@@ -634,10 +640,9 @@ class TestController {
       }
 
       const result = await testService.getTestResults(testId, userId, workspaceId);
-      return successResponse(res, result);
+      return res.success(result);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -645,7 +650,7 @@ class TestController {
    * 停止测试
    * POST /api/test/:testId/stop
    */
-  async stopTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async stopTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
@@ -655,10 +660,9 @@ class TestController {
       }
 
       await testService.stopTest(userId, testId, workspaceId);
-      return successResponse(res, { testId }, '测试已停止');
+      return res.success({ testId }, '测试已停止');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -666,7 +670,7 @@ class TestController {
    * 删除测试
    * DELETE /api/test/:testId
    */
-  async deleteTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async deleteTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
@@ -676,10 +680,9 @@ class TestController {
       }
 
       await testService.deleteTest(userId, testId, workspaceId);
-      return successResponse(res, { testId }, '测试已删除');
+      return res.success({ testId }, '测试已删除');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -687,13 +690,12 @@ class TestController {
    * API根路径
    * GET /api/test
    */
-  async getApiInfo(req: Request, res: ApiResponse) {
-    return res.json({
-      success: true,
+  async getApiInfo(_req: Request, res: ApiResponse) {
+    return res.success({
       message: 'Test API',
       version: '2.0.0',
       endpoints: {
-        tests: [
+        core: [
           'POST /api/test/create-and-start',
           'POST /api/test/website',
           'POST /api/test/performance',
@@ -732,7 +734,7 @@ class TestController {
    * 创建网站测试
    * POST /api/test/website
    */
-  async createWebsiteTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createWebsiteTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
       const workspaceId = (config.workspaceId as string | undefined) || undefined;
@@ -745,26 +747,17 @@ class TestController {
       };
 
       const result = await testService.createWebsiteTest(config, user);
-      return createdResponse(res, result, '网站测试创建成功');
+      return res.created(result, '网站测试创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
-  }
-
-  /**
-   * 运行网站测试（兼容旧路由）
-   * POST /api/test/website
-   */
-  async runWebsiteTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
-    return this.createWebsiteTest(req, res, next);
   }
 
   /**
    * 创建性能测试
    * POST /api/test/performance
    */
-  async createPerformanceTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createPerformanceTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
       const workspaceId = (config.workspaceId as string | undefined) || undefined;
@@ -777,26 +770,17 @@ class TestController {
       };
 
       const result = await testService.createPerformanceTest(config, user);
-      return createdResponse(res, result, '性能测试创建成功');
+      return res.created(result, '性能测试创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
-  }
-
-  /**
-   * 运行性能测试（兼容旧路由）
-   * POST /api/test/performance
-   */
-  async runPerformanceTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
-    return this.createPerformanceTest(req, res, next);
   }
 
   /**
    * 创建安全测试
    * POST /api/test/security
    */
-  async createSecurityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createSecurityTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
       const workspaceId = (config.workspaceId as string | undefined) || undefined;
@@ -809,26 +793,17 @@ class TestController {
       };
 
       const result = await testService.createSecurityTest(config, user);
-      return createdResponse(res, result, '安全测试创建成功');
+      return res.created(result, '安全测试创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
-  }
-
-  /**
-   * 运行安全测试（兼容旧路由）
-   * POST /api/test/security
-   */
-  async runSecurityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
-    return this.createSecurityTest(req, res, next);
   }
 
   /**
    * 创建SEO测试
    * POST /api/test/seo
    */
-  async createSEOTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createSEOTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
       const workspaceId = (config.workspaceId as string | undefined) || undefined;
@@ -841,26 +816,17 @@ class TestController {
       };
 
       const result = await testService.createSEOTest(config, user);
-      return createdResponse(res, result, 'SEO测试创建成功');
+      return res.created(result, 'SEO测试创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
-  }
-
-  /**
-   * 运行SEO测试（兼容旧路由）
-   * POST /api/test/seo
-   */
-  async runSEOTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
-    return this.createSEOTest(req, res, next);
   }
 
   /**
    * 创建压力测试
    * POST /api/test/stress
    */
-  async createStressTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createStressTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
       const workspaceId = (config.workspaceId as string | undefined) || undefined;
@@ -873,26 +839,17 @@ class TestController {
       };
 
       const result = await testService.createStressTest(config, user);
-      return createdResponse(res, result, '压力测试创建成功');
+      return res.created(result, '压力测试创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
-  }
-
-  /**
-   * 运行压力测试（兼容旧路由）
-   * POST /api/test/stress
-   */
-  async runStressTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
-    return this.createStressTest(req, res, next);
   }
 
   /**
    * 创建API测试
    * POST /api/test/api
    */
-  async createAPITest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createAPITest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
       const workspaceId = (config.workspaceId as string | undefined) || undefined;
@@ -905,26 +862,17 @@ class TestController {
       };
 
       const result = await testService.createAPITest(config, user);
-      return createdResponse(res, result, 'API测试创建成功');
+      return res.created(result, 'API测试创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
-  }
-
-  /**
-   * 运行API测试（兼容旧路由）
-   * POST /api/test/api
-   */
-  async runAPITest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
-    return this.createAPITest(req, res, next);
   }
 
   /**
    * 创建可访问性测试
    * POST /api/test/accessibility
    */
-  async createAccessibilityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createAccessibilityTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
       const workspaceId = (config.workspaceId as string | undefined) || undefined;
@@ -937,26 +885,17 @@ class TestController {
       };
 
       const result = await testService.createAccessibilityTest(config, user);
-      return createdResponse(res, result, '可访问性测试创建成功');
+      return res.created(result, '可访问性测试创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
-  }
-
-  /**
-   * 运行可访问性测试（兼容旧路由）
-   * POST /api/test/accessibility
-   */
-  async runAccessibilityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
-    return this.createAccessibilityTest(req, res, next);
   }
 
   /**
    * 创建兼容性测试
    * POST /api/test/compatibility
    */
-  async createCompatibilityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createCompatibilityTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
       const workspaceId = (config.workspaceId as string | undefined) || undefined;
@@ -969,26 +908,17 @@ class TestController {
       };
 
       const result = await testService.createCompatibilityTest(config, user);
-      return createdResponse(res, result, '兼容性测试创建成功');
+      return res.created(result, '兼容性测试创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
-  }
-
-  /**
-   * 运行兼容性测试（兼容旧路由）
-   * POST /api/test/compatibility
-   */
-  async runCompatibilityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
-    return this.createCompatibilityTest(req, res, next);
   }
 
   /**
    * 创建UX测试
    * POST /api/test/ux
    */
-  async createUXTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createUXTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const config = req.body as Record<string, unknown>;
       const workspaceId = (config.workspaceId as string | undefined) || undefined;
@@ -1001,26 +931,17 @@ class TestController {
       };
 
       const result = await testService.createUXTest(config, user);
-      return createdResponse(res, result, 'UX测试创建成功');
+      return res.created(result, 'UX测试创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
-  }
-
-  /**
-   * 运行UX测试（兼容旧路由）
-   * POST /api/test/ux
-   */
-  async runUXTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
-    return this.createUXTest(req, res, next);
   }
 
   /**
    * 重新运行测试
    * POST /api/test/:testId/rerun
    */
-  async rerunTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async rerunTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
@@ -1035,10 +956,9 @@ class TestController {
         req.user.role || 'free',
         workspaceId
       );
-      return successResponse(res, result, '测试重新运行成功');
+      return res.success(result, '测试重新运行成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1046,7 +966,7 @@ class TestController {
    * 更新测试
    * PUT /api/test/:testId
    */
-  async updateTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async updateTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
       const userId = req.user.id;
@@ -1057,10 +977,9 @@ class TestController {
       }
 
       const result = await testService.updateTest(testId, userId, updates, workspaceId);
-      return successResponse(res, result, '测试更新成功');
+      return res.success(result, '测试更新成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1068,7 +987,7 @@ class TestController {
    * 批量创建测试
    * POST /api/test/batch
    */
-  async createBatchTests(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createBatchTests(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { tests } = req.body as { tests?: Record<string, unknown>[] };
       const user = {
@@ -1077,10 +996,7 @@ class TestController {
       };
 
       if (!Array.isArray(tests) || tests.length === 0) {
-        return res.status(400).json({
-          success: false,
-          error: '请提供有效的测试列表',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '请提供有效的测试列表', undefined, 400);
       }
 
       const workspaceIds = new Set<string>();
@@ -1095,10 +1011,9 @@ class TestController {
       }
 
       const result = await testService.createBatchTests(tests, user);
-      return createdResponse(res, result, '批量测试创建成功');
+      return res.created(result, '批量测试创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1106,7 +1021,7 @@ class TestController {
    * 获取批量测试状态
    * GET /api/test/batch/:batchId
    */
-  async getBatchTestStatus(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getBatchTestStatus(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { batchId } = req.params as { batchId: string };
       const userId = req.user.id;
@@ -1116,10 +1031,9 @@ class TestController {
       }
 
       const result = await testService.getBatchTestStatus(batchId, userId, workspaceId);
-      return successResponse(res, result);
+      return res.success(result);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1127,7 +1041,7 @@ class TestController {
    * 删除批量测试
    * DELETE /api/test/batch/:batchId
    */
-  async deleteBatchTests(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async deleteBatchTests(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { batchId } = req.params as { batchId: string };
       const userId = req.user.id;
@@ -1137,10 +1051,9 @@ class TestController {
       }
 
       await testService.deleteBatchTests(batchId, userId, workspaceId);
-      return successResponse(res, { batchId }, '批量测试删除成功');
+      return res.success({ batchId }, '批量测试删除成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1148,7 +1061,7 @@ class TestController {
    * 获取测试列表
    * GET /api/test
    */
-  async getTestList(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getTestList(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { page = '1', limit = '10', workspaceId } = req.query as Record<string, string>;
       if (workspaceId) {
@@ -1160,10 +1073,9 @@ class TestController {
         parseInt(limit, 10) || 10,
         workspaceId
       );
-      return successResponse(res, result);
+      return res.success(result);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1171,7 +1083,7 @@ class TestController {
    * 获取测试历史
    * GET /api/test/history
    */
-  async getTestHistory(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getTestHistory(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const {
         testType,
@@ -1189,10 +1101,9 @@ class TestController {
         parseInt(limit, 10) || 20,
         workspaceId
       );
-      return successResponse(res, result);
+      return res.success(result);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1200,7 +1111,7 @@ class TestController {
    * 获取测试进度
    * GET /api/test/:testId/progress
    */
-  async getProgress(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getProgress(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
       const { workspaceId } = req.query as { workspaceId?: string };
@@ -1208,10 +1119,9 @@ class TestController {
         await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
       }
       const status = await testService.getStatus(req.user.id, testId, workspaceId);
-      return successResponse(res, { testId, progress: status.progress, status: status.status });
+      return res.success({ testId, progress: status.progress, status: status.status });
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1219,7 +1129,7 @@ class TestController {
    * 导出测试结果
    * GET /api/test/:testId/export
    */
-  async exportTestResult(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async exportTestResult(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
       const { format = 'json', workspaceId } = req.query as {
@@ -1263,10 +1173,9 @@ class TestController {
         return res.send('\ufeff' + csvContent);
       }
 
-      return successResponse(res, result);
+      return res.success(result);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1274,7 +1183,7 @@ class TestController {
    * 取消测试
    * POST /api/test/:testId/cancel
    */
-  async cancelTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async cancelTest(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
       const { workspaceId } = req.query as { workspaceId?: string };
@@ -1282,10 +1191,9 @@ class TestController {
         await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
       }
       await testService.cancelTest(req.user.id, testId, workspaceId);
-      return successResponse(res, { testId }, '测试已取消');
+      return res.success({ testId }, '测试已取消');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1293,7 +1201,7 @@ class TestController {
    * 获取历史记录详情
    * GET /api/test/history/:testId
    */
-  async getHistoryDetail(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getHistoryDetail(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
       const { workspaceId } = req.query as { workspaceId?: string };
@@ -1301,10 +1209,9 @@ class TestController {
         await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
       }
       const result = await testService.getTestDetail(req.user.id, testId, workspaceId);
-      return successResponse(res, result);
+      return res.success(result);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1312,7 +1219,7 @@ class TestController {
    * 获取测试日志
    * GET /api/test/:testId/logs
    */
-  async getTestLogs(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getTestLogs(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { testId } = req.params as { testId: string };
       const {
@@ -1332,10 +1239,9 @@ class TestController {
         level,
         workspaceId
       );
-      return successResponse(res, result);
+      return res.success(result);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1343,7 +1249,7 @@ class TestController {
    * 获取测试模板列表
    * GET /api/test/templates
    */
-  async getTemplates(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async getTemplates(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { engineType, workspaceId } = req.query as {
         engineType?: string;
@@ -1357,10 +1263,9 @@ class TestController {
         engineType,
         workspaceId
       );
-      return successResponse(res, templates);
+      return res.success(templates);
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1368,7 +1273,7 @@ class TestController {
    * 创建测试模板
    * POST /api/test/templates
    */
-  async createTemplate(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async createTemplate(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const payload = req.body as {
         name?: string;
@@ -1385,10 +1290,7 @@ class TestController {
       }
 
       if (!payload.name || !payload.engineType) {
-        return res.status(400).json({
-          success: false,
-          message: '模板名称和测试类型必填',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '模板名称和测试类型必填', undefined, 400);
       }
 
       const templateId = await testTemplateService.createTemplate(req.user.id, {
@@ -1401,10 +1303,9 @@ class TestController {
         workspaceId: payload.workspaceId,
       });
 
-      return createdResponse(res, { id: templateId }, '模板创建成功');
+      return res.created({ id: templateId }, '模板创建成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1412,7 +1313,7 @@ class TestController {
    * 更新测试模板
    * PUT /api/test/templates/:templateId
    */
-  async updateTemplate(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async updateTemplate(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { templateId } = req.params as { templateId: string };
       const updates = req.body as {
@@ -1434,10 +1335,9 @@ class TestController {
         updates,
         updates.workspaceId
       );
-      return successResponse(res, { templateId }, '模板更新成功');
+      return res.success({ templateId }, '模板更新成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 
@@ -1445,7 +1345,7 @@ class TestController {
    * 删除测试模板
    * DELETE /api/test/templates/:templateId
    */
-  async deleteTemplate(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+  async deleteTemplate(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
     try {
       const { templateId } = req.params as { templateId: string };
       const { workspaceId } = req.query as { workspaceId?: string };
@@ -1453,10 +1353,9 @@ class TestController {
         await ensureWorkspacePermission(workspaceId, req.user.id, 'delete');
       }
       await testTemplateService.deleteTemplate(req.user.id, templateId, workspaceId);
-      return successResponse(res, { templateId }, '模板删除成功');
+      return res.success({ templateId }, '模板删除成功');
     } catch (error) {
-      next(error);
-      return;
+      return handleControllerError(res, error);
     }
   }
 }

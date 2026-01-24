@@ -3,9 +3,8 @@
  * 职责: 定义用户相关的路由
  */
 
-import type { RequestHandler } from 'express';
 import express from 'express';
-import { authMiddleware, requireAdmin } from '../middleware/auth';
+import { authMiddleware } from '../middleware/auth';
 
 const userController = require('../controllers/userController');
 
@@ -20,10 +19,5 @@ router.post('/change-password', authMiddleware, userController.changePassword);
 
 // 用户统计
 router.get('/stats', authMiddleware, userController.getStats);
-
-// 管理员功能
-router.get('/', requireAdmin as RequestHandler, userController.getUsers);
-router.delete('/:userId', requireAdmin as RequestHandler, userController.deleteUser);
-router.put('/:userId/role', requireAdmin as RequestHandler, userController.updateRole);
 
 export default router;

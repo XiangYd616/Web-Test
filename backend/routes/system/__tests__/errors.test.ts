@@ -20,13 +20,13 @@ jest.mock('../../../utils/ErrorMonitoringSystem', () => ({
   },
 }));
 
-const { responseFormatter } = require('../../../middleware/responseFormatter');
+const { response } = require('../../../middleware/responseFormatter');
 const errorsRouter = require('../errors').default;
 
 const createApp = () => {
   const app = express();
   app.use(express.json());
-  app.use(responseFormatter);
+  app.use(response);
   app.use('/api/system/errors', errorsRouter);
   return app;
 };

@@ -5,7 +5,8 @@
 
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { asyncHandler } from '../../middleware/errorHandler';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
+import asyncHandler from '../../middleware/asyncHandler';
 import configRoutes from './config';
 import monitoringRoutes from './monitoring';
 import reportRoutes from './reports';
@@ -150,11 +151,12 @@ router.get(
       res.setHeader('Content-Disposition', 'attachment; filename="test-alerts.json"');
       return res.status(200).send(JSON.stringify(alerts.data, null, 2));
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '导出测试告警失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '导出测试告警失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -180,19 +182,17 @@ router.get(
         startTime: startTime as string | undefined,
         endTime: endTime as string | undefined,
       });
-      return res.json({
-        success: true,
-        data: {
-          alerts: alerts.data,
-          pagination: alerts.pagination,
-        },
+      return res.success({
+        alerts: alerts.data,
+        pagination: alerts.pagination,
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取测试告警失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取测试告警失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -218,16 +218,14 @@ router.get(
         version: process.env.npm_package_version || '1.0.0',
       };
 
-      return res.json({
-        success: true,
-        data: health,
-      });
+      return res.success(health);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '系统健康检查失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '系统健康检查失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -259,16 +257,14 @@ router.get(
         timestamp: new Date().toISOString(),
       };
 
-      return res.json({
-        success: true,
-        data: stats,
-      });
+      return res.success(stats);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取系统统计失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取系统统计失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -296,16 +292,14 @@ router.get(
         timestamp: new Date().toISOString(),
       };
 
-      return res.json({
-        success: true,
-        data: info,
-      });
+      return res.success(info);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取系统信息失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取系统信息失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -332,16 +326,14 @@ router.post(
         process.exit(0);
       }, 1000);
 
-      return res.json({
-        success: true,
-        message: '系统重启中...',
-      });
+      return res.success(null, '系统重启中...');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '系统重启失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '系统重启失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -363,16 +355,14 @@ router.get(
         offset: parseInt(offset as string),
       });
 
-      return res.json({
-        success: true,
-        data: logs,
-      });
+      return res.success(logs);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取系统日志失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取系统日志失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -391,11 +381,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '配置验证失败',
-        errors: errors.array(),
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '配置验证失败', errors.array(), 400);
     }
 
     try {
@@ -407,17 +393,14 @@ router.post(
       // 记录配置变更
       await monitoringService.logConfigChange(key, value, getUserId(req));
 
-      return res.json({
-        success: true,
-        message: '配置更新成功',
-        data: { key, value },
-      });
+      return res.success({ key, value }, '配置更新成功');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '更新配置失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '更新配置失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -479,16 +462,14 @@ router.get(
           };
       }
 
-      return res.json({
-        success: true,
-        data: config,
-      });
+      return res.success(config);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取配置失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取配置失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -503,16 +484,14 @@ router.get(
     try {
       const metrics = await monitoringService.getMetrics();
 
-      return res.json({
-        success: true,
-        data: metrics,
-      });
+      return res.success(metrics);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取系统指标失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取系统指标失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -531,11 +510,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '参数验证失败',
-        errors: errors.array(),
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '参数验证失败', errors.array(), 400);
     }
 
     try {
@@ -547,21 +522,21 @@ router.post(
       // 记录维护模式变更
       await monitoringService.logMaintenanceModeChange(enabled, message, getUserId(req));
 
-      return res.json({
-        success: true,
-        message: enabled ? '维护模式已启用' : '维护模式已禁用',
-        data: {
+      return res.success(
+        {
           enabled,
           message: message || (enabled ? '系统正在维护中' : ''),
           timestamp: new Date().toISOString(),
         },
-      });
+        enabled ? '维护模式已启用' : '维护模式已禁用'
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '设置维护模式失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '设置维护模式失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -583,17 +558,14 @@ router.post(
         createdBy: getUserId(req),
       });
 
-      return res.json({
-        success: true,
-        message: '备份创建成功',
-        data: backup,
-      });
+      return res.success(backup, '备份创建成功');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '创建备份失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '创建备份失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -609,16 +581,14 @@ router.get(
     try {
       const backups = await monitoringService.getBackupList();
 
-      return res.json({
-        success: true,
-        data: backups,
-      });
+      return res.success(backups);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取备份列表失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取备份列表失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -636,16 +606,14 @@ router.delete(
 
       await monitoringService.deleteBackup(id);
 
-      return res.json({
-        success: true,
-        message: '备份删除成功',
-      });
+      return res.success(null, '备份删除成功');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '删除备份失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '删除备份失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );

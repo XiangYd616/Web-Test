@@ -5,7 +5,8 @@
 import axios from 'axios';
 import express from 'express';
 import nodemailer from 'nodemailer';
-import { asyncHandler } from '../../middleware/errorHandler';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
+import asyncHandler from '../../middleware/asyncHandler';
 import { dataManagementService } from '../../services/data/DataManagementService';
 import Logger from '../../utils/logger';
 const { authMiddleware } = require('../../middleware/auth');
@@ -325,21 +326,19 @@ router.get(
         .map(record => mapIntegrationRecord(record))
         .filter(integration => integration.enabled);
 
-      return res.json({
-        success: true,
-        data: {
-          integrations: userIntegrations,
-          supportedTypes: Object.values(IntegrationType),
-        },
+      return res.success({
+        integrations: userIntegrations,
+        supportedTypes: Object.values(IntegrationType),
       });
     } catch (error) {
       Logger.error('获取集成配置失败', { error, userId });
 
-      return res.status(500).json({
-        success: false,
-        message: '获取集成配置失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取集成配置失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -356,18 +355,21 @@ router.post(
     const { name, type, config } = req.body;
 
     if (!name || !type || !config) {
-      return res.status(400).json({
-        success: false,
-        message: '名称、类型和配置都是必需的',
-      });
+      return res.error(
+        StandardErrorCode.INVALID_INPUT,
+        '名称、类型和配置都是必需的',
+        undefined,
+        400
+      );
     }
 
     if (!Object.values(IntegrationType).includes(type)) {
-      return res.status(400).json({
-        success: false,
-        message: '不支持的集成类型',
-        supportedTypes: Object.values(IntegrationType),
-      });
+      return res.error(
+        StandardErrorCode.INVALID_INPUT,
+        '不支持的集成类型',
+        { supportedTypes: Object.values(IntegrationType) },
+        400
+      );
     }
 
     try {
@@ -393,19 +395,16 @@ router.post(
 
       Logger.info('创建集成配置', { integrationId: id, userId, name, type });
 
-      return res.status(201).json({
-        success: true,
-        message: '集成配置创建成功',
-        data: { ...newIntegrationData, id },
-      });
+      return res.success({ ...newIntegrationData, id }, '集成配置创建成功', 201);
     } catch (error) {
       Logger.error('创建集成配置失败', { error, userId, name, type });
 
-      return res.status(500).json({
-        success: false,
-        message: '创建集成配置失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '创建集成配置失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -439,28 +438,23 @@ router.put(
 
       Logger.info('更新集成配置', { integrationId: id, userId, changes: { name, enabled } });
 
-      return res.json({
-        success: true,
-        message: '集成配置更新成功',
-        data: mapIntegrationRecord(
-          updatedIntegration as { id: string; data: Record<string, unknown> }
-        ),
-      });
+      return res.success(
+        mapIntegrationRecord(updatedIntegration as { id: string; data: Record<string, unknown> }),
+        '集成配置更新成功'
+      );
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '集成配置不存在', undefined, 404);
       }
 
       Logger.error('更新集成配置失败', { error, integrationId: id, userId });
 
-      return res.status(500).json({
-        success: false,
-        message: '更新集成配置失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '更新集成配置失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -482,25 +476,20 @@ router.delete(
 
       Logger.info('删除集成配置', { integrationId: id, userId, name: integration.name });
 
-      return res.json({
-        success: true,
-        message: '集成配置删除成功',
-      });
+      return res.success(null, '集成配置删除成功');
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '集成配置不存在', undefined, 404);
       }
 
       Logger.error('删除集成配置失败', { error, integrationId: id, userId });
 
-      return res.status(500).json({
-        success: false,
-        message: '删除集成配置失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '删除集成配置失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -545,31 +534,28 @@ router.post(
         success: testResult.success,
       });
 
-      return res.json({
-        success: testResult.success,
-        message: testResult.success ? '集成连接测试成功' : '集成连接测试失败',
-        data: {
+      return res.success(
+        {
           ...testResult,
           integration: mapIntegrationRecord(
             updatedIntegration as { id: string; data: Record<string, unknown> }
           ),
         },
-      });
+        testResult.success ? '集成连接测试成功' : '集成连接测试失败'
+      );
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '集成配置不存在', undefined, 404);
       }
 
       Logger.error('测试集成连接失败', { error, integrationId: id, userId });
 
-      return res.status(500).json({
-        success: false,
-        message: '测试集成连接失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '测试集成连接失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -590,10 +576,7 @@ router.post(
       const integration = await fetchIntegrationById(id);
 
       if (!integration.enabled) {
-        return res.status(400).json({
-          success: false,
-          message: '集成已禁用，无法触发',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '集成已禁用，无法触发', undefined, 400);
       }
 
       const triggerResult = await triggerIntegration(
@@ -627,26 +610,20 @@ router.post(
         success: triggerResult.success,
       });
 
-      return res.json({
-        success: triggerResult.success,
-        message: triggerResult.success ? '集成触发成功' : '集成触发失败',
-        data: triggerResult,
-      });
+      return res.success(triggerResult, triggerResult.success ? '集成触发成功' : '集成触发失败');
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '集成配置不存在', undefined, 404);
       }
 
       Logger.error('手动触发集成失败', { error, integrationId: id, userId, eventType });
 
-      return res.status(500).json({
-        success: false,
-        message: '手动触发集成失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '手动触发集成失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -681,25 +658,20 @@ router.get(
         ...(record.data as Record<string, unknown>),
       }));
 
-      return res.json({
-        success: true,
-        data: logs,
-      });
+      return res.success(logs);
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '集成配置不存在', undefined, 404);
       }
 
       Logger.error('获取集成日志失败', { error, integrationId: id });
 
-      return res.status(500).json({
-        success: false,
-        message: '获取集成日志失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取集成日志失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -810,16 +782,14 @@ router.get(
         },
       };
 
-      return res.json({
-        success: true,
-        data: typeDefinitions,
-      });
+      return res.success(typeDefinitions);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取集成类型失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取集成类型失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -837,23 +807,18 @@ router.get(
     try {
       const integration = await fetchIntegrationById(id);
 
-      return res.json({
-        success: true,
-        data: integration,
-      });
+      return res.success(integration);
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '集成配置不存在', undefined, 404);
       }
 
-      return res.status(500).json({
-        success: false,
-        message: '获取集成详情失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取集成详情失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -888,26 +853,21 @@ router.post(
         name: integration.name,
       });
 
-      return res.json({
-        success: true,
-        message: '集成已启用',
-        data: mapIntegrationRecord(
-          updatedIntegration as { id: string; data: Record<string, unknown> }
-        ),
-      });
+      return res.success(
+        mapIntegrationRecord(updatedIntegration as { id: string; data: Record<string, unknown> }),
+        '集成已启用'
+      );
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '集成配置不存在', undefined, 404);
       }
 
-      return res.status(500).json({
-        success: false,
-        message: '启用集成失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '启用集成失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -942,26 +902,21 @@ router.post(
         name: integration.name,
       });
 
-      return res.json({
-        success: true,
-        message: '集成已禁用',
-        data: mapIntegrationRecord(
-          updatedIntegration as { id: string; data: Record<string, unknown> }
-        ),
-      });
+      return res.success(
+        mapIntegrationRecord(updatedIntegration as { id: string; data: Record<string, unknown> }),
+        '集成已禁用'
+      );
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '集成配置不存在', undefined, 404);
       }
 
-      return res.status(500).json({
-        success: false,
-        message: '禁用集成失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '禁用集成失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );

@@ -1,6 +1,6 @@
 import express from 'express';
+import asyncHandler from '../middleware/asyncHandler';
 import { authMiddleware } from '../middleware/auth';
-import { asyncHandler } from '../middleware/errorHandler';
 const workspaceController = require('../controllers/workspaceController');
 
 const router = express.Router();

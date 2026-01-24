@@ -1,7 +1,7 @@
 import express from 'express';
-const collectionController = require('../controllers/collectionController');
+import asyncHandler from '../middleware/asyncHandler';
 import { authMiddleware } from '../middleware/auth';
-import { asyncHandler } from '../middleware/errorHandler';
+const collectionController = require('../controllers/collectionController');
 
 const router = express.Router();
 

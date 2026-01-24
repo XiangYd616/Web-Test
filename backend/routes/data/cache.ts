@@ -4,8 +4,9 @@
  */
 
 import express from 'express';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
+import asyncHandler from '../../middleware/asyncHandler';
 import { authMiddleware } from '../../middleware/auth';
-import { asyncHandler } from '../../middleware/errorHandler';
 
 const auth = authMiddleware as express.RequestHandler;
 
@@ -102,10 +103,7 @@ router.get(
       })),
     };
 
-    return res.json({
-      success: true,
-      data: info,
-    });
+    return res.success(info);
   })
 );
 
@@ -121,19 +119,13 @@ router.get(
     const value = cache.get(key);
 
     if (value === undefined) {
-      return res.status(404).json({
-        success: false,
-        message: '缓存键不存在',
-      });
+      return res.error(StandardErrorCode.NOT_FOUND, '缓存键不存在', undefined, 404);
     }
 
-    return res.json({
-      success: true,
-      data: {
-        key,
-        value,
-        timestamp: new Date().toISOString(),
-      },
+    return res.success({
+      key,
+      value,
+      timestamp: new Date().toISOString(),
     });
   })
 );
@@ -150,22 +142,18 @@ router.post(
     const { value, ttl } = req.body;
 
     if (value === undefined) {
-      return res.status(400).json({
-        success: false,
-        message: '缓存值不能为空',
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '缓存值不能为空', undefined, 400);
     }
 
     cache.set(key, value, ttl);
 
-    return res.json({
-      success: true,
-      message: '缓存设置成功',
-      data: {
+    return res.success(
+      {
         key,
         ttl: ttl || 300,
       },
-    });
+      '缓存设置成功'
+    );
   })
 );
 
@@ -181,16 +169,10 @@ router.delete(
     const deleted = cache.delete(key);
 
     if (!deleted) {
-      return res.status(404).json({
-        success: false,
-        message: '缓存键不存在',
-      });
+      return res.error(StandardErrorCode.NOT_FOUND, '缓存键不存在', undefined, 404);
     }
 
-    return res.json({
-      success: true,
-      message: '缓存删除成功',
-    });
+    return res.success(null, '缓存删除成功');
   })
 );
 
@@ -205,13 +187,12 @@ router.delete(
     const size = cache.size();
     cache.clear();
 
-    return res.json({
-      success: true,
-      message: '缓存清空成功',
-      data: {
+    return res.success(
+      {
         clearedItems: size,
       },
-    });
+      '缓存清空成功'
+    );
   })
 );
 
@@ -226,10 +207,12 @@ router.post(
     const { operation, items } = req.body;
 
     if (!operation || !Array.isArray(items)) {
-      return res.status(400).json({
-        success: false,
-        message: '操作类型和项目数组是必需的',
-      });
+      return res.error(
+        StandardErrorCode.INVALID_INPUT,
+        '操作类型和项目数组是必需的',
+        undefined,
+        400
+      );
     }
 
     const results: Array<{ key: string; success: boolean; error?: string }> = [];
@@ -269,22 +252,21 @@ router.post(
         break;
 
       default:
-        return res.status(400).json({
-          success: false,
-          message: '不支持的操作类型。支持的操作: get, set, delete',
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '不支持的操作类型。支持的操作: get, set, delete',
+          undefined,
+          400
+        );
     }
 
-    return res.json({
-      success: true,
-      data: {
-        operation,
-        results,
-        summary: {
-          total: results.length,
-          successful: results.filter(r => r.success).length,
-          failed: results.filter(r => !r.success).length,
-        },
+    return res.success({
+      operation,
+      results,
+      summary: {
+        total: results.length,
+        successful: results.filter(r => r.success).length,
+        failed: results.filter(r => !r.success).length,
       },
     });
   })

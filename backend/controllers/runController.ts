@@ -1,17 +1,19 @@
 import type { Request, Response } from 'express';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
+import { toOptionalDate } from '../utils/dateUtils';
 
-const { models } = require('../database/sequelize');
 const CollectionManager = require('../services/collections/CollectionManager');
-const EnvironmentManager = require('../services/environments/EnvironmentManager');
+const { query } = require('../config/database');
+const { models } = require('../database/pgModels');
 const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 
-const collectionManager = new CollectionManager({ models });
-const _environmentManager = new EnvironmentManager({ models });
+const collectionManager = new CollectionManager();
 
 type ApiResponse = Response & {
   validationError: (errors: ValidationError[]) => Response;
   success: (data?: unknown, message?: string) => Response;
   created: (data?: unknown, message?: string) => Response;
+  error: (code: string, message?: string, details?: unknown, statusCode?: number) => Response;
   notFound: (message?: string) => Response;
   forbidden: (message?: string) => Response;
 };
@@ -38,6 +40,15 @@ type RunResult = {
   };
 };
 
+const handleControllerError = (res: ApiResponse, error: unknown, message = '请求处理失败') => {
+  return res.error(
+    StandardErrorCode.INTERNAL_SERVER_ERROR,
+    message,
+    error instanceof Error ? error.message : String(error),
+    500
+  );
+};
+
 const runCancelFlags = new Map<string, boolean>();
 
 const parsePagination = (req: Request) => {
@@ -48,10 +59,11 @@ const parsePagination = (req: Request) => {
 };
 
 const ensureWorkspaceMember = async (workspaceId: string, userId: string) => {
-  const { WorkspaceMember } = models;
-  return WorkspaceMember.findOne({
-    where: { workspace_id: workspaceId, user_id: userId, status: 'active' },
-  });
+  const result = await query(
+    'SELECT * FROM workspace_members WHERE workspace_id = $1 AND user_id = $2 AND status = $3',
+    [workspaceId, userId, 'active']
+  );
+  return result.rows?.[0] || null;
 };
 
 const ensureWorkspacePermission = async (workspaceId: string, userId: string, action: string) => {
@@ -210,7 +222,10 @@ const fetchAllRunResults = async (runId: string) => {
 
 const listRuns = async (req: AuthRequest, res: ApiResponse) => {
   try {
-    const { workspaceId } = req.params;
+    const workspaceId = String(req.query.workspaceId || req.params.workspaceId || '');
+    if (!workspaceId) {
+      return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
+    }
     const { page, limit, offset } = parsePagination(req);
 
     const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
@@ -234,21 +249,24 @@ const listRuns = async (req: AuthRequest, res: ApiResponse) => {
       },
     });
   } catch (error) {
-    console.error('获取运行记录失败:', error);
-    return res.status(500).json({
-      success: false,
-      error: '获取运行记录失败',
-    });
+    return handleControllerError(res, error, '获取运行记录失败');
   }
 };
 
 const createRun = async (req: AuthRequest, res: ApiResponse) => {
   try {
-    const { collectionId } = req.params;
-    const { environmentId, options = {} } = req.body as {
+    const {
+      collectionId,
+      environmentId,
+      options = {},
+    } = req.body as {
+      collectionId?: string;
       environmentId?: string;
       options?: Record<string, unknown>;
     };
+    if (!collectionId) {
+      return res.validationError([{ field: 'collectionId', message: 'collectionId 不能为空' }]);
+    }
 
     const access = await ensureCollectionAccess(collectionId, req.user.id);
     if (access.error) {
@@ -278,11 +296,7 @@ const createRun = async (req: AuthRequest, res: ApiResponse) => {
 
     return res.created(run, '运行创建成功');
   } catch (error) {
-    console.error('创建运行失败:', error);
-    return res.status(500).json({
-      success: false,
-      error: '创建运行失败',
-    });
+    return handleControllerError(res, error, '创建运行失败');
   }
 };
 
@@ -302,11 +316,7 @@ const getRun = async (req: AuthRequest, res: ApiResponse) => {
 
     return res.success(run);
   } catch (error) {
-    console.error('获取运行详情失败:', error);
-    return res.status(500).json({
-      success: false,
-      error: '获取运行详情失败',
-    });
+    return handleControllerError(res, error, '获取运行详情失败');
   }
 };
 
@@ -333,11 +343,7 @@ const cancelRun = async (req: AuthRequest, res: ApiResponse) => {
 
     return res.success(null, '运行已取消');
   } catch (error) {
-    console.error('取消运行失败:', error);
-    return res.status(500).json({
-      success: false,
-      error: '取消运行失败',
-    });
+    return handleControllerError(res, error, '取消运行失败');
   }
 };
 
@@ -375,11 +381,7 @@ const getRunResults = async (req: AuthRequest, res: ApiResponse) => {
       },
     });
   } catch (error) {
-    console.error('获取运行结果失败:', error);
-    return res.status(500).json({
-      success: false,
-      error: '获取运行结果失败',
-    });
+    return handleControllerError(res, error, '获取运行结果失败');
   }
 };
 
@@ -445,11 +447,7 @@ const exportRun = async (req: AuthRequest, res: ApiResponse) => {
     res.setHeader('Content-Disposition', `attachment; filename="run-${runId}-${Date.now()}.json"`);
     return res.send(JSON.stringify(payload, null, 2));
   } catch (error) {
-    console.error('导出运行失败:', error);
-    return res.status(500).json({
-      success: false,
-      error: '导出运行失败',
-    });
+    return handleControllerError(res, error, '导出运行失败');
   }
 };
 
@@ -473,8 +471,8 @@ const getRunReport = async (req: AuthRequest, res: ApiResponse) => {
       status: run.status,
       collectionId: run.collection_id,
       environmentId: run.environment_id,
-      startedAt: run.started_at,
-      completedAt: run.completed_at,
+      startedAt: toOptionalDate(run.started_at),
+      completedAt: toOptionalDate(run.completed_at),
       summary: run.summary || {},
       aggregates,
       generatedAt: new Date().toISOString(),
@@ -482,11 +480,7 @@ const getRunReport = async (req: AuthRequest, res: ApiResponse) => {
 
     return res.success(report, '运行报告生成成功');
   } catch (error) {
-    console.error('获取运行报告失败:', error);
-    return res.status(500).json({
-      success: false,
-      error: '获取运行报告失败',
-    });
+    return handleControllerError(res, error, '获取运行报告失败');
   }
 };
 
@@ -509,11 +503,7 @@ const rerun = async (req: AuthRequest, res: ApiResponse) => {
     const newRun = await collectionManager.rerunRun(runId, req.user.id);
     return res.created(newRun, '运行重试已创建');
   } catch (error) {
-    console.error('重试运行失败:', error);
-    return res.status(500).json({
-      success: false,
-      error: '重试运行失败',
-    });
+    return handleControllerError(res, error, '重试运行失败');
   }
 };
 

@@ -6,18 +6,29 @@ import crypto from 'crypto';
 import express from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
 import { query } from '../../config/database';
+import asyncHandler from '../../middleware/asyncHandler';
 import type { ReportTemplate as ServiceReportTemplate } from '../../services/reporting/AutomatedReportingService';
 import Logger from '../../utils/logger';
 const { hasWorkspacePermission } = require('../../utils/workspacePermissions');
 const { authMiddleware } = require('../../middleware/auth');
-const { asyncHandler } = require('../../middleware/errorHandler');
 const AutomatedReportingService = require('../../services/reporting/AutomatedReportingService');
 
 type AuthRequest = express.Request & {
   user: {
     id: string;
   };
+};
+
+type ApiResponse = express.Response & {
+  success: (data?: unknown, message?: string) => express.Response;
+  error: (
+    code: string,
+    message?: string,
+    details?: unknown,
+    statusCode?: number
+  ) => express.Response;
 };
 
 enum ReportType {
@@ -187,7 +198,7 @@ const validateShareAccess = (
 router.get(
   '/',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const { type, format, status, page = 1, limit = 20, workspaceId } = req.query;
     const userId = (req as AuthRequest).user.id;
 
@@ -281,30 +292,28 @@ router.get(
         summaryByStatus[report.status] = (summaryByStatus[report.status] || 0) + 1;
       });
 
-      return res.json({
-        success: true,
-        data: {
-          reports: mappedReports,
-          pagination: {
-            page: pageNumber,
-            limit: limitNumber,
-            total: Number(countResult.rows[0]?.total) || 0,
-            totalPages: Math.ceil((Number(countResult.rows[0]?.total) || 0) / limitNumber),
-          },
-          summary: {
-            total: Number(countResult.rows[0]?.total) || 0,
-            byType: summaryByType,
-            byFormat: summaryByFormat,
-            byStatus: summaryByStatus,
-          },
+      return res.success({
+        reports: mappedReports,
+        pagination: {
+          page: pageNumber,
+          limit: limitNumber,
+          total: Number(countResult.rows[0]?.total) || 0,
+          totalPages: Math.ceil((Number(countResult.rows[0]?.total) || 0) / limitNumber),
+        },
+        summary: {
+          total: Number(countResult.rows[0]?.total) || 0,
+          byType: summaryByType,
+          byFormat: summaryByFormat,
+          byStatus: summaryByStatus,
         },
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取报告列表失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取报告列表失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -316,7 +325,7 @@ router.get(
 router.delete(
   '/share-emails/:id',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const userId = (req as AuthRequest).user.id;
     const { id } = req.params;
     const { workspaceId } = req.query as { workspaceId?: string };
@@ -342,31 +351,23 @@ router.delete(
       );
       const ownedRow = ownership.rows?.[0];
       if (!ownedRow) {
-        return res.status(404).json({
-          success: false,
-          message: '分享邮件记录不存在或无权限',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '分享邮件记录不存在或无权限', undefined, 404);
       }
 
       if (String(ownedRow.status) !== 'sent') {
-        return res.status(400).json({
-          success: false,
-          message: '仅支持删除已发送记录',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '仅支持删除已发送记录', undefined, 400);
       }
 
       await query('DELETE FROM report_share_emails WHERE id = $1', [id]);
 
-      return res.json({
-        success: true,
-        message: '分享邮件记录已删除',
-      });
+      return res.success(null, '分享邮件记录已删除');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '删除分享邮件记录失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '删除分享邮件记录失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -378,7 +379,7 @@ router.delete(
 router.get(
   '/share-emails',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const userId = (req as AuthRequest).user.id;
     const {
       reportId,
@@ -451,8 +452,7 @@ router.get(
         params
       );
 
-      return res.json({
-        success: true,
+      return res.success({
         data: result.rows || [],
         pagination: {
           page: pageNumber,
@@ -462,11 +462,12 @@ router.get(
         },
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取分享邮件记录失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取分享邮件记录失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -478,7 +479,7 @@ router.get(
 router.post(
   '/share-emails/:id/retry',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: ApiResponse) => {
     const userId = (req as AuthRequest).user.id;
     const { id } = req.params;
     const { force = 'false', workspaceId } = req.query;
@@ -504,24 +505,15 @@ router.post(
       );
       const ownedRow = ownership.rows?.[0];
       if (!ownedRow) {
-        return res.status(404).json({
-          success: false,
-          message: '分享邮件记录不存在或无权限',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '分享邮件记录不存在或无权限', undefined, 404);
       }
 
       if (String(ownedRow.status) !== 'failed' && String(force) !== 'true') {
-        return res.status(400).json({
-          success: false,
-          message: '仅支持重试失败记录',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '仅支持重试失败记录', undefined, 400);
       }
 
       if (Number(ownedRow.attempts || 0) >= 3 && String(force) !== 'true') {
-        return res.status(400).json({
-          success: false,
-          message: '已达到最大重试次数',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '已达到最大重试次数', undefined, 400);
       }
 
       await ensureReportingInitialized();
@@ -531,16 +523,14 @@ router.post(
         String(force) === 'true'
       );
 
-      return res.json({
-        success: true,
-        message: '已触发分享邮件重试',
-      });
+      return res.success(null, '已触发分享邮件重试');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '重试分享邮件失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '重试分享邮件失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -552,20 +542,18 @@ router.post(
 router.get(
   '/instances',
   authMiddleware,
-  asyncHandler(async (_req: express.Request, res: express.Response) => {
+  asyncHandler(async (_req: express.Request, res: ApiResponse) => {
     try {
       await ensureReportingInitialized();
       const instances = await automatedReportingService.getAllReportInstances();
-      return res.json({
-        success: true,
-        data: instances,
-      });
+      return res.success(instances);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取报告实例失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取报告实例失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -606,10 +594,10 @@ router.post(
       const reportResult = await query('SELECT user_id FROM test_reports WHERE id = $1', [id]);
       const reportRow = reportResult.rows[0];
       if (!reportRow) {
-        return res.status(404).json({ success: false, message: '报告不存在' });
+        return res.error(StandardErrorCode.NOT_FOUND, '报告不存在', undefined, 404);
       }
       if (String(reportRow.user_id) !== String(userId)) {
-        return res.status(403).json({ success: false, message: '无权分享此报告' });
+        return res.error(StandardErrorCode.FORBIDDEN, '无权分享此报告', undefined, 403);
       }
 
       const shareToken = crypto.randomBytes(20).toString('hex');
@@ -641,10 +629,12 @@ router.post(
       if (shareType === 'email') {
         const emailRecipients = Array.isArray(recipients) ? recipients.filter(Boolean) : [];
         if (emailRecipients.length === 0) {
-          return res.status(400).json({
-            success: false,
-            message: '分享类型为 email 时需提供 recipients',
-          });
+          return res.error(
+            StandardErrorCode.INVALID_INPUT,
+            '分享类型为 email 时需提供 recipients',
+            undefined,
+            400
+          );
         }
 
         await ensureReportingInitialized();
@@ -663,20 +653,18 @@ router.post(
         });
       }
 
-      return res.json({
-        success: true,
-        data: {
-          shareId: shareRow.id,
-          token: shareRow.share_token,
-          url: buildShareDownloadUrl(shareRow.share_token),
-        },
+      return res.success({
+        shareId: shareRow.id,
+        token: shareRow.share_token,
+        url: buildShareDownloadUrl(shareRow.share_token),
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '创建分享失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '创建分享失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -709,7 +697,7 @@ router.get(
     );
     const shareRow = shareResult.rows[0];
     if (!shareRow) {
-      return res.status(404).json({ success: false, message: '分享不存在' });
+      return res.error(StandardErrorCode.NOT_FOUND, '分享不存在', undefined, 404);
     }
 
     const validation = validateShareAccess(
@@ -731,22 +719,19 @@ router.get(
           ipAddress: req.ip,
         }
       );
-      return res.status(403).json({ success: false, message: validation.message });
+      return res.error(StandardErrorCode.FORBIDDEN, validation.message, undefined, 403);
     }
 
-    return res.json({
-      success: true,
-      data: {
-        id: shareRow.id,
-        reportId: shareRow.report_id,
-        shareType: shareRow.share_type,
-        expiresAt: shareRow.expires_at,
-        currentAccessCount: shareRow.current_access_count,
-        maxAccessCount: shareRow.max_access_count,
-        permissions: shareRow.permissions,
-        lastAccessedAt: shareRow.last_accessed_at,
-        downloadCount: Number(shareRow.download_count || 0),
-      },
+    return res.success({
+      id: shareRow.id,
+      reportId: shareRow.report_id,
+      shareType: shareRow.share_type,
+      expiresAt: shareRow.expires_at,
+      currentAccessCount: shareRow.current_access_count,
+      maxAccessCount: shareRow.max_access_count,
+      permissions: shareRow.permissions,
+      lastAccessedAt: shareRow.last_accessed_at,
+      downloadCount: Number(shareRow.download_count || 0),
     });
   })
 );
@@ -770,7 +755,7 @@ router.get(
     );
     const shareRow = shareResult.rows[0];
     if (!shareRow) {
-      return res.status(404).json({ success: false, message: '分享不存在' });
+      return res.error(StandardErrorCode.NOT_FOUND, '分享不存在', undefined, 404);
     }
 
     const validation = validateShareAccess(
@@ -792,7 +777,7 @@ router.get(
           ipAddress: req.ip,
         }
       );
-      return res.status(403).json({ success: false, message: validation.message });
+      return res.error(StandardErrorCode.FORBIDDEN, validation.message, undefined, 403);
     }
 
     const permissions = Array.isArray(shareRow.permissions) ? shareRow.permissions : [];
@@ -809,7 +794,7 @@ router.get(
           ipAddress: req.ip,
         }
       );
-      return res.status(403).json({ success: false, message: '无下载权限' });
+      return res.error(StandardErrorCode.FORBIDDEN, '无下载权限', undefined, 403);
     }
 
     if (!shareRow.file_path) {
@@ -825,7 +810,7 @@ router.get(
           ipAddress: req.ip,
         }
       );
-      return res.status(404).json({ success: false, message: '报告文件不存在' });
+      return res.error(StandardErrorCode.NOT_FOUND, '报告文件不存在', undefined, 404);
     }
 
     try {
@@ -843,7 +828,7 @@ router.get(
           ipAddress: req.ip,
         }
       );
-      return res.status(404).json({ success: false, message: '报告文件不存在' });
+      return res.error(StandardErrorCode.NOT_FOUND, '报告文件不存在', undefined, 404);
     }
 
     await query(
@@ -924,8 +909,7 @@ router.get(
         params
       );
 
-      return res.json({
-        success: true,
+      return res.success({
         data: result.rows || [],
         pagination: {
           page: pageNumber,
@@ -935,11 +919,12 @@ router.get(
         },
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取访问日志失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取访问日志失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -991,20 +976,14 @@ router.get(
       const report = reportRow ? mapReportRow(reportRow, userId) : null;
 
       if (!report) {
-        return res.status(404).json({
-          success: false,
-          message: '报告不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '报告不存在', undefined, 404);
       }
 
       const reportWorkspaceId = reportRow?.workspace_id as string | null | undefined;
       if (reportWorkspaceId) {
         await ensureWorkspacePermission(reportWorkspaceId, userId, 'read');
       } else if (String(reportRow.user_id) !== String(userId)) {
-        return res.status(403).json({
-          success: false,
-          message: '无权访问此报告',
-        });
+        return res.error(StandardErrorCode.FORBIDDEN, '无权访问此报告', undefined, 403);
       }
 
       const shareResult = await query(
@@ -1052,64 +1031,62 @@ router.get(
       const configRow = configResult.rows?.[0];
       const templateRow = templateResult.rows?.[0];
 
-      return res.json({
-        success: true,
-        data: {
-          ...report,
-          instance: reportRow
-            ? {
-                status: reportRow.instance_status,
-                duration: reportRow.instance_duration,
-                configId,
-                templateId,
-                metadata: reportRow.instance_metadata || {},
-              }
-            : null,
-          config: configRow
-            ? {
-                id: String(configRow.id),
-                name: configRow.name,
-                description: configRow.description,
-                templateId: configRow.template_id,
-                schedule: configRow.schedule,
-                recipients: configRow.recipients,
-                filters: configRow.filters,
-                format: configRow.format,
-                delivery: configRow.delivery,
-                enabled: configRow.enabled,
-              }
-            : null,
-          template: templateRow
-            ? {
-                id: String(templateRow.id),
-                name: templateRow.name,
-                description: templateRow.description,
-                reportType: templateRow.report_type,
-                defaultFormat: templateRow.default_format,
-                isPublic: templateRow.is_public,
-                isSystem: templateRow.is_system,
-              }
-            : null,
-          shares: (shareResult.rows || []).map((row: Record<string, unknown>) => ({
-            id: String(row.id),
-            token: String(row.share_token),
-            shareType: row.share_type,
-            expiresAt: row.expires_at,
-            currentAccessCount: row.current_access_count,
-            maxAccessCount: row.max_access_count,
-            permissions: row.permissions,
-            lastAccessedAt: row.last_accessed_at,
-            downloadCount: Number(row.download_count || 0),
-            url: buildShareDownloadUrl(String(row.share_token)),
-          })),
-        },
+      return res.success({
+        ...report,
+        instance: reportRow
+          ? {
+              status: reportRow.instance_status,
+              duration: reportRow.instance_duration,
+              configId,
+              templateId,
+              metadata: reportRow.instance_metadata || {},
+            }
+          : null,
+        config: configRow
+          ? {
+              id: String(configRow.id),
+              name: configRow.name,
+              description: configRow.description,
+              templateId: configRow.template_id,
+              schedule: configRow.schedule,
+              recipients: configRow.recipients,
+              filters: configRow.filters,
+              format: configRow.format,
+              delivery: configRow.delivery,
+              enabled: configRow.enabled,
+            }
+          : null,
+        template: templateRow
+          ? {
+              id: String(templateRow.id),
+              name: templateRow.name,
+              description: templateRow.description,
+              reportType: templateRow.report_type,
+              defaultFormat: templateRow.default_format,
+              isPublic: templateRow.is_public,
+              isSystem: templateRow.is_system,
+            }
+          : null,
+        shares: (shareResult.rows || []).map((row: Record<string, unknown>) => ({
+          id: String(row.id),
+          token: String(row.share_token),
+          shareType: row.share_type,
+          expiresAt: row.expires_at,
+          currentAccessCount: row.current_access_count,
+          maxAccessCount: row.max_access_count,
+          permissions: row.permissions,
+          lastAccessedAt: row.last_accessed_at,
+          downloadCount: Number(row.download_count || 0),
+          url: buildShareDownloadUrl(String(row.share_token)),
+        })),
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取报告详情失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取报告详情失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -1126,10 +1103,7 @@ router.post(
     const reportRequest: ReportRequest = req.body;
 
     if (!reportRequest.type || !reportRequest.format) {
-      return res.status(400).json({
-        success: false,
-        message: '报告类型和格式是必需的',
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '报告类型和格式是必需的', undefined, 400);
     }
 
     try {
@@ -1142,10 +1116,7 @@ router.post(
       );
 
       if (!matchedTemplate) {
-        return res.status(400).json({
-          success: false,
-          message: '未找到匹配的报告模板',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '未找到匹配的报告模板', undefined, 400);
       }
 
       const configId = await automatedReportingService.createConfig({
@@ -1215,17 +1186,14 @@ router.post(
         error: instance?.error,
       };
 
-      return res.status(201).json({
-        success: true,
-        message: '报告创建成功',
-        data: createdReport,
-      });
+      return res.success(createdReport, '报告创建成功', 201);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '创建报告失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '创建报告失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -1259,10 +1227,7 @@ router.get(
 
       const reportRow = reportResult.rows[0];
       if (!reportRow) {
-        return res.status(404).json({
-          success: false,
-          message: '报告不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '报告不存在', undefined, 404);
       }
 
       if (String(reportRow.user_id) !== String(userId)) {
@@ -1271,25 +1236,16 @@ router.get(
           userAgent: req.get('User-Agent') || undefined,
           ipAddress: req.ip,
         });
-        return res.status(403).json({
-          success: false,
-          message: '无权下载此报告',
-        });
+        return res.error(StandardErrorCode.FORBIDDEN, '无权下载此报告', undefined, 403);
       }
 
       const report = mapReportRow(reportRow, userId);
       if (!report) {
-        return res.status(404).json({
-          success: false,
-          message: '报告不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '报告不存在', undefined, 404);
       }
 
       if (report.status !== 'completed') {
-        return res.status(400).json({
-          success: false,
-          message: '报告尚未生成完成',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '报告尚未生成完成', undefined, 400);
       }
 
       if (!report.filePath) {
@@ -1298,10 +1254,7 @@ router.get(
           userAgent: req.get('User-Agent') || undefined,
           ipAddress: req.ip,
         });
-        return res.status(404).json({
-          success: false,
-          message: '报告文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '报告文件不存在', undefined, 404);
       }
 
       // 检查文件是否存在
@@ -1313,10 +1266,7 @@ router.get(
           userAgent: req.get('User-Agent') || undefined,
           ipAddress: req.ip,
         });
-        return res.status(404).json({
-          success: false,
-          message: '报告文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '报告文件不存在', undefined, 404);
       }
 
       // 设置下载响应头
@@ -1333,11 +1283,12 @@ router.get(
       // 发送文件
       return res.sendFile(report.filePath);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '下载报告失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '下载报告失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -1363,20 +1314,14 @@ router.delete(
       );
       const reportRow = reportResult.rows[0];
       if (!reportRow) {
-        return res.status(404).json({
-          success: false,
-          message: '报告不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '报告不存在', undefined, 404);
       }
 
       const reportWorkspaceId = reportRow?.workspace_id as string | null | undefined;
       if (reportWorkspaceId) {
         await ensureWorkspacePermission(reportWorkspaceId, userId, 'delete');
       } else if (String(reportRow.user_id) !== String(userId)) {
-        return res.status(403).json({
-          success: false,
-          message: '无权删除此报告',
-        });
+        return res.error(StandardErrorCode.FORBIDDEN, '无权删除此报告', undefined, 403);
       }
 
       const instanceResult = await query(
@@ -1435,16 +1380,14 @@ router.delete(
 
       Logger.info('报告删除', { reportId: id, userId });
 
-      return res.json({
-        success: true,
-        message: '报告删除成功',
-      });
+      return res.success(null, '报告删除成功');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '删除报告失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '删除报告失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -1487,16 +1430,14 @@ router.get(
         createdBy: 'system',
       }));
 
-      return res.json({
-        success: true,
-        data: mapped,
-      });
+      return res.success(mapped);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取报告模板失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取报告模板失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -1513,10 +1454,12 @@ router.post(
     const { name, type, description, template, variables } = req.body;
 
     if (!name || !type || !template) {
-      return res.status(400).json({
-        success: false,
-        message: '模板名称、类型和模板内容是必需的',
-      });
+      return res.error(
+        StandardErrorCode.INVALID_INPUT,
+        '模板名称、类型和模板内容是必需的',
+        undefined,
+        400
+      );
     }
 
     try {
@@ -1582,10 +1525,8 @@ router.post(
 
       const createdTemplate = await automatedReportingService.getTemplate(templateId);
 
-      return res.status(201).json({
-        success: true,
-        message: '报告模板创建成功',
-        data: createdTemplate
+      return res.success(
+        createdTemplate
           ? {
               id: createdTemplate.id,
               name: createdTemplate.name,
@@ -1598,13 +1539,16 @@ router.post(
               createdBy: userId,
             }
           : null,
-      });
+        '报告模板创建成功',
+        201
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '创建报告模板失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '创建报告模板失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -1703,16 +1647,14 @@ router.get(
           })),
       };
 
-      return res.json({
-        success: true,
-        data: statistics,
-      });
+      return res.success(statistics);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取报告统计失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取报告统计失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -1746,25 +1688,21 @@ router.post(
 
       const reportRow = reportResult.rows[0];
       if (!reportRow) {
-        return res.status(404).json({
-          success: false,
-          message: '报告不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '报告不存在', undefined, 404);
       }
 
       if (String(reportRow.user_id) !== String(userId)) {
-        return res.status(403).json({
-          success: false,
-          message: '无权设置此报告的定时任务',
-        });
+        return res.error(StandardErrorCode.FORBIDDEN, '无权设置此报告的定时任务', undefined, 403);
       }
 
       const reportData = reportRow.report_data as { metadata?: { templateId?: string } };
       if (!reportData?.metadata?.templateId) {
-        return res.status(400).json({
-          success: false,
-          message: '报告缺少模板信息，无法设置定时任务',
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '报告缺少模板信息，无法设置定时任务',
+          undefined,
+          400
+        );
       }
 
       const configId = await automatedReportingService.createConfig({
@@ -1807,22 +1745,22 @@ router.post(
         await automatedReportingService.scheduleReport(configId);
       }
 
-      return res.json({
-        success: true,
-        message: '定时任务设置成功',
-        data: {
+      return res.success(
+        {
           enabled,
           frequency,
           recipients: recipients || [],
           configId,
         },
-      });
+        '定时任务设置成功'
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '设置定时任务失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '设置定时任务失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -1877,16 +1815,14 @@ router.get(
         return res.send(csvRows.join('\n'));
       }
 
-      return res.status(400).json({
-        success: false,
-        message: '不支持的导出格式',
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '不支持的导出格式', undefined, 400);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '导出报告数据失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '导出报告数据失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );

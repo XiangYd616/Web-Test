@@ -4,7 +4,8 @@
  */
 
 import express from 'express';
-import { asyncHandler } from '../../middleware/errorHandler';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
+import asyncHandler from '../../middleware/asyncHandler';
 const advancedAnalyticsController = require('../../controllers/advancedAnalyticsController');
 const { authMiddleware } = require('../../middleware/auth');
 
@@ -33,6 +34,12 @@ type AnalyticsResponse = express.Response & {
     errors: unknown[] | Record<string, unknown>,
     message?: string
   ) => express.Response;
+  error: (
+    code: string,
+    message?: string,
+    details?: unknown,
+    statusCode?: number
+  ) => express.Response;
 };
 
 const router = express.Router();
@@ -52,10 +59,12 @@ router.post(
 
       // 验证请求参数
       if (!Array.isArray(request.dataPoints) || request.dataPoints.length < 2) {
-        return res.status(400).json({
-          success: false,
-          message: '需要至少2个数据点进行趋势分析',
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '需要至少2个数据点进行趋势分析',
+          undefined,
+          400
+        );
       }
 
       return advancedAnalyticsController.analyzeTrend(
@@ -64,11 +73,12 @@ router.post(
         () => undefined
       );
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: '趋势分析失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '趋势分析失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -85,10 +95,12 @@ router.post(
 
       // 验证请求参数
       if (!request.baseline || !request.comparison) {
-        return res.status(400).json({
-          success: false,
-          message: '需要提供基准数据和对比数据',
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '需要提供基准数据和对比数据',
+          undefined,
+          400
+        );
       }
 
       return advancedAnalyticsController.analyzeComparison(
@@ -97,11 +109,12 @@ router.post(
         () => undefined
       );
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: '对比分析失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '对比分析失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -118,10 +131,12 @@ router.post(
 
       // 验证请求参数
       if (!Array.isArray(request.dataPoints) || request.dataPoints.length < 2) {
-        return res.status(400).json({
-          success: false,
-          message: '需要至少2个数据点进行性能分析',
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '需要至少2个数据点进行性能分析',
+          undefined,
+          400
+        );
       }
 
       const result = await advancedAnalyticsController.analyzePerformance(
@@ -131,11 +146,12 @@ router.post(
       );
       return result;
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '性能分析失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '性能分析失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -155,11 +171,12 @@ router.get(
         res as AnalyticsResponse
       );
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: '获取可用指标失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取可用指标失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -175,10 +192,12 @@ router.post(
       const { dataPoints, options = {} } = req.body;
 
       if (!Array.isArray(dataPoints) || dataPoints.length < 2) {
-        return res.status(400).json({
-          success: false,
-          message: '需要至少2个数据点进行预测分析',
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '需要至少2个数据点进行预测分析',
+          undefined,
+          400
+        );
       }
 
       req.body = { dataPoints, options };
@@ -188,11 +207,12 @@ router.post(
         () => undefined
       );
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: '预测分析失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '预测分析失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -208,10 +228,12 @@ router.post(
       const { dataPoints, options = {} } = req.body;
 
       if (!Array.isArray(dataPoints) || dataPoints.length < 3) {
-        return res.status(400).json({
-          success: false,
-          message: '需要至少3个数据点进行异常检测',
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '需要至少3个数据点进行异常检测',
+          undefined,
+          400
+        );
       }
 
       req.body = { dataPoints, options };
@@ -221,11 +243,12 @@ router.post(
         () => undefined
       );
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: '异常检测失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '异常检测失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -247,16 +270,14 @@ router.get(
         limit: parseInt(limit as string),
       });
 
-      res.json({
-        success: true,
-        data: reports,
-      });
+      return res.success(reports);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: '获取分析报告列表失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取分析报告列表失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -272,10 +293,12 @@ router.post(
       const { name, type, config, schedule: _schedule } = req.body;
 
       if (!name || !type || !config) {
-        return res.status(400).json({
-          success: false,
-          message: '名称、类型和配置是必需的',
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '名称、类型和配置是必需的',
+          undefined,
+          400
+        );
       }
 
       return advancedAnalyticsController.createAnalysisReport(
@@ -283,11 +306,12 @@ router.post(
         res as AnalyticsResponse
       );
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: '创建分析报告失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '创建分析报告失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -305,22 +329,17 @@ router.get(
       const report = await advancedAnalyticsController.getAnalysisReport(id);
 
       if (!report) {
-        return res.status(404).json({
-          success: false,
-          message: '分析报告不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '分析报告不存在', undefined, 404);
       }
 
-      return res.json({
-        success: true,
-        data: report,
-      });
+      return res.success(report);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取分析报告详情失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取分析报告详情失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -350,11 +369,12 @@ router.post(
 
       return res.send(exportData);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '导出分析报告失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '导出分析报告失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -374,16 +394,14 @@ router.get(
         timeRange: timeRange as string,
       });
 
-      res.json({
-        success: true,
-        data: insights,
-      });
+      return res.success(insights);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: '获取系统洞察失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取系统洞察失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -399,10 +417,7 @@ router.post(
       const { widgets } = req.body;
 
       if (!Array.isArray(widgets) || widgets.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: '组件列表不能为空',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '组件列表不能为空', undefined, 400);
       }
 
       return advancedAnalyticsController.generateDashboardData(
@@ -410,11 +425,12 @@ router.post(
         res as AnalyticsResponse
       );
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: '生成仪表板数据失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '生成仪表板数据失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -433,11 +449,12 @@ router.get(
         () => undefined
       );
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: '分析服务健康检查失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '分析服务健康检查失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );

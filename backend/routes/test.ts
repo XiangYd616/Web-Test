@@ -4,9 +4,9 @@
  */
 
 import express from 'express';
+import asyncHandler from '../middleware/asyncHandler';
 const testController = require('../controllers/testController');
-const { authMiddleware, optionalAuth, requireAdmin } = require('../middleware/auth');
-const { asyncHandler } = require('../middleware/errorHandler');
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
 const { rateLimiter: testRateLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
@@ -23,29 +23,6 @@ router.post(
   testRateLimiter,
   asyncHandler(testController.createAndStart)
 );
-
-/**
- * 运行网站测试
- * POST /api/test/website
- */
-router.post('/website', optionalAuth, testRateLimiter, asyncHandler(testController.runWebsiteTest));
-
-/**
- * 创建兼容性测试
- * POST /api/test/compatibility
- */
-router.post(
-  '/compatibility',
-  authMiddleware,
-  testRateLimiter,
-  asyncHandler(testController.runCompatibilityTest)
-);
-
-/**
- * 创建UX测试
- * POST /api/test/ux
- */
-router.post('/ux', authMiddleware, testRateLimiter, asyncHandler(testController.runUXTest));
 
 /**
  * 获取测试状态

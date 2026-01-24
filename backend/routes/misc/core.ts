@@ -1,6 +1,7 @@
 import express from 'express';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
 import CoreTestEngine from '../../engines/core/CoreTestEngine';
-import { asyncHandler } from '../../middleware/errorHandler';
+import asyncHandler from '../../middleware/asyncHandler';
 
 interface CoreTestRequest {
   url: string;
@@ -22,16 +23,14 @@ router.get(
     try {
       const status = await engine.checkAvailability();
 
-      res.json({
-        success: true,
-        data: status,
-      });
+      return res.success(status);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return;
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        500
+      );
     }
   })
 );
@@ -48,25 +47,19 @@ router.post(
 
       // 验证请求参数
       if (!testRequest.url || !testRequest.testType) {
-        res.status(400).json({
-          success: false,
-          message: 'URL和测试类型是必需的',
-        });
-        return;
+        return res.error(StandardErrorCode.INVALID_INPUT, 'URL和测试类型是必需的', undefined, 400);
       }
 
       const result = await engine.runCoreTest(testRequest);
 
-      res.json({
-        success: true,
-        data: result,
-      });
+      return res.success(result);
     } catch (error) {
-      res.status(400).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return;
+      return res.error(
+        StandardErrorCode.INVALID_INPUT,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        400
+      );
     }
   })
 );
@@ -84,23 +77,17 @@ router.get(
       const status = engine.getTestStatus(testId);
 
       if (!status) {
-        res.status(404).json({
-          success: false,
-          message: '测试不存在',
-        });
-        return;
+        return res.error(StandardErrorCode.NOT_FOUND, '测试不存在', undefined, 404);
       }
 
-      res.json({
-        success: true,
-        data: status,
-      });
+      return res.success(status);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return;
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        500
+      );
     }
   })
 );
@@ -118,23 +105,17 @@ router.delete(
       const cancelled = engine.cancelTest(testId);
 
       if (!cancelled) {
-        res.status(404).json({
-          success: false,
-          message: '测试不存在或无法取消',
-        });
-        return;
+        return res.error(StandardErrorCode.NOT_FOUND, '测试不存在或无法取消', undefined, 404);
       }
 
-      res.json({
-        success: true,
-        message: '测试已取消',
-      });
+      return res.success(null, '测试已取消');
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return;
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        500
+      );
     }
   })
 );
@@ -154,16 +135,14 @@ router.get(
         limit: parseInt(limit as string),
       });
 
-      res.json({
-        success: true,
-        data: tests,
-      });
+      return res.success(tests);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return;
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        500
+      );
     }
   })
 );
@@ -179,25 +158,24 @@ router.post(
       const { url, benchmarkType, options } = req.body;
 
       if (!url || !benchmarkType) {
-        res.status(400).json({
-          success: false,
-          message: 'URL和基准测试类型是必需的',
-        });
-        return;
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          'URL和基准测试类型是必需的',
+          undefined,
+          400
+        );
       }
 
       const result = await engine.runBenchmark(url, benchmarkType, options);
 
-      res.json({
-        success: true,
-        data: result,
-      });
+      return res.success(result);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return;
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        500
+      );
     }
   })
 );
@@ -212,16 +190,14 @@ router.get(
     try {
       const benchmarks = engine.getBenchmarks();
 
-      res.json({
-        success: true,
-        data: benchmarks,
-      });
+      return res.success(benchmarks);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return;
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        500
+      );
     }
   })
 );
@@ -237,25 +213,19 @@ router.post(
       const { testConfig } = req.body;
 
       if (!testConfig) {
-        res.status(400).json({
-          success: false,
-          message: '测试配置是必需的',
-        });
-        return;
+        return res.error(StandardErrorCode.INVALID_INPUT, '测试配置是必需的', undefined, 400);
       }
 
       const validation = await engine.validateTestConfig(testConfig);
 
-      res.json({
-        success: true,
-        data: validation,
-      });
+      return res.success(validation);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return;
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        500
+      );
     }
   })
 );
@@ -270,16 +240,14 @@ router.get(
     try {
       const metrics = engine.getEngineMetrics();
 
-      res.json({
-        success: true,
-        data: metrics,
-      });
+      return res.success(metrics);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return;
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        500
+      );
     }
   })
 );
@@ -294,17 +262,14 @@ router.post(
     try {
       const result = await engine.resetEngine();
 
-      res.json({
-        success: true,
-        message: '引擎重置成功',
-        data: result,
-      });
+      return res.success(result, '引擎重置成功');
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return;
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        500
+      );
     }
   })
 );
@@ -319,16 +284,14 @@ router.get(
     try {
       const health = await engine.healthCheck();
 
-      res.json({
-        success: true,
-        data: health,
-      });
+      return res.success(health);
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return;
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        500
+      );
     }
   })
 );

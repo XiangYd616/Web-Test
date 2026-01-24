@@ -4,8 +4,9 @@
 
 import express from 'express';
 import Joi from 'joi';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
 import { query } from '../../config/database';
-import { asyncHandler } from '../../middleware/errorHandler';
+import asyncHandler from '../../middleware/asyncHandler';
 import { dataManagementService } from '../../services/data/DataManagementService';
 const { authMiddleware } = require('../../middleware/auth');
 const { validateQuery, validateRequest } = require('../../middleware/validation');
@@ -175,11 +176,12 @@ router.get(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const query = req.query as AlertQuery;
     const userId = getUserId(req);
-    const workspaceId = query.workspaceId;
+    const workspaceIdInput = query.workspaceId;
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
-        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      if (workspaceIdInput) {
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
       }
       const { results } = await dataManagementService.queryData(
         ALERTS_TYPE,
@@ -191,7 +193,7 @@ router.get(
           },
           search: query.search,
           sort: { field: 'timestamp', direction: 'desc' },
-          workspaceId: workspaceId ? String(workspaceId) : undefined,
+          workspaceId,
         },
         {}
       );
@@ -208,34 +210,32 @@ router.get(
       const endIndex = startIndex + limit;
       const paginatedAlerts = filteredAlerts.slice(startIndex, endIndex);
 
-      return res.json({
-        success: true,
-        data: {
-          alerts: paginatedAlerts,
-          pagination: {
-            page,
-            limit,
-            total: filteredAlerts.length,
-            totalPages: Math.ceil(filteredAlerts.length / limit),
-          },
-          summary: {
-            total: filteredAlerts.length,
-            active: filteredAlerts.filter(a => a.status === 'active').length,
-            acknowledged: filteredAlerts.filter(a => a.status === 'acknowledged').length,
-            resolved: filteredAlerts.filter(a => a.status === 'resolved').length,
-            critical: filteredAlerts.filter(a => a.severity === 'critical').length,
-            high: filteredAlerts.filter(a => a.severity === 'high').length,
-            medium: filteredAlerts.filter(a => a.severity === 'medium').length,
-            low: filteredAlerts.filter(a => a.severity === 'low').length,
-          },
+      return res.success({
+        alerts: paginatedAlerts,
+        pagination: {
+          page,
+          limit,
+          total: filteredAlerts.length,
+          totalPages: Math.ceil(filteredAlerts.length / limit),
+        },
+        summary: {
+          total: filteredAlerts.length,
+          active: filteredAlerts.filter(a => a.status === 'active').length,
+          acknowledged: filteredAlerts.filter(a => a.status === 'acknowledged').length,
+          resolved: filteredAlerts.filter(a => a.status === 'resolved').length,
+          critical: filteredAlerts.filter(a => a.severity === 'critical').length,
+          high: filteredAlerts.filter(a => a.severity === 'high').length,
+          medium: filteredAlerts.filter(a => a.severity === 'medium').length,
+          low: filteredAlerts.filter(a => a.severity === 'low').length,
         },
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取告警列表失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取告警列表失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -249,34 +249,30 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
-    const { workspaceId } = req.query as { workspaceId?: string };
+    const { workspaceId: workspaceIdInput } = req.query as { workspaceId?: string };
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = getUserId(req as AuthenticatedRequest);
-        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
       }
       const alertRecord = await dataManagementService.readData(ALERTS_TYPE, id, {
-        workspaceId: workspaceId ? String(workspaceId) : undefined,
+        workspaceId,
       });
       const alert = mapAlertRecord(alertRecord as { id: string; data: Record<string, unknown> });
 
-      return res.json({
-        success: true,
-        data: alert,
-      });
+      return res.success(alert);
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '告警不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '告警不存在', undefined, 404);
       }
-      return res.status(500).json({
-        success: false,
-        message: '获取告警详情失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取告警详情失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -292,22 +288,20 @@ router.post(
     const { id } = req.params;
     const { comment: _comment } = req.body;
     const userId = getUserId(req);
-    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceIdInput = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
-        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+      if (workspaceIdInput) {
+        await ensureWorkspacePermission(workspaceId, userId, 'write');
       }
       const alertRecord = await dataManagementService.readData(ALERTS_TYPE, id, {
-        workspaceId: workspaceId ? String(workspaceId) : undefined,
+        workspaceId,
       });
       const alert = mapAlertRecord(alertRecord as { id: string; data: Record<string, unknown> });
 
       if (alert.status !== 'active') {
-        return res.status(400).json({
-          success: false,
-          message: '只能确认活跃的告警',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '只能确认活跃的告警', undefined, 400);
       }
 
       const updatedAlert = await dataManagementService.updateData(
@@ -318,26 +312,23 @@ router.post(
           acknowledgedAt: new Date(),
           acknowledgedBy: userId,
         },
-        { userId, workspaceId: workspaceId ? String(workspaceId) : undefined }
+        { userId, workspaceId }
       );
 
-      return res.json({
-        success: true,
-        message: '告警已确认',
-        data: mapAlertRecord(updatedAlert as { id: string; data: Record<string, unknown> }),
-      });
+      return res.success(
+        mapAlertRecord(updatedAlert as { id: string; data: Record<string, unknown> }),
+        '告警已确认'
+      );
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '告警不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '告警不存在', undefined, 404);
       }
-      return res.status(500).json({
-        success: false,
-        message: '确认告警失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '确认告警失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -353,14 +344,15 @@ router.post(
     const { id } = req.params;
     const { comment: _comment } = req.body;
     const userId = getUserId(req);
-    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceIdInput = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
-        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+      if (workspaceIdInput) {
+        await ensureWorkspacePermission(workspaceId, userId, 'write');
       }
       await dataManagementService.readData(ALERTS_TYPE, id, {
-        workspaceId: workspaceId ? String(workspaceId) : undefined,
+        workspaceId,
       });
 
       const updatedAlert = await dataManagementService.updateData(
@@ -371,26 +363,23 @@ router.post(
           resolvedAt: new Date(),
           resolvedBy: userId,
         },
-        { userId, workspaceId: workspaceId ? String(workspaceId) : undefined }
+        { userId, workspaceId }
       );
 
-      return res.json({
-        success: true,
-        message: '告警已解决',
-        data: mapAlertRecord(updatedAlert as { id: string; data: Record<string, unknown> }),
-      });
+      return res.success(
+        mapAlertRecord(updatedAlert as { id: string; data: Record<string, unknown> }),
+        '告警已解决'
+      );
     } catch (error) {
       if (error instanceof Error && error.message.includes('数据记录不存在')) {
-        return res.status(404).json({
-          success: false,
-          message: '告警不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '告警不存在', undefined, 404);
       }
-      return res.status(500).json({
-        success: false,
-        message: '解决告警失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '解决告警失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -406,19 +395,20 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { action, alertIds, comment: _comment, workspaceId: bodyWorkspaceId } = req.body;
     const userId = getUserId(req);
-    const workspaceId = bodyWorkspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceIdInput = bodyWorkspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const permissionAction = action === 'delete' ? 'delete' : 'write';
-        await ensureWorkspacePermission(String(workspaceId), userId, permissionAction);
+        await ensureWorkspacePermission(workspaceId, userId, permissionAction);
       }
       const results = [];
 
       for (const alertId of alertIds) {
         try {
           const alertRecord = await dataManagementService.readData(ALERTS_TYPE, alertId, {
-            workspaceId: workspaceId ? String(workspaceId) : undefined,
+            workspaceId,
           });
           const alert = mapAlertRecord(
             alertRecord as { id: string; data: Record<string, unknown> }
@@ -435,7 +425,7 @@ router.post(
                     acknowledgedAt: new Date(),
                     acknowledgedBy: userId,
                   },
-                  { userId, workspaceId: workspaceId ? String(workspaceId) : undefined }
+                  { userId, workspaceId }
                 );
                 results.push({ alertId, success: true });
               } else {
@@ -452,7 +442,7 @@ router.post(
                   resolvedAt: new Date(),
                   resolvedBy: userId,
                 },
-                { userId, workspaceId: workspaceId ? String(workspaceId) : undefined }
+                { userId, workspaceId }
               );
               results.push({ alertId, success: true });
               break;
@@ -460,7 +450,7 @@ router.post(
             case 'delete':
               await dataManagementService.deleteData(ALERTS_TYPE, alertId, {
                 userId,
-                workspaceId: workspaceId ? String(workspaceId) : undefined,
+                workspaceId,
               });
               results.push({ alertId, success: true });
               break;
@@ -482,10 +472,8 @@ router.post(
         }
       }
 
-      return res.json({
-        success: true,
-        message: `批量${action}操作完成`,
-        data: {
+      return res.success(
+        {
           action,
           results,
           summary: {
@@ -494,13 +482,15 @@ router.post(
             failed: results.filter(r => !r.success).length,
           },
         },
-      });
+        `批量${action}操作完成`
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '批量操作失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '批量操作失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -513,31 +503,30 @@ router.get(
   '/rules',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { workspaceId } = req.query as { workspaceId?: string };
+    const { workspaceId: workspaceIdInput } = req.query as { workspaceId?: string };
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = getUserId(req as AuthenticatedRequest);
-        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
       }
       const { results } = await dataManagementService.queryData(
         ALERT_RULES_TYPE,
         {
-          workspaceId: workspaceId ? String(workspaceId) : undefined,
+          workspaceId,
         },
         {}
       );
       const rules = results.map(record => mapRuleRecord(record));
 
-      return res.json({
-        success: true,
-        data: rules,
-      });
+      return res.success(rules);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取告警规则失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取告警规则失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -553,11 +542,12 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const userId = getUserId(req);
     const ruleData = req.body;
-    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceIdInput = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
-        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+      if (workspaceIdInput) {
+        await ensureWorkspacePermission(workspaceId, userId, 'write');
       }
       const newRuleData: AlertRule = {
         ...(ruleData as AlertRule),
@@ -572,23 +562,20 @@ router.post(
         {
           userId,
           source: 'alerts',
-          workspaceId: workspaceId ? String(workspaceId) : undefined,
+          workspaceId,
         }
       );
 
       const newRule: AlertRule = { ...newRuleData, id };
 
-      return res.status(201).json({
-        success: true,
-        message: '告警规则创建成功',
-        data: newRule,
-      });
+      return res.success(newRule, '告警规则创建成功', 201);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '创建告警规则失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '创建告警规则失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -603,15 +590,16 @@ router.put(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const updateData = req.body;
-    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceIdInput = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = getUserId(req as AuthenticatedRequest);
-        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+        await ensureWorkspacePermission(workspaceId, userId, 'write');
       }
       await dataManagementService.readData(ALERT_RULES_TYPE, id, {
-        workspaceId: workspaceId ? String(workspaceId) : undefined,
+        workspaceId,
       });
       const updatedRule = await dataManagementService.updateData(
         ALERT_RULES_TYPE,
@@ -622,21 +610,21 @@ router.put(
         },
         {
           userId: getUserId(req as AuthenticatedRequest),
-          workspaceId: workspaceId ? String(workspaceId) : undefined,
+          workspaceId,
         }
       );
 
-      return res.json({
-        success: true,
-        message: '告警规则更新成功',
-        data: mapRuleRecord(updatedRule as { id: string; data: Record<string, unknown> }),
-      });
+      return res.success(
+        mapRuleRecord(updatedRule as { id: string; data: Record<string, unknown> }),
+        '告警规则更新成功'
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '更新告警规则失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '更新告警规则失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -650,28 +638,27 @@ router.delete(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
-    const workspaceId = (req.query.workspaceId as string | undefined) || req.body?.workspaceId;
+    const workspaceIdInput = (req.query.workspaceId as string | undefined) || req.body?.workspaceId;
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceId) {
+      if (workspaceIdInput) {
         const userId = getUserId(req as AuthenticatedRequest);
-        await ensureWorkspacePermission(String(workspaceId), userId, 'delete');
+        await ensureWorkspacePermission(workspaceId, userId, 'delete');
       }
       await dataManagementService.deleteData(ALERT_RULES_TYPE, id, {
         userId: getUserId(req as AuthenticatedRequest),
-        workspaceId: workspaceId ? String(workspaceId) : undefined,
+        workspaceId,
       });
 
-      return res.json({
-        success: true,
-        message: '告警规则删除成功',
-      });
+      return res.success(null, '告警规则删除成功');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '删除告警规则失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '删除告警规则失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -684,12 +671,13 @@ router.get(
   '/statistics',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { timeRange = '24h', workspaceId } = req.query;
+    const { timeRange = '24h', workspaceId: workspaceIdInput } = req.query;
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
     const userId = getUserId(req as AuthenticatedRequest);
 
     try {
-      if (workspaceId) {
-        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      if (workspaceIdInput) {
+        await ensureWorkspacePermission(workspaceId, userId, 'read');
       }
       const now = new Date();
       let cutoffTime: Date;
@@ -711,11 +699,7 @@ router.get(
           cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       }
 
-      const { results } = await dataManagementService.queryData(
-        ALERTS_TYPE,
-        { workspaceId: workspaceId ? String(workspaceId) : undefined },
-        {}
-      );
+      const { results } = await dataManagementService.queryData(ALERTS_TYPE, { workspaceId }, {});
       const allAlerts = results.map(record => mapAlertRecord(record));
       const recentAlerts = allAlerts.filter(alert => new Date(alert.timestamp) >= cutoffTime);
 
@@ -747,19 +731,14 @@ router.get(
               return sum + (resolvedAt - new Date(alert.timestamp).getTime());
             }, 0) / (recentAlerts.filter(a => a.status === 'resolved').length || 1),
         rules: {
-          total: (
-            await dataManagementService.queryData(
-              ALERT_RULES_TYPE,
-              { workspaceId: workspaceId ? String(workspaceId) : undefined },
-              {}
-            )
-          ).total,
+          total: (await dataManagementService.queryData(ALERT_RULES_TYPE, { workspaceId }, {}))
+            .total,
           enabled: (
             await dataManagementService.queryData(
               ALERT_RULES_TYPE,
               {
                 filters: { enabled: true },
-                workspaceId: workspaceId ? String(workspaceId) : undefined,
+                workspaceId,
               },
               {}
             )
@@ -769,7 +748,7 @@ router.get(
               ALERT_RULES_TYPE,
               {
                 filters: { enabled: false },
-                workspaceId: workspaceId ? String(workspaceId) : undefined,
+                workspaceId,
               },
               {}
             )
@@ -777,16 +756,14 @@ router.get(
         },
       };
 
-      return res.json({
-        success: true,
-        data: statistics,
-      });
+      return res.success(statistics);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: '获取告警统计失败',
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取告警统计失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );

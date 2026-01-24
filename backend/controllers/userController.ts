@@ -6,6 +6,7 @@
 import bcrypt from 'bcrypt';
 import type { NextFunction, Request, Response } from 'express';
 import { StandardErrorCode } from '../../shared/types/standardApiResponse';
+import { toDate } from '../utils/dateUtils';
 
 const { query } = require('../config/database');
 const { hasWorkspacePermission } = require('../utils/workspacePermissions');
@@ -54,7 +55,7 @@ type UserProfile = {
   username: string;
   email: string;
   role: string;
-  created_at: string;
+  created_at: Date;
 };
 
 type UserStats = {
@@ -80,7 +81,7 @@ class UserController {
         return res.error(StandardErrorCode.NOT_FOUND, '用户不存在');
       }
 
-      return res.success(user);
+      return res.success({ ...user, created_at: toDate(user.created_at) });
     } catch (error) {
       next(error);
       return;

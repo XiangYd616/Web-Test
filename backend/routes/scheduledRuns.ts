@@ -3,7 +3,7 @@
  */
 
 import express from 'express';
-import { asyncHandler } from '../middleware/errorHandler';
+import asyncHandler from '../middleware/asyncHandler';
 const scheduledRunController = require('../controllers/scheduledRunController');
 const { authMiddleware } = require('../middleware/auth');
 

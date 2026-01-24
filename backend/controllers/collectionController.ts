@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 
-const { models } = require('../database/sequelize');
+const { models } = require('../database/pgModels');
 const CollectionManager = require('../services/collections/CollectionManager');
 const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 const Logger = require('../utils/logger');
@@ -11,6 +12,7 @@ type ApiResponse = Response & {
   validationError: (errors: ValidationError[]) => Response;
   success: (data?: unknown, message?: string) => Response;
   created: (data?: unknown, message?: string) => Response;
+  error: (code: string, message?: string, details?: unknown, statusCode?: number) => Response;
   notFound: (message?: string) => Response;
   forbidden: (message?: string) => Response;
 };
@@ -196,10 +198,7 @@ const listCollections = async (req: AuthRequest, res: ApiResponse) => {
     });
   } catch (error) {
     Logger.error('获取集合列表失败', error, { userId: req.user.id });
-    return res.status(500).json({
-      success: false,
-      error: '获取集合列表失败',
-    });
+    return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '获取集合列表失败', undefined, 500);
   }
 };
 
@@ -225,10 +224,7 @@ const createCollection = async (req: AuthRequest, res: ApiResponse) => {
     return res.created(collection, '集合创建成功');
   } catch (error) {
     Logger.error('创建集合失败', error, { userId: req.user.id });
-    return res.status(500).json({
-      success: false,
-      error: '创建集合失败',
-    });
+    return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '创建集合失败', undefined, 500);
   }
 };
 
@@ -251,10 +247,7 @@ const getCollection = async (req: AuthRequest, res: ApiResponse) => {
       userId: req.user.id,
       collectionId: req.params.collectionId,
     });
-    return res.status(500).json({
-      success: false,
-      error: '获取集合详情失败',
-    });
+    return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '获取集合详情失败', undefined, 500);
   }
 };
 
@@ -285,10 +278,7 @@ const updateCollection = async (req: AuthRequest, res: ApiResponse) => {
       userId: req.user.id,
       collectionId: req.params.collectionId,
     });
-    return res.status(500).json({
-      success: false,
-      error: '更新集合失败',
-    });
+    return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '更新集合失败', undefined, 500);
   }
 };
 
@@ -315,10 +305,7 @@ const deleteCollection = async (req: AuthRequest, res: ApiResponse) => {
       userId: req.user.id,
       collectionId: req.params.collectionId,
     });
-    return res.status(500).json({
-      success: false,
-      error: '删除集合失败',
-    });
+    return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '删除集合失败', undefined, 500);
   }
 };
 
@@ -351,10 +338,7 @@ const importPostmanCollection = async (req: AuthRequest, res: ApiResponse) => {
     return res.created(collection, '导入集合成功');
   } catch (error) {
     Logger.error('导入集合失败', error, { userId: req.user.id });
-    return res.status(500).json({
-      success: false,
-      error: '导入集合失败',
-    });
+    return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '导入集合失败', undefined, 500);
   }
 };
 
@@ -375,10 +359,7 @@ const exportCollection = async (req: AuthRequest, res: ApiResponse) => {
       userId: req.user.id,
       collectionId: req.params.collectionId,
     });
-    return res.status(500).json({
-      success: false,
-      error: '导出集合失败',
-    });
+    return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '导出集合失败', undefined, 500);
   }
 };
 
@@ -420,10 +401,7 @@ const addFolder = async (req: AuthRequest, res: ApiResponse) => {
       userId: req.user.id,
       collectionId: req.params.collectionId,
     });
-    return res.status(500).json({
-      success: false,
-      error: '创建文件夹失败',
-    });
+    return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '创建文件夹失败', undefined, 500);
   }
 };
 
@@ -494,10 +472,7 @@ const addRequest = async (req: AuthRequest, res: ApiResponse) => {
       userId: req.user.id,
       collectionId: req.params.collectionId,
     });
-    return res.status(500).json({
-      success: false,
-      error: '添加请求失败',
-    });
+    return res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, '添加请求失败', undefined, 500);
   }
 };
 

@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
+import { toDate } from '../utils/dateUtils';
 
-const { models } = require('../database/sequelize');
+const { models } = require('../database/pgModels');
 const WorkspaceManager = require('../services/collaboration/WorkspaceManager');
 const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 
@@ -98,8 +99,8 @@ const listWorkspaces = async (req: AuthRequest, res: ApiResponse) => {
       name: member.workspace.name,
       description: member.workspace.description,
       visibility: member.workspace.visibility,
-      createdAt: member.workspace.createdAt?.toISOString?.() || member.workspace.created_at,
-      updatedAt: member.workspace.updatedAt?.toISOString?.() || member.workspace.updated_at,
+      createdAt: toDate(member.workspace.createdAt || member.workspace.created_at),
+      updatedAt: toDate(member.workspace.updatedAt || member.workspace.updated_at),
       role: member.role,
       metadata: member.workspace.metadata || {},
     }));

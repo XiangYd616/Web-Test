@@ -9,8 +9,9 @@ import { promises as fs } from 'fs';
 import multer from 'multer';
 import path from 'path';
 import * as tar from 'tar';
+import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
 import { query } from '../../config/database';
-import { asyncHandler } from '../../middleware/errorHandler';
+import asyncHandler from '../../middleware/asyncHandler';
 import StorageService from '../../services/storage/StorageService';
 import logger from '../../utils/logger';
 const { authMiddleware, optionalAuth } = require('../../middleware/auth');
@@ -88,20 +89,21 @@ router.get(
       const healthStatus = await storageService.healthCheck();
       const statistics = storageService.getStatistics();
 
-      return res.json({
-        success: true,
-        data: {
-          health: healthStatus,
-          statistics,
-          timestamp: new Date().toISOString(),
-        },
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
+      return res.success({
+        health: healthStatus,
+        statistics,
         timestamp: new Date().toISOString(),
       });
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取存储状态失败',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          timestamp: new Date().toISOString(),
+        },
+        500
+      );
     }
   })
 );
@@ -147,23 +149,22 @@ router.get(
       const countResult = await query(countSql, countParams);
       const total = parseInt(countResult.rows[0].total, 10);
 
-      return res.json({
-        success: true,
-        data: {
-          files: result.rows,
-          pagination: {
-            page: parseInt(page as string),
-            limit: parseInt(limit as string),
-            total,
-            totalPages: Math.ceil(total / parseInt(limit as string)),
-          },
+      return res.success({
+        files: result.rows,
+        pagination: {
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          total,
+          totalPages: Math.ceil(total / parseInt(limit as string)),
         },
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取文件列表失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -187,23 +188,19 @@ router.get(
       const result = await query(sql, [fileId]);
 
       if (result.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: '文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '文件不存在', undefined, 404);
       }
 
       const file = result.rows[0];
 
-      return res.json({
-        success: true,
-        data: file,
-      });
+      return res.success(file);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取文件详情失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -225,18 +222,16 @@ router.post(
       // 验证输入
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: '输入验证失败',
-          errors: errors.array(),
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '输入验证失败', errors.array(), 400);
       }
 
       if (!req.file || !ensuredUserId) {
-        return res.status(400).json({
-          success: false,
-          message: '没有上传文件或用户未认证',
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '没有上传文件或用户未认证',
+          undefined,
+          400
+        );
       }
 
       const file = req.file;
@@ -263,11 +258,7 @@ router.post(
         uploadDate: new Date(),
       };
 
-      return res.status(201).json({
-        success: true,
-        message: '文件上传成功',
-        data: payload,
-      });
+      return res.success(payload, '文件上传成功', 201);
     } catch (error) {
       if (req.file?.path) {
         try {
@@ -276,10 +267,12 @@ router.post(
           logger.error('删除上传文件失败', { error: unlinkError, filePath: req.file.path });
         }
       }
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '文件上传失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -297,27 +290,18 @@ router.get(
     try {
       const file = await storageService.getUploadedFile(fileId);
       if (!file) {
-        return res.status(404).json({
-          success: false,
-          message: '文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '文件不存在', undefined, 404);
       }
 
       const filePath = String((file as Record<string, unknown>).file_path || '');
       if (!filePath) {
-        return res.status(404).json({
-          success: false,
-          message: '文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '文件不存在', undefined, 404);
       }
 
       try {
         await fs.access(filePath);
       } catch {
-        return res.status(404).json({
-          success: false,
-          message: '文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '文件不存在', undefined, 404);
       }
 
       res.setHeader(
@@ -330,10 +314,12 @@ router.get(
       );
       return res.sendFile(filePath);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '下载文件失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -351,17 +337,11 @@ router.delete(
     try {
       const file = await storageService.getUploadedFile(fileId);
       if (!file) {
-        return res.status(404).json({
-          success: false,
-          message: '文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '文件不存在', undefined, 404);
       }
       const filePath = String((file as Record<string, unknown>).file_path || '');
       if (!filePath) {
-        return res.status(404).json({
-          success: false,
-          message: '文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '文件不存在', undefined, 404);
       }
       try {
         await fs.unlink(filePath);
@@ -371,15 +351,14 @@ router.delete(
 
       await storageService.deleteUploadedFile(fileId);
 
-      return res.json({
-        success: true,
-        message: '文件删除成功',
-      });
+      return res.success(null, '文件删除成功');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '文件删除失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -398,11 +377,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '输入验证失败',
-        errors: errors.array(),
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '输入验证失败', errors.array(), 400);
     }
 
     const { fileIds, archiveName, description } = req.body;
@@ -411,10 +386,7 @@ router.post(
 
     try {
       if (!ensuredUserId) {
-        return res.status(401).json({
-          success: false,
-          message: '用户未认证',
-        });
+        return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
       }
 
       const result = await storageService.archive(
@@ -427,19 +399,21 @@ router.post(
         { targetPath: archiveDir }
       );
 
-      return res.status(201).json({
-        success: true,
-        message: '归档创建成功',
-        data: {
+      return res.success(
+        {
           jobId: result.jobId,
           filesCount: result.affected,
         },
-      });
+        '归档创建成功',
+        201
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '归档创建失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -488,23 +462,22 @@ router.get(
         createdBy: job.metadata?.createdBy,
       }));
 
-      return res.json({
-        success: true,
-        data: {
-          archives,
-          pagination: {
-            page: pageNumber,
-            limit: pageLimit,
-            total,
-            totalPages,
-          },
+      return res.success({
+        archives,
+        pagination: {
+          page: pageNumber,
+          limit: pageLimit,
+          total,
+          totalPages,
         },
       });
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取归档列表失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -524,26 +497,17 @@ router.post(
 
     try {
       if (!ensuredUserId) {
-        return res.status(401).json({
-          success: false,
-          message: '用户未认证',
-        });
+        return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
       }
 
       const archiveJob = await storageService.getArchiveJob(archiveId);
       if (!archiveJob) {
-        return res.status(404).json({
-          success: false,
-          message: '归档任务不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '归档任务不存在', undefined, 404);
       }
 
       const archiveData = archiveJob.metadata || {};
       if (archiveData.createdBy && archiveData.createdBy !== ensuredUserId) {
-        return res.status(403).json({
-          success: false,
-          message: '无权恢复该归档',
-        });
+        return res.error(StandardErrorCode.FORBIDDEN, '无权恢复该归档', undefined, 403);
       }
 
       const archivePath = archiveData.archivePath as string | undefined;
@@ -554,10 +518,7 @@ router.post(
         size: number;
       }>;
       if (!archivePath) {
-        return res.status(400).json({
-          success: false,
-          message: '归档文件不存在',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '归档文件不存在', undefined, 400);
       }
 
       const targetDir = destination
@@ -588,20 +549,21 @@ router.post(
         });
       }
 
-      return res.json({
-        success: true,
-        message: '归档恢复成功',
-        data: {
+      return res.success(
+        {
           archiveId,
           destination: targetDir,
           restoredFiles,
         },
-      });
+        '归档恢复成功'
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '归档恢复失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -619,10 +581,7 @@ router.delete(
     try {
       const archiveJob = await storageService.getArchiveJob(archiveId);
       if (!archiveJob) {
-        return res.status(404).json({
-          success: false,
-          message: '归档任务不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '归档任务不存在', undefined, 404);
       }
 
       const archivePath = archiveJob.metadata?.archivePath as string | undefined;
@@ -635,16 +594,14 @@ router.delete(
       }
       await storageService.deleteArchiveJob(archiveId);
 
-      return res.json({
-        success: true,
-        message: '归档删除成功',
-        data: { archiveId },
-      });
+      return res.success({ archiveId }, '归档删除成功');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '归档删除失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -663,11 +620,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '输入验证失败',
-        errors: errors.array(),
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '输入验证失败', errors.array(), 400);
     }
 
     const { olderThan, dryRun = false } = req.body;
@@ -678,16 +631,14 @@ router.post(
         dryRun,
       });
 
-      return res.json({
-        success: true,
-        message: dryRun ? '清理预览完成' : '清理完成',
-        data: result,
-      });
+      return res.success(result, dryRun ? '清理预览完成' : '清理完成');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '清理失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -713,15 +664,14 @@ router.get(
         totalSize: parseInt(row.total_size, 10),
       };
 
-      return res.json({
-        success: true,
-        data: quota,
-      });
+      return res.success(quota);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取存储配额失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -740,11 +690,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '输入验证失败',
-        errors: errors.array(),
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '输入验证失败', errors.array(), 400);
     }
 
     const { fileId, targetPath } = req.body;
@@ -753,30 +699,21 @@ router.post(
 
     try {
       if (!ensuredUserId) {
-        return res.status(401).json({
-          success: false,
-          message: '用户未认证',
-        });
+        return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
       }
       const fileResult = await query(
         'SELECT id, original_name, filename, mimetype, size, file_path FROM uploaded_files WHERE id = $1',
         [fileId]
       );
       if (fileResult.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: '文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '文件不存在', undefined, 404);
       }
 
       const file = fileResult.rows[0] as Record<string, unknown>;
       const targetDir = await resolveTargetDirectory(targetPath);
       const sourcePath = String(file.file_path || '');
       if (!sourcePath) {
-        return res.status(404).json({
-          success: false,
-          message: '文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '文件不存在', undefined, 404);
       }
       const targetFilename = await ensureUniqueFilename(targetDir, String(file.filename || ''));
       const targetFilePath = path.join(targetDir, targetFilename);
@@ -788,16 +725,14 @@ router.post(
         path: targetFilePath,
       });
 
-      return res.json({
-        success: true,
-        message: '文件移动成功',
-        data: { fileId, targetPath: targetFilePath },
-      });
+      return res.success({ fileId, targetPath: targetFilePath }, '文件移动成功');
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '文件移动失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
@@ -816,11 +751,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '输入验证失败',
-        errors: errors.array(),
-      });
+      return res.error(StandardErrorCode.INVALID_INPUT, '输入验证失败', errors.array(), 400);
     }
 
     const { fileId, targetPath } = req.body;
@@ -829,30 +760,21 @@ router.post(
 
     try {
       if (!ensuredUserId) {
-        return res.status(401).json({
-          success: false,
-          message: '用户未认证',
-        });
+        return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
       }
       const fileResult = await query(
         'SELECT id, original_name, filename, mimetype, size, file_path FROM uploaded_files WHERE id = $1',
         [fileId]
       );
       if (fileResult.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: '文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '文件不存在', undefined, 404);
       }
 
       const file = fileResult.rows[0] as Record<string, unknown>;
       const targetDir = await resolveTargetDirectory(targetPath);
       const sourcePath = String(file.file_path || '');
       if (!sourcePath) {
-        return res.status(404).json({
-          success: false,
-          message: '文件不存在',
-        });
+        return res.error(StandardErrorCode.NOT_FOUND, '文件不存在', undefined, 404);
       }
       const targetFilename = await ensureUniqueFilename(targetDir, String(file.filename || ''));
       const targetFilePath = path.join(targetDir, targetFilename);
@@ -870,16 +792,18 @@ router.post(
         ensuredUserId
       );
 
-      return res.status(201).json({
-        success: true,
-        message: '文件复制成功',
-        data: { fileId: insertResult.id, filePath: targetFilePath },
-      });
+      return res.success(
+        { fileId: insertResult.id, filePath: targetFilePath },
+        '文件复制成功',
+        201
+      );
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '文件复制失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
     }
   })
 );
