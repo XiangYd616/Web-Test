@@ -161,13 +161,13 @@ CREATE TABLE IF NOT EXISTS workspaces (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     visibility VARCHAR(20) DEFAULT 'private' CHECK (visibility IN ('private', 'team', 'public')),
-    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     metadata JSONB DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_workspaces_created_by ON workspaces(created_by);
+CREATE INDEX IF NOT EXISTS idx_workspaces_owner_id ON workspaces(owner_id);
 CREATE INDEX IF NOT EXISTS idx_workspaces_visibility ON workspaces(visibility);
 CREATE INDEX IF NOT EXISTS idx_workspaces_metadata_gin ON workspaces USING GIN (metadata);
 
@@ -192,6 +192,210 @@ CREATE INDEX IF NOT EXISTS idx_workspace_members_user_id ON workspace_members(us
 CREATE INDEX IF NOT EXISTS idx_workspace_members_role ON workspace_members(role);
 CREATE INDEX IF NOT EXISTS idx_workspace_members_status ON workspace_members(status);
 CREATE INDEX IF NOT EXISTS idx_workspace_members_permissions_gin ON workspace_members USING GIN (permissions);
+
+-- =====================================================
+-- 1.1 协作/集合/环境/运行模块（由 Sequelize 模型反推）
+-- =====================================================
+
+-- 集合表
+CREATE TABLE IF NOT EXISTS collections (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    definition JSONB DEFAULT '{}',
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_collections_workspace_id ON collections(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_collections_created_by ON collections(created_by);
+CREATE INDEX IF NOT EXISTS idx_collections_created_at ON collections(created_at DESC);
+
+-- 环境表
+CREATE TABLE IF NOT EXISTS environments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    config JSONB DEFAULT '{}',
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_environments_workspace_id ON environments(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_environments_created_at ON environments(created_at DESC);
+
+-- 环境变量表
+CREATE TABLE IF NOT EXISTS environment_variables (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    environment_id UUID NOT NULL REFERENCES environments(id) ON DELETE CASCADE,
+    key VARCHAR(255) NOT NULL,
+    value TEXT NOT NULL,
+    type VARCHAR(50),
+    description TEXT,
+    enabled BOOLEAN DEFAULT true,
+    secret BOOLEAN DEFAULT false,
+    encrypted BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_environment_variables_environment_id ON environment_variables(environment_id);
+CREATE INDEX IF NOT EXISTS idx_environment_variables_key ON environment_variables(key);
+
+-- 全局变量表
+CREATE TABLE IF NOT EXISTS global_variables (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    key VARCHAR(255) NOT NULL,
+    value TEXT NOT NULL,
+    type VARCHAR(50),
+    description TEXT,
+    enabled BOOLEAN DEFAULT true,
+    secret BOOLEAN DEFAULT false,
+    encrypted BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_global_variables_key ON global_variables(key);
+
+-- 运行记录表
+CREATE TABLE IF NOT EXISTS runs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    collection_id UUID NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+    environment_id UUID REFERENCES environments(id) ON DELETE SET NULL,
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(20) NOT NULL DEFAULT 'running',
+    options JSONB DEFAULT '{}',
+    summary JSONB DEFAULT '{}',
+    started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    completed_at TIMESTAMP WITH TIME ZONE,
+    duration INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_runs_workspace_id ON runs(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_runs_collection_id ON runs(collection_id);
+CREATE INDEX IF NOT EXISTS idx_runs_user_id ON runs(user_id);
+CREATE INDEX IF NOT EXISTS idx_runs_status ON runs(status);
+CREATE INDEX IF NOT EXISTS idx_runs_created_at ON runs(created_at DESC);
+
+-- 运行结果表
+CREATE TABLE IF NOT EXISTS run_results (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    run_id UUID NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+    request_id UUID NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    response JSONB,
+    assertions JSONB,
+    duration INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_run_results_run_id ON run_results(run_id);
+CREATE INDEX IF NOT EXISTS idx_run_results_status ON run_results(status);
+
+-- 定时运行表
+CREATE TABLE IF NOT EXISTS scheduled_runs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+    collection_id UUID NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+    environment_id UUID REFERENCES environments(id) ON DELETE SET NULL,
+    cron_expression VARCHAR(100) NOT NULL,
+    config JSONB DEFAULT '{}',
+    status VARCHAR(20) NOT NULL DEFAULT 'active',
+    name VARCHAR(255),
+    description TEXT,
+    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    last_run_at TIMESTAMP WITH TIME ZONE,
+    next_run_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_scheduled_runs_workspace_id ON scheduled_runs(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_scheduled_runs_collection_id ON scheduled_runs(collection_id);
+CREATE INDEX IF NOT EXISTS idx_scheduled_runs_status ON scheduled_runs(status);
+
+-- 定时运行结果表
+CREATE TABLE IF NOT EXISTS scheduled_run_results (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    scheduled_run_id UUID NOT NULL REFERENCES scheduled_runs(id) ON DELETE CASCADE,
+    status VARCHAR(20) NOT NULL DEFAULT 'running',
+    started_at TIMESTAMP WITH TIME ZONE,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    duration INTEGER,
+    total_requests INTEGER DEFAULT 0,
+    passed_requests INTEGER DEFAULT 0,
+    failed_requests INTEGER DEFAULT 0,
+    error_count INTEGER DEFAULT 0,
+    logs JSONB DEFAULT '[]',
+    triggered_by VARCHAR(20),
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_scheduled_run_results_scheduled_run_id ON scheduled_run_results(scheduled_run_id);
+
+-- 工作空间邀请表
+CREATE TABLE IF NOT EXISTS workspace_invitations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+    inviter_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    invitee_email VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    permissions JSONB DEFAULT '[]',
+    token VARCHAR(255) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    responded_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_workspace_invitations_workspace_id ON workspace_invitations(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_workspace_invitations_invitee_email ON workspace_invitations(invitee_email);
+CREATE INDEX IF NOT EXISTS idx_workspace_invitations_status ON workspace_invitations(status);
+
+-- 工作空间资源表
+CREATE TABLE IF NOT EXISTS workspace_resources (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    path TEXT,
+    size BIGINT,
+    mime_type VARCHAR(100),
+    owner_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    permissions JSONB DEFAULT '[]',
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_workspace_resources_workspace_id ON workspace_resources(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_workspace_resources_owner_id ON workspace_resources(owner_id);
+
+-- 工作空间活动表
+CREATE TABLE IF NOT EXISTS workspace_activities (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    type VARCHAR(50) NOT NULL,
+    resource JSONB DEFAULT '{}',
+    details JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_workspace_activities_workspace_id ON workspace_activities(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_workspace_activities_user_id ON workspace_activities(user_id);
 
 -- =====================================================
 -- 2. 测试管理模块
@@ -275,6 +479,21 @@ CREATE TABLE IF NOT EXISTS test_metrics (
     recommendation TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 测试对比记录表
+CREATE TABLE IF NOT EXISTS test_comparisons (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    comparison_name VARCHAR(255) NOT NULL,
+    execution_ids INTEGER[] NOT NULL,
+    comparison_type VARCHAR(50) NOT NULL,
+    comparison_data JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_test_comparisons_user_id ON test_comparisons(user_id);
+CREATE INDEX IF NOT EXISTS idx_test_comparisons_created_at ON test_comparisons(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_test_comparisons_type ON test_comparisons(comparison_type);
 
 -- 压力测试结果表
 CREATE TABLE IF NOT EXISTS stress_test_results (
@@ -759,7 +978,7 @@ CREATE INDEX IF NOT EXISTS idx_archive_policies_enabled ON archive_policies(enab
 CREATE TABLE IF NOT EXISTS data_records (
     id VARCHAR(80) PRIMARY KEY,
     type VARCHAR(100) NOT NULL,
-    workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
+    workspace_id VARCHAR(80),
     data JSONB NOT NULL,
     metadata JSONB NOT NULL DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -771,6 +990,22 @@ CREATE INDEX IF NOT EXISTS idx_data_records_type ON data_records(type);
 CREATE INDEX IF NOT EXISTS idx_data_records_workspace_id ON data_records(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_data_records_created ON data_records(created_at DESC);
 
+CREATE TABLE IF NOT EXISTS data_record_versions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    record_id VARCHAR(80) NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    workspace_id VARCHAR(80),
+    data JSONB NOT NULL,
+    metadata JSONB NOT NULL DEFAULT '{}',
+    version INTEGER NOT NULL,
+    action VARCHAR(30) NOT NULL,
+    created_by UUID,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_data_record_versions_record_id ON data_record_versions(record_id);
+CREATE INDEX IF NOT EXISTS idx_data_record_versions_created_at ON data_record_versions(created_at DESC);
+
 CREATE TABLE IF NOT EXISTS data_backups (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
@@ -780,46 +1015,23 @@ CREATE TABLE IF NOT EXISTS data_backups (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 系统统计表
-CREATE TABLE IF NOT EXISTS system_stats (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-
-    -- 统计日期
-    date DATE NOT NULL,
-
-    -- 用户统计
-    total_users INTEGER DEFAULT 0,
-    active_users INTEGER DEFAULT 0,
-    new_users INTEGER DEFAULT 0,
-
-    -- 测试统计
-    total_tests INTEGER DEFAULT 0,
-    successful_tests INTEGER DEFAULT 0,
-    failed_tests INTEGER DEFAULT 0,
-
-    -- 按测试类型统计
-    api_tests INTEGER DEFAULT 0,
-    compatibility_tests INTEGER DEFAULT 0,
-    infrastructure_tests INTEGER DEFAULT 0,
-    security_tests INTEGER DEFAULT 0,
-    seo_tests INTEGER DEFAULT 0,
-    stress_tests INTEGER DEFAULT 0,
-    ux_tests INTEGER DEFAULT 0,
-    website_tests INTEGER DEFAULT 0,
-
-    -- 性能统计
-    average_test_duration INTEGER DEFAULT 0, -- 毫秒
-    total_test_duration BIGINT DEFAULT 0, -- 毫秒
-
-    -- 系统资源统计
-    storage_used BIGINT DEFAULT 0, -- 字节
-    bandwidth_used BIGINT DEFAULT 0, -- 字节
-
-    -- 时间戳
+CREATE TABLE IF NOT EXISTS export_tasks (
+    id VARCHAR(80) PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
+    type VARCHAR(50) NOT NULL,
+    filters JSONB,
+    format VARCHAR(20) NOT NULL DEFAULT 'json',
+    options JSONB,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-
-    UNIQUE(date)
+    started_at TIMESTAMP WITH TIME ZONE,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    file_path TEXT,
+    error_message TEXT
 );
+
+CREATE INDEX IF NOT EXISTS idx_export_tasks_user_id ON export_tasks(user_id);
+CREATE INDEX IF NOT EXISTS idx_export_tasks_status ON export_tasks(status);
 
 -- 引擎状态表
 CREATE TABLE IF NOT EXISTS engine_status (
