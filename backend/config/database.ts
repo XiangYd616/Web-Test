@@ -251,25 +251,12 @@ const initializeTables = async () => {
       return;
     }
 
-    console.log('🔧 开始优化数据库架构初始化...');
+    console.log('🔧 开始数据库架构初始化 (data/schema.sql)...');
 
-    // 读取并执行优化的数据库架构脚本
-    const optimizedSchemaSqlPath = path.join(
-      __dirname,
-      '..',
-      'scripts',
-      'optimized-database-schema.sql'
-    );
-    const fallbackSqlPath = path.join(__dirname, '..', 'scripts', 'fix-database.sql');
+    const schemaSqlPath = path.join(__dirname, '..', '..', 'data', 'schema.sql');
 
-    let sqlPath = optimizedSchemaSqlPath;
-    if (!fs.existsSync(optimizedSchemaSqlPath) && fs.existsSync(fallbackSqlPath)) {
-      console.log('⚠️ 未找到优化架构脚本，使用备用脚本');
-      sqlPath = fallbackSqlPath;
-    }
-
-    if (fs.existsSync(sqlPath)) {
-      const schemaSql = fs.readFileSync(sqlPath, 'utf8');
+    if (fs.existsSync(schemaSqlPath)) {
+      const schemaSql = fs.readFileSync(schemaSqlPath, 'utf8');
       await dbPool.query(schemaSql);
       console.log('✅ 数据库架构初始化完成');
 
@@ -281,7 +268,7 @@ const initializeTables = async () => {
       `);
       console.log(`📊 创建了 ${verifyResult.rows[0].count} 个表`);
     } else {
-      console.log('⚠️ 未找到数据库初始化脚本，跳过表创建');
+      console.log('⚠️ 未找到数据库初始化脚本 (data/schema.sql)，跳过表创建');
     }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);

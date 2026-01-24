@@ -57,7 +57,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
 
   // 生成新的备份代码
   const generateNewCodes = async () => {
-    // eslint-disable-next-line no-alert
+     
     if (!window.confirm('生成新代码将使旧代码失效。确定要继续吗？')) {
       return;
     }

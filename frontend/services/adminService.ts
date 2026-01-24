@@ -147,6 +147,7 @@ class AdminService {
         success?: boolean;
         data?: AdminUser[];
         pagination?: AdminApiResponse<AdminUser[]>['pagination'];
+        meta?: { pagination?: AdminApiResponse<AdminUser[]>['pagination'] };
         error?: string;
       };
 
@@ -157,7 +158,7 @@ class AdminService {
       return {
         success: true,
         data: result.data,
-        pagination: result.pagination,
+        pagination: result.pagination || result.meta?.pagination,
       };
     } catch (error) {
       this.handleAuthFailure(error);
@@ -323,6 +324,7 @@ class AdminService {
         success?: boolean;
         data?: TestManagement[];
         pagination?: AdminApiResponse<TestManagement[]>['pagination'];
+        meta?: { pagination?: AdminApiResponse<TestManagement[]>['pagination'] };
         error?: string;
       };
 
@@ -333,7 +335,7 @@ class AdminService {
       return {
         success: true,
         data: result.data,
-        pagination: result.pagination,
+        pagination: result.pagination || result.meta?.pagination,
       };
     } catch (error) {
       this.handleAuthFailure(error);
@@ -407,6 +409,7 @@ class AdminService {
         success?: boolean;
         data?: ActivityLog[];
         pagination?: AdminApiResponse<ActivityLog[]>['pagination'];
+        meta?: { pagination?: AdminApiResponse<ActivityLog[]>['pagination'] };
         error?: string;
       };
 
@@ -417,7 +420,7 @@ class AdminService {
       return {
         success: true,
         data: result.data,
-        pagination: result.pagination,
+        pagination: result.pagination || result.meta?.pagination,
       };
     } catch (error) {
       this.handleAuthFailure(error);

@@ -15,8 +15,8 @@ const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
 
-// 导入数据库连接
-const { connectDatabase, syncDatabase } = require('./database/sequelize');
+// 导入数据库连接 (pg)
+const { connectDB, closeConnection } = require('./config/database');
 
 // 导入路由
 const authRoutes = require('./routes/auth');
@@ -31,6 +31,7 @@ const coreRoutes = require('./routes/misc/core');
 const analyticsRoutes = require('./routes/analytics');
 const systemRoutes = require('./routes/system');
 const dataRoutes = require('./routes/data');
+const storageRoutes = require('./routes/data/storage');
 const adminRoutes = require('./routes/admin');
 const workspaceRoutes = require('./routes/workspaces');
 const collectionRoutes = require('./routes/collections');
@@ -45,10 +46,11 @@ const testEngineRegistry = require('./core/TestEngineRegistry');
 const { startWorker } = require('./services/testing/TestQueueService');
 
 // 导入中间件
-const { responseFormatter } = require('./middleware/responseFormatter');
+const { response } = require('./middleware/responseFormatter');
 // 导入统一错误处理系统
 const { errorMiddleware, notFoundHandler, handleError } = require('./middleware/errorHandler');
 const { requestLogger, performanceMonitor, apiStats } = require('./middleware/logger');
+const { typeAlignmentMiddleware } = require('./utils/typeAlignment');
 
 // 创建Express应用
 const app = express();
@@ -126,22 +128,28 @@ app.use(performanceMonitor);
 app.use(apiStats);
 
 // 响应格式化中间件（提供 res.success 等）
-app.use(responseFormatter);
+app.use(response);
+// 响应类型对齐
+app.use(typeAlignmentMiddleware);
 
 // 健康检查端点
 app.get('/health', (_req: Request, res: Response) => {
-  res.status(200).json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: NODE_ENV,
-    version: process.env.npm_package_version || '1.0.0',
-  });
+  res.success(
+    {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: NODE_ENV,
+      version: process.env.npm_package_version || '1.0.0',
+    },
+    undefined,
+    200
+  );
 });
 
 // API信息端点
 app.get('/api/info', (_req: Request, res: Response) => {
-  res.json({
+  res.success({
     name: 'Test-Web Platform API',
     version: process.env.npm_package_version || '1.0.0',
     description: '网站测试平台后端API服务',
@@ -179,6 +187,7 @@ app.use('/api/batch', batchRoutes);
 app.use('/api/core', coreRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/data', dataRoutes);
+app.use('/api/storage', storageRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/workspaces', workspaceRoutes);
 app.use('/api/collections', collectionRoutes);
@@ -213,21 +222,16 @@ const gracefulShutdown = () => {
   server.close(() => {
     console.log('✅ HTTP server closed');
 
-    // 关闭数据库连接
-    if (require('./database/sequelize').sequelize) {
-      require('./database/sequelize')
-        .sequelize.close()
-        .then(() => {
-          console.log('✅ Database connection closed');
-          process.exit(0);
-        })
-        .catch((err: unknown) => {
-          console.error('❌ Error during database shutdown:', err);
-          process.exit(1);
-        });
-    } else {
-      process.exit(0);
-    }
+    // 关闭数据库连接 (pg)
+    closeConnection()
+      .then(() => {
+        console.log('✅ Database connection closed');
+        process.exit(0);
+      })
+      .catch((err: unknown) => {
+        console.error('❌ Error during database shutdown:', err);
+        process.exit(1);
+      });
   });
 
   // 强制关闭超时
@@ -268,39 +272,30 @@ const startServer = async (): Promise<Server> => {
     }
 
     // 连接数据库
-    const dbConnected = await connectDatabase();
+    await connectDB();
 
-    if (dbConnected) {
-      // 同步数据库表结构（仅在开发环境）
-      if (NODE_ENV === 'development') {
-        await syncDatabase(false); // false = 不强制重建表
+    registerTestEngines();
+    await testEngineRegistry.initialize();
+
+    const enableTestQueue = process.env.TEST_QUEUE_ENABLED !== 'false';
+    if (enableTestQueue) {
+      try {
+        startWorker({ queueName: 'test-execution' });
+        startWorker({ queueName: 'test-execution-heavy' });
+        console.log('✅ 测试队列 Worker 已启动');
+      } catch (error: unknown) {
+        console.error('启动测试队列 Worker 失败:', error);
       }
+    }
 
-      registerTestEngines();
-      await testEngineRegistry.initialize();
+    const enableScheduledRuns = process.env.SCHEDULED_RUNS_ENABLED === 'true';
 
-      const enableTestQueue = process.env.TEST_QUEUE_ENABLED !== 'false';
-      if (enableTestQueue) {
-        try {
-          startWorker({ queueName: 'test-execution' });
-          startWorker({ queueName: 'test-execution-heavy' });
-          console.log('✅ 测试队列 Worker 已启动');
-        } catch (error: unknown) {
-          console.error('启动测试队列 Worker 失败:', error);
-        }
-      }
-
-      const enableScheduledRuns = process.env.SCHEDULED_RUNS_ENABLED === 'true';
-
-      if (enableScheduledRuns) {
-        const scheduledRunService = new ScheduledRunService();
-        scheduledRunController.setScheduledRunService(scheduledRunService);
-        scheduledRunService.start().catch((error: unknown) => {
-          console.error('启动定时运行服务失败:', error);
-        });
-      }
-    } else {
-      console.warn('⚠️  Database connection failed, but server will continue...');
+    if (enableScheduledRuns) {
+      const scheduledRunService = new ScheduledRunService();
+      scheduledRunController.setScheduledRunService(scheduledRunService);
+      scheduledRunService.start().catch((error: unknown) => {
+        console.error('启动定时运行服务失败:', error);
+      });
     }
 
     // 启动HTTP服务器
