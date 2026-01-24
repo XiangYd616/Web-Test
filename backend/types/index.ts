@@ -71,9 +71,11 @@ export {
   // 测试相关模型
   TestConfiguration,
   TestExecution,
+  TestMetricRecord,
   // 报告相关模型
   TestReport,
   TestResult,
+  TestResultRecord,
   UpdateTestConfigData,
   UpdateTestExecutionData,
   UpdateUserData,

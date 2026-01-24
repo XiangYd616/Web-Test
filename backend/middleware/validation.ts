@@ -5,17 +5,14 @@
 
 import type { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
+import { TEST_TYPES } from '../constants/testTypes';
 
-// 测试类型枚举
-const TEST_TYPES = [
-  'performance',
-  'security',
-  'api',
-  'stress',
-  'seo',
-  'website',
-  'accessibility',
-] as const;
+const respondInvalidInput = (res: Response, message: string, details?: unknown) =>
+  res.error(StandardErrorCode.INVALID_INPUT, message, details, 400);
+
+const respondInternalError = (res: Response, message: string, details?: unknown) =>
+  res.error(StandardErrorCode.INTERNAL_SERVER_ERROR, message, details, 500);
 
 /**
  * 验证测试类型
@@ -25,10 +22,7 @@ const validateTestType = (req: Request, res: Response, next: NextFunction) => {
   const { error } = schema.validate(req.query.testType);
 
   if (error) {
-    return res.status(400).json({
-      success: false,
-      error: `无效的测试类型。支持的类型: ${TEST_TYPES.join(', ')}`,
-    });
+    return respondInvalidInput(res, `无效的测试类型。支持的类型: ${TEST_TYPES.join(', ')}`);
   }
 
   return next();
@@ -45,10 +39,7 @@ const validateRequest = (schema: Joi.Schema, target: 'body' | 'query' = 'body') 
     });
 
     if (error) {
-      return res.status(400).json({
-        success: false,
-        error: error.details.map(detail => detail.message).join(', '),
-      });
+      return respondInvalidInput(res, error.details.map(detail => detail.message).join(', '));
     }
 
     (req as Request & { [key: string]: unknown })[target] = value;
@@ -68,10 +59,7 @@ const validatePagination = (req: Request, res: Response, next: NextFunction) => 
   if (page !== undefined) {
     const pageNum = parseInt(String(page));
     if (isNaN(pageNum) || pageNum < 1) {
-      return res.status(400).json({
-        success: false,
-        error: '页码必须是大于0的整数',
-      });
+      return respondInvalidInput(res, '页码必须是大于0的整数');
     }
     (req.query as Record<string, unknown>).page = pageNum;
   }
@@ -80,10 +68,7 @@ const validatePagination = (req: Request, res: Response, next: NextFunction) => 
   if (limit !== undefined) {
     const limitNum = parseInt(String(limit));
     if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
-      return res.status(400).json({
-        success: false,
-        error: '每页数量必须是1-100之间的整数',
-      });
+      return respondInvalidInput(res, '每页数量必须是1-100之间的整数');
     }
     (req.query as Record<string, unknown>).limit = limitNum;
   }
@@ -110,17 +95,11 @@ const validateSorting = (req: Request, res: Response, next: NextFunction) => {
   const validSortOrders = ['ASC', 'DESC', 'asc', 'desc'];
 
   if (sortBy && !validSortFields.includes(String(sortBy))) {
-    return res.status(400).json({
-      success: false,
-      error: `无效的排序字段。支持的字段: ${validSortFields.join(', ')}`,
-    });
+    return respondInvalidInput(res, `无效的排序字段。支持的字段: ${validSortFields.join(', ')}`);
   }
 
   if (sortOrder && !validSortOrders.includes(String(sortOrder))) {
-    return res.status(400).json({
-      success: false,
-      error: `无效的排序方向。支持: ASC, DESC`,
-    });
+    return respondInvalidInput(res, '无效的排序方向。支持: ASC, DESC');
   }
 
   return next();
@@ -135,10 +114,7 @@ const validateUUID = (paramName: string) => {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
     if (!uuidRegex.test(String(value))) {
-      return res.status(400).json({
-        success: false,
-        error: `无效的${paramName}格式`,
-      });
+      return respondInvalidInput(res, `无效的${paramName}格式`);
     }
 
     return next();
@@ -153,10 +129,7 @@ const validateEmail = (req: Request, res: Response, next: NextFunction) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!email || !emailRegex.test(String(email))) {
-    return res.status(400).json({
-      success: false,
-      error: '无效的邮箱格式',
-    });
+    return respondInvalidInput(res, '无效的邮箱格式');
   }
 
   return next();
@@ -169,24 +142,15 @@ const validatePassword = (req: Request, res: Response, next: NextFunction) => {
   const { password } = req.body;
 
   if (!password) {
-    return res.status(400).json({
-      success: false,
-      error: '密码是必需的',
-    });
+    return respondInvalidInput(res, '密码是必需的');
   }
 
   if (typeof password !== 'string') {
-    return res.status(400).json({
-      success: false,
-      error: '密码必须是字符串',
-    });
+    return respondInvalidInput(res, '密码必须是字符串');
   }
 
   if (password.length < 8) {
-    return res.status(400).json({
-      success: false,
-      error: '密码长度至少8位',
-    });
+    return respondInvalidInput(res, '密码长度至少8位');
   }
 
   // 检查密码强度
@@ -196,10 +160,7 @@ const validatePassword = (req: Request, res: Response, next: NextFunction) => {
   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
   if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
-    return res.status(400).json({
-      success: false,
-      error: '密码必须包含大写字母、小写字母、数字和特殊字符',
-    });
+    return respondInvalidInput(res, '密码必须包含大写字母、小写字母、数字和特殊字符');
   }
 
   return next();
@@ -213,10 +174,7 @@ const validatePhoneNumber = (req: Request, res: Response, next: NextFunction) =>
   const phoneRegex = /^1[3-9]\d{9}$/;
 
   if (!phoneNumber || !phoneRegex.test(String(phoneNumber))) {
-    return res.status(400).json({
-      success: false,
-      error: '无效的手机号格式',
-    });
+    return respondInvalidInput(res, '无效的手机号格式');
   }
 
   return next();
@@ -231,20 +189,14 @@ const validateDateRange = (req: Request, res: Response, next: NextFunction) => {
   if (startDate) {
     const start = new Date(String(startDate));
     if (isNaN(start.getTime())) {
-      return res.status(400).json({
-        success: false,
-        error: '无效的开始日期格式',
-      });
+      return respondInvalidInput(res, '无效的开始日期格式');
     }
   }
 
   if (endDate) {
     const end = new Date(String(endDate));
     if (isNaN(end.getTime())) {
-      return res.status(400).json({
-        success: false,
-        error: '无效的结束日期格式',
-      });
+      return respondInvalidInput(res, '无效的结束日期格式');
     }
   }
 
@@ -253,19 +205,13 @@ const validateDateRange = (req: Request, res: Response, next: NextFunction) => {
     const end = new Date(String(endDate));
 
     if (start > end) {
-      return res.status(400).json({
-        success: false,
-        error: '开始日期不能晚于结束日期',
-      });
+      return respondInvalidInput(res, '开始日期不能晚于结束日期');
     }
 
     // 检查日期范围是否超过一年
     const oneYear = 365 * 24 * 60 * 60 * 1000;
     if (end.getTime() - start.getTime() > oneYear) {
-      return res.status(400).json({
-        success: false,
-        error: '日期范围不能超过一年',
-      });
+      return respondInvalidInput(res, '日期范围不能超过一年');
     }
   }
 
@@ -288,34 +234,22 @@ const validateFileUpload = (
     const files = (req as { files?: Array<{ size: number; mimetype: string }> }).files;
 
     if (!files || files.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: '请选择要上传的文件',
-      });
+      return respondInvalidInput(res, '请选择要上传的文件');
     }
 
     if (files.length > maxFiles) {
-      return res.status(400).json({
-        success: false,
-        error: `最多只能上传${maxFiles}个文件`,
-      });
+      return respondInvalidInput(res, `最多只能上传${maxFiles}个文件`);
     }
 
     for (const file of files) {
       // 检查文件大小
       if (file.size > maxSize) {
-        return res.status(400).json({
-          success: false,
-          error: `文件大小不能超过${Math.round(maxSize / 1024 / 1024)}MB`,
-        });
+        return respondInvalidInput(res, `文件大小不能超过${Math.round(maxSize / 1024 / 1024)}MB`);
       }
 
       // 检查文件类型
       if (allowedTypes.length > 0 && !allowedTypes.includes(file.mimetype)) {
-        return res.status(400).json({
-          success: false,
-          error: `不支持的文件类型。支持的类型: ${allowedTypes.join(', ')}`,
-        });
+        return respondInvalidInput(res, `不支持的文件类型。支持的类型: ${allowedTypes.join(', ')}`);
       }
     }
 
@@ -333,10 +267,7 @@ const validateJSON = (req: Request, res: Response, next: NextFunction) => {
     try {
       JSON.parse(data);
     } catch {
-      return res.status(400).json({
-        success: false,
-        error: '无效的JSON格式',
-      });
+      return respondInvalidInput(res, '无效的JSON格式');
     }
   }
 
@@ -364,24 +295,15 @@ const validateArray = (
     }
 
     if (!Array.isArray(value)) {
-      return res.status(400).json({
-        success: false,
-        error: `${fieldName}必须是数组`,
-      });
+      return respondInvalidInput(res, `${fieldName}必须是数组`);
     }
 
     if (value.length < minLength) {
-      return res.status(400).json({
-        success: false,
-        error: `${fieldName}至少需要${minLength}个元素`,
-      });
+      return respondInvalidInput(res, `${fieldName}至少需要${minLength}个元素`);
     }
 
     if (value.length > maxLength) {
-      return res.status(400).json({
-        success: false,
-        error: `${fieldName}最多允许${maxLength}个元素`,
-      });
+      return respondInvalidInput(res, `${fieldName}最多允许${maxLength}个元素`);
     }
 
     // 如果提供了itemSchema，验证每个元素
@@ -389,10 +311,7 @@ const validateArray = (
       for (let i = 0; i < value.length; i++) {
         const { error } = itemSchema.validate(value[i]);
         if (error) {
-          return res.status(400).json({
-            success: false,
-            error: `${fieldName}[${i}]验证失败: ${error.message}`,
-          });
+          return respondInvalidInput(res, `${fieldName}[${i}]验证失败: ${error.message}`);
         }
       }
     }
@@ -413,18 +332,12 @@ const validateObject = (fieldName: string, schema: Joi.Schema) => {
     }
 
     if (typeof value !== 'object' || value === null) {
-      return res.status(400).json({
-        success: false,
-        error: `${fieldName}必须是对象`,
-      });
+      return respondInvalidInput(res, `${fieldName}必须是对象`);
     }
 
     const { error } = schema.validate(value);
     if (error) {
-      return res.status(400).json({
-        success: false,
-        error: `${fieldName}验证失败: ${error.message}`,
-      });
+      return respondInvalidInput(res, `${fieldName}验证失败: ${error.message}`);
     }
 
     return next();
@@ -439,10 +352,7 @@ const customValidation = (validator: (req: Request) => { isValid: boolean; messa
     const result = validator(req);
 
     if (!result.isValid) {
-      return res.status(400).json({
-        success: false,
-        error: result.message || '验证失败',
-      });
+      return respondInvalidInput(res, result.message || '验证失败');
     }
 
     return next();
@@ -497,18 +407,12 @@ const asyncValidation = (
       const result = await validator(req);
 
       if (!result.isValid) {
-        return res.status(400).json({
-          success: false,
-          error: result.message || '验证失败',
-        });
+        return respondInvalidInput(res, result.message || '验证失败');
       }
 
       return next();
     } catch {
-      return res.status(500).json({
-        success: false,
-        error: '验证过程中发生错误',
-      });
+      return respondInternalError(res, '验证过程中发生错误');
     }
   };
 };

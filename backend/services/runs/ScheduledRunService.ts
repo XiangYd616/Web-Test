@@ -5,10 +5,10 @@
 
 import cronParser from 'cron-parser';
 import cron from 'node-cron';
+import { query } from '../../config/database';
+import { toDate, toOptionalDate } from '../../utils/dateUtils';
 const CollectionManager = require('../collections/CollectionManager');
 const EnvironmentManager = require('../environments/EnvironmentManager');
-
-const { models: sequelizeModels } = require('../../database/sequelize');
 
 interface CronTask {
   start: () => void;
@@ -17,7 +17,7 @@ interface CronTask {
 
 type ScheduledRunRecord = {
   id: string;
-  workspace_id: string;
+  workspace_id: string | null;
   collection_id: string;
   environment_id?: string | null;
   cron_expression: string;
@@ -48,22 +48,6 @@ type ScheduledRunResultRecord = {
   triggered_by?: string;
   metadata?: Record<string, unknown>;
 };
-
-type Model<T> = {
-  findAll: (options?: Record<string, unknown>) => Promise<T[]>;
-  findByPk: (id: string) => Promise<T | null>;
-  create: (data: Record<string, unknown>) => Promise<T>;
-  update: (
-    data: Record<string, unknown>,
-    options: Record<string, unknown>
-  ) => Promise<[number, T[]]>;
-  destroy: (options: Record<string, unknown>) => Promise<number>;
-};
-
-interface Models {
-  ScheduledRun: Model<ScheduledRunRecord>;
-  ScheduledRunResult: Model<ScheduledRunResultRecord>;
-}
 
 // 定时运行配置接口
 export interface ScheduledRunConfig {
@@ -136,7 +120,6 @@ export interface ScheduledRunStatistics {
  * 定时运行服务
  */
 class ScheduledRunService {
-  private models: Models;
   private collectionManager: InstanceType<typeof CollectionManager>;
   private environmentManager: InstanceType<typeof EnvironmentManager>;
   private jobs: Map<string, { task: CronTask; config: ScheduledRunConfig }> = new Map();
@@ -147,16 +130,12 @@ class ScheduledRunService {
 
   constructor(
     options: {
-      models?: Models;
       collectionManager?: InstanceType<typeof CollectionManager>;
       environmentManager?: InstanceType<typeof EnvironmentManager>;
     } = {}
   ) {
-    this.models = options.models || (sequelizeModels as Models);
-    this.collectionManager =
-      options.collectionManager || new CollectionManager({ models: this.models });
-    this.environmentManager =
-      options.environmentManager || new EnvironmentManager({ models: this.models });
+    this.collectionManager = options.collectionManager || new CollectionManager();
+    this.environmentManager = options.environmentManager || new EnvironmentManager();
   }
 
   /**
@@ -170,7 +149,7 @@ class ScheduledRunService {
     try {
       await this.recoverRunningExecutions();
       await this.resumeScheduledRetries();
-      const schedules = await this.models.ScheduledRun.findAll({ where: { status: 'active' } });
+      const schedules = await this.fetchSchedules({ status: 'active' });
 
       for (const schedule of schedules) {
         await this.updateScheduleNextRunAt(schedule);
@@ -206,8 +185,9 @@ class ScheduledRunService {
   async createSchedule(
     scheduleData: Omit<ScheduledRunConfig, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<string> {
-    const schedule: ScheduledRunRecord = await this.models.ScheduledRun.create({
-      workspace_id: scheduleData.workspaceId,
+    const schedule = await this.insertSchedule({
+      id: this.generateId(),
+      workspace_id: scheduleData.workspaceId || null,
       name: scheduleData.name,
       description: scheduleData.description,
       cron_expression: scheduleData.cronExpression,
@@ -225,7 +205,7 @@ class ScheduledRunService {
 
     const config: ScheduledRunConfig = {
       id: schedule.id,
-      workspaceId: schedule.workspace_id,
+      workspaceId: schedule.workspace_id || undefined,
       name: schedule.name || '',
       description: schedule.description || '',
       cronExpression: schedule.cron_expression,
@@ -233,10 +213,10 @@ class ScheduledRunService {
       collectionId: schedule.collection_id,
       environmentId: schedule.environment_id || '',
       status: schedule.status as ScheduledRunConfig['status'],
-      lastRunAt: schedule.last_run_at || undefined,
-      nextRunAt: schedule.next_run_at || undefined,
-      createdAt: schedule.created_at || new Date(),
-      updatedAt: schedule.updated_at || new Date(),
+      lastRunAt: toOptionalDate(schedule.last_run_at),
+      nextRunAt: toOptionalDate(schedule.next_run_at),
+      createdAt: toDate(schedule.created_at || new Date()),
+      updatedAt: toDate(schedule.updated_at || new Date()),
       config: schedule.config || {},
       createdBy: schedule.created_by || undefined,
     };
@@ -252,14 +232,14 @@ class ScheduledRunService {
    * 获取定时任务
    */
   async getSchedule(scheduleId: string): Promise<ScheduledRunConfig | null> {
-    const schedule = await this.models.ScheduledRun.findByPk(scheduleId);
+    const schedule = await this.fetchScheduleById(scheduleId);
     if (!schedule) {
       return null;
     }
 
     return {
       id: schedule.id,
-      workspaceId: schedule.workspace_id,
+      workspaceId: schedule.workspace_id || undefined,
       name: schedule.name || '',
       description: schedule.description || '',
       cronExpression: schedule.cron_expression,
@@ -267,10 +247,10 @@ class ScheduledRunService {
       collectionId: schedule.collection_id,
       environmentId: schedule.environment_id || '',
       status: schedule.status as ScheduledRunConfig['status'],
-      lastRunAt: schedule.last_run_at || undefined,
-      nextRunAt: schedule.next_run_at || undefined,
-      createdAt: schedule.created_at || new Date(),
-      updatedAt: schedule.updated_at || new Date(),
+      lastRunAt: toOptionalDate(schedule.last_run_at),
+      nextRunAt: toOptionalDate(schedule.next_run_at),
+      createdAt: toDate(schedule.created_at || new Date()),
+      updatedAt: toDate(schedule.updated_at || new Date()),
       config: schedule.config || {},
       createdBy: schedule.created_by || undefined,
     };
@@ -280,11 +260,11 @@ class ScheduledRunService {
    * 获取所有定时任务
    */
   async getAllSchedules(): Promise<ScheduledRunConfig[]> {
-    const schedules = await this.models.ScheduledRun.findAll();
+    const schedules = await this.fetchSchedules();
 
     return schedules.map(schedule => ({
       id: schedule.id,
-      workspaceId: schedule.workspace_id,
+      workspaceId: schedule.workspace_id || undefined,
       name: schedule.name || '',
       description: schedule.description || '',
       cronExpression: schedule.cron_expression,
@@ -292,10 +272,10 @@ class ScheduledRunService {
       collectionId: schedule.collection_id,
       environmentId: schedule.environment_id || '',
       status: schedule.status as ScheduledRunConfig['status'],
-      lastRunAt: schedule.last_run_at || undefined,
-      nextRunAt: schedule.next_run_at || undefined,
-      createdAt: schedule.created_at || new Date(),
-      updatedAt: schedule.updated_at || new Date(),
+      lastRunAt: toOptionalDate(schedule.last_run_at),
+      nextRunAt: toOptionalDate(schedule.next_run_at),
+      createdAt: toDate(schedule.created_at || new Date()),
+      updatedAt: toDate(schedule.updated_at || new Date()),
       config: schedule.config || {},
       createdBy: schedule.created_by || undefined,
     }));
@@ -308,30 +288,26 @@ class ScheduledRunService {
     scheduleId: string,
     updates: Partial<ScheduledRunConfig>
   ): Promise<ScheduledRunConfig> {
-    const schedule = await this.models.ScheduledRun.findByPk(scheduleId);
+    const schedule = await this.fetchScheduleById(scheduleId);
     if (!schedule) {
       throw new Error('Schedule not found');
     }
 
-    const [_, updatedSchedules] = await this.models.ScheduledRun.update(
-      {
-        name: updates.name,
-        description: updates.description,
-        cron_expression: updates.cronExpression,
-        timezone: updates.timezone,
-        collection_id: updates.collectionId,
-        environment_id: updates.environmentId,
-        status: updates.status,
-        last_run_at: updates.lastRunAt,
-        next_run_at: updates.nextRunAt,
-        config: updates.config,
-        updated_at: new Date(),
-      },
-      { where: { id: scheduleId }, returning: true }
-    );
+    await this.updateScheduleRecord(scheduleId, {
+      name: updates.name,
+      description: updates.description,
+      cron_expression: updates.cronExpression,
+      timezone: updates.timezone,
+      collection_id: updates.collectionId,
+      environment_id: updates.environmentId,
+      status: updates.status,
+      last_run_at: updates.lastRunAt,
+      next_run_at: updates.nextRunAt,
+      config: updates.config,
+      updated_at: new Date(),
+    });
 
-    const updatedSchedule =
-      updatedSchedules[0] || (await this.models.ScheduledRun.findByPk(scheduleId));
+    const updatedSchedule = await this.fetchScheduleById(scheduleId);
     if (!updatedSchedule) {
       throw new Error('Schedule not found');
     }
@@ -343,7 +319,7 @@ class ScheduledRunService {
 
     return {
       id: updatedSchedule.id,
-      workspaceId: updatedSchedule.workspace_id,
+      workspaceId: updatedSchedule.workspace_id || undefined,
       name: updatedSchedule.name || '',
       description: updatedSchedule.description || '',
       cronExpression: updatedSchedule.cron_expression,
@@ -351,10 +327,10 @@ class ScheduledRunService {
       collectionId: updatedSchedule.collection_id,
       environmentId: updatedSchedule.environment_id || '',
       status: updatedSchedule.status as ScheduledRunConfig['status'],
-      lastRunAt: updatedSchedule.last_run_at || undefined,
-      nextRunAt: updatedSchedule.next_run_at || undefined,
-      createdAt: updatedSchedule.created_at || new Date(),
-      updatedAt: updatedSchedule.updated_at || new Date(),
+      lastRunAt: toOptionalDate(updatedSchedule.last_run_at),
+      nextRunAt: toOptionalDate(updatedSchedule.next_run_at),
+      createdAt: toDate(updatedSchedule.created_at || new Date()),
+      updatedAt: toDate(updatedSchedule.updated_at || new Date()),
       config: updatedSchedule.config || {},
       createdBy: updatedSchedule.created_by || undefined,
     };
@@ -364,7 +340,7 @@ class ScheduledRunService {
    * 删除定时任务
    */
   async deleteSchedule(scheduleId: string): Promise<boolean> {
-    const schedule = await this.models.ScheduledRun.findByPk(scheduleId);
+    const schedule = await this.fetchScheduleById(scheduleId);
     if (!schedule) {
       return false;
     }
@@ -372,7 +348,7 @@ class ScheduledRunService {
     // 停止任务
     await this.unscheduleJob(scheduleId);
 
-    await this.models.ScheduledRun.destroy({ where: { id: scheduleId } });
+    await this.deleteScheduleRecord(scheduleId);
     return true;
   }
 
@@ -386,7 +362,7 @@ class ScheduledRunService {
       metadata?: Record<string, unknown>;
     } = {}
   ): Promise<string> {
-    const schedule = await this.models.ScheduledRun.findByPk(scheduleId);
+    const schedule = await this.fetchScheduleById(scheduleId);
     if (!schedule) {
       throw new Error('Schedule not found');
     }
@@ -426,7 +402,7 @@ class ScheduledRunService {
     };
 
     this.executions.set(executionId, execution);
-    await this.models.ScheduledRunResult.create(this.toScheduledRunResultRecord(runningResult));
+    await this.insertScheduleResult(this.toScheduledRunResultRecord(runningResult));
     try {
       if (options.dryRun) {
         // 干运行模式
@@ -451,9 +427,7 @@ class ScheduledRunService {
         execution.endTime = new Date();
         execution.duration = 0;
 
-        await this.models.ScheduledRunResult.update(this.toScheduledRunResultRecord(result), {
-          where: { id: runningResult.id },
-        });
+        await this.updateScheduleResult(runningResult.id, this.toScheduledRunResultRecord(result));
         return executionId;
       }
 
@@ -465,19 +439,14 @@ class ScheduledRunService {
       execution.endTime = new Date();
       execution.duration = result.duration;
 
-      await this.models.ScheduledRunResult.update(this.toScheduledRunResultRecord(result), {
-        where: { id: runningResult.id },
-      });
+      await this.updateScheduleResult(runningResult.id, this.toScheduledRunResultRecord(result));
 
       // 更新任务的最后/下次运行时间
       await this.updateScheduleRunTimes(scheduleId, startTime);
-      await this.models.ScheduledRun.update(
-        {
-          last_run_at: new Date(),
-          updated_at: new Date(),
-        },
-        { where: { id: scheduleId } }
-      );
+      await this.updateScheduleRecord(scheduleId, {
+        last_run_at: new Date(),
+        updated_at: new Date(),
+      });
 
       return executionId;
     } catch (error) {
@@ -509,9 +478,10 @@ class ScheduledRunService {
         },
       };
 
-      await this.models.ScheduledRunResult.update(this.toScheduledRunResultRecord(failedResult), {
-        where: { id: runningResult.id },
-      });
+      await this.updateScheduleResult(
+        runningResult.id,
+        this.toScheduledRunResultRecord(failedResult)
+      );
 
       if (nextRetryAt) {
         this.scheduleRetry(scheduleId, retryCount + 1, nextRetryAt, {
@@ -561,15 +531,14 @@ class ScheduledRunService {
    * 获取统计信息
    */
   async getStatistics(workspaceId?: string): Promise<ScheduledRunStatistics> {
-    const scheduleWhere = workspaceId ? { workspace_id: workspaceId } : undefined;
-    const schedules = await this.models.ScheduledRun.findAll({ where: scheduleWhere });
+    const schedules = await this.fetchSchedules(
+      workspaceId ? { workspace_id: workspaceId } : undefined
+    );
 
     let results: ScheduledRunResultRecord[] = [];
     if (schedules.length > 0) {
       const scheduleIds = schedules.map(schedule => schedule.id);
-      results = await this.models.ScheduledRunResult.findAll({
-        where: workspaceId ? { scheduled_run_id: scheduleIds } : undefined,
-      });
+      results = await this.fetchScheduleResultsByScheduleIds(scheduleIds);
     }
 
     const totalSchedules = schedules.length;
@@ -630,10 +599,10 @@ class ScheduledRunService {
       collectionId: schedule.collection_id,
       environmentId: schedule.environment_id || '',
       status: schedule.status as ScheduledRunConfig['status'],
-      lastRunAt: schedule.last_run_at || undefined,
-      nextRunAt: schedule.next_run_at || undefined,
-      createdAt: schedule.created_at || new Date(),
-      updatedAt: schedule.updated_at || new Date(),
+      lastRunAt: toOptionalDate(schedule.last_run_at),
+      nextRunAt: toOptionalDate(schedule.next_run_at),
+      createdAt: toDate(schedule.created_at || new Date()),
+      updatedAt: toDate(schedule.updated_at || new Date()),
       config: schedule.config || {},
       createdBy: schedule.created_by || undefined,
     };
@@ -707,32 +676,27 @@ class ScheduledRunService {
     if (!nextRunAt) {
       return;
     }
-    await this.models.ScheduledRun.update(
-      { next_run_at: nextRunAt, updated_at: new Date() },
-      { where: { id: schedule.id } }
-    );
+    await this.updateScheduleRecord(schedule.id, {
+      next_run_at: nextRunAt,
+      updated_at: new Date(),
+    });
   }
 
   private async updateScheduleRunTimes(scheduleId: string, startedAt: Date): Promise<void> {
-    const schedule = await this.models.ScheduledRun.findByPk(scheduleId);
+    const schedule = await this.fetchScheduleById(scheduleId);
     if (!schedule) {
       return;
     }
     const nextRunAt = this.getNextRunAt(schedule, startedAt);
-    await this.models.ScheduledRun.update(
-      {
-        last_run_at: new Date(),
-        next_run_at: nextRunAt || schedule.next_run_at,
-        updated_at: new Date(),
-      },
-      { where: { id: scheduleId } }
-    );
+    await this.updateScheduleRecord(scheduleId, {
+      last_run_at: new Date(),
+      next_run_at: nextRunAt || schedule.next_run_at,
+      updated_at: new Date(),
+    });
   }
 
   private async recoverRunningExecutions(): Promise<void> {
-    const runningResults = await this.models.ScheduledRunResult.findAll({
-      where: { status: 'running' },
-    });
+    const runningResults = await this.fetchScheduleResultsByStatus('running');
     if (!runningResults.length) {
       return;
     }
@@ -744,31 +708,26 @@ class ScheduledRunService {
         const existingMetadata = (result.metadata || {}) as Record<string, unknown>;
         const retryCount =
           typeof existingMetadata.retryCount === 'number' ? existingMetadata.retryCount : 0;
-        await this.models.ScheduledRunResult.update(
-          {
-            status: 'failed',
-            completed_at: now,
-            duration,
-            error_count: 1,
-            logs: [...(result.logs || []), 'Marked failed due to service restart'],
-            metadata: {
-              ...existingMetadata,
-              error: 'Marked failed due to service restart',
-              retryCount,
-              recoveredAt: now.toISOString(),
-            },
-            updated_at: now,
+        await this.updateScheduleResult(result.id, {
+          status: 'failed',
+          completed_at: now,
+          duration,
+          error_count: 1,
+          logs: [...(result.logs || []), 'Marked failed due to service restart'],
+          metadata: {
+            ...existingMetadata,
+            error: 'Marked failed due to service restart',
+            retryCount,
+            recoveredAt: now.toISOString(),
           },
-          { where: { id: result.id } }
-        );
+          updated_at: now,
+        });
       })
     );
   }
 
   private async resumeScheduledRetries(): Promise<void> {
-    const failedResults = await this.models.ScheduledRunResult.findAll({
-      where: { status: 'failed' },
-    });
+    const failedResults = await this.fetchScheduleResultsByStatus('failed');
     if (!failedResults.length) {
       return;
     }
@@ -811,7 +770,7 @@ class ScheduledRunService {
   private async rescheduleJob(scheduleId: string): Promise<void> {
     await this.unscheduleJob(scheduleId);
 
-    const schedule = await this.models.ScheduledRun.findByPk(scheduleId);
+    const schedule = await this.fetchScheduleById(scheduleId);
     if (schedule && schedule.status === 'active') {
       await this.scheduleJob(schedule);
     }
@@ -982,6 +941,128 @@ class ScheduledRunService {
       triggered_by: triggeredBy,
       metadata: result.metadata,
     };
+  }
+
+  private async fetchScheduleById(scheduleId: string): Promise<ScheduledRunRecord | null> {
+    const result = await query('SELECT * FROM scheduled_runs WHERE id = $1', [scheduleId]);
+    return (result.rows?.[0] || null) as ScheduledRunRecord | null;
+  }
+
+  private async fetchSchedules(where?: { status?: string; workspace_id?: string }) {
+    const values: unknown[] = [];
+    const clauses: string[] = [];
+    if (where?.status) {
+      values.push(where.status);
+      clauses.push(`status = $${values.length}`);
+    }
+    if (where?.workspace_id) {
+      values.push(where.workspace_id);
+      clauses.push(`workspace_id = $${values.length}`);
+    }
+    const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+    const result = await query(`SELECT * FROM scheduled_runs ${whereClause}`, values);
+    return result.rows as ScheduledRunRecord[];
+  }
+
+  private async insertSchedule(schedule: ScheduledRunRecord): Promise<ScheduledRunRecord> {
+    const result = await query(
+      `INSERT INTO scheduled_runs
+       (id, workspace_id, collection_id, environment_id, cron_expression, timezone, status, name, description, config, created_by, last_run_at, next_run_at, created_at, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+       RETURNING *`,
+      [
+        schedule.id,
+        schedule.workspace_id,
+        schedule.collection_id,
+        schedule.environment_id || null,
+        schedule.cron_expression,
+        schedule.timezone || null,
+        schedule.status,
+        schedule.name || null,
+        schedule.description || null,
+        schedule.config || {},
+        schedule.created_by || null,
+        schedule.last_run_at || null,
+        schedule.next_run_at || null,
+        schedule.created_at || new Date(),
+        schedule.updated_at || new Date(),
+      ]
+    );
+    return result.rows[0] as ScheduledRunRecord;
+  }
+
+  private async updateScheduleRecord(scheduleId: string, updates: Record<string, unknown>) {
+    const entries = Object.entries(updates).filter(([, value]) => value !== undefined);
+    if (!entries.length) {
+      return;
+    }
+    const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = entries.map(([, value]) => value);
+    values.push(scheduleId);
+    await query(`UPDATE scheduled_runs SET ${setClause} WHERE id = $${values.length}`, values);
+  }
+
+  private async deleteScheduleRecord(scheduleId: string) {
+    await query('DELETE FROM scheduled_runs WHERE id = $1', [scheduleId]);
+  }
+
+  private async insertScheduleResult(result: ScheduledRunResultRecord) {
+    await query(
+      `INSERT INTO scheduled_run_results
+       (id, scheduled_run_id, status, started_at, completed_at, duration, total_requests, passed_requests, failed_requests, error_count, logs, triggered_by, metadata, created_at, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW(),NOW())`,
+      [
+        result.id,
+        result.scheduled_run_id,
+        result.status,
+        result.started_at || null,
+        result.completed_at || null,
+        result.duration || null,
+        result.total_requests || 0,
+        result.passed_requests || 0,
+        result.failed_requests || 0,
+        result.error_count || 0,
+        JSON.stringify(result.logs || []),
+        result.triggered_by || null,
+        JSON.stringify(result.metadata || {}),
+      ]
+    );
+  }
+
+  private async updateScheduleResult(resultId: string, updates: Record<string, unknown>) {
+    const entries = Object.entries(updates).filter(([, value]) => value !== undefined);
+    if (!entries.length) {
+      return;
+    }
+    const normalized = entries.map(([key, value]) => {
+      if (key === 'logs') {
+        return [key, JSON.stringify(value || [])] as [string, unknown];
+      }
+      if (key === 'metadata') {
+        return [key, JSON.stringify(value || {})] as [string, unknown];
+      }
+      return [key, value] as [string, unknown];
+    });
+    const setClause = normalized.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = normalized.map(([, value]) => value);
+    values.push(resultId);
+    await query(
+      `UPDATE scheduled_run_results SET ${setClause} WHERE id = $${values.length}`,
+      values
+    );
+  }
+
+  private async fetchScheduleResultsByStatus(status: string) {
+    const result = await query('SELECT * FROM scheduled_run_results WHERE status = $1', [status]);
+    return result.rows as ScheduledRunResultRecord[];
+  }
+
+  private async fetchScheduleResultsByScheduleIds(scheduleIds: string[]) {
+    const result = await query(
+      'SELECT * FROM scheduled_run_results WHERE scheduled_run_id = ANY($1)',
+      [scheduleIds]
+    );
+    return result.rows as ScheduledRunResultRecord[];
   }
 }
 

@@ -3,6 +3,7 @@
  * 确保后端数据类型与前端类型定义完全一致
  */
 
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 const Logger = require('../middleware/logger');
 
 type ConversionMap = Record<string, (value: unknown) => unknown>;
@@ -410,30 +411,38 @@ const typeAlignmentMiddleware = (
 const validateRequestTypes = (expectedTypes: Record<string, string>) => {
   return (
     req: { body: Record<string, unknown> },
-    res: { status: (code: number) => { json: (data: unknown) => unknown } },
+    res: {
+      error: (code: string, message?: string, details?: unknown, statusCode?: number) => unknown;
+    },
     next: () => void
   ) => {
     try {
       const validation = validateTypeConsistency(req.body, expectedTypes);
 
       if (!validation.valid) {
-        return res.status(400).json({
-          success: false,
-          message: '请求数据类型不正确',
-          errors: validation.errors,
-          timestamp: new Date().toISOString(),
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '请求数据类型不正确',
+          {
+            errors: validation.errors,
+            timestamp: new Date().toISOString(),
+          },
+          400
+        );
       }
 
       next();
     } catch (error) {
       Logger.error('请求类型验证失败:', error);
-      res.status(500).json({
-        success: false,
-        message: '请求验证失败',
-        error: (error as Error).message,
-        timestamp: new Date().toISOString(),
-      });
+      res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '请求验证失败',
+        {
+          error: (error as Error).message,
+          timestamp: new Date().toISOString(),
+        },
+        500
+      );
     }
     return undefined;
   };
@@ -488,13 +497,13 @@ const generateTypeAlignmentReport = (data: Record<string, unknown> | Record<stri
 };
 
 export {
-  TYPE_CONVERSIONS,
   alignApiResponse,
   alignDatabaseResult,
   applyTypeConversions,
   applyTypeConversionsToArray,
   createTypeSafeQuery,
   generateTypeAlignmentReport,
+  TYPE_CONVERSIONS,
   typeAlignmentMiddleware,
   validateRequestTypes,
   validateTypeConsistency,

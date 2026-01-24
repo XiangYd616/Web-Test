@@ -3,24 +3,30 @@
  * 用于包装异步路由处理器，自动捕获错误
  */
 
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
-type AsyncFunction = (req: Request, res: Response, next: NextFunction) => Promise<unknown>;
+type AsyncFunction<Req extends Request = Request, Res extends Response = Response> = (
+  req: Req,
+  res: Res,
+  next: NextFunction
+) => Promise<unknown>;
 
 /**
  * 异步处理器包装函数
  * @param fn - 异步函数
  * @returns Express中间件函数
  */
-const asyncHandler = (fn: AsyncFunction) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+const asyncHandler = <Req extends Request = Request, Res extends Response = Response>(
+  fn: AsyncFunction<Req, Res>
+): RequestHandler => {
+  return (req, res, next: NextFunction) => {
     // 确保fn是一个函数
     if (typeof fn !== 'function') {
       return next(new Error('asyncHandler expects a function'));
     }
 
     // 执行异步函数并捕获错误
-    Promise.resolve(fn(req, res, next)).catch(next);
+    Promise.resolve(fn(req as Req, res as Res, next)).catch(next);
   };
 };
 

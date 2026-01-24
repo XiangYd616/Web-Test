@@ -7,7 +7,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
 const { StandardErrorCode } = require('../../shared/types/standardApiResponse');
-const { errorResponseFormatter: errorMiddleware, notFoundHandler } = require('./responseFormatter');
+const { errorHandler: errorMiddleware, notFoundHandler } = require('./responseFormatter');
 const asyncHandler = require('./asyncHandler');
 
 const ErrorCode = StandardErrorCode;
@@ -28,16 +28,6 @@ interface AppError extends Error {
   code?: string;
   details?: unknown;
   timestamp?: Date;
-}
-
-interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-    details?: unknown;
-    timestamp: string;
-  };
 }
 
 const handleError = (error: AppError, context: ErrorContext = {}) => {
@@ -308,23 +298,36 @@ const enhancedErrorHandler = (error: AppError, req: Request, res: Response, next
     return next(error);
   }
 
-  // 构建错误响应
-  const errorResponse: ErrorResponse = {
-    success: false,
-    error: {
-      code: error.code || ErrorCode.INTERNAL_ERROR,
-      message: error.message || '服务器内部错误',
-      details: error.details,
-      timestamp: new Date().toISOString(),
-    },
-  };
+  const timestamp = new Date().toISOString();
+  const errorCode = error.code || ErrorCode.INTERNAL_ERROR;
+  const errorMessage = error.message || '服务器内部错误';
+  const baseDetails = error.details ?? undefined;
+  const details =
+    baseDetails && typeof baseDetails === 'object'
+      ? { ...baseDetails, timestamp }
+      : { details: baseDetails, timestamp };
 
   // 在开发环境中包含堆栈跟踪
   if (process.env.NODE_ENV === 'development') {
-    (errorResponse.error as { stack?: string }).stack = error.stack;
+    (details as { stack?: string }).stack = error.stack;
   }
 
-  res.status(error.statusCode || 500).json(errorResponse);
+  const statusCode = error.statusCode || 500;
+  const responder = res as Response & {
+    error?: (code: string, message?: string, details?: unknown, statusCode?: number) => Response;
+  };
+  if (responder.error) {
+    responder.error(errorCode, errorMessage, details, statusCode);
+    return;
+  }
+  res.status(statusCode).json({
+    success: false,
+    error: {
+      code: errorCode,
+      message: errorMessage,
+      details,
+    },
+  });
 };
 
 /**
@@ -333,14 +336,12 @@ const enhancedErrorHandler = (error: AppError, req: Request, res: Response, next
 const notFoundMiddleware = (req: Request, res: Response) => {
   const error = ApiError.notFound(`路径 ${req.originalUrl} 不存在`);
 
-  res.status(404).json({
-    success: false,
-    error: {
-      code: error.code,
-      message: error.message,
-      timestamp: error.timestamp.toISOString(),
-    },
-  });
+  res.error(
+    StandardErrorCode.NOT_FOUND,
+    error.message,
+    { code: error.code, timestamp: error.timestamp.toISOString() },
+    404
+  );
 };
 
 /**

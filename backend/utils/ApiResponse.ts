@@ -1,8 +1,8 @@
 /**
  * 统一API响应格式工具
- * 版本: v2.0.0 - 重构为与responseFormatter中间件兼容
+ * 版本: v2.0.0 - 重构为与response中间件兼容
  *
- * 注意：此文件已重构为使用responseFormatter中间件的格式
+ * 注意：此文件已重构为使用response中间件的格式
  * 主要用于非Express环境或需要手动构建响应的场景
  */
 
@@ -36,7 +36,7 @@ type ValidationErrorPayload = {
 
 class ApiResponse {
   /**
-   * 成功响应 - 兼容responseFormatter格式
+   * 成功响应 - 兼容response格式
    */
   static success(data: unknown = null, message = '操作成功', meta: ApiMeta = {}) {
     const response: ApiResponsePayload = {
@@ -53,7 +53,7 @@ class ApiResponse {
   }
 
   /**
-   * 错误响应 - 兼容responseFormatter格式
+   * 错误响应 - 兼容response格式
    */
   static error(code = 'UNKNOWN_ERROR', message = '操作失败', details: ApiErrorDetails = null) {
     return {
@@ -247,49 +247,18 @@ class ApiResponse {
   /**
    * 获取默认建议
    */
-  static getDefaultSuggestions(code: string) {
+  static getErrorSuggestions(code: string): string[] {
     const suggestions: Record<string, string[]> = {
-      TIMEOUT: ['增加超时时间', '检查网络连接', '稍后重试'],
-      NETWORK_ERROR: ['检查网络连接', '确认URL可访问', '稍后重试'],
-      VALIDATION_ERROR: ['检查请求参数', '参考API文档', '确认数据格式'],
-      AUTH_ERROR: ['检查认证令牌', '重新登录', '确认权限'],
+      VALIDATION_ERROR: ['检查输入参数格式', '确保必填字段已填写', '查看API文档'],
+      UNAUTHORIZED: ['检查登录状态', '刷新登录凭证', '重新登录'],
+      FORBIDDEN: ['联系管理员获取权限', '检查访问权限', '确认操作范围'],
+      NOT_FOUND: ['检查请求的资源ID', '确认资源是否存在', '刷新页面重试'],
+      CONFLICT: ['刷新数据重试', '检查是否重复提交', '稍后再试'],
       RATE_LIMITED: ['降低请求频率', '稍后重试', '联系管理员提升限制'],
       INTERNAL_ERROR: ['稍后重试', '联系技术支持', '检查系统状态'],
     };
 
     return suggestions[code] || ['稍后重试', '联系技术支持'];
-  }
-
-  /**
-   * 中间件：统一响应格式
-   *
-   * @deprecated 推荐使用 backend/api/middleware/responseFormatter.js 中间件
-   * 该中间件提供更完整的功能，包括请求ID、性能监控等
-   */
-  static middleware() {
-    console.warn('ApiResponse.middleware() 已废弃，请使用 responseFormatter 中间件');
-
-    return (
-      req: Record<string, unknown>,
-      res: Record<string, unknown> & {
-        json: (body: unknown) => unknown;
-        status: (code: number) => { json: (body: unknown) => unknown };
-        apiSuccess?: (data: unknown, message?: string, meta?: ApiMeta) => unknown;
-        apiError?: (code: string, message?: string, details?: ApiErrorDetails) => unknown;
-      },
-      next: () => void
-    ) => {
-      // 为了向后兼容，保留这些方法，但建议迁移到responseFormatter
-      res.apiSuccess = (data: unknown, message?: string, meta?: ApiMeta) => {
-        return res.json(ApiResponse.success(data, message, meta));
-      };
-
-      res.apiError = (code: string, message?: string, details?: ApiErrorDetails) => {
-        return res.status(400).json(ApiResponse.error(code, message, details));
-      };
-
-      next();
-    };
   }
 
   /**

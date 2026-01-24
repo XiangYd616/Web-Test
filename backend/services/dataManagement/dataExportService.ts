@@ -13,6 +13,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as winston from 'winston';
 import { query as dbQuery } from '../../config/database';
+import { toDate, toOptionalDate } from '../../utils/dateUtils';
 const PDFDocument = require('pdfkit');
 
 // 导出配置接口
@@ -292,9 +293,9 @@ class DataExportService extends EventEmitter {
       id: String(row.id),
       userId: String(row.user_id),
       status: row.status,
-      createdAt: row.created_at,
-      startedAt: row.started_at || undefined,
-      completedAt: row.completed_at || undefined,
+      createdAt: toDate(row.created_at),
+      startedAt: toOptionalDate(row.started_at),
+      completedAt: toOptionalDate(row.completed_at),
       error: row.error_message || undefined,
       filePath: row.file_path || undefined,
     };
@@ -409,9 +410,9 @@ class DataExportService extends EventEmitter {
         id: String(row.id),
         userId: String(row.user_id),
         status: row.status,
-        createdAt: row.created_at,
-        startedAt: row.started_at || undefined,
-        completedAt: row.completed_at || undefined,
+        createdAt: toDate(row.created_at),
+        startedAt: toOptionalDate(row.started_at),
+        completedAt: toOptionalDate(row.completed_at),
         error: row.error_message || undefined,
         filePath: row.file_path || undefined,
       })),

@@ -4,8 +4,14 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { query } from '../../config/database';
+import testHistoryRepository, {
+  type TestHistoryRow,
+} from '../../repositories/testHistoryRepository';
+import testOperationsRepository from '../../repositories/testOperationsRepository';
 import testRepository from '../../repositories/testRepository';
+import testResultRepository from '../../repositories/testResultRepository';
+import type { TestResultRecord } from '../../types';
+import { toDate } from '../../utils/dateUtils';
 import testBusinessService from './TestBusinessService';
 import { insertExecutionLog, normalizeTestLogLevel, updateStatusWithLog } from './testLogService';
 import testTemplateService from './testTemplateService';
@@ -44,18 +50,6 @@ interface TestExecutionRecord {
   completed_at?: Date;
   execution_time?: number;
   error_message?: string;
-}
-
-interface TestResultRecord {
-  id: number;
-  execution_id: number;
-  summary: Record<string, unknown>;
-  score?: number;
-  grade?: string;
-  passed?: boolean;
-  warnings?: unknown[];
-  errors?: unknown[];
-  created_at: Date;
 }
 
 interface TestConfig {
@@ -125,6 +119,12 @@ type TestLogEntry = {
   createdAt: Date;
 };
 
+type TestHistoryPagedResult = {
+  results: TestHistoryRow[];
+  total: number;
+  hasMore: boolean;
+};
+
 interface User {
   userId: string;
   role: string;
@@ -150,7 +150,7 @@ class TestService {
       throw new Error('测试不存在');
     }
 
-    const result = (await testRepository.findResults(
+    const result = (await testResultRepository.findResults(
       testId,
       userId,
       workspaceId
@@ -159,7 +159,7 @@ class TestService {
       throw new Error('测试结果不存在');
     }
 
-    const metrics = await testRepository.findMetrics(testId, userId, workspaceId);
+    const metrics = await testResultRepository.findMetrics(testId, userId, workspaceId);
     const metricsPayload = metrics.map(metric => ({ ...metric }));
 
     return this.formatResults(execution, result, metricsPayload);
@@ -218,15 +218,13 @@ class TestService {
     const nextTestUrl = (updates.url as string) ?? execution.test_url ?? currentConfig.url;
     const nextTestName = (updates.testName as string) ?? execution.test_name;
 
-    await query(
-      `UPDATE test_executions
-       SET test_name = $1,
-           test_url = $2,
-           test_config = $3,
-           updated_at = NOW()
-       WHERE test_id = $4 AND ${workspaceId ? 'workspace_id = $5' : 'user_id = $5'}`,
-      [nextTestName, nextTestUrl || null, JSON.stringify(nextConfig), testId, workspaceId ?? userId]
-    );
+    const scopeValue = workspaceId ?? userId;
+    const scopeColumn = workspaceId ? 'workspace_id' : 'user_id';
+    await testOperationsRepository.updateTestConfig(testId, scopeValue, scopeColumn, {
+      testName: nextTestName,
+      testUrl: nextTestUrl || null,
+      testConfig: nextConfig,
+    });
 
     await insertExecutionLog(testId, 'info', '测试配置已更新', {
       updates: Object.keys(updates),
@@ -265,21 +263,16 @@ class TestService {
    * 获取批量测试状态
    */
   async getBatchTestStatus(batchId: string, userId: string, workspaceId?: string) {
-    const result = await query(
-      `SELECT test_id, status, progress, created_at, updated_at
-       FROM test_executions
-       WHERE ${workspaceId ? 'workspace_id = $1' : 'user_id = $1'}
-         AND (test_config->>'batchId') = $2
-       ORDER BY created_at DESC`,
-      [workspaceId ?? userId, batchId]
-    );
+    const scopeValue = workspaceId ?? userId;
+    const scopeColumn = workspaceId ? 'workspace_id' : 'user_id';
+    const rows = await testOperationsRepository.getBatchTests(batchId, scopeValue, scopeColumn);
 
-    const tests = result.rows.map(row => ({
-      testId: row.test_id as string,
-      status: row.status as string,
+    const tests = rows.map(row => ({
+      testId: row.test_id,
+      status: row.status,
       progress: typeof row.progress === 'number' ? row.progress : 0,
-      createdAt: row.created_at as Date,
-      updatedAt: row.updated_at as Date,
+      createdAt: toDate(row.created_at),
+      updatedAt: toDate(row.updated_at),
     }));
 
     return {
@@ -293,15 +286,15 @@ class TestService {
    * 删除批量测试
    */
   async deleteBatchTests(batchId: string, userId: string, workspaceId?: string): Promise<void> {
-    const testIdsResult = await query(
-      `SELECT test_id FROM test_executions
-       WHERE ${workspaceId ? 'workspace_id = $1' : 'user_id = $1'}
-         AND (test_config->>'batchId') = $2`,
-      [workspaceId ?? userId, batchId]
+    const scopeValue = workspaceId ?? userId;
+    const scopeColumn = workspaceId ? 'workspace_id' : 'user_id';
+    const testIds = await testOperationsRepository.getBatchTestIds(
+      batchId,
+      scopeValue,
+      scopeColumn
     );
 
-    for (const row of testIdsResult.rows) {
-      const testId = row.test_id as string;
+    for (const testId of testIds) {
       try {
         await this.stopTestExecution(testId, userId);
       } catch {
@@ -322,7 +315,7 @@ class TestService {
     workspaceId?: string
   ): Promise<TestHistoryResponse> {
     const offset = (page - 1) * limit;
-    const result = await testRepository.getTestHistory(
+    const result = await testHistoryRepository.getTestHistory(
       userId,
       testType,
       limit,
@@ -338,6 +331,48 @@ class TestService {
         totalPages: Math.ceil(result.total / limit),
       },
     };
+  }
+
+  async getTestHistorySummary(
+    testId: string,
+    userId: string,
+    workspaceId?: string
+  ): Promise<TestHistoryRow | null> {
+    return testHistoryRepository.getLatestTestResultRecord(testId, userId, workspaceId);
+  }
+
+  async getTestHistoryByPeriod(
+    testId: string,
+    userId: string,
+    period: string,
+    workspaceId?: string
+  ): Promise<TestHistoryRow[]> {
+    const days = parseInt(period.replace(/\D/g, ''), 10) || 30;
+    return testHistoryRepository.getTestHistoryByTestIdInPeriod(testId, userId, days, workspaceId);
+  }
+
+  async getTestHistoryPaged(
+    testId: string,
+    userId: string,
+    limit = 20,
+    offset = 0,
+    workspaceId?: string
+  ): Promise<TestHistoryPagedResult> {
+    return testHistoryRepository.getTestHistoryByTestIdPaged(
+      testId,
+      userId,
+      limit,
+      offset,
+      workspaceId
+    );
+  }
+
+  async getExecutionIdForTest(
+    testId: string,
+    userId: string,
+    workspaceId?: string
+  ): Promise<number | null> {
+    return testHistoryRepository.getExecutionIdForTest(testId, userId, workspaceId);
   }
 
   /**
@@ -356,7 +391,7 @@ class TestService {
     if (!test) {
       throw new Error('测试不存在');
     }
-    const result = (await testRepository.findResults(
+    const result = (await testResultRepository.findResults(
       testId,
       userId,
       workspaceId
@@ -393,46 +428,29 @@ class TestService {
       throw new Error('测试不存在');
     }
 
-    const params: Array<string | number> = [testId, workspaceId ?? userId];
-    let whereClause = `te.test_id = $1 AND te.${workspaceId ? 'workspace_id' : 'user_id'} = $2`;
-
+    const scopeValue = workspaceId ?? userId;
+    const scopeColumn = workspaceId ? 'workspace_id' : 'user_id';
     const normalizedLevel = level ? normalizeTestLogLevel(level, 'info') : undefined;
-    if (normalizedLevel) {
-      params.push(normalizedLevel);
-      whereClause += ` AND tl.level = $${params.length}`;
-    }
-
-    const countResult = await query(
-      `SELECT COUNT(*)::int AS total
-       FROM test_logs tl
-       INNER JOIN test_executions te ON te.id = tl.execution_id
-       WHERE ${whereClause}`,
-      params
+    const result = await testOperationsRepository.getTestLogs(
+      testId,
+      scopeValue,
+      scopeColumn,
+      limit,
+      offset,
+      normalizedLevel
     );
-    const total = countResult.rows[0]?.total || 0;
-
-    const listResult = await query(
-      `SELECT tl.id, tl.level, tl.message, tl.context, tl.created_at
-       FROM test_logs tl
-       INNER JOIN test_executions te ON te.id = tl.execution_id
-       WHERE ${whereClause}
-       ORDER BY tl.created_at DESC
-       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
-    );
-
-    const logs = listResult.rows.map(row => ({
-      id: row.id as number,
-      level: row.level as string,
-      message: row.message as string,
+    const logs = result.rows.map(row => ({
+      id: row.id,
+      level: row.level,
+      message: row.message,
       context: (row.context || {}) as Record<string, unknown>,
-      createdAt: row.created_at as Date,
+      createdAt: toDate(row.created_at),
     }));
 
     return {
       logs,
-      total,
-      hasMore: offset + limit < total,
+      total: result.total,
+      hasMore: offset + limit < result.total,
     };
   }
 
@@ -559,7 +577,7 @@ class TestService {
       throw new Error('无权访问此测试');
     }
 
-    const result = await testRepository.findResults(testId, userId, workspaceId);
+    const result = await testResultRepository.findResults(testId, userId, workspaceId);
     const results = result?.summary ?? null;
 
     return {
@@ -700,7 +718,7 @@ class TestService {
       passed: result.passed,
       warnings: this.parseJsonArray(result.warnings),
       errors: this.parseJsonArray(result.errors),
-      createdAt: result.created_at,
+      createdAt: toDate(result.created_at),
     };
   }
 

@@ -4,6 +4,7 @@ import { Queue, Worker } from 'bullmq';
 const { randomUUID } = require('crypto');
 
 const { configManager } = require('../../src/ConfigManager');
+const testOperationsRepository = require('../../repositories/testOperationsRepository');
 const testRepository = require('../../repositories/testRepository');
 const { insertExecutionLog, countDeadLetterReplays } = require('./testLogService');
 
@@ -138,14 +139,14 @@ const startWorker = (options: { queueName?: string; concurrency?: number } = {})
 
       try {
         const testBusinessService = require('./TestBusinessService').default;
-        await testRepository.updateStatus(testId, 'running');
+        await testOperationsRepository.updateStatus(testId, 'running');
         await testBusinessService.executeQueuedTest(testId, config, {
           userId,
           role: (config as { userRole?: string }).userRole || 'user',
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        await testRepository.markFailed(testId, message);
+        await testOperationsRepository.markFailed(testId, message);
         await insertExecutionLog(testId, 'error', '测试队列执行失败', {
           error: message,
         });

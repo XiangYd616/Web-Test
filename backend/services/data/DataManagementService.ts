@@ -7,8 +7,11 @@ import csv from 'csv-parser';
 import { EventEmitter } from 'events';
 import { createReadStream } from 'fs';
 import fs from 'fs/promises';
+import path from 'path';
 import { query } from '../../config/database';
+import { toDate } from '../../utils/dateUtils';
 import Logger from '../../utils/logger';
+import DataExportService, { ExportJobRequest } from '../dataManagement/dataExportService';
 
 const { createObjectCsvWriter } = require('csv-writer');
 
@@ -95,6 +98,7 @@ type BatchOperation = {
 
 type ImportOptions = {
   userId?: string;
+  workspaceId?: string;
   tags?: string[];
   source?: string;
 };
@@ -122,6 +126,7 @@ class DataManagementService extends EventEmitter {
     REPORTS: 'reports',
     CONFIGURATIONS: 'configurations',
   };
+  private exportService?: DataExportService;
 
   /**
    * 初始化数据管理服务
@@ -167,13 +172,27 @@ class DataManagementService extends EventEmitter {
     return row?.type || null;
   }
 
-  async getDataOverview(userId: string) {
+  async getDataOverview(userId: string, workspaceId?: string) {
+    this.ensureIsolationContext({ userId, workspaceId }, '获取数据概览');
+    const params: Array<string | number> = [];
+    const clauses: string[] = ['deleted_at IS NULL'];
+
+    if (userId) {
+      params.push(userId);
+      clauses.push(`metadata->>'userId' = $${params.length}`);
+    }
+    if (workspaceId) {
+      params.push(workspaceId);
+      clauses.push(`workspace_id = $${params.length}`);
+    }
+
+    const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
     const result = await query(
       `SELECT type, COUNT(*)::int AS count
        FROM data_records
-       WHERE deleted_at IS NULL AND metadata->>'userId' = $1
+       ${whereClause}
        GROUP BY type`,
-      [userId]
+      params
     );
     const summary = result.rows.reduce<Record<string, number>>((acc, row) => {
       acc[String(row.type)] = Number(row.count) || 0;
@@ -185,61 +204,79 @@ class DataManagementService extends EventEmitter {
     };
   }
 
-  async getDataStatistics(userId: string, options: { period?: string; type?: string } = {}) {
+  async getDataStatistics(
+    userId: string,
+    options: { period?: string; type?: string; workspaceId?: string } = {}
+  ) {
     const type = options.type || this.dataTypes.TEST_RESULTS;
-    const stats = await this.getStatistics(type, { userId });
+    const stats = await this.getStatistics(type, { userId, workspaceId: options.workspaceId });
     return {
       userId,
+      workspaceId: options.workspaceId,
       type,
       period: options.period || 'all',
       stats,
     };
   }
 
-  async createDataRecord(userId: string, data: Record<string, unknown>) {
+  async createDataRecord(userId: string, data: Record<string, unknown>, workspaceId?: string) {
     const type = String(data.type || data.dataType || this.dataTypes.TEST_RESULTS);
-    return this.createData(type, data, { userId });
+    return this.createData(type, data, { userId, workspaceId });
   }
 
   async getDataList(
     _userId: string,
-    options: { page?: number; limit?: number; type?: string; status?: string; search?: string }
+    options: { page?: number; limit?: number; type?: string; status?: string; search?: string },
+    workspaceId?: string
   ) {
     const type = options.type || this.dataTypes.TEST_RESULTS;
     const filters: Record<string, unknown> = {};
     if (options.status) {
       filters.status = options.status;
     }
-    return this.queryData(type, { filters, search: options.search, userId: _userId }, options);
+    return this.queryData(
+      type,
+      { filters, search: options.search, userId: _userId, workspaceId },
+      options
+    );
   }
 
-  async getDataRecord(_userId: string, id: string) {
-    const type = await this.getRecordTypeById(id, { userId: _userId });
+  async getDataRecord(_userId: string, id: string, workspaceId?: string) {
+    const type = await this.getRecordTypeById(id, { userId: _userId, workspaceId });
     if (!type) return null;
-    return this.readData(type, id, { userId: _userId });
+    return this.readData(type, id, { userId: _userId, workspaceId });
   }
 
-  async updateDataRecord(userId: string, id: string, updates: Record<string, unknown>) {
+  async updateDataRecord(
+    userId: string,
+    id: string,
+    updates: Record<string, unknown>,
+    workspaceId?: string
+  ) {
     const type = String(
-      updates.type || updates.dataType || (await this.getRecordTypeById(id, { userId })) || ''
+      updates.type ||
+        updates.dataType ||
+        (await this.getRecordTypeById(id, { userId, workspaceId })) ||
+        ''
     );
     if (!type) {
       throw new Error('无法确定数据类型');
     }
-    return this.updateData(type, id, updates, { userId });
+    return this.updateData(type, id, updates, { userId, workspaceId });
   }
 
-  async deleteDataRecord(userId: string, id: string) {
-    const type = await this.getRecordTypeById(id, { userId });
+  async deleteDataRecord(userId: string, id: string, workspaceId?: string) {
+    const type = await this.getRecordTypeById(id, { userId, workspaceId });
     if (!type) {
       throw new Error('数据记录不存在');
     }
-    return this.deleteData(type, id, { userId, softDelete: true });
+    return this.deleteData(type, id, { userId, workspaceId, softDelete: true });
   }
 
   async batchOperationForUser(
     userId: string,
-    payload: { operation: string; ids?: string[]; data?: Record<string, unknown> }
+    payload: { operation: string; ids?: string[]; data?: Record<string, unknown> },
+    workspaceId?: string
   ) {
     const operations: BatchOperation[] = [];
     const dataType = String(
@@ -251,7 +288,7 @@ class DataManagementService extends EventEmitter {
         type: 'create',
         dataType,
         data: payload.data,
-        options: { userId },
+        options: { userId, workspaceId },
       });
     } else if (payload.operation === 'update' && payload.ids?.length) {
       payload.ids.forEach(id => {
@@ -260,7 +297,7 @@ class DataManagementService extends EventEmitter {
           dataType,
           id,
           updates: payload.data || {},
-          options: { userId },
+          options: { userId, workspaceId },
         });
       });
     } else if (payload.operation === 'delete' && payload.ids?.length) {
@@ -269,7 +306,7 @@ class DataManagementService extends EventEmitter {
           type: 'delete',
           dataType,
           id,
-          options: { userId, softDelete: true },
+          options: { userId, workspaceId, softDelete: true },
         });
       });
     }
@@ -279,14 +316,15 @@ class DataManagementService extends EventEmitter {
 
   async searchData(
     _userId: string,
-    payload: { query?: string; filters?: Record<string, unknown>; options?: PaginationOptions }
+    payload: { query?: string; filters?: Record<string, unknown>; options?: PaginationOptions },
+    workspaceId?: string
   ) {
     const filters = payload.filters || {};
     const type = String(filters.type || this.dataTypes.TEST_RESULTS);
     const { type: _type, ...restFilters } = filters;
     return this.queryData(
       type,
-      { filters: restFilters, search: payload.query, userId: _userId },
+      { filters: restFilters, search: payload.query, userId: _userId, workspaceId },
       payload.options
     );
   }
@@ -297,14 +335,43 @@ class DataManagementService extends EventEmitter {
       format?: string;
       filters?: Record<string, unknown>;
       options?: Record<string, unknown>;
-    }
+    },
+    workspaceId?: string
   ) {
-    return {
+    this.ensureIsolationContext({ userId, workspaceId }, '数据导出');
+    const format = (payload.format || 'json') as ExportJobRequest['format'];
+    const filters = payload.filters || {};
+    const options = payload.options || {};
+    const dataType = this.resolveExportDataType(
+      (options.dataType as string | undefined) ||
+        (options.type as string | undefined) ||
+        (filters.type as string | undefined) ||
+        this.dataTypes.TEST_RESULTS
+    );
+
+    const allowedFormats: ExportJobRequest['format'][] = ['pdf', 'csv', 'json', 'excel', 'zip'];
+    if (!allowedFormats.includes(format)) {
+      throw new Error(`不支持的导出格式: ${format}`);
+    }
+
+    const service = this.getExportService();
+    const mergedFilters = {
+      ...filters,
+      ...(workspaceId ? { workspaceId } : {}),
+    } as Record<string, unknown>;
+
+    const job = await service.createExportJob({
       userId,
-      status: 'not_implemented',
-      format: payload.format || 'json',
-      filters: payload.filters || {},
-      options: payload.options || {},
+      dataType,
+      format,
+      filters: mergedFilters,
+      options,
+    });
+
+    return {
+      jobId: job.id,
+      status: job.status,
+      createdAt: job.createdAt,
     };
   }
 
@@ -315,31 +382,122 @@ class DataManagementService extends EventEmitter {
       options?: Record<string, unknown>;
       type?: string;
       format?: string;
+      workspaceId?: string;
     }
   ) {
     const type = payload.type || this.dataTypes.TEST_RESULTS;
     const format = payload.format || 'json';
-    return this.importData(type, payload.file.path, format, { ...(payload.options || {}), userId });
+    return this.importData(type, payload.file.path, format, {
+      ...(payload.options || {}),
+      userId,
+      workspaceId: payload.workspaceId,
+    });
   }
 
-  async restoreData(_userId: string, payload: { file: Express.Multer.File; options?: unknown }) {
+  async restoreData(
+    userId: string,
+    payload: { file: Express.Multer.File; options?: unknown; workspaceId?: string }
+  ) {
+    this.ensureIsolationContext({ userId, workspaceId: payload.workspaceId }, '数据恢复');
+    const options = (payload.options || {}) as { format?: string; mode?: 'merge' | 'overwrite' };
+    const mode = options.mode || 'merge';
+    const filePath = payload.file.path;
+    const extension = path.extname(payload.file.originalname || '').toLowerCase();
+    const format = options.format || (extension === '.csv' ? 'csv' : 'json');
+
+    const rawData =
+      format === 'csv' ? await this.importFromCsv(filePath) : await this.importFromJson(filePath);
+    const records = Array.isArray(rawData)
+      ? rawData
+      : (rawData as { data?: Array<Record<string, unknown>> }).data || [];
+
+    let restored = 0;
+    let failed = 0;
+    const errors: Array<Record<string, unknown>> = [];
+
+    for (const item of records) {
+      try {
+        const record = item as Record<string, unknown>;
+        const recordData = (record.data as Record<string, unknown> | undefined) || record;
+        const recordType = this.resolveRecordType(record, recordData);
+        const recordId = (record.id as string | undefined) || this.generateId();
+
+        if (mode === 'merge' && record.id) {
+          await this.updateData(recordType, recordId, recordData, {
+            userId,
+            workspaceId: payload.workspaceId,
+          });
+        } else {
+          await this.upsertRestoredRecord({
+            id: recordId,
+            type: recordType,
+            data: recordData,
+            metadata: (record.metadata as Record<string, unknown> | undefined) || {},
+            userId,
+            workspaceId: payload.workspaceId,
+            mode,
+          });
+        }
+
+        restored += 1;
+      } catch (error) {
+        failed += 1;
+        errors.push({ item, error: this.getErrorMessage(error) });
+      }
+    }
+
     return {
-      status: 'not_implemented',
-      file: payload.file.originalname,
+      success: failed === 0,
+      restored,
+      failed,
+      mode,
+      errors,
     };
   }
 
-  async getDataVersions(_userId: string, _id: string) {
-    return [] as Array<Record<string, unknown>>;
+  async getDataVersions(_userId: string, _id: string, _workspaceId?: string) {
+    this.ensureIsolationContext({ userId: _userId, workspaceId: _workspaceId }, '获取版本历史');
+    const params: Array<string | number> = [_id];
+    const clauses: string[] = ['record_id = $1'];
+
+    if (_workspaceId) {
+      params.push(_workspaceId);
+      clauses.push(`workspace_id = $${params.length}`);
+    }
+    if (_userId) {
+      params.push(_userId);
+      clauses.push(`created_by = $${params.length}`);
+    }
+
+    const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+    const result = await query(
+      `SELECT id, record_id, type, data, metadata, version, action, created_at, created_by
+       FROM data_record_versions
+       ${whereClause}
+       ORDER BY created_at DESC`,
+      params
+    );
+
+    return result.rows.map(row => ({
+      id: row.id,
+      recordId: row.record_id,
+      type: row.type,
+      data: row.data || {},
+      metadata: row.metadata || {},
+      version: Number(row.version) || 1,
+      action: row.action,
+      createdAt: toDate(row.created_at),
+      createdBy: row.created_by,
+    }));
   }
 
   async validateDataRequest(
     _userId: string,
-    payload: { data: Record<string, unknown>; schema?: { type?: string } }
+    payload: { data: Record<string, unknown>; schema?: { type?: string }; workspaceId?: string }
   ) {
     const type = payload.schema?.type || String(payload.data.type || this.dataTypes.TEST_RESULTS);
     this.validateData(type, payload.data);
-    return { valid: true };
+    return { valid: true, workspaceId: payload.workspaceId };
   }
 
   /**
@@ -448,6 +606,8 @@ class DataManagementService extends EventEmitter {
         workspaceId: options.workspaceId,
       })) as DataRecord;
 
+      await this.saveVersionSnapshot(existingRecord, 'update', options.userId, options.workspaceId);
+
       const updatedRecord: DataRecord = {
         ...existingRecord,
         data: { ...existingRecord.data, ...updates },
@@ -505,6 +665,8 @@ class DataManagementService extends EventEmitter {
         userId: options.userId,
         workspaceId: options.workspaceId,
       })) as DataRecord;
+
+      await this.saveVersionSnapshot(record, 'delete', options.userId, options.workspaceId);
 
       if (options.softDelete) {
         const recordValue = record as DataRecord;
@@ -884,6 +1046,7 @@ class DataManagementService extends EventEmitter {
       `CREATE TABLE IF NOT EXISTS data_records (
          id VARCHAR(80) PRIMARY KEY,
          type VARCHAR(100) NOT NULL,
+         workspace_id VARCHAR(80),
          data JSONB NOT NULL,
          metadata JSONB NOT NULL DEFAULT '{}',
          created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -891,7 +1054,25 @@ class DataManagementService extends EventEmitter {
          deleted_at TIMESTAMPTZ
        );
        CREATE INDEX IF NOT EXISTS idx_data_records_type ON data_records(type);
+       CREATE INDEX IF NOT EXISTS idx_data_records_workspace_id ON data_records(workspace_id);
        CREATE INDEX IF NOT EXISTS idx_data_records_created ON data_records(created_at DESC);
+
+       CREATE TABLE IF NOT EXISTS data_record_versions (
+         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+         record_id VARCHAR(80) NOT NULL,
+         type VARCHAR(100) NOT NULL,
+         workspace_id VARCHAR(80),
+         data JSONB NOT NULL,
+         metadata JSONB NOT NULL DEFAULT '{}',
+         version INTEGER NOT NULL,
+         action VARCHAR(30) NOT NULL,
+         created_by VARCHAR(80),
+         created_at TIMESTAMPTZ DEFAULT NOW()
+       );
+       CREATE INDEX IF NOT EXISTS idx_data_record_versions_record_id
+         ON data_record_versions(record_id);
+       CREATE INDEX IF NOT EXISTS idx_data_record_versions_created_at
+         ON data_record_versions(created_at DESC);
 
        CREATE TABLE IF NOT EXISTS data_backups (
          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -1072,6 +1253,119 @@ class DataManagementService extends EventEmitter {
       return error.message;
     }
     return String(error);
+  }
+
+  private getExportService(): DataExportService {
+    if (!this.exportService) {
+      this.exportService = new DataExportService({
+        exportDir: path.join(process.cwd(), 'exports'),
+        maxFileSize: 100 * 1024 * 1024,
+        supportedFormats: ['json', 'csv', 'excel', 'pdf', 'zip'],
+      });
+    }
+    return this.exportService;
+  }
+
+  private resolveExportDataType(value: string): ExportJobRequest['dataType'] {
+    const normalized = value.toLowerCase();
+    const mapping: Record<string, ExportJobRequest['dataType']> = {
+      [this.dataTypes.TEST_RESULTS]: 'test_results',
+      [this.dataTypes.USER_DATA]: 'users',
+      [this.dataTypes.SYSTEM_LOGS]: 'logs',
+      [this.dataTypes.ANALYTICS]: 'analytics',
+      [this.dataTypes.REPORTS]: 'reports',
+      test_results: 'test_results',
+      users: 'users',
+      logs: 'logs',
+      analytics: 'analytics',
+      reports: 'reports',
+    };
+    const resolved = mapping[normalized];
+    if (!resolved) {
+      throw new Error(`不支持的数据类型: ${value}`);
+    }
+    return resolved;
+  }
+
+  private resolveRecordType(
+    record: Record<string, unknown>,
+    recordData: Record<string, unknown>
+  ): string {
+    return String(
+      record.type ||
+        record.dataType ||
+        recordData.type ||
+        recordData.dataType ||
+        this.dataTypes.TEST_RESULTS
+    );
+  }
+
+  private async saveVersionSnapshot(
+    record: DataRecord,
+    action: 'update' | 'delete' | 'restore',
+    userId?: string,
+    workspaceId?: string
+  ) {
+    const version = Number(record.metadata.version || 1);
+    await query(
+      `INSERT INTO data_record_versions
+        (record_id, type, workspace_id, data, metadata, version, action, created_by, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
+      [
+        record.id,
+        record.type,
+        workspaceId || null,
+        JSON.stringify(record.data),
+        JSON.stringify(record.metadata),
+        version,
+        action,
+        userId || null,
+      ]
+    );
+  }
+
+  private async upsertRestoredRecord(payload: {
+    id: string;
+    type: string;
+    data: Record<string, unknown>;
+    metadata: Record<string, unknown>;
+    userId: string;
+    workspaceId?: string;
+    mode: 'merge' | 'overwrite';
+  }) {
+    const { id, type, data, metadata, userId, workspaceId, mode } = payload;
+    const now = new Date().toISOString();
+    const baseMetadata: DataRecordMetadata = {
+      createdAt: (metadata.createdAt as string) || now,
+      updatedAt: now,
+      version: Number(metadata.version || 1),
+      tags: (metadata.tags as string[]) || [],
+      source: (metadata.source as string) || 'restore',
+      userId: (metadata.userId as string) || userId,
+      updatedBy: userId,
+    };
+
+    if (mode === 'overwrite') {
+      const existing = await query(
+        `SELECT id, type, data, metadata FROM data_records WHERE id = $1`,
+        [id]
+      );
+      if (existing.rows.length) {
+        const record = existing.rows[0] as DataRecord;
+        await this.saveVersionSnapshot(record, 'restore', userId, workspaceId);
+        baseMetadata.version = Number(record.metadata?.version || 1) + 1;
+      }
+    }
+
+    this.validateData(type, data);
+
+    await query(
+      `INSERT INTO data_records (id, type, workspace_id, data, metadata, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+       ON CONFLICT (id)
+       DO UPDATE SET data = $4, metadata = $5, updated_at = NOW(), deleted_at = NULL`,
+      [id, type, workspaceId || null, JSON.stringify(data), JSON.stringify(baseMetadata)]
+    );
   }
 }
 

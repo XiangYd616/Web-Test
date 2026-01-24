@@ -4,6 +4,7 @@
 
 import type { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 const { securityLogger } = require('./logger');
 
 interface RateLimitOptions {
@@ -60,11 +61,12 @@ const rateLimiter = rateLimit({
       req
     );
 
-    res.status(429).json({
-      success: false,
-      message: '请求过于频繁，请稍后再试',
-      retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000),
-    });
+    res.error(
+      StandardErrorCode.RATE_LIMIT_EXCEEDED,
+      '请求过于频繁，请稍后再试',
+      { retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000) },
+      429
+    );
   },
 });
 
@@ -89,11 +91,12 @@ const strictRateLimiter = rateLimit({
       req
     );
 
-    res.status(429).json({
-      success: false,
-      message: '敏感操作请求过于频繁，请稍后再试',
-      retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000),
-    });
+    res.error(
+      StandardErrorCode.RATE_LIMIT_EXCEEDED,
+      '敏感操作请求过于频繁，请稍后再试',
+      { retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000) },
+      429
+    );
   },
 });
 
@@ -119,11 +122,12 @@ const loginRateLimiter = rateLimit({
       req
     );
 
-    res.status(429).json({
-      success: false,
-      message: '登录尝试过于频繁，请15分钟后再试',
-      retryAfter: Math.round((req.rateLimit?.resetTime ?? 0) / 1000),
-    });
+    res.error(
+      StandardErrorCode.RATE_LIMIT_EXCEEDED,
+      '登录尝试过于频繁，请15分钟后再试',
+      { retryAfter: Math.round((req.rateLimit?.resetTime ?? 0) / 1000) },
+      429
+    );
   },
 });
 
@@ -147,11 +151,12 @@ const registerRateLimiter = rateLimit({
       req
     );
 
-    res.status(429).json({
-      success: false,
-      message: '注册请求过于频繁，请1小时后再试',
-      retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000),
-    });
+    res.error(
+      StandardErrorCode.RATE_LIMIT_EXCEEDED,
+      '注册请求过于频繁，请1小时后再试',
+      { retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000) },
+      429
+    );
   },
 });
 
@@ -204,11 +209,12 @@ const testEngineRateLimiter = rateLimit({
       req
     );
 
-    res.status(429).json({
-      success: false,
-      message: '测试请求过于频繁，请稍后再试',
-      retryAfter: Math.round((req.rateLimit?.resetTime ?? 0) / 1000),
-    });
+    res.error(
+      StandardErrorCode.RATE_LIMIT_EXCEEDED,
+      '测试请求过于频繁，请稍后再试',
+      { retryAfter: Math.round((req.rateLimit?.resetTime ?? 0) / 1000) },
+      429
+    );
   },
 });
 
@@ -237,11 +243,12 @@ const apiRateLimiter = rateLimit({
       req
     );
 
-    res.status(429).json({
-      success: false,
-      message: 'API调用过于频繁，请稍后再试',
-      retryAfter: Math.round((req.rateLimit?.resetTime ?? 0) / 1000),
-    });
+    res.error(
+      StandardErrorCode.RATE_LIMIT_EXCEEDED,
+      'API调用过于频繁，请稍后再试',
+      { retryAfter: Math.round((req.rateLimit?.resetTime ?? 0) / 1000) },
+      429
+    );
   },
 });
 
@@ -270,11 +277,12 @@ const uploadRateLimiter = rateLimit({
       req
     );
 
-    res.status(429).json({
-      success: false,
-      message: '文件上传过于频繁，请稍后再试',
-      retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000),
-    });
+    res.error(
+      StandardErrorCode.RATE_LIMIT_EXCEEDED,
+      '文件上传过于频繁，请稍后再试',
+      { retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000) },
+      429
+    );
   },
 });
 
@@ -294,12 +302,12 @@ function createCustomRateLimiter(options: RateLimitOptions) {
     handler:
       options.handler ||
       ((req: RateLimitRequest, res: Response) => {
-        res.status(429).json({
-          success: false,
-          message:
-            typeof options.message === 'string' ? options.message : '请求过于频繁，请稍后再试',
-          retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000),
-        });
+        res.error(
+          StandardErrorCode.RATE_LIMIT_EXCEEDED,
+          typeof options.message === 'string' ? options.message : '请求过于频繁，请稍后再试',
+          { retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000) },
+          429
+        );
       }),
   });
 }

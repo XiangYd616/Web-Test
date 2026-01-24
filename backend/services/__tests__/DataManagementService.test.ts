@@ -70,13 +70,14 @@ describe('DataManagementService', () => {
         ],
       });
 
-      const record = await service.readData('test_results', 'data_1');
+      const record = await service.readData('test_results', 'data_1', { userId: mockUserId });
 
       expect(record.id).toBe('data_1');
       expect(record.type).toBe('test_results');
       expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('SELECT id, type'), [
         'test_results',
         'data_1',
+        mockUserId,
       ]);
     });
   });
@@ -127,12 +128,16 @@ describe('DataManagementService', () => {
         })
         .mockResolvedValueOnce({ rows: [] });
 
-      const result = await service.deleteData('test_results', 'data_2', { softDelete: false });
+      const result = await service.deleteData('test_results', 'data_2', {
+        softDelete: false,
+        userId: mockUserId,
+      });
 
       expect(result.success).toBe(true);
       expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM data_records'), [
         'test_results',
         'data_2',
+        mockUserId,
       ]);
     });
   });
@@ -180,12 +185,16 @@ describe('DataManagementService', () => {
         })
         .mockResolvedValueOnce({ rows: [] });
 
-      const result = await service.deleteData('test_results', 'data_2', { softDelete: false });
+      const result = await service.deleteData('test_results', 'data_2', {
+        softDelete: false,
+        userId: mockUserId,
+      });
 
       expect(result.success).toBe(true);
       expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM data_records'), [
         'test_results',
         'data_2',
+        mockUserId,
       ]);
     });
   });
@@ -204,12 +213,17 @@ describe('DataManagementService', () => {
         ],
       });
 
-      const result = await service.queryData('test_results', {}, { page: 1, limit: 10 });
+      const result = await service.queryData(
+        'test_results',
+        { userId: mockUserId },
+        { page: 1, limit: 10 }
+      );
 
       expect(result.results).toHaveLength(1);
       expect(result.total).toBe(2);
       expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('SELECT COUNT(*)'), [
         'test_results',
+        mockUserId,
       ]);
     });
 
@@ -228,7 +242,7 @@ describe('DataManagementService', () => {
 
       const result = await service.queryData(
         'test_results',
-        { search: 'Alpha', sort: { field: 'name', direction: 'asc' } },
+        { search: 'Alpha', sort: { field: 'name', direction: 'asc' }, userId: mockUserId },
         { page: 1, limit: 10 }
       );
 
@@ -236,6 +250,7 @@ describe('DataManagementService', () => {
       expect(result.results[0].data.name).toBe('Alpha');
       expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('SELECT COUNT(*)'), [
         'test_results',
+        mockUserId,
         '%Alpha%',
       ]);
     });

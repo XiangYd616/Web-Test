@@ -117,6 +117,30 @@ export interface TestResult {
   created_at: DatabaseTimestamp;
 }
 
+export interface TestResultRecord {
+  id: DatabaseId;
+  execution_id: DatabaseId;
+  summary: JsonObject;
+  score?: number;
+  grade?: string;
+  passed?: boolean;
+  warnings?: unknown[];
+  errors?: unknown[];
+  created_at: DatabaseTimestamp;
+}
+
+export interface TestMetricRecord {
+  id: DatabaseId;
+  metric_name: JsonObject | number | string;
+  metric_value: JsonObject | number | string;
+  metric_unit?: string | null;
+  metric_type?: string | null;
+  passed?: boolean | null;
+  severity?: string | null;
+  recommendation?: string | null;
+  created_at: DatabaseTimestamp;
+}
+
 // ==================== 性能测试详细结果 ====================
 
 export interface PerformanceTestResult {

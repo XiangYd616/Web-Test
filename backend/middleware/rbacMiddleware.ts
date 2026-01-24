@@ -5,6 +5,7 @@
  */
 
 import type { NextFunction, Request, Response } from 'express';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 
 const { rbacService } = require('../services/core/rbacService');
 const Logger = require('../utils/logger');
@@ -70,13 +71,12 @@ function requirePermission(resource: string, action: string, options: Permission
     try {
       // 检查用户是否已认证
       if (!req.user || !req.user.id) {
-        return res.status(401).json({
-          success: false,
-          error: {
-            code: 'UNAUTHORIZED',
-            message: '用户未认证',
-          },
-        });
+        return res.error(
+          StandardErrorCode.UNAUTHORIZED,
+          '用户未认证',
+          { code: 'UNAUTHORIZED' },
+          401
+        );
       }
 
       const userId = req.user.id;
@@ -152,16 +152,12 @@ function requirePermission(resource: string, action: string, options: Permission
         return next();
       } else {
         // 权限检查失败
-        const errorResponse = {
-          success: false,
-          error: {
-            code: 'FORBIDDEN',
-            message: '权限不足',
-            details: {
-              resource,
-              action,
-              reason: permissionResult.reason,
-            },
+        const errorDetails = {
+          code: 'FORBIDDEN',
+          details: {
+            resource,
+            action,
+            reason: permissionResult.reason,
           },
         };
 
@@ -170,17 +166,16 @@ function requirePermission(resource: string, action: string, options: Permission
           return options.onDenied(req, res, permissionResult.reason);
         }
 
-        return res.status(403).json(errorResponse);
+        return res.error(StandardErrorCode.FORBIDDEN, '权限不足', errorDetails, 403);
       }
     } catch (error) {
       Logger.error('Permission check error:', error);
-      return res.status(500).json({
-        success: false,
-        error: {
-          code: 'INTERNAL_ERROR',
-          message: '权限检查过程中发生错误',
-        },
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '权限检查过程中发生错误',
+        { code: 'INTERNAL_ERROR' },
+        500
+      );
     }
   };
 }
@@ -212,27 +207,27 @@ function requireRole(roles: string | string[]) {
 
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user || !req.user.role) {
-      return res.status(401).json({
-        success: false,
-        error: {
-          code: 'UNAUTHORIZED',
-          message: '用户未认证或角色信息缺失',
-        },
-      });
+      return res.error(
+        StandardErrorCode.UNAUTHORIZED,
+        '用户未认证或角色信息缺失',
+        { code: 'UNAUTHORIZED' },
+        401
+      );
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        error: {
+      return res.error(
+        StandardErrorCode.FORBIDDEN,
+        '角色权限不足',
+        {
           code: 'FORBIDDEN',
-          message: '角色权限不足',
           details: {
             requiredRoles: allowedRoles,
             currentRole: req.user.role,
           },
         },
-      });
+        403
+      );
     }
 
     return next();
@@ -255,13 +250,7 @@ const requireSuperAdmin = requireRole('superadmin');
 function requireAnyPermission(permissions: Array<{ resource: string; action: string }>) {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user || !req.user.id) {
-      return res.status(401).json({
-        success: false,
-        error: {
-          code: 'UNAUTHORIZED',
-          message: '用户未认证',
-        },
-      });
+      return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', { code: 'UNAUTHORIZED' }, 401);
     }
 
     try {
@@ -288,26 +277,26 @@ function requireAnyPermission(permissions: Array<{ resource: string; action: str
         return next();
       }
 
-      return res.status(403).json({
-        success: false,
-        error: {
+      return res.error(
+        StandardErrorCode.FORBIDDEN,
+        '权限不足',
+        {
           code: 'FORBIDDEN',
-          message: '权限不足',
           details: {
             requiredPermissions: permissions,
             message: '需要满足以下任一权限',
           },
         },
-      });
+        403
+      );
     } catch (error) {
       Logger.error('Multi-permission check error:', error);
-      return res.status(500).json({
-        success: false,
-        error: {
-          code: 'INTERNAL_ERROR',
-          message: '权限检查过程中发生错误',
-        },
-      });
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '权限检查过程中发生错误',
+        { code: 'INTERNAL_ERROR' },
+        500
+      );
     }
   };
 }

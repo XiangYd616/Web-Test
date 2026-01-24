@@ -1,3 +1,11 @@
+import comparisonRepository from '../repositories/comparisonRepository';
+import PerformanceBenchmarkService, {
+  BaselineComparison,
+  BenchmarkConfig,
+  MetricChange,
+  PerformanceData,
+} from '../services/performance/PerformanceBenchmarkService';
+
 /**
  * 测试结果对比分析器
  *
@@ -50,6 +58,24 @@ type ComparisonResult = {
   message?: string;
 };
 
+type BenchmarkComparisonResult = {
+  benchmark: BenchmarkConfig;
+  current: PerformanceData;
+  comparison: BaselineComparison | null;
+  hasBaseline: boolean;
+};
+
+type ComparisonExportOptions = {
+  comparison?: BenchmarkComparisonResult;
+  comparisons?: BenchmarkComparisonResult[];
+  includeSummary?: boolean;
+};
+
+type StoredComparison = {
+  id: string;
+  comparison_data: Record<string, unknown>;
+};
+
 type TestResultRecord = Record<string, unknown> & {
   testId?: string;
   type?: string;
@@ -64,6 +90,7 @@ type TestResultRecord = Record<string, unknown> & {
 };
 
 class ComparisonAnalyzer {
+  private benchmarkService?: PerformanceBenchmarkService;
   /**
    * 对比两次测试结果
    */
@@ -462,52 +489,333 @@ class ComparisonAnalyzer {
    * 基准测试对比（占位实现）
    */
   async compareToBenchmark(testResult: Record<string, unknown>, benchmarkType: string) {
+    const service = await this.getBenchmarkService();
+    const benchmark = await service.getBenchmark(benchmarkType);
+    if (!benchmark) {
+      throw new Error('基准测试不存在');
+    }
+
+    const current = this.buildCurrentPerformanceData(testResult, benchmark);
+    const baseline = await service.getBaseline(benchmarkType);
+
     return {
-      benchmarkType,
-      testResult,
-      comparison: {
-        status: 'not_implemented',
-        message: '基准对比逻辑尚未实现，返回原始数据',
-      },
+      benchmark,
+      current,
+      comparison: baseline ? this.buildBaselineComparison(current, baseline) : null,
+      hasBaseline: Boolean(baseline),
     };
   }
 
   /**
    * 获取可用基准测试（占位实现）
    */
-  async getAvailableBenchmarks(_testType?: string) {
-    return [] as string[];
+  async getAvailableBenchmarks(testType?: string) {
+    const service = await this.getBenchmarkService();
+    const benchmarks = await service.getAllBenchmarks();
+
+    if (!testType) {
+      return benchmarks;
+    }
+
+    const normalized = testType.toLowerCase();
+    const categoryMap: Record<string, BenchmarkConfig['category']> = {
+      frontend: 'frontend',
+      performance: 'frontend',
+      backend: 'backend',
+      api: 'backend',
+      business: 'business',
+    };
+    const category = categoryMap[normalized];
+    return category ? benchmarks.filter(benchmark => benchmark.category === category) : benchmarks;
   }
 
   /**
    * 生成对比摘要（占位实现）
    */
   async generateComparisonSummary(comparisons: unknown[], groupBy?: string) {
-    return {
-      total: comparisons.length,
-      groupBy: groupBy || 'none',
-      comparisons,
+    const items = comparisons as BenchmarkComparisonResult[];
+    const summary = {
+      total: items.length,
+      improving: 0,
+      degrading: 0,
+      stable: 0,
+      groups: {} as Record<
+        string,
+        { total: number; improving: number; degrading: number; stable: number }
+      >,
     };
+
+    items.forEach(item => {
+      const trend = item.comparison?.trend || 'stable';
+      if (trend === 'improving') summary.improving += 1;
+      else if (trend === 'degrading') summary.degrading += 1;
+      else summary.stable += 1;
+
+      if (groupBy === 'category') {
+        const key = item.benchmark.category;
+        if (!summary.groups[key]) {
+          summary.groups[key] = { total: 0, improving: 0, degrading: 0, stable: 0 };
+        }
+        summary.groups[key].total += 1;
+        if (trend === 'improving') summary.groups[key].improving += 1;
+        else if (trend === 'degrading') summary.groups[key].degrading += 1;
+        else summary.groups[key].stable += 1;
+      }
+    });
+
+    return summary;
   }
 
   /**
    * 获取对比指标（占位实现）
    */
-  async getComparisonMetrics(_testType?: string) {
-    return [] as string[];
+  async getComparisonMetrics(testType?: string) {
+    const benchmarks = await this.getAvailableBenchmarks(testType);
+    const metrics = new Set<string>();
+
+    benchmarks.forEach(benchmark => {
+      benchmark.metrics.forEach(metric => metrics.add(metric));
+    });
+
+    return Array.from(metrics.values()).map(metric => ({
+      key: metric,
+      label: metric.replace(/_/g, ' '),
+    }));
   }
 
   /**
    * 导出对比报告（占位实现）
    */
-  async exportComparisonReport(comparisonId: string, format = 'json', options?: unknown) {
-    const payload = {
-      comparisonId,
-      format,
-      options,
-      message: '导出功能尚未实现，返回基础信息',
+  async exportComparisonReport(_comparisonId: string, format = 'json', options?: unknown) {
+    const payload = (options || {}) as ComparisonExportOptions;
+    const comparisons = payload.comparisons || (payload.comparison ? [payload.comparison] : []);
+
+    if (comparisons.length === 0) {
+      if (!_comparisonId) {
+        throw new Error('导出对比报告缺少数据');
+      }
+      const stored = await this.loadStoredComparison(_comparisonId);
+      if (!stored) {
+        throw new Error('对比记录不存在');
+      }
+
+      return this.exportStoredComparison(stored, format);
+    }
+
+    const summary = payload.includeSummary
+      ? await this.generateComparisonSummary(comparisons, 'category')
+      : undefined;
+    const report = {
+      generatedAt: new Date().toISOString(),
+      comparisons,
+      summary,
     };
-    return Buffer.from(JSON.stringify(payload, null, 2));
+
+    if (format === 'csv') {
+      const generatedAt = new Date().toISOString();
+      const rows: string[] = [
+        [
+          'benchmark_id',
+          'benchmark_name',
+          'category',
+          'metric',
+          'current_value',
+          'baseline_value',
+          'change',
+          'change_percent',
+          'significance',
+          'direction',
+          'trend',
+          'has_baseline',
+          'generated_at',
+        ].join(','),
+      ];
+
+      comparisons.forEach(item => {
+        const metrics = item.benchmark.metrics || [];
+        const changes = item.comparison?.changes || {};
+        metrics.forEach(metric => {
+          const baselineValue = item.comparison?.baseline.values[metric];
+          const currentValue = item.current.values[metric];
+          const change = changes[metric];
+          rows.push(
+            [
+              item.benchmark.id,
+              item.benchmark.name,
+              item.benchmark.category,
+              metric,
+              currentValue ?? '',
+              baselineValue ?? '',
+              change?.value ?? '',
+              change?.percentage ?? '',
+              change?.significance ?? '',
+              change?.direction ?? '',
+              item.comparison?.trend || 'stable',
+              item.hasBaseline ? 'true' : 'false',
+              generatedAt,
+            ]
+              .map(value => this.toCsvValue(value))
+              .join(',')
+          );
+        });
+      });
+      return Buffer.from(rows.join('\n'));
+    }
+
+    return Buffer.from(JSON.stringify(report, null, 2));
+  }
+
+  private async loadStoredComparison(comparisonId: string): Promise<StoredComparison | null> {
+    const row = await comparisonRepository.getStoredComparison(comparisonId);
+    if (!row) {
+      return null;
+    }
+    return {
+      id: String(row.id),
+      comparison_data: row.comparison_data,
+    };
+  }
+
+  private exportStoredComparison(comparison: StoredComparison, format: string) {
+    const payload = comparison.comparison_data || {};
+    if (format === 'csv') {
+      const generatedAt = new Date().toISOString();
+      const metrics = (payload as { comparison?: { metrics?: Record<string, ComparisonMetric> } })
+        .comparison?.metrics;
+      const rows: string[] = [
+        [
+          'comparison_id',
+          'metric',
+          'current',
+          'previous',
+          'change',
+          'change_percent',
+          'status',
+          'generated_at',
+        ].join(','),
+      ];
+      if (metrics) {
+        Object.entries(metrics).forEach(([key, metric]) => {
+          rows.push(
+            [
+              comparison.id,
+              key,
+              metric.current,
+              metric.previous,
+              metric.change ?? '',
+              metric.changePercent ?? '',
+              metric.status,
+              generatedAt,
+            ]
+              .map(value => this.toCsvValue(value))
+              .join(',')
+          );
+        });
+      } else {
+        rows.push([comparison.id, 'comparison', '', '', '', '', '', generatedAt].join(','));
+      }
+      return Buffer.from(rows.join('\n'));
+    }
+
+    return Buffer.from(
+      JSON.stringify(
+        {
+          generatedAt: new Date().toISOString(),
+          comparisonId: comparison.id,
+          comparison: payload,
+        },
+        null,
+        2
+      )
+    );
+  }
+
+  private toCsvValue(value: unknown) {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    const str = String(value);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  }
+
+  private async getBenchmarkService() {
+    if (!this.benchmarkService) {
+      this.benchmarkService = new PerformanceBenchmarkService();
+    }
+    await this.benchmarkService.initialize();
+    return this.benchmarkService;
+  }
+
+  private buildCurrentPerformanceData(
+    testResult: Record<string, unknown>,
+    benchmark: BenchmarkConfig
+  ): PerformanceData {
+    const rawMetrics =
+      (testResult.metrics as Record<string, unknown> | undefined) ||
+      (testResult.result as Record<string, unknown> | undefined) ||
+      {};
+    const values: Record<string, number> = {};
+
+    benchmark.metrics.forEach(metric => {
+      values[metric] = toNumber(rawMetrics[metric]);
+    });
+
+    return {
+      timestamp: new Date(),
+      values,
+      metadata: {
+        benchmarkId: benchmark.id,
+        source: 'comparison_analyzer',
+        testResultId: testResult.testId || testResult.id || null,
+      },
+    };
+  }
+
+  private buildBaselineComparison(
+    current: PerformanceData,
+    baseline: PerformanceData
+  ): BaselineComparison {
+    const changes: Record<string, MetricChange> = {};
+    Object.entries(current.values).forEach(([metric, currentValue]) => {
+      const baselineValue = baseline.values[metric];
+      if (baselineValue !== undefined) {
+        const change = currentValue - baselineValue;
+        const percentage = baselineValue !== 0 ? (change / baselineValue) * 100 : 0;
+        let significance: MetricChange['significance'] = 'negligible';
+        if (Math.abs(percentage) > 10) significance = 'significant';
+        else if (Math.abs(percentage) > 5) significance = 'minor';
+
+        changes[metric] = {
+          value: change,
+          percentage,
+          significance,
+          direction: change > 0 ? 'degradation' : 'improvement',
+        };
+      }
+    });
+
+    const trend = this.calculateBaselineTrend(changes);
+    return {
+      baseline,
+      current,
+      changes,
+      trend,
+    };
+  }
+
+  private calculateBaselineTrend(
+    changes: Record<string, MetricChange>
+  ): BaselineComparison['trend'] {
+    const values = Object.values(changes);
+    if (values.length === 0) return 'stable';
+    const improvements = values.filter(change => change.direction === 'improvement').length;
+    const degradations = values.filter(change => change.direction === 'degradation').length;
+    if (improvements > degradations * 1.2) return 'improving';
+    if (degradations > improvements * 1.2) return 'degrading';
+    return 'stable';
   }
 
   /**

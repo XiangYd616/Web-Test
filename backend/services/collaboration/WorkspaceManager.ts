@@ -6,6 +6,8 @@
 import * as crypto from 'crypto';
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
+import { query } from '../../config/database';
+import { toDate, toOptionalDate } from '../../utils/dateUtils';
 
 // 工作空间配置接口
 export interface WorkspaceManagerConfig {
@@ -125,6 +127,149 @@ export interface WorkspaceStatistics {
   bySize: Record<string, number>;
 }
 
+type WorkspaceRow = {
+  id: string;
+  name?: string | null;
+  description?: string | null;
+  visibility?: string | null;
+  owner_id?: string | null;
+  metadata?: unknown;
+  created_at?: unknown;
+  updated_at?: unknown;
+  last_activity?: unknown;
+};
+
+type WorkspaceInvitationRow = {
+  id: string;
+  workspace_id: string;
+  inviter_id: string;
+  invitee_email: string;
+  role: WorkspaceMember['role'];
+  permissions?: unknown;
+  token: string;
+  status: WorkspaceInvitation['status'];
+  expires_at?: unknown;
+  created_at?: unknown;
+  responded_at?: unknown;
+  message?: string | null;
+};
+
+type WorkspaceResourceRow = {
+  id: string;
+  workspace_id: string;
+  type: WorkspaceResource['type'];
+  name: string;
+  path: string;
+  size: number;
+  mime_type?: string | null;
+  owner_id?: string | null;
+  permissions?: unknown;
+  metadata?: unknown;
+  created_at?: unknown;
+  updated_at?: unknown;
+};
+
+type WorkspaceActivityRow = {
+  id: string;
+  workspace_id: string;
+  user_id?: string | null;
+  type: WorkspaceActivity['type'];
+  resource?: unknown;
+  details?: unknown;
+  created_at?: unknown;
+};
+
+const parseJsonValue = <T>(value: unknown, fallback: T): T => {
+  if (value === null || value === undefined) {
+    return fallback;
+  }
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return fallback;
+    }
+  }
+  return value as T;
+};
+
+const defaultWorkspaceSettings = (): WorkspaceSettings => ({
+  isPublic: false,
+  allowInvitations: true,
+  requireApproval: false,
+  maxMembers: 100,
+  defaultPermissions: [],
+  enableRealTimeSync: true,
+  enableVersionControl: false,
+  enableBackup: false,
+  retentionDays: 30,
+});
+
+const mapWorkspaceRow = (row: WorkspaceRow): Workspace => {
+  const metadata = parseJsonValue<Record<string, unknown>>(row.metadata, {});
+  const settings =
+    (metadata.settings as WorkspaceSettings | undefined) ?? defaultWorkspaceSettings();
+  const createdAt = toDate(row.created_at || new Date());
+  const updatedAt = toDate(row.updated_at || createdAt);
+  const lastActivity = toDate(row.last_activity || updatedAt || createdAt);
+  const visibility = row.visibility || 'private';
+
+  return {
+    id: String(row.id),
+    name: String(row.name || ''),
+    description: String(row.description || ''),
+    ownerId: String(row.owner_id || ''),
+    type: visibility === 'team' ? 'team' : visibility === 'public' ? 'enterprise' : 'personal',
+    settings,
+    members: [],
+    resources: [],
+    invitations: [],
+    createdAt,
+    updatedAt,
+    lastActivity,
+    metadata,
+  };
+};
+
+const mapWorkspaceInvitationRow = (row: WorkspaceInvitationRow): WorkspaceInvitation => ({
+  id: String(row.id),
+  workspaceId: String(row.workspace_id),
+  inviterId: String(row.inviter_id),
+  inviteeEmail: String(row.invitee_email),
+  role: row.role,
+  permissions: parseJsonValue<Permission[]>(row.permissions, []),
+  token: String(row.token),
+  status: row.status,
+  expiresAt: toDate(row.expires_at || new Date()),
+  createdAt: toDate(row.created_at || new Date()),
+  respondedAt: toOptionalDate(row.responded_at),
+  message: row.message || undefined,
+});
+
+const mapWorkspaceResourceRow = (row: WorkspaceResourceRow): WorkspaceResource => ({
+  id: String(row.id),
+  type: row.type,
+  name: String(row.name),
+  path: String(row.path),
+  size: Number(row.size || 0),
+  mimeType: row.mime_type || undefined,
+  ownerId: row.owner_id ? String(row.owner_id) : '',
+  permissions: parseJsonValue<Permission[]>(row.permissions, []),
+  createdAt: toDate(row.created_at || new Date()),
+  updatedAt: toDate(row.updated_at || new Date()),
+  metadata: parseJsonValue<Record<string, unknown>>(row.metadata, {}),
+});
+
+const mapWorkspaceActivityRow = (row: WorkspaceActivityRow): WorkspaceActivity => ({
+  id: String(row.id),
+  workspaceId: String(row.workspace_id),
+  userId: row.user_id ? String(row.user_id) : '',
+  type: row.type,
+  resource: parseJsonValue(row.resource, { type: '', id: '', name: '' }),
+  details: parseJsonValue<Record<string, unknown>>(row.details, {}),
+  timestamp: toDate(row.created_at || new Date()),
+});
+
 // 工作空间搜索接口
 export interface WorkspaceSearchQuery {
   query?: string;
@@ -151,15 +296,6 @@ export interface WorkspaceSearchResult {
 
 class WorkspaceManager extends EventEmitter {
   private options: WorkspaceManagerConfig;
-  private models: {
-    Workspace: { create: (data: Record<string, unknown>) => Promise<unknown> };
-    WorkspaceMember: {
-      count: (options: Record<string, unknown>) => Promise<number>;
-      create: (data: Record<string, unknown>) => Promise<unknown>;
-      destroy: (options: Record<string, unknown>) => Promise<number>;
-      findAll: (options: Record<string, unknown>) => Promise<Array<{ workspace?: unknown }>>;
-    };
-  };
   private workspaces: Map<string, Workspace> = new Map();
   private users: Map<string, unknown> = new Map();
   private invitations: Map<string, WorkspaceInvitation> = new Map();
@@ -176,11 +312,6 @@ class WorkspaceManager extends EventEmitter {
       ...options,
     };
 
-    if (!options.models) {
-      throw new Error('WorkspaceManager requires sequelize models');
-    }
-    this.models = options.models as WorkspaceManager['models'];
-
     // 启动清理任务
     this.startCleanupTask();
   }
@@ -196,29 +327,19 @@ class WorkspaceManager extends EventEmitter {
   ): Promise<unknown> {
     const workspaceId = uuidv4();
 
-    const currentCount = await this.models.WorkspaceMember.count({
-      where: { user_id: workspaceData.ownerId, status: 'active' },
-    });
+    const currentCount = await this.countWorkspaceMembersByUser(workspaceData.ownerId);
     const maxWorkspaces = this.options.maxWorkspacesPerUser ?? 0;
     if (maxWorkspaces > 0 && currentCount >= maxWorkspaces) {
       throw new Error(`Maximum workspaces per user exceeded: ${maxWorkspaces}`);
     }
 
-    const workspaceRecord = await this.models.Workspace.create({
-      id: workspaceId,
-      name: workspaceData.name,
-      description: workspaceData.description ?? null,
-      visibility: workspaceData.type === 'team' ? 'team' : 'private',
-      owner_id: workspaceData.ownerId,
-      metadata: workspaceData.metadata || {},
-    });
-
-    await this.models.WorkspaceMember.create({
-      workspace_id: workspaceId,
-      user_id: workspaceData.ownerId,
+    const workspaceRecord = await this.createWorkspaceRecord(workspaceId, workspaceData);
+    await this.createWorkspaceMemberRecord({
+      workspaceId,
+      userId: workspaceData.ownerId,
       role: 'owner',
       status: 'active',
-      invited_by: null,
+      invitedBy: null,
     });
 
     await this.recordActivity({
@@ -250,14 +371,10 @@ class WorkspaceManager extends EventEmitter {
    * 更新工作空间
    */
   async updateWorkspace(workspaceId: string, updates: Partial<Workspace>): Promise<unknown> {
-    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
-      findByPk: (id: string) => Promise<{ update: (data: unknown) => Promise<unknown> } | null>;
-    };
-    const workspace = await record.findByPk(workspaceId);
-    if (!workspace) {
+    const existing = await this.getWorkspaceRecordById(workspaceId);
+    if (!existing) {
       throw new Error('Workspace not found');
     }
-
     const updatePayload = {
       name: updates.name,
       description: updates.description ?? null,
@@ -271,7 +388,7 @@ class WorkspaceManager extends EventEmitter {
       Object.entries(updatePayload).filter(([, value]) => value !== undefined)
     );
 
-    const updated = await workspace.update(cleanedPayload);
+    const updated = await this.updateWorkspaceRecord(workspaceId, cleanedPayload);
 
     await this.recordActivity({
       id: uuidv4(),
@@ -295,16 +412,13 @@ class WorkspaceManager extends EventEmitter {
    * 删除工作空间
    */
   async deleteWorkspace(workspaceId: string, userId?: string): Promise<boolean> {
-    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
-      findByPk: (id: string) => Promise<{ destroy: () => Promise<void> } | null>;
-    };
-    const workspace = await record.findByPk(workspaceId);
+    const workspace = await this.getWorkspaceRecordById(workspaceId);
     if (!workspace) {
       return false;
     }
 
-    await this.models.WorkspaceMember.destroy({ where: { workspace_id: workspaceId } });
-    await workspace.destroy();
+    await query('DELETE FROM workspace_members WHERE workspace_id = $1', [workspaceId]);
+    await query('DELETE FROM workspaces WHERE id = $1', [workspaceId]);
 
     await this.recordActivity({
       id: uuidv4(),
@@ -340,19 +454,14 @@ class WorkspaceManager extends EventEmitter {
       throw new Error('Workspace not found');
     }
 
-    const memberCount = await this.models.WorkspaceMember.count({
-      where: { workspace_id: workspaceId, status: 'active' },
-    });
+    const memberCount = await this.countActiveMembersInWorkspace(workspaceId);
     const maxMembers = this.options.maxMembersPerWorkspace ?? 0;
     if (maxMembers > 0 && memberCount >= maxMembers) {
       throw new Error('Maximum members per workspace exceeded');
     }
 
-    const existingMember = await this.models.WorkspaceMember.findAll({
-      where: { workspace_id: workspaceId, status: 'active' },
-      include: [{ association: 'workspace' }],
-    });
-    if (existingMember.some(member => member.workspace)) {
+    const existingMemberCount = await this.countActiveMembersInWorkspace(workspaceId);
+    if (existingMemberCount > 0) {
       const alreadyInvited = await this.findInvitationByEmail(
         workspaceId,
         invitationData.inviteeEmail
@@ -417,20 +526,18 @@ class WorkspaceManager extends EventEmitter {
     }
     const workspaceName = (workspace as { name?: string }).name || 'workspace';
 
-    const memberCount = await this.models.WorkspaceMember.count({
-      where: { workspace_id: invitation.workspaceId, status: 'active' },
-    });
+    const memberCount = await this.countActiveMembersInWorkspace(invitation.workspaceId);
     const maxMembers = this.options.maxMembersPerWorkspace ?? 0;
     if (maxMembers > 0 && memberCount >= maxMembers) {
       throw new Error('Maximum members per workspace exceeded');
     }
 
-    await this.models.WorkspaceMember.create({
-      workspace_id: invitation.workspaceId,
-      user_id: userId,
+    await this.createWorkspaceMemberRecord({
+      workspaceId: invitation.workspaceId,
+      userId,
       role: invitation.role,
       status: 'active',
-      invited_by: invitation.inviterId,
+      invitedBy: invitation.inviterId,
     });
 
     await this.updateInvitationStatus(invitation.id, 'accepted');
@@ -597,41 +704,48 @@ class WorkspaceManager extends EventEmitter {
    * 获取用户工作空间
    */
   async getUserWorkspaces(userId: string): Promise<Workspace[]> {
-    const members = await this.models.WorkspaceMember.findAll({
-      where: { user_id: userId, status: 'active' },
-      include: [{ association: 'workspace' }],
-    });
-
-    return members.map(member => member.workspace).filter(Boolean) as unknown as Workspace[];
+    const result = await query(
+      `SELECT w.*
+       FROM workspace_members wm
+       JOIN workspaces w ON w.id = wm.workspace_id
+       WHERE wm.user_id = $1 AND wm.status = 'active'`,
+      [userId]
+    );
+    return (result.rows as WorkspaceRow[]).map(mapWorkspaceRow);
   }
 
   /**
    * 搜索工作空间
    */
-  async searchWorkspaces(query: WorkspaceSearchQuery): Promise<WorkspaceSearchResult> {
-    const limit = query.limit || 20;
-    const offset = query.offset || 0;
-    const where: Record<string, unknown> = {};
-
-    if (query.ownerId) {
-      where.owner_id = query.ownerId;
+  async searchWorkspaces(searchQuery: WorkspaceSearchQuery): Promise<WorkspaceSearchResult> {
+    const limit = searchQuery.limit || 20;
+    const offset = searchQuery.offset || 0;
+    const values: unknown[] = [];
+    const clauses: string[] = [];
+    if (searchQuery.ownerId) {
+      values.push(searchQuery.ownerId);
+      clauses.push(`owner_id = $${values.length}`);
     }
-
-    if (query.query) {
-      where.name = { $ilike: `%${query.query}%` };
+    if (searchQuery.query) {
+      values.push(`%${searchQuery.query}%`);
+      clauses.push(`name ILIKE $${values.length}`);
     }
+    const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+    const sortBy = searchQuery.sortBy || 'created_at';
+    const sortOrder = searchQuery.sortOrder || 'desc';
 
-    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
-      findAndCountAll: (
-        options: Record<string, unknown>
-      ) => Promise<{ rows: Workspace[]; count: number }>;
+    const rowsResult = await query(
+      `SELECT * FROM workspaces ${whereClause} ORDER BY ${sortBy} ${sortOrder} LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
+      [...values, limit, offset]
+    );
+    const countResult = await query(
+      `SELECT COUNT(*) as count FROM workspaces ${whereClause}`,
+      values
+    );
+    const result = {
+      rows: (rowsResult.rows as WorkspaceRow[]).map(mapWorkspaceRow),
+      count: Number(countResult.rows?.[0]?.count || 0),
     };
-    const result = await record.findAndCountAll({
-      where,
-      limit,
-      offset,
-      order: [[query.sortBy || 'created_at', query.sortOrder || 'desc']],
-    });
 
     return {
       workspaces: result.rows,
@@ -644,15 +758,11 @@ class WorkspaceManager extends EventEmitter {
    * 获取工作空间统计
    */
   async getStatistics(): Promise<WorkspaceStatistics> {
-    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
-      findAll: (
-        options?: Record<string, unknown>
-      ) => Promise<Array<{ id: string; visibility: string }>>;
-    };
-    const workspaces = await record.findAll();
+    const workspacesResult = await query('SELECT id, visibility FROM workspaces');
+    const workspaces = workspacesResult.rows as Array<{ id: string; visibility: string }>;
 
     const totalWorkspaces = workspaces.length;
-    const totalMembers = await this.models.WorkspaceMember.count({ where: { status: 'active' } });
+    const totalMembers = await this.countActiveMembers();
 
     const totalResources = await this.countWorkspaceResources();
     const totalInvitations = await this.countWorkspaceInvitations();
@@ -683,14 +793,11 @@ class WorkspaceManager extends EventEmitter {
     workspaceId: string,
     limit: number = 50
   ): Promise<WorkspaceActivity[]> {
-    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
-      findAll: (options: Record<string, unknown>) => Promise<WorkspaceActivity[]>;
-    };
-    return record.findAll({
-      where: { workspace_id: workspaceId },
-      limit,
-      order: [['created_at', 'DESC']],
-    });
+    const result = await query(
+      `SELECT * FROM workspace_activities WHERE workspace_id = $1 ORDER BY created_at DESC LIMIT $2`,
+      [workspaceId, limit]
+    );
+    return (result.rows as WorkspaceActivityRow[]).map(mapWorkspaceActivityRow);
   }
 
   /**
@@ -753,17 +860,11 @@ class WorkspaceManager extends EventEmitter {
   }
 
   private async getWorkspaceById(workspaceId: string) {
-    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
-      findByPk: (id: string) => Promise<unknown | null>;
-    };
-    return record.findByPk(workspaceId);
+    return this.getWorkspaceRecordById(workspaceId);
   }
 
   private async createInvitationRecord(invitation: WorkspaceInvitation) {
-    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
-      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
-    };
-    await db.sequelize.query(
+    await query(
       `INSERT INTO workspace_invitations
        (id, workspace_id, inviter_id, invitee_email, role, permissions, token, status, expires_at, created_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
@@ -782,22 +883,13 @@ class WorkspaceManager extends EventEmitter {
   }
 
   private async getInvitationRecord(invitationId: string): Promise<WorkspaceInvitation | null> {
-    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
-      sequelize: {
-        query: (sql: string, params: unknown[]) => Promise<{ rows: WorkspaceInvitation[] }>;
-      };
-    };
-    const result = await db.sequelize.query('SELECT * FROM workspace_invitations WHERE id = $1', [
-      invitationId,
-    ]);
-    return result.rows?.[0] || null;
+    const result = await query('SELECT * FROM workspace_invitations WHERE id = $1', [invitationId]);
+    const row = result.rows?.[0] as WorkspaceInvitationRow | undefined;
+    return row ? mapWorkspaceInvitationRow(row) : null;
   }
 
   private async updateInvitationStatus(invitationId: string, status: string) {
-    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
-      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
-    };
-    await db.sequelize.query(
+    await query(
       `UPDATE workspace_invitations
        SET status = $2, responded_at = NOW()
        WHERE id = $1`,
@@ -806,39 +898,40 @@ class WorkspaceManager extends EventEmitter {
   }
 
   private async findInvitationByEmail(workspaceId: string, email: string) {
-    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
-      sequelize: {
-        query: (sql: string, params: unknown[]) => Promise<{ rows: WorkspaceInvitation[] }>;
-      };
-    };
-    const result = await db.sequelize.query(
+    const result = await query(
       `SELECT * FROM workspace_invitations
        WHERE workspace_id = $1 AND invitee_email = $2 AND status = 'pending'`,
       [workspaceId, email]
     );
-    return result.rows?.[0] || null;
+    const row = result.rows?.[0] as WorkspaceInvitationRow | undefined;
+    return row ? mapWorkspaceInvitationRow(row) : null;
   }
 
   private async updateWorkspaceMember(memberId: string, updates: Record<string, unknown>) {
-    const record = (await this.models.WorkspaceMember.create({}).constructor) as unknown as {
-      findByPk: (
-        id: string
-      ) => Promise<{ update: (data: Record<string, unknown>) => Promise<void> } | null>;
-    };
-    const member = await record.findByPk(memberId);
-    if (!member) {
+    const entries = Object.entries(updates).filter(([, value]) => value !== undefined);
+    if (!entries.length) {
+      return;
+    }
+    const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = entries.map(([, value]) => value);
+    values.push(memberId);
+    const result = await query(
+      `UPDATE workspace_members SET ${setClause} WHERE id = $${values.length}`,
+      values
+    );
+    if (!result.rowCount) {
       throw new Error('Workspace member not found');
     }
-    await member.update(updates);
   }
 
   private async getWorkspaceMemberById(memberId: string, workspaceId: string) {
-    const record = (await this.models.WorkspaceMember.create({}).constructor) as unknown as {
-      findByPk: (
-        id: string
-      ) => Promise<{ workspace_id: string; user_id: string; role: string } | null>;
-    };
-    const member = await record.findByPk(memberId);
+    const result = await query(
+      'SELECT * FROM workspace_members WHERE id = $1 AND workspace_id = $2',
+      [memberId, workspaceId]
+    );
+    const member = result.rows?.[0] as
+      | { workspace_id: string; user_id: string; role: string }
+      | undefined;
     if (!member || member.workspace_id !== workspaceId) {
       return null;
     }
@@ -846,10 +939,7 @@ class WorkspaceManager extends EventEmitter {
   }
 
   private async createWorkspaceResource(resource: WorkspaceResource, workspaceId: string) {
-    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
-      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
-    };
-    await db.sequelize.query(
+    await query(
       `INSERT INTO workspace_resources
        (id, workspace_id, type, name, path, size, mime_type, owner_id, permissions, metadata, created_at, updated_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW(),NOW())`,
@@ -869,33 +959,23 @@ class WorkspaceManager extends EventEmitter {
   }
 
   private async getWorkspaceResource(resourceId: string, workspaceId: string) {
-    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
-      sequelize: {
-        query: (sql: string, params: unknown[]) => Promise<{ rows: WorkspaceResource[] }>;
-      };
-    };
-    const result = await db.sequelize.query(
+    const result = await query(
       `SELECT * FROM workspace_resources WHERE id = $1 AND workspace_id = $2`,
       [resourceId, workspaceId]
     );
-    return result.rows?.[0] || null;
+    const row = result.rows?.[0] as WorkspaceResourceRow | undefined;
+    return row ? mapWorkspaceResourceRow(row) : null;
   }
 
   private async deleteWorkspaceResource(resourceId: string, workspaceId: string) {
-    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
-      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
-    };
-    await db.sequelize.query(
-      `DELETE FROM workspace_resources WHERE id = $1 AND workspace_id = $2`,
-      [resourceId, workspaceId]
-    );
+    await query(`DELETE FROM workspace_resources WHERE id = $1 AND workspace_id = $2`, [
+      resourceId,
+      workspaceId,
+    ]);
   }
 
   private async createWorkspaceActivity(activity: WorkspaceActivity) {
-    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
-      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
-    };
-    await db.sequelize.query(
+    await query(
       `INSERT INTO workspace_activities
        (id, workspace_id, user_id, type, resource, details, created_at)
        VALUES ($1,$2,$3,$4,$5,$6,NOW())`,
@@ -911,10 +991,7 @@ class WorkspaceManager extends EventEmitter {
   }
 
   private async expireInvitations(now: Date) {
-    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
-      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
-    };
-    await db.sequelize.query(
+    await query(
       `UPDATE workspace_invitations
        SET status = 'expired'
        WHERE status = 'pending' AND expires_at < $1`,
@@ -923,23 +1000,96 @@ class WorkspaceManager extends EventEmitter {
   }
 
   private async countWorkspaceInvitations() {
-    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
-      sequelize: {
-        query: (sql: string, params?: unknown[]) => Promise<{ rows: Array<{ total: string }> }>;
-      };
-    };
-    const result = await db.sequelize.query('SELECT COUNT(*) as total FROM workspace_invitations');
+    const result = await query('SELECT COUNT(*) as total FROM workspace_invitations');
     return parseInt(result.rows?.[0]?.total || '0', 10);
   }
 
   private async countWorkspaceResources() {
-    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
-      sequelize: {
-        query: (sql: string, params?: unknown[]) => Promise<{ rows: Array<{ total: string }> }>;
-      };
-    };
-    const result = await db.sequelize.query('SELECT COUNT(*) as total FROM workspace_resources');
+    const result = await query('SELECT COUNT(*) as total FROM workspace_resources');
     return parseInt(result.rows?.[0]?.total || '0', 10);
+  }
+
+  private async countWorkspaceMembersByUser(userId: string) {
+    const result = await query(
+      'SELECT COUNT(*) as total FROM workspace_members WHERE user_id = $1 AND status = $2',
+      [userId, 'active']
+    );
+    return parseInt(result.rows?.[0]?.total || '0', 10);
+  }
+
+  private async countActiveMembersInWorkspace(workspaceId: string) {
+    const result = await query(
+      'SELECT COUNT(*) as total FROM workspace_members WHERE workspace_id = $1 AND status = $2',
+      [workspaceId, 'active']
+    );
+    return parseInt(result.rows?.[0]?.total || '0', 10);
+  }
+
+  private async countActiveMembers() {
+    const result = await query(
+      'SELECT COUNT(*) as total FROM workspace_members WHERE status = $1',
+      ['active']
+    );
+    return parseInt(result.rows?.[0]?.total || '0', 10);
+  }
+
+  private async createWorkspaceRecord(
+    workspaceId: string,
+    workspaceData: Omit<
+      Workspace,
+      'id' | 'createdAt' | 'updatedAt' | 'lastActivity' | 'members' | 'resources' | 'invitations'
+    >
+  ) {
+    const result = await query(
+      `INSERT INTO workspaces (id, name, description, visibility, owner_id, metadata, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+       RETURNING *`,
+      [
+        workspaceId,
+        workspaceData.name,
+        workspaceData.description ?? null,
+        workspaceData.type === 'team' ? 'team' : 'private',
+        workspaceData.ownerId,
+        JSON.stringify(workspaceData.metadata || {}),
+      ]
+    );
+    return mapWorkspaceRow(result.rows[0] as WorkspaceRow);
+  }
+
+  private async createWorkspaceMemberRecord(payload: {
+    workspaceId: string;
+    userId: string;
+    role: WorkspaceMember['role'];
+    status: WorkspaceMember['status'];
+    invitedBy: string | null;
+  }) {
+    await query(
+      `INSERT INTO workspace_members (workspace_id, user_id, role, status, invited_by, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
+      [payload.workspaceId, payload.userId, payload.role, payload.status, payload.invitedBy]
+    );
+  }
+
+  private async getWorkspaceRecordById(workspaceId: string) {
+    const result = await query('SELECT * FROM workspaces WHERE id = $1', [workspaceId]);
+    const row = result.rows?.[0] as WorkspaceRow | undefined;
+    return row ? mapWorkspaceRow(row) : null;
+  }
+
+  private async updateWorkspaceRecord(workspaceId: string, updates: Record<string, unknown>) {
+    const entries = Object.entries(updates).filter(([, value]) => value !== undefined);
+    if (!entries.length) {
+      return this.getWorkspaceRecordById(workspaceId);
+    }
+    const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = entries.map(([, value]) => value);
+    values.push(workspaceId);
+    const result = await query(
+      `UPDATE workspaces SET ${setClause} WHERE id = $${values.length} RETURNING *`,
+      values
+    );
+    const row = result.rows?.[0] as WorkspaceRow | undefined;
+    return row ? mapWorkspaceRow(row) : null;
   }
 }
 

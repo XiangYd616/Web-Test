@@ -5,6 +5,7 @@
  */
 
 import crypto from 'crypto';
+import { toDate, toOptionalDate } from '../../utils/dateUtils';
 
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
@@ -612,13 +613,13 @@ class MFAService {
 
       const mfaSettings: Record<
         string,
-        { enabled: boolean; createdAt: string; verifiedAt: string | null; remaining?: number }
+        { enabled: boolean; createdAt: Date; verifiedAt: Date | null; remaining?: number }
       > = {};
       result.rows.forEach(row => {
         mfaSettings[row.type] = {
           enabled: row.is_enabled,
-          createdAt: row.created_at,
-          verifiedAt: row.verified_at,
+          createdAt: toDate(row.created_at),
+          verifiedAt: toOptionalDate(row.verified_at) ?? null,
         };
       });
 
@@ -749,7 +750,7 @@ const createMFATables = async () => {
 
 const mfaService = new MFAService();
 
-export { MFAService, MFA_CONFIG, createMFATables, mfaService };
+export { createMFATables, MFA_CONFIG, MFAService, mfaService };
 
 // 兼容 CommonJS require
 module.exports = {

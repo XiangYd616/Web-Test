@@ -6,6 +6,7 @@
 import { promises as dns } from 'dns';
 import type { NextFunction, Request, Response } from 'express';
 import { URL } from 'url';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 
 interface URLOptions {
   allowedProtocols?: string[];
@@ -15,6 +16,13 @@ interface URLOptions {
   checkDNS?: boolean;
   timeout?: number;
 }
+
+const respondUrlError = (
+  res: Response,
+  message: string,
+  code: string,
+  details?: Record<string, unknown>
+) => res.error(StandardErrorCode.INVALID_INPUT, message, { code, details }, 400);
 
 interface URLValidationResult {
   isValid: boolean;
@@ -233,30 +241,17 @@ function urlValidator(options: URLOptions = {}) {
     const urlParam = (req.query.url as string) || (req.body.url as string);
 
     if (!urlParam) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'MISSING_URL',
-          message: 'URL参数是必需的',
-        },
-      });
+      respondUrlError(res, 'URL参数是必需的', 'MISSING_URL');
       return;
     }
 
     const validation = await validateURL(urlParam, options);
 
     if (!validation.isValid) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'INVALID_URL',
-          message: 'URL验证失败',
-          details: {
-            errors: validation.errors,
-            warnings: validation.warnings,
-            suggestions: validation.suggestions,
-          },
-        },
+      respondUrlError(res, 'URL验证失败', 'INVALID_URL', {
+        errors: validation.errors,
+        warnings: validation.warnings,
+        suggestions: validation.suggestions,
       });
       return;
     }
@@ -278,24 +273,12 @@ function batchUrlValidator(options: URLOptions = {}) {
     const urls = (req.body.urls as string[]) || [];
 
     if (!Array.isArray(urls) || urls.length === 0) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'MISSING_URLS',
-          message: 'URLs数组是必需的',
-        },
-      });
+      respondUrlError(res, 'URLs数组是必需的', 'MISSING_URLS');
       return;
     }
 
     if (urls.length > 50) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'BATCH_SIZE_EXCEEDED',
-          message: '批量验证最多支持50个URL',
-        },
-      });
+      respondUrlError(res, '批量验证最多支持50个URL', 'BATCH_SIZE_EXCEEDED');
       return;
     }
 
@@ -304,22 +287,15 @@ function batchUrlValidator(options: URLOptions = {}) {
     const invalidResults = results.filter(result => !result.isValid);
 
     if (invalidResults.length > 0) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'BATCH_VALIDATION_FAILED',
-          message: '批量URL验证失败',
-          details: {
-            total: results.length,
-            valid: results.length - invalidResults.length,
-            invalid: invalidResults.length,
-            errors: invalidResults.map(result => ({
-              url: result.url?.href,
-              errors: result.errors,
-              warnings: result.warnings,
-            })),
-          },
-        },
+      respondUrlError(res, '批量URL验证失败', 'BATCH_VALIDATION_FAILED', {
+        total: results.length,
+        valid: results.length - invalidResults.length,
+        invalid: invalidResults.length,
+        errors: invalidResults.map(result => ({
+          url: result.url?.href,
+          errors: result.errors,
+          warnings: result.warnings,
+        })),
       });
       return;
     }
@@ -443,16 +419,7 @@ function urlSecurityCheck() {
       .map(regex => `检测到潜在的安全问题: ${regex.source}`);
 
     if (issues.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          code: 'URL_SECURITY_ISSUE',
-          message: 'URL包含潜在的安全问题',
-          details: {
-            issues,
-          },
-        },
-      });
+      return respondUrlError(res, 'URL包含潜在的安全问题', 'URL_SECURITY_ISSUE', { issues });
     }
 
     next();
@@ -467,13 +434,7 @@ function urlLengthLimit(maxLength: number = 2048) {
     const urlParam = (req.query.url as string) || (req.body.url as string);
 
     if (urlParam && urlParam.length > maxLength) {
-      res.status(400).json({
-        success: false,
-        error: {
-          code: 'URL_TOO_LONG',
-          message: `URL长度不能超过${maxLength}个字符`,
-        },
-      });
+      respondUrlError(res, `URL长度不能超过${maxLength}个字符`, 'URL_TOO_LONG');
       return;
     }
 

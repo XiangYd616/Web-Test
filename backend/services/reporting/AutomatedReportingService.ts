@@ -7,6 +7,7 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { query } from '../../config/database';
+import { toDate, toOptionalDate } from '../../utils/dateUtils';
 import Logger from '../../utils/logger';
 import ReportGenerator, {
   ReportConfig as GeneratorReportConfig,
@@ -1553,8 +1554,8 @@ class AutomatedReportingService extends EventEmitter {
             margins: { top: 40, right: 32, bottom: 40, left: 32 },
           },
         },
-        createdAt: new Date(String(row.created_at)),
-        updatedAt: new Date(String(row.updated_at)),
+        createdAt: toDate(row.created_at),
+        updatedAt: toDate(row.updated_at),
         createdBy: row.user_id ? String(row.user_id) : undefined,
         isSystem: Boolean(row.is_system),
         isPublic: Boolean(row.is_public),
@@ -1630,8 +1631,8 @@ class AutomatedReportingService extends EventEmitter {
         format: (row.format as ReportFormat) || { type: 'html', options: {} },
         delivery: (row.delivery as ReportDelivery) || { method: 'storage', settings: {} },
         enabled: Boolean(row.enabled),
-        createdAt: new Date(String(row.created_at)),
-        updatedAt: new Date(String(row.updated_at)),
+        createdAt: toDate(row.created_at),
+        updatedAt: toDate(row.updated_at),
         createdBy: row.user_id ? String(row.user_id) : undefined,
       };
 
@@ -2079,12 +2080,8 @@ class AutomatedReportingService extends EventEmitter {
           configId: row.config_id ? String(row.config_id) : '',
           templateId: row.template_id ? String(row.template_id) : '',
           status: (row.status as ReportInstance['status']) || 'completed',
-          generatedAt: row.generated_at
-            ? new Date(row.generated_at as string | number | Date)
-            : new Date(),
-          completedAt: row.completed_at
-            ? new Date(row.completed_at as string | number | Date)
-            : undefined,
+          generatedAt: row.generated_at ? toDate(row.generated_at) : new Date(),
+          completedAt: toOptionalDate(row.completed_at),
           duration: row.duration ? Number(row.duration) : undefined,
           format: String(row.format || 'json'),
           size: row.size ? Number(row.size) : undefined,

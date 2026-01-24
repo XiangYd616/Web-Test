@@ -5,19 +5,8 @@
 
 import type { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
-
-// 测试类型枚举
-const TEST_TYPES = [
-  'performance',
-  'security',
-  'api',
-  'stress',
-  'seo',
-  'website',
-  'accessibility',
-] as const;
-
-type TestType = (typeof TEST_TYPES)[number];
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
+import { TEST_TYPES, type TestType } from '../constants/testTypes';
 
 interface TestEngineRequest extends Request {
   body: {
@@ -35,6 +24,18 @@ interface ValidationResult {
   };
   value?: Record<string, unknown>;
 }
+
+const respondValidationError = (res: Response, validationError: ValidationResult['error']) => {
+  if (!validationError) {
+    return res;
+  }
+  return res.error(
+    StandardErrorCode.INVALID_INPUT,
+    validationError.message,
+    validationError.details ?? validationError,
+    400
+  );
+};
 
 /**
  * 基础URL验证Schema
@@ -311,35 +312,37 @@ function testEngineValidation(req: TestEngineRequest, res: Response, next: NextF
   const { testType, ...config } = req.body;
 
   if (!testType) {
-    return res.status(400).json({
-      success: false,
-      error: {
+    return res.error(
+      StandardErrorCode.INVALID_INPUT,
+      '测试类型是必需的',
+      {
         code: 'MISSING_TEST_TYPE',
-        message: '测试类型是必需的',
         details: {
           availableTypes: TEST_TYPES,
         },
       },
-    });
+      400
+    );
   }
 
   if (!TEST_TYPES.includes(testType)) {
-    return res.status(400).json({
-      success: false,
-      error: {
+    return res.error(
+      StandardErrorCode.INVALID_INPUT,
+      `不支持的测试类型: ${testType}`,
+      {
         code: 'INVALID_TEST_TYPE',
-        message: `不支持的测试类型: ${testType}`,
         details: {
           availableTypes: TEST_TYPES,
         },
       },
-    });
+      400
+    );
   }
 
   const validation = validateTestConfig(testType, config);
 
   if (validation.error) {
-    return res.status(400).json(validation.error);
+    return respondValidationError(res, validation.error);
   }
 
   const validatedValue = validation.value ?? {};
@@ -359,7 +362,7 @@ function performanceTestValidation(req: Request, res: Response, next: NextFuncti
   const validation = validateTestConfig('performance', req.body);
 
   if (validation.error) {
-    return res.status(400).json(validation.error);
+    return respondValidationError(res, validation.error);
   }
 
   req.body = validation.value ?? {};
@@ -373,7 +376,7 @@ function securityTestValidation(req: Request, res: Response, next: NextFunction)
   const validation = validateTestConfig('security', req.body);
 
   if (validation.error) {
-    return res.status(400).json(validation.error);
+    return respondValidationError(res, validation.error);
   }
 
   req.body = validation.value ?? {};
@@ -387,7 +390,7 @@ function apiTestValidation(req: Request, res: Response, next: NextFunction) {
   const validation = validateTestConfig('api', req.body);
 
   if (validation.error) {
-    return res.status(400).json(validation.error);
+    return respondValidationError(res, validation.error);
   }
 
   req.body = validation.value ?? {};
@@ -401,7 +404,7 @@ function stressTestValidation(req: Request, res: Response, next: NextFunction) {
   const validation = validateTestConfig('stress', req.body);
 
   if (validation.error) {
-    return res.status(400).json(validation.error);
+    return respondValidationError(res, validation.error);
   }
 
   req.body = validation.value ?? {};
@@ -415,7 +418,7 @@ function seoTestValidation(req: Request, res: Response, next: NextFunction) {
   const validation = validateTestConfig('seo', req.body);
 
   if (validation.error) {
-    return res.status(400).json(validation.error);
+    return respondValidationError(res, validation.error);
   }
 
   req.body = validation.value ?? {};
@@ -429,7 +432,7 @@ function accessibilityTestValidation(req: Request, res: Response, next: NextFunc
   const validation = validateTestConfig('accessibility', req.body);
 
   if (validation.error) {
-    return res.status(400).json(validation.error);
+    return respondValidationError(res, validation.error);
   }
 
   req.body = validation.value ?? {};
@@ -443,7 +446,7 @@ function websiteTestValidation(req: Request, res: Response, next: NextFunction) 
   const validation = validateTestConfig('website', req.body);
 
   if (validation.error) {
-    return res.status(400).json(validation.error);
+    return respondValidationError(res, validation.error);
   }
 
   req.body = validation.value ?? {};
@@ -457,23 +460,21 @@ function batchTestValidation(req: Request, res: Response, next: NextFunction) {
   const { tests } = req.body as { tests?: unknown[] };
 
   if (!Array.isArray(tests) || tests.length === 0) {
-    return res.status(400).json({
-      success: false,
-      error: {
-        code: 'INVALID_BATCH_REQUEST',
-        message: '批量测试请求必须包含测试数组',
-      },
-    });
+    return res.error(
+      StandardErrorCode.INVALID_INPUT,
+      '批量测试请求必须包含测试数组',
+      { code: 'INVALID_BATCH_REQUEST' },
+      400
+    );
   }
 
   if (tests.length > 10) {
-    return res.status(400).json({
-      success: false,
-      error: {
-        code: 'BATCH_SIZE_EXCEEDED',
-        message: '批量测试最多支持10个测试',
-      },
-    });
+    return res.error(
+      StandardErrorCode.INVALID_INPUT,
+      '批量测试最多支持10个测试',
+      { code: 'BATCH_SIZE_EXCEEDED' },
+      400
+    );
   }
 
   const validationResults: Array<
@@ -499,14 +500,15 @@ function batchTestValidation(req: Request, res: Response, next: NextFunction) {
   const errors = validationResults.filter(result => result.error);
 
   if (errors.length > 0) {
-    return res.status(400).json({
-      success: false,
-      error: {
+    return res.error(
+      StandardErrorCode.INVALID_INPUT,
+      '批量测试验证失败',
+      {
         code: 'BATCH_VALIDATION_FAILED',
-        message: '批量测试验证失败',
         details: errors,
       },
-    });
+      400
+    );
   }
 
   const validatedResults = validationResults.filter(
@@ -527,7 +529,7 @@ function conditionalValidation(condition: (req: Request) => boolean, testType: T
       const validation = validateTestConfig(testType, req.body);
 
       if (validation.error) {
-        return res.status(400).json(validation.error);
+        return respondValidationError(res, validation.error);
       }
 
       req.body = validation.value ?? {};
@@ -546,7 +548,7 @@ function dynamicTestValidation(getTestType: (req: Request) => TestType) {
     const validation = validateTestConfig(testType, req.body);
 
     if (validation.error) {
-      return res.status(400).json(validation.error);
+      return respondValidationError(res, validation.error);
     }
 
     req.body = validation.value ?? {};

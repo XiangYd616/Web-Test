@@ -40,18 +40,6 @@ type QueueStatusCountOptions = {
   offset?: number;
 };
 
-interface TestResultRecord {
-  id: number;
-  execution_id: number;
-  summary: Record<string, unknown>;
-  score?: number;
-  grade?: string;
-  passed?: boolean;
-  warnings?: unknown[];
-  errors?: unknown[];
-  created_at: Date;
-}
-
 interface TestCreateData {
   testId: string;
   userId: string;
@@ -63,31 +51,6 @@ interface TestCreateData {
   testConfig?: Record<string, unknown>;
   status: string;
   createdAt: Date;
-}
-
-interface TestMetricCreateData {
-  resultId: number;
-  metricName: string;
-  metricValue: Record<string, unknown> | number | string;
-  metricUnit?: string;
-  metricType?: string;
-  thresholdMin?: number;
-  thresholdMax?: number;
-  passed?: boolean;
-  severity?: string;
-  recommendation?: string;
-}
-
-interface TestMetricRecord {
-  id: number;
-  metric_name: string;
-  metric_value: Record<string, unknown> | number | string;
-  metric_unit?: string | null;
-  metric_type?: string | null;
-  passed?: boolean | null;
-  severity?: string | null;
-  recommendation?: string | null;
-  created_at: Date;
 }
 
 class TestRepository {
@@ -180,46 +143,6 @@ class TestRepository {
     };
   }
 
-  async findMetrics(
-    testId: string,
-    userId: string,
-    workspaceId?: string
-  ): Promise<TestMetricRecord[]> {
-    const { clause, params } = this.buildScopeClause(userId, workspaceId);
-    const result = await query(
-      `SELECT tm.id, tm.metric_name, tm.metric_value, tm.metric_unit, tm.metric_type,
-              tm.passed, tm.severity, tm.recommendation, tm.created_at
-       FROM test_metrics tm
-       INNER JOIN test_results tr ON tr.id = tm.result_id
-       INNER JOIN test_executions te ON te.id = tr.execution_id
-       WHERE te.test_id = $1 AND ${clause}
-       ORDER BY tm.created_at DESC`,
-      [testId, ...params]
-    );
-    return result.rows as TestMetricRecord[];
-  }
-
-  /**
-   * 获取测试结果
-   */
-  async findResults(
-    testId: string,
-    userId: string,
-    workspaceId?: string
-  ): Promise<TestResultRecord | null> {
-    const { clause, params } = this.buildScopeClause(userId, workspaceId);
-    const result = await query(
-      `SELECT tr.*
-       FROM test_results tr
-       INNER JOIN test_executions te ON te.id = tr.execution_id
-       WHERE te.test_id = $1 AND ${clause}
-       ORDER BY tr.created_at DESC
-       LIMIT 1`,
-      [testId, ...params]
-    );
-    return result.rows[0] || null;
-  }
-
   /**
    * 检查所有权
    */
@@ -257,127 +180,6 @@ class TestRepository {
       ]
     );
     return { id: result.rows[0].id, testId: result.rows[0].test_id };
-  }
-
-  /**
-   * 更新测试状态
-   */
-  async updateStatus(testId: string, status: string): Promise<void> {
-    await query(
-      `UPDATE test_executions
-       SET status = $1, updated_at = NOW()
-       WHERE test_id = $2 AND status IN ('pending', 'queued', 'running')`,
-      [status, testId]
-    );
-  }
-
-  async updateProgress(testId: string, progress: number): Promise<void> {
-    await query(
-      `UPDATE test_executions
-       SET progress = $1, updated_at = NOW()
-       WHERE test_id = $2 AND status = 'running'`,
-      [progress, testId]
-    );
-  }
-
-  async markStarted(testId: string): Promise<void> {
-    await query(
-      `UPDATE test_executions
-       SET status = $1, started_at = NOW(), updated_at = NOW()
-       WHERE test_id = $2 AND status IN ('pending', 'queued')`,
-      ['running', testId]
-    );
-  }
-
-  async markCompleted(
-    testId: string,
-    executionTimeSeconds: number,
-    errorMessage?: string
-  ): Promise<void> {
-    await query(
-      `UPDATE test_executions
-       SET status = $1,
-           completed_at = NOW(),
-           execution_time = $2,
-           error_message = $3,
-           updated_at = NOW()
-       WHERE test_id = $4 AND status IN ('running', 'pending')`,
-      ['completed', executionTimeSeconds, errorMessage || null, testId]
-    );
-  }
-
-  async markFailed(testId: string, errorMessage: string): Promise<void> {
-    await query(
-      `UPDATE test_executions
-       SET status = $1,
-           error_message = $2,
-           updated_at = NOW()
-       WHERE test_id = $3 AND status IN ('running', 'pending')`,
-      ['failed', errorMessage, testId]
-    );
-  }
-
-  /**
-   * 更新测试结果
-   */
-  async saveResult(
-    executionId: number,
-    summary: Record<string, unknown>,
-    score?: number,
-    grade?: string,
-    passed?: boolean,
-    warnings?: unknown[],
-    errors?: unknown[]
-  ): Promise<number> {
-    const result = await query(
-      `INSERT INTO test_results (
-         execution_id, summary, score, grade, passed, warnings, errors
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id`,
-      [
-        executionId,
-        JSON.stringify(summary),
-        score ?? null,
-        grade ?? null,
-        passed ?? null,
-        JSON.stringify(warnings || []),
-        JSON.stringify(errors || []),
-      ]
-    );
-    return result.rows[0].id;
-  }
-
-  async saveMetrics(metrics: TestMetricCreateData[]): Promise<void> {
-    if (metrics.length === 0) {
-      return;
-    }
-
-    const values: unknown[] = [];
-    const placeholders = metrics
-      .map((metric, index) => {
-        const baseIndex = index * 9;
-        values.push(
-          metric.resultId,
-          metric.metricName,
-          JSON.stringify(metric.metricValue),
-          metric.metricUnit || null,
-          metric.metricType || null,
-          metric.thresholdMin ?? null,
-          metric.thresholdMax ?? null,
-          metric.passed ?? null,
-          metric.severity || null
-        );
-        return `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, $${baseIndex + 6}, $${baseIndex + 7}, $${baseIndex + 8}, $${baseIndex + 9})`;
-      })
-      .join(', ');
-
-    await query(
-      `INSERT INTO test_metrics (
-         result_id, metric_name, metric_value, metric_unit, metric_type,
-         threshold_min, threshold_max, passed, severity
-       ) VALUES ${placeholders}`,
-      values
-    );
   }
 
   /**
@@ -478,47 +280,6 @@ class TestRepository {
     return result.rows;
   }
 
-  /**
-   * 获取测试历史
-   */
-  async getTestHistory(
-    userId: string,
-    testType?: string,
-    limit = 20,
-    offset = 0,
-    workspaceId?: string
-  ): Promise<{
-    tests: TestExecutionRecord[];
-    total: number;
-  }> {
-    const { clause, params } = this.buildScopeClause(userId, workspaceId);
-    let whereClause = `WHERE ${clause}`;
-
-    if (testType) {
-      whereClause += ` AND engine_type = $${params.length + 1}`;
-      params.push(testType);
-    }
-
-    const countResult = await query(
-      `SELECT COUNT(*) as total FROM test_executions ${whereClause}`,
-      params
-    );
-    const total = parseInt(countResult.rows[0].total);
-
-    const testsResult = await query(
-      `SELECT * FROM test_executions 
-       ${whereClause} 
-       ORDER BY created_at DESC 
-       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-      [...params, limit, offset]
-    );
-
-    return {
-      tests: testsResult.rows,
-      total,
-    };
-  }
-
   private buildScopeClause(
     userId: string,
     workspaceId?: string
@@ -527,6 +288,15 @@ class TestRepository {
       return { clause: 'workspace_id = $1', params: [workspaceId] };
     }
     return { clause: 'user_id = $1', params: [userId] };
+  }
+
+  private buildScopedClause(params: Array<string | number>, userId: string, workspaceId?: string) {
+    if (workspaceId) {
+      params.push(workspaceId);
+      return `workspace_id = $${params.length}`;
+    }
+    params.push(userId);
+    return `user_id = $${params.length}`;
   }
 }
 

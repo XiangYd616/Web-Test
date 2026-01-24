@@ -1,6 +1,6 @@
 const { calculateUXScore, scoreToGrade } = require('../shared/utils/uxScore');
 const { query } = require('../../config/database');
-const testRepository = require('../../repositories/testRepository');
+const testResultRepository = require('../../repositories/testResultRepository');
 const Joi = require('joi');
 
 type UXConfig = {
@@ -461,7 +461,7 @@ class UXTestEngine {
     const warnings = (results as { warnings?: unknown[] }).warnings || [];
     const errors = (results as { errors?: unknown[] }).errors || [];
 
-    const resultId = await testRepository.saveResult(
+    const resultId = await testResultRepository.saveResult(
       execution.id,
       summary,
       score,
@@ -472,7 +472,7 @@ class UXTestEngine {
     );
 
     const metrics = this.buildUxMetrics(resultId, results);
-    await testRepository.saveMetrics(metrics);
+    await testResultRepository.saveMetrics(metrics);
 
     await this.updateUserUxStats(execution.user_id, passed);
   }

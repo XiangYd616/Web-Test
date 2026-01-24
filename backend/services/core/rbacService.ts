@@ -5,6 +5,7 @@
  */
 
 import crypto from 'crypto';
+import { toDate, toOptionalDate } from '../../utils/dateUtils';
 
 const uuidv4 = () => crypto.randomUUID();
 const { getPool } = require('../../config/database');
@@ -411,8 +412,8 @@ class RBACService {
           ? (JSON.parse(String(row.conditions)) as PermissionCondition[])
           : [],
         metadata: row.metadata ? (JSON.parse(String(row.metadata)) as Record<string, unknown>) : {},
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
+        createdAt: toDate(row.created_at),
+        updatedAt: toDate(row.updated_at),
       }));
 
       // 缓存权限
@@ -464,10 +465,10 @@ class RBACService {
         isActive: Boolean(row.is_active),
         isSystem: Boolean(row.is_system),
         metadata: row.metadata ? (JSON.parse(String(row.metadata)) as Record<string, unknown>) : {},
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-        assignedAt: row.assigned_at,
-        expiresAt: row.expires_at,
+        createdAt: toDate(row.created_at),
+        updatedAt: toDate(row.updated_at),
+        assignedAt: toOptionalDate(row.assigned_at),
+        expiresAt: toOptionalDate(row.expires_at),
         assignedBy: row.assigned_by ? String(row.assigned_by) : undefined,
       }));
     } catch (error) {
@@ -1032,7 +1033,7 @@ class RBACService {
 
 const rbacService = new RBACService();
 
-export { RBACService, RBAC_CONFIG, rbacService };
+export { RBAC_CONFIG, RBACService, rbacService };
 
 // 兼容 CommonJS require
 module.exports = {

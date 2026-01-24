@@ -8,7 +8,9 @@ import {
   updateStatusWithLog,
 } from './testLogService';
 
+const testOperationsRepository = require('../../repositories/testOperationsRepository');
 const testRepository = require('../../repositories/testRepository');
+const testResultRepository = require('../../repositories/testResultRepository');
 const registry = require('../../core/TestEngineRegistry');
 
 type EngineProgress = Record<string, unknown> & { testId?: string };
@@ -268,9 +270,11 @@ class UserTestManager {
 
       const progressValue = (progress as { progress?: number }).progress;
       if (typeof progressValue === 'number') {
-        Promise.resolve(testRepository.updateProgress(testId, progressValue)).catch(error => {
-          Logger.warn(`更新测试进度失败: ${testId}`, error);
-        });
+        Promise.resolve(testOperationsRepository.updateProgress(testId, progressValue)).catch(
+          error => {
+            Logger.warn(`更新测试进度失败: ${testId}`, error);
+          }
+        );
       }
 
       const message = (progress as { message?: string }).message;
@@ -482,7 +486,7 @@ class UserTestManager {
         return;
       }
 
-      const existingResult = await testRepository.findResults(testId, userId);
+      const existingResult = await testResultRepository.findResults(testId, userId);
       if (existingResult) {
         Logger.warn(`测试结果已存在，跳过重复落库: ${testId}`);
         return;
@@ -509,7 +513,7 @@ class UserTestManager {
         errorCount: errors.length,
       });
 
-      const resultId = await testRepository.saveResult(
+      const resultId = await testResultRepository.saveResult(
         execution.id,
         normalizedSummary,
         score,
@@ -520,7 +524,7 @@ class UserTestManager {
       );
 
       const metrics = this.buildMetricsFromResults(normalizedResults, resultId, normalizedSummary);
-      await testRepository.saveMetrics(metrics);
+      await testResultRepository.saveMetrics(metrics);
 
       const executionTime = this.calculateExecutionTimeSeconds(
         execution.started_at,

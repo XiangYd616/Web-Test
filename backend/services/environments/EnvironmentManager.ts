@@ -6,8 +6,7 @@
 import crypto from 'crypto';
 import { promises as fs } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-
-const { models } = require('../../database/sequelize');
+import { query } from '../../config/database';
 
 type EnvironmentConfig = {
   baseUrl?: string;
@@ -39,6 +38,8 @@ type EnvironmentVariable = {
   encrypted?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 type EnvironmentCache = {
@@ -75,49 +76,16 @@ type EnvironmentRecord = {
   save?: () => Promise<void>;
 } & Record<string, unknown>;
 
-type VariableRecord = {
-  key: string;
-  value: string;
-  type?: string;
-  enabled?: boolean;
-  secret?: boolean;
-  encrypted?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
-  created_at?: string;
-  updated_at?: string;
-  save?: () => Promise<void>;
-} & Record<string, unknown>;
-
-type Model<T> = {
-  create: (data: Record<string, unknown>) => Promise<T>;
-  findByPk: (id: string) => Promise<T | null>;
-  findAll: (options?: Record<string, unknown>) => Promise<T[]>;
-  update: (values: Record<string, unknown>, options: Record<string, unknown>) => Promise<unknown>;
-  destroy: (options: Record<string, unknown>) => Promise<unknown>;
-  count?: (options?: Record<string, unknown>) => Promise<number>;
-  findOne?: (options: Record<string, unknown>) => Promise<T | null>;
-  bulkCreate?: (data: Record<string, unknown>[]) => Promise<unknown>;
-};
-
-type EnvironmentModels = {
-  Environment: Model<EnvironmentRecord>;
-  EnvironmentVariable: Model<VariableRecord>;
-  GlobalVariable: Model<VariableRecord>;
-};
-
 type EnvironmentManagerOptions = {
   storageDir?: string;
   encryptionKey?: string;
   allowGlobalAccess?: boolean;
-  models?: EnvironmentModels;
 };
 
 type ResolvedEnvironmentManagerOptions = {
   storageDir: string;
   encryptionKey: string;
   allowGlobalAccess: boolean;
-  models?: EnvironmentModels;
 };
 
 type VariableInput = {
@@ -170,7 +138,6 @@ type GetVariableOptions = {
 
 class EnvironmentManager {
   private options: ResolvedEnvironmentManagerOptions;
-  private models: EnvironmentModels;
   private environments = new Map<string, EnvironmentCache>();
   private globalVariables = new Map<string, EnvironmentVariable>();
   private activeEnvironment: EnvironmentCache | null = null;
@@ -184,8 +151,6 @@ class EnvironmentManager {
       allowGlobalAccess: options.allowGlobalAccess !== false,
       ...options,
     };
-
-    this.models = options.models || (models as EnvironmentModels);
 
     // 预定义动态变量
     this.dynamicVariables = {
@@ -212,11 +177,202 @@ class EnvironmentManager {
     void this.ensureStorageDir();
   }
 
+  private async insertEnvironmentRecord(payload: {
+    id: string;
+    workspace_id: string;
+    name: string;
+    description: string;
+    config: EnvironmentConfig;
+    metadata: EnvironmentMetadata;
+    created_by?: string | null;
+    updated_by?: string | null;
+  }): Promise<EnvironmentRecord> {
+    const result = await query(
+      `INSERT INTO environments (id, workspace_id, name, description, config, metadata, created_by, updated_by, created_at, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),NOW())
+       RETURNING *`,
+      [
+        payload.id,
+        payload.workspace_id,
+        payload.name,
+        payload.description,
+        JSON.stringify(payload.config || {}),
+        JSON.stringify(payload.metadata || {}),
+        payload.created_by || null,
+        payload.updated_by || null,
+      ]
+    );
+    return result.rows[0] as EnvironmentRecord;
+  }
+
+  private async updateEnvironmentRecord(environmentId: string, updates: Record<string, unknown>) {
+    const entries = Object.entries(updates).filter(([, value]) => value !== undefined);
+    if (!entries.length) {
+      return;
+    }
+    const normalized = entries.map(([key, value]) => {
+      if (key === 'config' || key === 'metadata') {
+        return [key, JSON.stringify(value || {})] as [string, unknown];
+      }
+      return [key, value] as [string, unknown];
+    });
+    const setClause = normalized.map(([key], index) => `${key} = $${index + 1}`).join(', ');
+    const values = normalized.map(([, value]) => value);
+    values.push(environmentId);
+    await query(`UPDATE environments SET ${setClause} WHERE id = $${values.length}`, values);
+  }
+
+  private async deactivateWorkspaceEnvironments(workspaceId: string) {
+    await query(
+      `UPDATE environments
+       SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{isActive}', 'false', true)
+       WHERE workspace_id = $1`,
+      [workspaceId]
+    );
+  }
+
+  private async insertEnvironmentVariables(
+    environmentId: string,
+    variables: EnvironmentVariable[]
+  ) {
+    for (const variable of variables) {
+      await query(
+        `INSERT INTO environment_variables
+         (environment_id, key, value, type, enabled, secret, encrypted, created_at, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,NOW(),NOW())`,
+        [
+          environmentId,
+          variable.key,
+          variable.value,
+          variable.type || 'text',
+          variable.enabled !== false,
+          variable.secret || false,
+          variable.encrypted || false,
+        ]
+      );
+    }
+  }
+
+  private async upsertEnvironmentVariable(payload: {
+    environmentId: string;
+    key: string;
+    value: string;
+    type: string;
+    enabled: boolean;
+    secret: boolean;
+    encrypted: boolean;
+  }) {
+    const existing = await query(
+      'SELECT id FROM environment_variables WHERE environment_id = $1 AND key = $2',
+      [payload.environmentId, payload.key]
+    );
+    if (existing.rowCount) {
+      await query(
+        `UPDATE environment_variables
+         SET value = $1, type = $2, enabled = $3, secret = $4, encrypted = $5, updated_at = NOW()
+         WHERE environment_id = $6 AND key = $7`,
+        [
+          payload.value,
+          payload.type,
+          payload.enabled,
+          payload.secret,
+          payload.encrypted,
+          payload.environmentId,
+          payload.key,
+        ]
+      );
+      return;
+    }
+    await query(
+      `INSERT INTO environment_variables
+       (environment_id, key, value, type, enabled, secret, encrypted, created_at, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,NOW(),NOW())`,
+      [
+        payload.environmentId,
+        payload.key,
+        payload.value,
+        payload.type,
+        payload.enabled,
+        payload.secret,
+        payload.encrypted,
+      ]
+    );
+  }
+
+  private async upsertGlobalVariable(payload: {
+    userId: string;
+    workspaceId: string | null;
+    key: string;
+    value: string;
+    type: string;
+    enabled: boolean;
+    secret: boolean;
+    encrypted: boolean;
+  }) {
+    const existing = await query(
+      'SELECT id FROM global_variables WHERE user_id = $1 AND workspace_id = $2 AND key = $3',
+      [payload.userId, payload.workspaceId, payload.key]
+    );
+    if (existing.rowCount) {
+      await query(
+        `UPDATE global_variables
+         SET value = $1, type = $2, enabled = $3, secret = $4, encrypted = $5, updated_at = NOW()
+         WHERE user_id = $6 AND workspace_id = $7 AND key = $8`,
+        [
+          payload.value,
+          payload.type,
+          payload.enabled,
+          payload.secret,
+          payload.encrypted,
+          payload.userId,
+          payload.workspaceId,
+          payload.key,
+        ]
+      );
+      return;
+    }
+    await query(
+      `INSERT INTO global_variables
+       (user_id, workspace_id, key, value, type, enabled, secret, encrypted, created_at, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),NOW())`,
+      [
+        payload.userId,
+        payload.workspaceId,
+        payload.key,
+        payload.value,
+        payload.type,
+        payload.enabled,
+        payload.secret,
+        payload.encrypted,
+      ]
+    );
+  }
+
+  private async fetchEnvironmentRecord(environmentId: string) {
+    const result = await query('SELECT * FROM environments WHERE id = $1', [environmentId]);
+    return (result.rows?.[0] || null) as EnvironmentRecord | null;
+  }
+
+  private async fetchEnvironmentVariables(environmentId: string) {
+    const result = await query(
+      'SELECT * FROM environment_variables WHERE environment_id = $1 ORDER BY created_at ASC',
+      [environmentId]
+    );
+    return result.rows as EnvironmentVariable[];
+  }
+
+  private async fetchGlobalVariables(userId: string, workspaceId: string | null) {
+    const result = await query(
+      'SELECT * FROM global_variables WHERE user_id = $1 AND workspace_id = $2',
+      [userId, workspaceId]
+    );
+    return result.rows as EnvironmentVariable[];
+  }
+
   /**
    * 创建新环境
    */
   async createEnvironment(environmentData: CreateEnvironmentInput) {
-    const { Environment, EnvironmentVariable } = this.models;
     if (!environmentData.workspaceId) {
       throw new Error('workspaceId 不能为空');
     }
@@ -242,7 +398,8 @@ class EnvironmentManager {
       ...(environmentData.metadata || {}),
     };
 
-    const environmentRecord = await Environment.create({
+    const environmentRecord = await this.insertEnvironmentRecord({
+      id: uuidv4(),
       workspace_id: environmentData.workspaceId,
       name: environmentData.name || 'New Environment',
       description: environmentData.description || '',
@@ -252,18 +409,8 @@ class EnvironmentManager {
       updated_by: environmentData.createdBy || null,
     });
 
-    if (variables.length > 0 && EnvironmentVariable.bulkCreate) {
-      await EnvironmentVariable.bulkCreate(
-        variables.map(variable => ({
-          environment_id: environmentRecord.id,
-          key: variable.key,
-          value: variable.value,
-          type: variable.type || 'text',
-          enabled: variable.enabled !== false,
-          secret: variable.secret || false,
-          encrypted: variable.encrypted || false,
-        }))
-      );
+    if (variables.length > 0) {
+      await this.insertEnvironmentVariables(environmentRecord.id, variables);
     }
 
     const environment = this.buildEnvironmentCache(environmentRecord, variables);
@@ -300,24 +447,19 @@ class EnvironmentManager {
    * 设置活跃环境
    */
   async setActiveEnvironment(environmentId: string) {
-    const { Environment } = this.models;
-    const environmentRecord = await Environment.findByPk(environmentId);
+    const environmentRecord = await this.fetchEnvironmentRecord(environmentId);
     if (!environmentRecord) {
       throw new Error(`环境不存在: ${environmentId}`);
     }
 
     if (environmentRecord.workspace_id) {
-      await Environment.update(
-        { metadata: { ...(environmentRecord.metadata || {}), isActive: false } },
-        { where: { workspace_id: environmentRecord.workspace_id } }
-      );
+      await this.deactivateWorkspaceEnvironments(environmentRecord.workspace_id);
     }
 
-    environmentRecord.metadata = {
-      ...(environmentRecord.metadata || {}),
-      isActive: true,
-    };
-    await environmentRecord.save?.();
+    await this.updateEnvironmentRecord(environmentId, {
+      metadata: { ...(environmentRecord.metadata || {}), isActive: true },
+      updated_at: new Date(),
+    });
 
     const cached = this.environments.get(environmentId);
     if (cached) {
@@ -384,7 +526,6 @@ class EnvironmentManager {
     const scope = options.scope || 'environment';
     const environmentId = options.environmentId || this.activeEnvironment?.id;
     const isSecret = options.secret || false;
-    const { Environment, EnvironmentVariable, GlobalVariable } = this.models;
 
     if (scope === 'global') {
       // 设置全局变量
@@ -392,33 +533,16 @@ class EnvironmentManager {
         throw new Error('global 变量需要 userId');
       }
       const variableValue = isSecret ? this.encryptValue(value) : value;
-      const existingGlobal = await GlobalVariable.findOne?.({
-        where: {
-          user_id: options.userId,
-          workspace_id: options.workspaceId || null,
-          key,
-        },
+      await this.upsertGlobalVariable({
+        userId: options.userId,
+        workspaceId: options.workspaceId || null,
+        key,
+        value: variableValue,
+        type: options.type || 'text',
+        enabled: true,
+        secret: isSecret,
+        encrypted: isSecret,
       });
-
-      if (existingGlobal) {
-        existingGlobal.value = variableValue;
-        existingGlobal.secret = isSecret;
-        existingGlobal.encrypted = isSecret;
-        existingGlobal.type = options.type || existingGlobal.type || 'text';
-        existingGlobal.enabled = true;
-        await existingGlobal.save?.();
-      } else {
-        await GlobalVariable.create({
-          user_id: options.userId,
-          workspace_id: options.workspaceId || null,
-          key,
-          value: variableValue,
-          type: options.type || 'text',
-          enabled: true,
-          secret: isSecret,
-          encrypted: isSecret,
-        });
-      }
 
       this.globalVariables.set(key, {
         key,
@@ -434,34 +558,21 @@ class EnvironmentManager {
       if (!environmentId) {
         throw new Error('没有指定环境或活跃环境');
       }
-      const environmentRecord = await Environment.findByPk(environmentId);
+      const environmentRecord = await this.fetchEnvironmentRecord(environmentId);
       if (!environmentRecord) {
         throw new Error(`环境不存在: ${environmentId}`);
       }
 
       const variableValue = isSecret ? this.encryptValue(value) : value;
-      const existingVar = await EnvironmentVariable.findOne?.({
-        where: { environment_id: environmentId, key },
+      await this.upsertEnvironmentVariable({
+        environmentId,
+        key,
+        value: variableValue,
+        type: options.type || 'text',
+        enabled: true,
+        secret: isSecret,
+        encrypted: isSecret,
       });
-
-      if (existingVar) {
-        existingVar.value = variableValue;
-        existingVar.secret = isSecret;
-        existingVar.encrypted = isSecret;
-        existingVar.type = options.type || existingVar.type || 'text';
-        existingVar.enabled = true;
-        await existingVar.save?.();
-      } else {
-        await EnvironmentVariable.create({
-          environment_id: environmentId,
-          key,
-          value: variableValue,
-          type: options.type || 'text',
-          enabled: true,
-          secret: isSecret,
-          encrypted: isSecret,
-        });
-      }
 
       const environment = this.environments.get(environmentId);
       if (environment) {
@@ -766,14 +877,16 @@ class EnvironmentManager {
   }
 
   async getEnvironmentsFromDb() {
-    const { Environment, EnvironmentVariable } = this.models;
-    const environments = await Environment.findAll();
+    const environmentsResult = await query('SELECT * FROM environments');
+    const environments = environmentsResult.rows as EnvironmentRecord[];
 
     const results: Array<Record<string, unknown>> = [];
     for (const environmentRecord of environments) {
-      const variableCount = await EnvironmentVariable.count?.({
-        where: { environment_id: environmentRecord.id },
-      });
+      const countResult = await query(
+        'SELECT COUNT(*) as total FROM environment_variables WHERE environment_id = $1',
+        [environmentRecord.id]
+      );
+      const variableCount = parseInt(countResult.rows?.[0]?.total || '0', 10);
       results.push({
         id: environmentRecord.id,
         name: environmentRecord.name,
@@ -790,16 +903,12 @@ class EnvironmentManager {
   }
 
   async getEnvironment(environmentId: string, options: { raw?: boolean } = {}) {
-    const { Environment, EnvironmentVariable } = this.models;
-    const environmentRecord = await Environment.findByPk(environmentId);
+    const environmentRecord = await this.fetchEnvironmentRecord(environmentId);
     if (!environmentRecord) {
       return null;
     }
 
-    const variableRecords = await EnvironmentVariable.findAll({
-      where: { environment_id: environmentId },
-      order: [['created_at', 'ASC']],
-    });
+    const variableRecords = await this.fetchEnvironmentVariables(environmentId);
     const variables = variableRecords.map(record => ({
       key: record.key,
       value: record.value,
@@ -807,8 +916,8 @@ class EnvironmentManager {
       enabled: record.enabled,
       secret: record.secret,
       encrypted: record.encrypted,
-      createdAt: record.createdAt?.toISOString?.() || record.created_at,
-      updatedAt: record.updatedAt?.toISOString?.() || record.updated_at,
+      createdAt: record.createdAt || record.created_at,
+      updatedAt: record.updatedAt || record.updated_at,
     }));
 
     const environment = this.buildEnvironmentCache(environmentRecord, variables);
@@ -834,17 +943,11 @@ class EnvironmentManager {
   }
 
   async getGlobalVariables(options: { userId?: string; workspaceId?: string | null } = {}) {
-    const { GlobalVariable } = this.models;
     if (!options.userId) {
       throw new Error('获取全局变量需要 userId');
     }
 
-    const globals = await GlobalVariable.findAll({
-      where: {
-        user_id: options.userId,
-        workspace_id: options.workspaceId || null,
-      },
-    });
+    const globals = await this.fetchGlobalVariables(options.userId, options.workspaceId || null);
 
     return globals.map(record => {
       const result: EnvironmentVariable = {
@@ -854,8 +957,8 @@ class EnvironmentManager {
         enabled: record.enabled,
         secret: record.secret,
         encrypted: record.encrypted,
-        createdAt: record.createdAt?.toISOString?.() || record.created_at,
-        updatedAt: record.updatedAt?.toISOString?.() || record.updated_at,
+        createdAt: record.createdAt || record.created_at,
+        updatedAt: record.updatedAt || record.updated_at,
       };
       if (result.encrypted) {
         result.value = '[ENCRYPTED]';
@@ -872,8 +975,7 @@ class EnvironmentManager {
    * 删除方法
    */
   async deleteEnvironment(environmentId: string) {
-    const { Environment } = this.models;
-    const environment = await Environment.findByPk(environmentId);
+    const environment = await this.fetchEnvironmentRecord(environmentId);
     if (!environment) {
       throw new Error(`环境不存在: ${environmentId}`);
     }
@@ -882,7 +984,7 @@ class EnvironmentManager {
       this.activeEnvironment = null;
     }
 
-    await Environment.destroy({ where: { id: environmentId } });
+    await query('DELETE FROM environments WHERE id = $1', [environmentId]);
     this.environments.delete(environmentId);
 
     return true;

@@ -171,35 +171,56 @@ const performanceMonitor = (req: Request, res: Response, next: NextFunction) => 
 /**
  * API使用统计
  */
-const apiStats = (() => {
-  const stats = new Map<string, { count: number; totalTime: number; errors: number }>();
+const apiStatsStartTime = Date.now();
+const apiStatsStore = new Map<string, { count: number; totalTime: number; errors: number }>();
 
-  return (req: RequestWithStats, res: Response, next: NextFunction) => {
-    const endpoint = `${req.method} ${req.route ? req.route.path : req.path}`;
+const apiStats = (req: RequestWithStats, res: Response, next: NextFunction) => {
+  const endpoint = `${req.method} ${req.route ? req.route.path : req.path}`;
 
-    if (!stats.has(endpoint)) {
-      stats.set(endpoint, { count: 0, totalTime: 0, errors: 0 });
+  if (!apiStatsStore.has(endpoint)) {
+    apiStatsStore.set(endpoint, { count: 0, totalTime: 0, errors: 0 });
+  }
+
+  const start = Date.now();
+  const endpointStats = apiStatsStore.get(endpoint);
+  if (!endpointStats) {
+    return next();
+  }
+  endpointStats.count++;
+
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    endpointStats.totalTime += duration;
+
+    if (res.statusCode >= 400) {
+      endpointStats.errors++;
     }
+  });
 
-    const start = Date.now();
-    const endpointStats = stats.get(endpoint);
-    if (!endpointStats) {
-      return next();
-    }
-    endpointStats.count++;
+  next();
+};
 
-    res.on('finish', () => {
-      const duration = Date.now() - start;
-      endpointStats.totalTime += duration;
-
-      if (res.statusCode >= 400) {
-        endpointStats.errors++;
-      }
-    });
-
-    next();
+const getApiStatsSnapshot = () => {
+  const totals = { count: 0, totalTime: 0, errors: 0 };
+  apiStatsStore.forEach(entry => {
+    totals.count += entry.count;
+    totals.totalTime += entry.totalTime;
+    totals.errors += entry.errors;
+  });
+  const uptimeMinutes = Math.max((Date.now() - apiStatsStartTime) / 60000, 1);
+  return {
+    totalRequests: totals.count,
+    averageResponseTime: totals.count > 0 ? totals.totalTime / totals.count : 0,
+    errorRate: totals.count > 0 ? totals.errors / totals.count : 0,
+    requestsPerMinute: totals.count / uptimeMinutes,
+    endpoints: Array.from(apiStatsStore.entries()).map(([endpoint, stats]) => ({
+      endpoint,
+      count: stats.count,
+      averageResponseTime: stats.count > 0 ? stats.totalTime / stats.count : 0,
+      errorRate: stats.count > 0 ? stats.errors / stats.count : 0,
+    })),
   };
-})();
+};
 
 module.exports = {
   requestLogger,
@@ -207,6 +228,7 @@ module.exports = {
   dbLogger,
   performanceMonitor,
   apiStats,
+  getApiStatsSnapshot,
 };
 
 export {};

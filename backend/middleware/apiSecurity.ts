@@ -6,6 +6,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 const { AppError: _AppError } = require('./errorHandler');
 const Logger = require('../utils/logger');
 
@@ -193,11 +194,12 @@ class ApiSecurity {
           method: req.method,
         });
 
-        return res.status(400).json({
-          success: false,
-          message: '请求包含非法内容',
-          type: suspicious.type,
-        });
+        return res.error(
+          StandardErrorCode.INVALID_INPUT,
+          '请求包含非法内容',
+          { type: suspicious.type },
+          400
+        );
       }
 
       next();
@@ -275,10 +277,12 @@ class ApiSecurity {
             method: req.method,
           });
 
-          return res.status(400).json({
-            success: false,
-            message: '请求包含潜在的SQL注入攻击',
-          });
+          return res.error(
+            StandardErrorCode.INVALID_INPUT,
+            '请求包含潜在的SQL注入攻击',
+            undefined,
+            400
+          );
         }
       }
 
@@ -319,10 +323,12 @@ class ApiSecurity {
             method: req.method,
           });
 
-          return res.status(400).json({
-            success: false,
-            message: '请求包含潜在的XSS攻击',
-          });
+          return res.error(
+            StandardErrorCode.INVALID_INPUT,
+            '请求包含潜在的XSS攻击',
+            undefined,
+            400
+          );
         }
       }
 
@@ -350,10 +356,7 @@ class ApiSecurity {
       const maxSize = parseInt(this.securityConfig.maxRequestSize.replace('mb', '')) * 1024 * 1024;
 
       if (contentLength && parseInt(contentLength) > maxSize) {
-        return res.status(413).json({
-          success: false,
-          message: '请求体过大',
-        });
+        return res.error(StandardErrorCode.INVALID_INPUT, '请求体过大', undefined, 413);
       }
 
       return next();

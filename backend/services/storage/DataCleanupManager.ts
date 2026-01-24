@@ -7,6 +7,7 @@ import * as fs from 'fs/promises';
 import cron from 'node-cron';
 import * as path from 'path';
 import { query } from '../../config/database';
+import { toDate, toOptionalDate } from '../../utils/dateUtils';
 
 interface CronTask {
   start: () => void;
@@ -1082,9 +1083,9 @@ class DataCleanupManager {
       policyId: String(row.policy_id),
       status: row.status as CleanupJob['status'],
       progress: Number(row.progress || 0),
-      createdAt: new Date(String(row.created_at)),
-      startedAt: row.started_at ? new Date(String(row.started_at)) : undefined,
-      completedAt: row.completed_at ? new Date(String(row.completed_at)) : undefined,
+      createdAt: toDate(row.created_at),
+      startedAt: toOptionalDate(row.started_at),
+      completedAt: toOptionalDate(row.completed_at),
       duration: row.duration ? Number(row.duration) : undefined,
       itemsProcessed: Number(row.items_processed || 0),
       itemsTotal: Number(row.items_total || 0),
@@ -1106,8 +1107,8 @@ class DataCleanupManager {
       actions: (row.actions as CleanupAction[]) || [],
       priority: Number(row.priority || 0),
       enabled: row.enabled !== false,
-      createdAt: new Date(String(row.created_at)),
-      updatedAt: new Date(String(row.updated_at)),
+      createdAt: toDate(row.created_at),
+      updatedAt: toDate(row.updated_at),
     };
   }
 

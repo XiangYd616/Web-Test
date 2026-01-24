@@ -66,7 +66,7 @@ interface EnhancedResponse extends Response {
  * 响应格式化中间件
  * 在所有路由处理之前添加响应格式化方法
  */
-const responseFormatter = (req: EnhancedRequest, res: EnhancedResponse, next: NextFunction) => {
+const response = (req: EnhancedRequest, res: EnhancedResponse, next: NextFunction) => {
   // 生成请求ID
   const requestId = generateRequestId();
   req.requestId = requestId;
@@ -512,16 +512,16 @@ const responseCache = (
 export {
   errorHandler,
   notFoundHandler,
+  response,
   responseCache,
   responseCompression,
-  responseFormatter,
   responseHeaders,
   responseTimeLogger,
   StandardErrorCode,
 };
 
 module.exports = {
-  responseFormatter,
+  response,
   notFoundHandler,
   errorHandler,
   responseTimeLogger,

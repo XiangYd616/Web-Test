@@ -9,6 +9,7 @@ import * as path from 'path';
 import * as tar from 'tar';
 import * as zlib from 'zlib';
 import { query } from '../../config/database';
+import { toDate, toOptionalDate } from '../../utils/dateUtils';
 
 interface CronTask {
   start: () => void;
@@ -999,9 +1000,9 @@ class DataArchiveManager {
       targetPath: String(row.target_path),
       status: row.status as ArchiveJob['status'],
       progress: Number(row.progress || 0),
-      createdAt: new Date(String(row.created_at)),
-      startedAt: row.started_at ? new Date(String(row.started_at)) : undefined,
-      completedAt: row.completed_at ? new Date(String(row.completed_at)) : undefined,
+      createdAt: toDate(row.created_at),
+      startedAt: toOptionalDate(row.started_at),
+      completedAt: toOptionalDate(row.completed_at),
       duration: row.duration ? Number(row.duration) : undefined,
       size: Number(row.size || 0),
       compressedSize: row.compressed_size ? Number(row.compressed_size) : undefined,
@@ -1021,8 +1022,8 @@ class DataArchiveManager {
       rules: (row.rules as ArchiveRule[]) || [],
       schedule: String(row.schedule),
       enabled: row.enabled !== false,
-      createdAt: new Date(String(row.created_at)),
-      updatedAt: new Date(String(row.updated_at)),
+      createdAt: toDate(row.created_at),
+      updatedAt: toDate(row.updated_at),
     };
   }
 
