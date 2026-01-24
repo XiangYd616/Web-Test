@@ -560,9 +560,17 @@ class ScheduledRunService {
   /**
    * 获取统计信息
    */
-  async getStatistics(): Promise<ScheduledRunStatistics> {
-    const schedules = await this.models.ScheduledRun.findAll();
-    const results = await this.models.ScheduledRunResult.findAll();
+  async getStatistics(workspaceId?: string): Promise<ScheduledRunStatistics> {
+    const scheduleWhere = workspaceId ? { workspace_id: workspaceId } : undefined;
+    const schedules = await this.models.ScheduledRun.findAll({ where: scheduleWhere });
+
+    let results: ScheduledRunResultRecord[] = [];
+    if (schedules.length > 0) {
+      const scheduleIds = schedules.map(schedule => schedule.id);
+      results = await this.models.ScheduledRunResult.findAll({
+        where: workspaceId ? { scheduled_run_id: scheduleIds } : undefined,
+      });
+    }
 
     const totalSchedules = schedules.length;
     const activeSchedules = schedules.filter(s => s.status === 'active').length;

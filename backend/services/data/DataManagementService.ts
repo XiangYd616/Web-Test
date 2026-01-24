@@ -44,19 +44,24 @@ type CreateOptions = {
   tags?: string[];
   source?: string;
   userId?: string;
+  workspaceId?: string;
 };
 
 type ReadOptions = {
   fields?: string[];
+  userId?: string;
+  workspaceId?: string;
 };
 
 type UpdateOptions = {
   userId?: string;
+  workspaceId?: string;
 };
 
 type DeleteOptions = {
   softDelete?: boolean;
   userId?: string;
+  workspaceId?: string;
 };
 
 type QueryFilters = Record<string, unknown>;
@@ -70,6 +75,8 @@ type QueryOptions = {
   filters?: QueryFilters;
   search?: string;
   sort?: QuerySort;
+  userId?: string;
+  workspaceId?: string;
 };
 
 type PaginationOptions = {
@@ -101,6 +108,8 @@ type CustomStatDefinition = {
 
 type StatisticsOptions = {
   customStats?: CustomStatDefinition[];
+  userId?: string;
+  workspaceId?: string;
 };
 
 class DataManagementService extends EventEmitter {
@@ -135,8 +144,25 @@ class DataManagementService extends EventEmitter {
     }
   }
 
-  private async getRecordTypeById(id: string): Promise<string | null> {
-    const result = await query('SELECT type FROM data_records WHERE id = $1', [id]);
+  private async getRecordTypeById(id: string, options: ReadOptions = {}): Promise<string | null> {
+    this.ensureIsolationContext(options, '获取数据类型');
+    const params: Array<string | number> = [id];
+    let userClause = '';
+    let workspaceClause = '';
+
+    if (options.userId) {
+      params.push(options.userId);
+      userClause = ` AND metadata->>'userId' = $${params.length}`;
+    }
+    if (options.workspaceId) {
+      params.push(options.workspaceId);
+      workspaceClause = ` AND workspace_id = $${params.length}`;
+    }
+
+    const result = await query(
+      `SELECT type FROM data_records WHERE id = $1${userClause}${workspaceClause}`,
+      params
+    );
     const row = result.rows[0] as { type?: string } | undefined;
     return row?.type || null;
   }
@@ -161,7 +187,7 @@ class DataManagementService extends EventEmitter {
 
   async getDataStatistics(userId: string, options: { period?: string; type?: string } = {}) {
     const type = options.type || this.dataTypes.TEST_RESULTS;
-    const stats = await this.getStatistics(type, {});
+    const stats = await this.getStatistics(type, { userId });
     return {
       userId,
       type,
@@ -184,18 +210,18 @@ class DataManagementService extends EventEmitter {
     if (options.status) {
       filters.status = options.status;
     }
-    return this.queryData(type, { filters, search: options.search }, options);
+    return this.queryData(type, { filters, search: options.search, userId: _userId }, options);
   }
 
   async getDataRecord(_userId: string, id: string) {
-    const type = await this.getRecordTypeById(id);
+    const type = await this.getRecordTypeById(id, { userId: _userId });
     if (!type) return null;
-    return this.readData(type, id);
+    return this.readData(type, id, { userId: _userId });
   }
 
   async updateDataRecord(userId: string, id: string, updates: Record<string, unknown>) {
     const type = String(
-      updates.type || updates.dataType || (await this.getRecordTypeById(id)) || ''
+      updates.type || updates.dataType || (await this.getRecordTypeById(id, { userId })) || ''
     );
     if (!type) {
       throw new Error('无法确定数据类型');
@@ -204,7 +230,7 @@ class DataManagementService extends EventEmitter {
   }
 
   async deleteDataRecord(userId: string, id: string) {
-    const type = await this.getRecordTypeById(id);
+    const type = await this.getRecordTypeById(id, { userId });
     if (!type) {
       throw new Error('数据记录不存在');
     }
@@ -258,7 +284,11 @@ class DataManagementService extends EventEmitter {
     const filters = payload.filters || {};
     const type = String(filters.type || this.dataTypes.TEST_RESULTS);
     const { type: _type, ...restFilters } = filters;
-    return this.queryData(type, { filters: restFilters, search: payload.query }, payload.options);
+    return this.queryData(
+      type,
+      { filters: restFilters, search: payload.query, userId: _userId },
+      payload.options
+    );
   }
 
   async exportData(
@@ -337,9 +367,15 @@ class DataManagementService extends EventEmitter {
       this.validateData(type, data);
 
       await query(
-        `INSERT INTO data_records (id, type, data, metadata, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, NOW(), NOW())`,
-        [id, type, JSON.stringify(record.data), JSON.stringify(record.metadata)]
+        `INSERT INTO data_records (id, type, workspace_id, data, metadata, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())`,
+        [
+          id,
+          type,
+          options.workspaceId || null,
+          JSON.stringify(record.data),
+          JSON.stringify(record.metadata),
+        ]
       );
 
       this.emit('dataCreated', { type, id, record });
@@ -356,11 +392,23 @@ class DataManagementService extends EventEmitter {
    */
   async readData(type: string, id: string, options: ReadOptions = {}) {
     try {
+      this.ensureIsolationContext(options, '读取数据');
+      const params: Array<string | number> = [type, id];
+      let workspaceClause = '';
+      let userClause = '';
+      if (options.workspaceId) {
+        params.push(options.workspaceId);
+        workspaceClause = ` AND workspace_id = $${params.length}`;
+      }
+      if (options.userId) {
+        params.push(options.userId);
+        userClause = ` AND metadata->>'userId' = $${params.length}`;
+      }
       const result = await query(
         `SELECT id, type, data, metadata, created_at, updated_at, deleted_at
          FROM data_records
-         WHERE type = $1 AND id = $2 AND deleted_at IS NULL`,
-        [type, id]
+         WHERE type = $1 AND id = $2 AND deleted_at IS NULL${workspaceClause}${userClause}`,
+        params
       );
       const row = result.rows[0];
       if (!row) {
@@ -394,7 +442,11 @@ class DataManagementService extends EventEmitter {
     options: UpdateOptions = {}
   ) {
     try {
-      const existingRecord = (await this.readData(type, id)) as DataRecord;
+      this.ensureIsolationContext(options, '更新数据');
+      const existingRecord = (await this.readData(type, id, {
+        userId: options.userId,
+        workspaceId: options.workspaceId,
+      })) as DataRecord;
 
       const updatedRecord: DataRecord = {
         ...existingRecord,
@@ -409,13 +461,29 @@ class DataManagementService extends EventEmitter {
 
       this.validateData(type, updatedRecord.data);
 
+      const params: Array<string | number> = [
+        JSON.stringify(updatedRecord.data),
+        JSON.stringify(updatedRecord.metadata),
+        type,
+        id,
+      ];
+      let workspaceClause = '';
+      let userClause = '';
+      if (options.workspaceId) {
+        params.push(options.workspaceId);
+        workspaceClause = ` AND workspace_id = $${params.length}`;
+      }
+      if (options.userId) {
+        params.push(options.userId);
+        userClause = ` AND metadata->>'userId' = $${params.length}`;
+      }
       await query(
         `UPDATE data_records
          SET data = $1,
              metadata = $2,
              updated_at = NOW()
-         WHERE type = $3 AND id = $4 AND deleted_at IS NULL`,
-        [JSON.stringify(updatedRecord.data), JSON.stringify(updatedRecord.metadata), type, id]
+         WHERE type = $3 AND id = $4${workspaceClause}${userClause}`,
+        params
       );
 
       this.emit('dataUpdated', { type, id, record: updatedRecord, changes: updates });
@@ -432,7 +500,11 @@ class DataManagementService extends EventEmitter {
    */
   async deleteData(type: string, id: string, options: DeleteOptions = {}) {
     try {
-      const record = await this.readData(type, id);
+      this.ensureIsolationContext(options, '删除数据');
+      const record = (await this.readData(type, id, {
+        userId: options.userId,
+        workspaceId: options.workspaceId,
+      })) as DataRecord;
 
       if (options.softDelete) {
         const recordValue = record as DataRecord;
@@ -446,19 +518,44 @@ class DataManagementService extends EventEmitter {
             version: recordValue.metadata.version + 1,
           },
         };
+        const params: Array<string | number> = [JSON.stringify(updatedRecord.metadata), type, id];
+        let workspaceClause = '';
+        let userClause = '';
+        if (options.workspaceId) {
+          params.push(options.workspaceId);
+          workspaceClause = ` AND workspace_id = $${params.length}`;
+        }
+        if (options.userId) {
+          params.push(options.userId);
+          userClause = ` AND metadata->>'userId' = $${params.length}`;
+        }
         await query(
           `UPDATE data_records
            SET metadata = $1,
                updated_at = NOW(),
                deleted_at = NOW()
-           WHERE type = $2 AND id = $3`,
-          [JSON.stringify(updatedRecord.metadata), type, id]
+           WHERE type = $2 AND id = $3${workspaceClause}${userClause}`,
+          params
         );
         this.emit('dataDeleted', { type, id, record: updatedRecord });
         return { success: true, deletedRecord: updatedRecord };
       }
 
-      await query('DELETE FROM data_records WHERE type = $1 AND id = $2', [type, id]);
+      const deleteParams: Array<string | number> = [type, id];
+      let deleteWorkspaceClause = '';
+      let deleteUserClause = '';
+      if (options.workspaceId) {
+        deleteParams.push(options.workspaceId);
+        deleteWorkspaceClause = ` AND workspace_id = $${deleteParams.length}`;
+      }
+      if (options.userId) {
+        deleteParams.push(options.userId);
+        deleteUserClause = ` AND metadata->>'userId' = $${deleteParams.length}`;
+      }
+      await query(
+        `DELETE FROM data_records WHERE type = $1 AND id = $2${deleteWorkspaceClause}${deleteUserClause}`,
+        deleteParams
+      );
 
       this.emit('dataDeleted', { type, id, record });
 
@@ -474,9 +571,19 @@ class DataManagementService extends EventEmitter {
    */
   async queryData(type: string, queryOptions: QueryOptions = {}, options: PaginationOptions = {}) {
     try {
+      this.ensureIsolationContext(queryOptions, '查询数据');
       const filters = queryOptions.filters || {};
       const params: Array<string | number> = [type];
       const clauses: string[] = ['type = $1', 'deleted_at IS NULL'];
+
+      if (queryOptions.userId) {
+        params.push(queryOptions.userId);
+        clauses.push(`metadata->>'userId' = $${params.length}`);
+      }
+      if (queryOptions.workspaceId) {
+        params.push(queryOptions.workspaceId);
+        clauses.push(`workspace_id = $${params.length}`);
+      }
 
       Object.entries(filters).forEach(([key, value]) => {
         params.push(String(value));
@@ -649,11 +756,24 @@ class DataManagementService extends EventEmitter {
    */
   async getStatistics(type: string, options: StatisticsOptions = {}) {
     try {
+      this.ensureIsolationContext(options, '统计数据');
+      const params: Array<string | number> = [type];
+      const clauses: string[] = ['type = $1', 'deleted_at IS NULL'];
+
+      if (options.userId) {
+        params.push(options.userId);
+        clauses.push(`metadata->>'userId' = $${params.length}`);
+      }
+      if (options.workspaceId) {
+        params.push(options.workspaceId);
+        clauses.push(`workspace_id = $${params.length}`);
+      }
+      const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
       const result = await query(
         `SELECT id, type, data, metadata
          FROM data_records
-         WHERE type = $1 AND deleted_at IS NULL`,
-        [type]
+         ${whereClause}`,
+        params
       );
       const records = result.rows.map(row => ({
         id: row.id,
@@ -747,6 +867,15 @@ class DataManagementService extends EventEmitter {
         break;
       default:
         break;
+    }
+  }
+
+  private ensureIsolationContext(
+    options: { userId?: string; workspaceId?: string },
+    action: string
+  ) {
+    if (!options.userId && !options.workspaceId) {
+      throw new Error(`${action}缺少用户或工作区信息`);
     }
   }
 

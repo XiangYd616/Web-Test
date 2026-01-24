@@ -25,6 +25,7 @@ type DbPool = {
 type MonitoringTarget = {
   id: string;
   user_id?: string;
+  workspace_id?: string;
   name?: string;
   url: string;
   monitoring_type?: string;
@@ -140,12 +141,14 @@ class MonitoringService extends EventEmitter {
     message?: string | null;
     details?: Record<string, unknown>;
     createdAt?: string;
+    workspaceId?: string | null;
   }) {
     try {
       await this.dbPool.query(
         `INSERT INTO monitoring_alerts (
            id,
            site_id,
+           workspace_id,
            alert_type,
            severity,
            source,
@@ -154,11 +157,12 @@ class MonitoringService extends EventEmitter {
            details,
            created_at,
            updated_at
-         ) VALUES ($1, $2, $3, $4, $5, 'active', $6, $7, $8, NOW())
+         ) VALUES ($1, $2, $3, $4, $5, $6, 'active', $7, $8, $9, NOW())
          ON CONFLICT (id) DO NOTHING`,
         [
           payload.alertId,
           '00000000-0000-0000-0000-000000000000',
+          payload.workspaceId || null,
           payload.alertType,
           payload.severity,
           'test',
@@ -179,6 +183,10 @@ class MonitoringService extends EventEmitter {
           `ALTER TABLE monitoring_alerts
            ADD COLUMN IF NOT EXISTS source VARCHAR(50) NOT NULL DEFAULT 'monitoring'`
         );
+        await this.dbPool.query(
+          `ALTER TABLE monitoring_alerts
+           ADD COLUMN IF NOT EXISTS workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL`
+        );
         await this.insertTestAlert(payload);
         return;
       }
@@ -190,8 +198,8 @@ class MonitoringService extends EventEmitter {
   /**
    * 暂停监控目标
    */
-  async pauseMonitoringTarget(siteId: string, userId: string) {
-    const target = await this.getMonitoringTarget(siteId, userId);
+  async pauseMonitoringTarget(siteId: string, userId: string, workspaceId?: string) {
+    const target = await this.getMonitoringTarget(siteId, userId, workspaceId);
     if (!target) {
       throw new Error('监控站点不存在或无权限访问');
     }
@@ -204,12 +212,14 @@ class MonitoringService extends EventEmitter {
       this.activeMonitors.delete(siteId);
     }
 
+    const scopeField = workspaceId ? 'workspace_id' : 'user_id';
+    const scopeValue = workspaceId || userId;
     const result = await this.dbPool.query<MonitoringTarget>(
       `UPDATE monitoring_sites
        SET status = 'paused', updated_at = NOW()
-       WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
+       WHERE id = $1 AND ${scopeField} = $2 AND deleted_at IS NULL
        RETURNING *`,
-      [siteId, userId]
+      [siteId, scopeValue]
     );
 
     return result.rows[0] || null;
@@ -218,13 +228,15 @@ class MonitoringService extends EventEmitter {
   /**
    * 恢复监控目标
    */
-  async resumeMonitoringTarget(siteId: string, userId: string) {
+  async resumeMonitoringTarget(siteId: string, userId: string, workspaceId?: string) {
+    const scopeField = workspaceId ? 'workspace_id' : 'user_id';
+    const scopeValue = workspaceId || userId;
     const result = await this.dbPool.query<MonitoringTarget>(
       `UPDATE monitoring_sites
        SET status = 'active', updated_at = NOW()
-       WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
+       WHERE id = $1 AND ${scopeField} = $2 AND deleted_at IS NULL
        RETURNING *`,
-      [siteId, userId]
+      [siteId, scopeValue]
     );
 
     const target = result.rows[0];
@@ -238,21 +250,23 @@ class MonitoringService extends EventEmitter {
   /**
    * 获取监控摘要（按状态/类型统计）
    */
-  async getMonitoringSummary(userId: string) {
+  async getMonitoringSummary(userId: string, workspaceId?: string) {
+    const scopeClause = workspaceId ? 'workspace_id = $1' : 'user_id = $1';
+    const scopeParams = [workspaceId || userId];
     const statusResult = await this.dbPool.query<Record<string, string>>(
       `SELECT status, COUNT(*)::int AS count
        FROM monitoring_sites
-       WHERE deleted_at IS NULL AND user_id = $1
+       WHERE deleted_at IS NULL AND ${scopeClause}
        GROUP BY status`,
-      [userId]
+      scopeParams
     );
 
     const typeResult = await this.dbPool.query<Record<string, string>>(
       `SELECT monitoring_type, COUNT(*)::int AS count
        FROM monitoring_sites
-       WHERE deleted_at IS NULL AND user_id = $1
+       WHERE deleted_at IS NULL AND ${scopeClause}
        GROUP BY monitoring_type`,
-      [userId]
+      scopeParams
     );
 
     const statusMap = statusResult.rows.reduce(
@@ -861,9 +875,12 @@ class MonitoringService extends EventEmitter {
     try {
       const query = `
         INSERT INTO monitoring_results (
-          site_id, status, response_time, status_code,
+          site_id, workspace_id, status, response_time, status_code,
           results, error_message, checked_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, NOW())
+        )
+        SELECT id, workspace_id, $2, $3, $4, $5, $6, NOW()
+        FROM monitoring_sites
+        WHERE id = $1
         RETURNING id
       `;
 
@@ -877,6 +894,10 @@ class MonitoringService extends EventEmitter {
       ];
 
       const insertResult = await this.dbPool.query<{ id: string }>(query, values);
+
+      if (insertResult.rows.length === 0) {
+        throw new Error(`监控站点不存在: ${siteId}`);
+      }
 
       logger.debug(`保存监控结果: ${insertResult.rows[0].id}`);
 
@@ -1293,14 +1314,15 @@ class MonitoringService extends EventEmitter {
     try {
       const query = `
         INSERT INTO monitoring_sites (
-          user_id, name, url, monitoring_type, check_interval,
+          user_id, workspace_id, name, url, monitoring_type, check_interval,
           timeout, config, notification_settings
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING *
       `;
 
       const values = [
         targetData.user_id,
+        targetData.workspace_id || null,
         targetData.name,
         targetData.url,
         targetData.monitoring_type || 'uptime',
@@ -1327,7 +1349,7 @@ class MonitoringService extends EventEmitter {
   /**
    * 移除监控目标
    */
-  async removeMonitoringTarget(targetId: string) {
+  async removeMonitoringTarget(targetId: string, userId: string, workspaceId?: string) {
     try {
       if (this.activeMonitors.has(targetId)) {
         const task = this.activeMonitors.get(targetId);
@@ -1337,14 +1359,16 @@ class MonitoringService extends EventEmitter {
         this.activeMonitors.delete(targetId);
       }
 
+      const scopeField = workspaceId ? 'workspace_id' : 'user_id';
+      const scopeValue = workspaceId || userId;
       const query = `
         UPDATE monitoring_sites
         SET deleted_at = NOW(), updated_at = NOW()
-        WHERE id = $1
+        WHERE id = $1 AND ${scopeField} = $2
         RETURNING name
       `;
 
-      const result = await this.dbPool.query<{ name: string }>(query, [targetId]);
+      const result = await this.dbPool.query<{ name: string }>(query, [targetId, scopeValue]);
 
       if (result.rows.length > 0) {
         logger.info(`移除监控目标: ${result.rows[0].name}`);
@@ -1361,10 +1385,12 @@ class MonitoringService extends EventEmitter {
   /**
    * 获取监控统计
    */
-  async getMonitoringStats(userId: string | null = null) {
+  async getMonitoringStats(userId: string | null = null, workspaceId?: string) {
     try {
-      const userFilter = userId ? 'AND ms.user_id = $1' : '';
-      const params = userId ? [userId] : [];
+      const scopeValue = workspaceId || userId;
+      const scopeField = workspaceId ? 'workspace_id' : 'user_id';
+      const scopeFilter = scopeValue ? `AND ms.${scopeField} = $1` : '';
+      const params = scopeValue ? [scopeValue] : [];
 
       const query = `
         SELECT
@@ -1381,7 +1407,7 @@ class MonitoringService extends EventEmitter {
           ORDER BY checked_at DESC
           LIMIT 1
         ) mr ON true
-        WHERE ms.deleted_at IS NULL ${userFilter}
+        WHERE ms.deleted_at IS NULL ${scopeFilter}
       `;
 
       const result = await this.dbPool.query<Record<string, string>>(query, params);
@@ -1420,12 +1446,22 @@ class MonitoringService extends EventEmitter {
       status?: string | null;
       monitoringType?: string | null;
       search?: string | null;
+      workspaceId?: string | null;
     } = {}
   ) {
     try {
-      const { page = 1, limit = 20, status = null, monitoringType = null, search = null } = options;
+      const {
+        page = 1,
+        limit = 20,
+        status = null,
+        monitoringType = null,
+        search = null,
+        workspaceId = null,
+      } = options;
       const offset = (page - 1) * limit;
 
+      const scopeField = workspaceId ? 'workspace_id' : 'user_id';
+      const scopeValue = workspaceId || userId;
       let query = `
         SELECT
           ms.*,
@@ -1440,10 +1476,10 @@ class MonitoringService extends EventEmitter {
           ORDER BY checked_at DESC
           LIMIT 1
         ) mr ON true
-        WHERE ms.deleted_at IS NULL AND ms.user_id = $1
+        WHERE ms.deleted_at IS NULL AND ms.${scopeField} = $1
       `;
 
-      const params: Array<string | number> = [userId];
+      const params: Array<string | number> = [scopeValue];
       let paramIndex = 2;
 
       if (status) {
@@ -1473,7 +1509,7 @@ class MonitoringService extends EventEmitter {
       const countQuery = `
         SELECT COUNT(*) as total
         FROM monitoring_sites ms
-        WHERE ms.deleted_at IS NULL AND ms.user_id = $1
+        WHERE ms.deleted_at IS NULL AND ms.${scopeField} = $1
         ${status ? `AND ms.status = $2` : ''}
         ${status && monitoringType ? `AND ms.monitoring_type = $3` : ''}
         ${!status && monitoringType ? `AND ms.monitoring_type = $2` : ''}
@@ -1501,8 +1537,10 @@ class MonitoringService extends EventEmitter {
   /**
    * 获取单个监控目标
    */
-  async getMonitoringTarget(siteId: string, userId: string) {
+  async getMonitoringTarget(siteId: string, userId: string, workspaceId?: string) {
     try {
+      const scopeField = workspaceId ? 'workspace_id' : 'user_id';
+      const scopeValue = workspaceId || userId;
       const query = `
         SELECT
           ms.*,
@@ -1518,10 +1556,10 @@ class MonitoringService extends EventEmitter {
           ORDER BY checked_at DESC
           LIMIT 1
         ) mr ON true
-        WHERE ms.id = $1 AND ms.user_id = $2 AND ms.deleted_at IS NULL
+        WHERE ms.id = $1 AND ms.${scopeField} = $2 AND ms.deleted_at IS NULL
       `;
 
-      const result = await this.dbPool.query(query, [siteId, userId]);
+      const result = await this.dbPool.query(query, [siteId, scopeValue]);
 
       return result.rows.length > 0 ? result.rows[0] : null;
     } catch (error) {
@@ -1536,7 +1574,8 @@ class MonitoringService extends EventEmitter {
   async updateMonitoringTarget(
     siteId: string,
     userId: string,
-    updateData: Record<string, unknown>
+    updateData: Record<string, unknown>,
+    workspaceId?: string
   ) {
     try {
       const allowedFields = [
@@ -1564,14 +1603,16 @@ class MonitoringService extends EventEmitter {
         throw new Error('没有有效的更新字段');
       }
 
-      values.push(siteId, userId);
+      const scopeField = workspaceId ? 'workspace_id' : 'user_id';
+      const scopeValue = workspaceId || userId;
+      values.push(siteId, scopeValue);
       const siteIdParam = paramIndex;
       const userIdParam = paramIndex + 1;
 
       const query = `
         UPDATE monitoring_sites
         SET ${updates.join(', ')}, updated_at = NOW()
-        WHERE id = $${siteIdParam} AND user_id = $${userIdParam} AND deleted_at IS NULL
+        WHERE id = $${siteIdParam} AND ${scopeField} = $${userIdParam} AND deleted_at IS NULL
         RETURNING *
       `;
 
@@ -1598,9 +1639,9 @@ class MonitoringService extends EventEmitter {
   /**
    * 立即执行监控检查
    */
-  async executeImmediateCheck(siteId: string, userId: string) {
+  async executeImmediateCheck(siteId: string, userId: string, workspaceId?: string) {
     try {
-      const target = await this.getMonitoringTarget(siteId, userId);
+      const target = await this.getMonitoringTarget(siteId, userId, workspaceId);
       if (!target) {
         throw new Error('监控站点不存在或无权限访问');
       }
@@ -1630,10 +1671,16 @@ class MonitoringService extends EventEmitter {
   async getMonitoringHistory(
     siteId: string,
     userId: string,
-    options: { page?: number; limit?: number; timeRange?: string; status?: string } = {}
+    options: {
+      page?: number;
+      limit?: number;
+      timeRange?: string;
+      status?: string;
+      workspaceId?: string;
+    } = {}
   ) {
     try {
-      const target = await this.getMonitoringTarget(siteId, userId);
+      const target = await this.getMonitoringTarget(siteId, userId, options.workspaceId);
       if (!target) {
         throw new Error('监控站点不存在或无权限访问');
       }
@@ -1718,6 +1765,7 @@ class MonitoringService extends EventEmitter {
         source,
         status: statusValue = 'active',
         timeRange = null,
+        workspaceId = null,
       } = options as {
         page?: number;
         limit?: number;
@@ -1725,6 +1773,7 @@ class MonitoringService extends EventEmitter {
         source?: string;
         status?: string;
         timeRange?: string | null;
+        workspaceId?: string | null;
       };
       const offset = (page - 1) * limit;
 
@@ -1746,9 +1795,11 @@ class MonitoringService extends EventEmitter {
           break;
       }
 
-      const params: Array<string | number> = [userId];
+      const scopeField = workspaceId ? 'workspace_id' : 'user_id';
+      const scopeValue = workspaceId || userId;
+      const params: Array<string | number> = [scopeValue];
       let paramIndex = 2;
-      const conditions = ['ms.user_id = $1', 'ms.deleted_at IS NULL'];
+      const conditions = [`ms.${scopeField} = $1`, 'ms.deleted_at IS NULL'];
 
       if (statusValue) {
         conditions.push(`ma.status = $${paramIndex}`);
@@ -1896,6 +1947,7 @@ class MonitoringService extends EventEmitter {
         CREATE TABLE IF NOT EXISTS monitoring_alerts (
           id VARCHAR(255) PRIMARY KEY,
           site_id UUID NOT NULL,
+          workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
           alert_type VARCHAR(50) NOT NULL,
           severity VARCHAR(20) NOT NULL CHECK (severity IN ('low', 'medium', 'high', 'critical')),
           source VARCHAR(50) NOT NULL DEFAULT 'monitoring',
@@ -1910,6 +1962,7 @@ class MonitoringService extends EventEmitter {
         );
 
         CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_site ON monitoring_alerts(site_id);
+        CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_workspace_id ON monitoring_alerts(workspace_id);
         CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_source ON monitoring_alerts(source);
         CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_severity ON monitoring_alerts(severity);
         CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_status ON monitoring_alerts(status);

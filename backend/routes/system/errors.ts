@@ -4,10 +4,12 @@
  */
 
 import express from 'express';
+import { query } from '../../config/database';
 import { asyncHandler } from '../../middleware/errorHandler';
 import { dataManagementService } from '../../services/data/DataManagementService';
 import { errorMonitoringSystem } from '../../utils/ErrorMonitoringSystem';
 import Logger from '../../utils/logger';
+const { hasWorkspacePermission } = require('../../utils/workspacePermissions');
 
 interface ErrorReport {
   id: string;
@@ -45,6 +47,7 @@ interface ErrorQuery {
   timeRange?: '1h' | '24h' | '7d' | '30d';
   search?: string;
   resolved?: boolean;
+  workspaceId?: string;
 }
 
 interface ErrorStatistics {
@@ -77,6 +80,32 @@ const ERROR_REPORTS_TYPE = 'system_error_reports';
 dataManagementService.initialize().catch(error => {
   console.error('错误数据服务初始化失败:', error);
 });
+
+const resolveWorkspaceRole = async (workspaceId: string, userId: string) => {
+  const result = await query(
+    `SELECT role
+     FROM workspace_members
+     WHERE workspace_id = $1 AND user_id = $2 AND status = 'active'
+     LIMIT 1`,
+    [workspaceId, userId]
+  );
+  return result.rows[0]?.role as 'owner' | 'admin' | 'member' | 'viewer' | undefined;
+};
+
+const ensureWorkspacePermission = async (
+  workspaceId: string,
+  userId: string,
+  action: 'read' | 'write' | 'delete' | 'invite' | 'manage' | 'execute'
+) => {
+  const role = await resolveWorkspaceRole(workspaceId, userId);
+  if (!role) {
+    throw new Error('没有权限访问该工作空间');
+  }
+  if (!hasWorkspacePermission(role, action)) {
+    throw new Error('当前工作空间角色无此操作权限');
+  }
+  return role;
+};
 
 const mapErrorRecord = (record: { id: string; data: Record<string, unknown> }): ErrorReport =>
   ({
@@ -118,6 +147,14 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const errorReport: ErrorReport = req.body;
+      const workspaceId = (req.body as { workspaceId?: string }).workspaceId;
+      if (workspaceId) {
+        const userId = (req as { user?: { id?: string } }).user?.id;
+        if (!userId) {
+          return res.status(401).json({ success: false, message: '用户未认证' });
+        }
+        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+      }
 
       // 验证必需字段
       if (!errorReport.type || !errorReport.message || !errorReport.timestamp) {
@@ -130,7 +167,10 @@ router.post(
       const { id } = await dataManagementService.createData(
         ERROR_REPORTS_TYPE,
         { ...errorReport, id: undefined },
-        { source: 'error-report' }
+        {
+          source: 'error-report',
+          workspaceId: workspaceId ? String(workspaceId) : undefined,
+        }
       );
 
       // 记录到日志
@@ -179,8 +219,16 @@ router.get(
   '/',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const query: ErrorQuery = req.query;
+    const workspaceId = query.workspaceId;
 
     try {
+      if (workspaceId) {
+        const userId = (req as { user?: { id?: string } }).user?.id;
+        if (!userId) {
+          return res.status(401).json({ success: false, message: '用户未认证' });
+        }
+        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      }
       const { results } = await dataManagementService.queryData(
         ERROR_REPORTS_TYPE,
         {
@@ -190,6 +238,7 @@ router.get(
           },
           search: query.search,
           sort: { field: 'timestamp', direction: 'desc' },
+          workspaceId: workspaceId ? String(workspaceId) : undefined,
         },
         {}
       );
@@ -236,9 +285,19 @@ router.get(
   '/:id',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
+    const { workspaceId } = req.query as { workspaceId?: string };
 
     try {
-      const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, id);
+      if (workspaceId) {
+        const userId = (req as { user?: { id?: string } }).user?.id;
+        if (!userId) {
+          return res.status(401).json({ success: false, message: '用户未认证' });
+        }
+        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      }
+      const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, id, {
+        workspaceId: workspaceId ? String(workspaceId) : undefined,
+      });
       const errorReport = mapErrorRecord(
         errorRecord as { id: string; data: Record<string, unknown> }
       );
@@ -270,10 +329,21 @@ router.get(
 router.get(
   '/statistics',
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { timeRange = '24h' } = req.query;
+    const { timeRange = '24h', workspaceId } = req.query;
 
     try {
-      const { results } = await dataManagementService.queryData(ERROR_REPORTS_TYPE, {}, {});
+      if (workspaceId) {
+        const userId = (req as { user?: { id?: string } }).user?.id;
+        if (!userId) {
+          return res.status(401).json({ success: false, message: '用户未认证' });
+        }
+        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      }
+      const { results } = await dataManagementService.queryData(
+        ERROR_REPORTS_TYPE,
+        { workspaceId: workspaceId ? String(workspaceId) : undefined },
+        {}
+      );
       const now = new Date();
       const recentErrors = applyTimeRangeFilter(
         results.map(record => mapErrorRecord(record)),
@@ -350,9 +420,19 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const { comment, resolvedBy } = req.body;
+    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
 
     try {
-      const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, id);
+      if (workspaceId) {
+        const userId = (req as { user?: { id?: string } }).user?.id;
+        if (!userId) {
+          return res.status(401).json({ success: false, message: '用户未认证' });
+        }
+        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+      }
+      const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, id, {
+        workspaceId: workspaceId ? String(workspaceId) : undefined,
+      });
       const errorReport = mapErrorRecord(
         errorRecord as { id: string; data: Record<string, unknown> }
       );
@@ -369,7 +449,10 @@ router.post(
             resolutionComment: comment,
           },
         },
-        { userId: resolvedBy }
+        {
+          userId: resolvedBy,
+          workspaceId: workspaceId ? String(workspaceId) : undefined,
+        }
       );
 
       Logger.info('错误已标记为解决', { errorId: id, resolvedBy, comment });
@@ -396,6 +479,7 @@ router.post(
   '/batch/resolve',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { errorIds, comment, resolvedBy } = req.body;
+    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
 
     if (!Array.isArray(errorIds) || errorIds.length === 0) {
       return res.status(400).json({
@@ -405,11 +489,20 @@ router.post(
     }
 
     try {
+      if (workspaceId) {
+        const userId = (req as { user?: { id?: string } }).user?.id;
+        if (!userId) {
+          return res.status(401).json({ success: false, message: '用户未认证' });
+        }
+        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+      }
       const results = [];
 
       for (const errorId of errorIds) {
         try {
-          const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, errorId);
+          const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, errorId, {
+            workspaceId: workspaceId ? String(workspaceId) : undefined,
+          });
           const errorReport = mapErrorRecord(
             errorRecord as { id: string; data: Record<string, unknown> }
           );
@@ -426,7 +519,10 @@ router.post(
                 resolutionComment: comment,
               },
             },
-            { userId: resolvedBy }
+            {
+              userId: resolvedBy,
+              workspaceId: workspaceId ? String(workspaceId) : undefined,
+            }
           );
 
           results.push({ errorId, success: true });
@@ -480,9 +576,19 @@ router.delete(
   '/:id',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
+    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
 
     try {
-      await dataManagementService.deleteData(ERROR_REPORTS_TYPE, id);
+      if (workspaceId) {
+        const userId = (req as { user?: { id?: string } }).user?.id;
+        if (!userId) {
+          return res.status(401).json({ success: false, message: '用户未认证' });
+        }
+        await ensureWorkspacePermission(String(workspaceId), userId, 'delete');
+      }
+      await dataManagementService.deleteData(ERROR_REPORTS_TYPE, id, {
+        workspaceId: workspaceId ? String(workspaceId) : undefined,
+      });
 
       Logger.info('删除错误报告', { errorId: id });
 
@@ -507,8 +613,20 @@ router.delete(
 router.get(
   '/types',
   asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { workspaceId } = req.query as { workspaceId?: string };
     try {
-      const { results } = await dataManagementService.queryData(ERROR_REPORTS_TYPE, {}, {});
+      if (workspaceId) {
+        const userId = (req as { user?: { id?: string } }).user?.id;
+        if (!userId) {
+          return res.status(401).json({ success: false, message: '用户未认证' });
+        }
+        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      }
+      const { results } = await dataManagementService.queryData(
+        ERROR_REPORTS_TYPE,
+        { workspaceId: workspaceId ? String(workspaceId) : undefined },
+        {}
+      );
       const types = Array.from(new Set(results.map(record => mapErrorRecord(record).type)));
 
       return res.json({
@@ -532,10 +650,26 @@ router.get(
 router.get(
   '/health',
   asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { workspaceId } = req.query as { workspaceId?: string };
     try {
+      if (workspaceId) {
+        const userId = (req as { user?: { id?: string } }).user?.id;
+        if (!userId) {
+          return res.status(401).json({ success: false, message: '用户未认证' });
+        }
+        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      }
       const health = errorMonitoringSystem.getStatus();
-      const { total } = await dataManagementService.queryData(ERROR_REPORTS_TYPE, {}, {});
-      const { results } = await dataManagementService.queryData(ERROR_REPORTS_TYPE, {}, {});
+      const { total } = await dataManagementService.queryData(
+        ERROR_REPORTS_TYPE,
+        { workspaceId: workspaceId ? String(workspaceId) : undefined },
+        {}
+      );
+      const { results } = await dataManagementService.queryData(
+        ERROR_REPORTS_TYPE,
+        { workspaceId: workspaceId ? String(workspaceId) : undefined },
+        {}
+      );
       const lastRecord = results
         .map(record => mapErrorRecord(record))
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())

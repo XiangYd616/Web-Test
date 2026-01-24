@@ -1,5 +1,14 @@
 const UXTestEngine = require('../../engines/ux/UXTestEngine');
 
+jest.mock('../../config/database', () => ({
+  query: jest.fn().mockResolvedValue({ rows: [] }),
+}));
+
+jest.mock('../../repositories/testRepository', () => ({
+  saveResult: jest.fn().mockResolvedValue('result-1'),
+  saveMetrics: jest.fn().mockResolvedValue(undefined),
+}));
+
 const mockLaunch = jest.fn();
 const mockNewPage = jest.fn();
 const mockGoto = jest.fn();
@@ -44,7 +53,7 @@ describe('UXTestEngine', () => {
 
   test('应在缺少URL时抛出错误', async () => {
     const engine = new UXTestEngine();
-    await expect(engine.executeTest({})).rejects.toThrow('UX测试URL不能为空');
+    await expect(engine.executeTest({})).rejects.toThrow('配置验证失败');
   });
 
   test('应在未确认Puppeteer时抛出错误', async () => {

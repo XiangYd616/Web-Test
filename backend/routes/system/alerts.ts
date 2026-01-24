@@ -4,10 +4,12 @@
 
 import express from 'express';
 import Joi from 'joi';
+import { query } from '../../config/database';
 import { asyncHandler } from '../../middleware/errorHandler';
 import { dataManagementService } from '../../services/data/DataManagementService';
 const { authMiddleware } = require('../../middleware/auth');
 const { validateQuery, validateRequest } = require('../../middleware/validation');
+const { hasWorkspacePermission } = require('../../utils/workspacePermissions');
 
 interface Alert {
   id: string;
@@ -33,6 +35,7 @@ interface AlertQuery {
   timeRange?: '1h' | '24h' | '7d' | '30d';
   source?: string;
   search?: string;
+  workspaceId?: string;
 }
 
 interface AlertRule {
@@ -64,6 +67,32 @@ const getUserId = (req: AuthenticatedRequest): string => {
   return userId;
 };
 
+const resolveWorkspaceRole = async (workspaceId: string, userId: string) => {
+  const result = await query(
+    `SELECT role
+     FROM workspace_members
+     WHERE workspace_id = $1 AND user_id = $2 AND status = 'active'
+     LIMIT 1`,
+    [workspaceId, userId]
+  );
+  return result.rows[0]?.role as 'owner' | 'admin' | 'member' | 'viewer' | undefined;
+};
+
+const ensureWorkspacePermission = async (
+  workspaceId: string,
+  userId: string,
+  action: 'read' | 'write' | 'delete' | 'invite' | 'manage' | 'execute'
+) => {
+  const role = await resolveWorkspaceRole(workspaceId, userId);
+  if (!role) {
+    throw new Error('没有权限访问该工作空间');
+  }
+  if (!hasWorkspacePermission(role, action)) {
+    throw new Error('当前工作空间角色无此操作权限');
+  }
+  return role;
+};
+
 // 验证规则
 const alertQuerySchema = Joi.object({
   page: Joi.number().integer().min(1).default(1),
@@ -73,6 +102,7 @@ const alertQuerySchema = Joi.object({
   timeRange: Joi.string().valid('1h', '24h', '7d', '30d').default('24h'),
   source: Joi.string(),
   search: Joi.string(),
+  workspaceId: Joi.string(),
 });
 
 const batchActionSchema = Joi.object({
@@ -144,9 +174,13 @@ router.get(
   validateQuery(alertQuerySchema),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const query = req.query as AlertQuery;
-    getUserId(req);
+    const userId = getUserId(req);
+    const workspaceId = query.workspaceId;
 
     try {
+      if (workspaceId) {
+        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      }
       const { results } = await dataManagementService.queryData(
         ALERTS_TYPE,
         {
@@ -157,6 +191,7 @@ router.get(
           },
           search: query.search,
           sort: { field: 'timestamp', direction: 'desc' },
+          workspaceId: workspaceId ? String(workspaceId) : undefined,
         },
         {}
       );
@@ -214,9 +249,16 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
+    const { workspaceId } = req.query as { workspaceId?: string };
 
     try {
-      const alertRecord = await dataManagementService.readData(ALERTS_TYPE, id);
+      if (workspaceId) {
+        const userId = getUserId(req as AuthenticatedRequest);
+        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      }
+      const alertRecord = await dataManagementService.readData(ALERTS_TYPE, id, {
+        workspaceId: workspaceId ? String(workspaceId) : undefined,
+      });
       const alert = mapAlertRecord(alertRecord as { id: string; data: Record<string, unknown> });
 
       return res.json({
@@ -250,9 +292,15 @@ router.post(
     const { id } = req.params;
     const { comment: _comment } = req.body;
     const userId = getUserId(req);
+    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
 
     try {
-      const alertRecord = await dataManagementService.readData(ALERTS_TYPE, id);
+      if (workspaceId) {
+        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+      }
+      const alertRecord = await dataManagementService.readData(ALERTS_TYPE, id, {
+        workspaceId: workspaceId ? String(workspaceId) : undefined,
+      });
       const alert = mapAlertRecord(alertRecord as { id: string; data: Record<string, unknown> });
 
       if (alert.status !== 'active') {
@@ -270,7 +318,7 @@ router.post(
           acknowledgedAt: new Date(),
           acknowledgedBy: userId,
         },
-        { userId }
+        { userId, workspaceId: workspaceId ? String(workspaceId) : undefined }
       );
 
       return res.json({
@@ -305,9 +353,15 @@ router.post(
     const { id } = req.params;
     const { comment: _comment } = req.body;
     const userId = getUserId(req);
+    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
 
     try {
-      await dataManagementService.readData(ALERTS_TYPE, id);
+      if (workspaceId) {
+        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+      }
+      await dataManagementService.readData(ALERTS_TYPE, id, {
+        workspaceId: workspaceId ? String(workspaceId) : undefined,
+      });
 
       const updatedAlert = await dataManagementService.updateData(
         ALERTS_TYPE,
@@ -317,7 +371,7 @@ router.post(
           resolvedAt: new Date(),
           resolvedBy: userId,
         },
-        { userId }
+        { userId, workspaceId: workspaceId ? String(workspaceId) : undefined }
       );
 
       return res.json({
@@ -350,15 +404,22 @@ router.post(
   authMiddleware,
   validateRequest(batchActionSchema),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { action, alertIds, comment: _comment } = req.body;
+    const { action, alertIds, comment: _comment, workspaceId: bodyWorkspaceId } = req.body;
     const userId = getUserId(req);
+    const workspaceId = bodyWorkspaceId || (req.query.workspaceId as string | undefined);
 
     try {
+      if (workspaceId) {
+        const permissionAction = action === 'delete' ? 'delete' : 'write';
+        await ensureWorkspacePermission(String(workspaceId), userId, permissionAction);
+      }
       const results = [];
 
       for (const alertId of alertIds) {
         try {
-          const alertRecord = await dataManagementService.readData(ALERTS_TYPE, alertId);
+          const alertRecord = await dataManagementService.readData(ALERTS_TYPE, alertId, {
+            workspaceId: workspaceId ? String(workspaceId) : undefined,
+          });
           const alert = mapAlertRecord(
             alertRecord as { id: string; data: Record<string, unknown> }
           );
@@ -374,7 +435,7 @@ router.post(
                     acknowledgedAt: new Date(),
                     acknowledgedBy: userId,
                   },
-                  { userId }
+                  { userId, workspaceId: workspaceId ? String(workspaceId) : undefined }
                 );
                 results.push({ alertId, success: true });
               } else {
@@ -391,13 +452,16 @@ router.post(
                   resolvedAt: new Date(),
                   resolvedBy: userId,
                 },
-                { userId }
+                { userId, workspaceId: workspaceId ? String(workspaceId) : undefined }
               );
               results.push({ alertId, success: true });
               break;
 
             case 'delete':
-              await dataManagementService.deleteData(ALERTS_TYPE, alertId, { userId });
+              await dataManagementService.deleteData(ALERTS_TYPE, alertId, {
+                userId,
+                workspaceId: workspaceId ? String(workspaceId) : undefined,
+              });
               results.push({ alertId, success: true });
               break;
 
@@ -449,8 +513,19 @@ router.get(
   '/rules',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { workspaceId } = req.query as { workspaceId?: string };
     try {
-      const { results } = await dataManagementService.queryData(ALERT_RULES_TYPE, {}, {});
+      if (workspaceId) {
+        const userId = getUserId(req as AuthenticatedRequest);
+        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      }
+      const { results } = await dataManagementService.queryData(
+        ALERT_RULES_TYPE,
+        {
+          workspaceId: workspaceId ? String(workspaceId) : undefined,
+        },
+        {}
+      );
       const rules = results.map(record => mapRuleRecord(record));
 
       return res.json({
@@ -478,8 +553,12 @@ router.post(
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const userId = getUserId(req);
     const ruleData = req.body;
+    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
 
     try {
+      if (workspaceId) {
+        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+      }
       const newRuleData: AlertRule = {
         ...(ruleData as AlertRule),
         createdAt: new Date(),
@@ -490,7 +569,11 @@ router.post(
       const { id } = await dataManagementService.createData(
         ALERT_RULES_TYPE,
         newRuleData as unknown as Record<string, unknown>,
-        { userId, source: 'alerts' }
+        {
+          userId,
+          source: 'alerts',
+          workspaceId: workspaceId ? String(workspaceId) : undefined,
+        }
       );
 
       const newRule: AlertRule = { ...newRuleData, id };
@@ -520,9 +603,16 @@ router.put(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const updateData = req.body;
+    const workspaceId = req.body?.workspaceId || (req.query.workspaceId as string | undefined);
 
     try {
-      await dataManagementService.readData(ALERT_RULES_TYPE, id);
+      if (workspaceId) {
+        const userId = getUserId(req as AuthenticatedRequest);
+        await ensureWorkspacePermission(String(workspaceId), userId, 'write');
+      }
+      await dataManagementService.readData(ALERT_RULES_TYPE, id, {
+        workspaceId: workspaceId ? String(workspaceId) : undefined,
+      });
       const updatedRule = await dataManagementService.updateData(
         ALERT_RULES_TYPE,
         id,
@@ -530,7 +620,10 @@ router.put(
           ...updateData,
           updatedAt: new Date(),
         },
-        { userId: getUserId(req as AuthenticatedRequest) }
+        {
+          userId: getUserId(req as AuthenticatedRequest),
+          workspaceId: workspaceId ? String(workspaceId) : undefined,
+        }
       );
 
       return res.json({
@@ -557,10 +650,16 @@ router.delete(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
+    const workspaceId = (req.query.workspaceId as string | undefined) || req.body?.workspaceId;
 
     try {
+      if (workspaceId) {
+        const userId = getUserId(req as AuthenticatedRequest);
+        await ensureWorkspacePermission(String(workspaceId), userId, 'delete');
+      }
       await dataManagementService.deleteData(ALERT_RULES_TYPE, id, {
         userId: getUserId(req as AuthenticatedRequest),
+        workspaceId: workspaceId ? String(workspaceId) : undefined,
       });
 
       return res.json({
@@ -585,9 +684,13 @@ router.get(
   '/statistics',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { timeRange = '24h' } = req.query;
+    const { timeRange = '24h', workspaceId } = req.query;
+    const userId = getUserId(req as AuthenticatedRequest);
 
     try {
+      if (workspaceId) {
+        await ensureWorkspacePermission(String(workspaceId), userId, 'read');
+      }
       const now = new Date();
       let cutoffTime: Date;
 
@@ -608,7 +711,11 @@ router.get(
           cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       }
 
-      const { results } = await dataManagementService.queryData(ALERTS_TYPE, {}, {});
+      const { results } = await dataManagementService.queryData(
+        ALERTS_TYPE,
+        { workspaceId: workspaceId ? String(workspaceId) : undefined },
+        {}
+      );
       const allAlerts = results.map(record => mapAlertRecord(record));
       const recentAlerts = allAlerts.filter(alert => new Date(alert.timestamp) >= cutoffTime);
 
@@ -640,18 +747,30 @@ router.get(
               return sum + (resolvedAt - new Date(alert.timestamp).getTime());
             }, 0) / (recentAlerts.filter(a => a.status === 'resolved').length || 1),
         rules: {
-          total: (await dataManagementService.queryData(ALERT_RULES_TYPE, {}, {})).total,
+          total: (
+            await dataManagementService.queryData(
+              ALERT_RULES_TYPE,
+              { workspaceId: workspaceId ? String(workspaceId) : undefined },
+              {}
+            )
+          ).total,
           enabled: (
             await dataManagementService.queryData(
               ALERT_RULES_TYPE,
-              { filters: { enabled: true } },
+              {
+                filters: { enabled: true },
+                workspaceId: workspaceId ? String(workspaceId) : undefined,
+              },
               {}
             )
           ).total,
           disabled: (
             await dataManagementService.queryData(
               ALERT_RULES_TYPE,
-              { filters: { enabled: false } },
+              {
+                filters: { enabled: false },
+                workspaceId: workspaceId ? String(workspaceId) : undefined,
+              },
               {}
             )
           ).total,

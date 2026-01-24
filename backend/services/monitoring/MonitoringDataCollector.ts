@@ -360,9 +360,21 @@ class MonitoringDataCollector extends EventEmitter {
 
     const query = `
       INSERT INTO monitoring_results (
-        site_id, status, response_time, status_code,
+        site_id, workspace_id, status, response_time, status_code,
         results, error_message, checked_at
-      ) VALUES ${placeholders.join(', ')}
+      )
+      SELECT
+        v.site_id,
+        ms.workspace_id,
+        v.status,
+        v.response_time,
+        v.status_code,
+        v.results,
+        v.error_message,
+        v.checked_at
+      FROM (VALUES ${placeholders.join(', ')})
+        AS v(site_id, status, response_time, status_code, results, error_message, checked_at)
+      JOIN monitoring_sites ms ON ms.id = v.site_id
     `;
 
     await this.dbPool.query(query, values);
@@ -394,15 +406,27 @@ class MonitoringDataCollector extends EventEmitter {
       );
 
       placeholders.push(
-        `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, $${baseIndex + 6}, NOW())`
+        `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, $${baseIndex + 6})`
       );
     }
 
     const query = `
       INSERT INTO monitoring_results (
-        site_id, status, response_time, status_code,
+        site_id, workspace_id, status, response_time, status_code,
         results, error_message, checked_at
-      ) VALUES ${placeholders.join(', ')}
+      )
+      SELECT
+        v.site_id,
+        ms.workspace_id,
+        v.status,
+        v.response_time,
+        v.status_code,
+        v.results,
+        v.error_message,
+        NOW()
+      FROM (VALUES ${placeholders.join(', ')})
+        AS v(site_id, status, response_time, status_code, results, error_message)
+      JOIN monitoring_sites ms ON ms.id = v.site_id
     `;
 
     await this.dbPool.query(query, values);
@@ -434,15 +458,27 @@ class MonitoringDataCollector extends EventEmitter {
       );
 
       placeholders.push(
-        `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, $${baseIndex + 6}, NOW())`
+        `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, $${baseIndex + 6})`
       );
     }
 
     const query = `
       INSERT INTO monitoring_results (
-        site_id, status, response_time, status_code,
+        site_id, workspace_id, status, response_time, status_code,
         results, error_message, checked_at
-      ) VALUES ${placeholders.join(', ')}
+      )
+      SELECT
+        v.site_id,
+        ms.workspace_id,
+        v.status,
+        v.response_time,
+        v.status_code,
+        v.results,
+        v.error_message,
+        NOW()
+      FROM (VALUES ${placeholders.join(', ')})
+        AS v(site_id, status, response_time, status_code, results, error_message)
+      JOIN monitoring_sites ms ON ms.id = v.site_id
     `;
 
     await this.dbPool.query(query, values);

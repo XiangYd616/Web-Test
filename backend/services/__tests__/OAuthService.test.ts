@@ -58,8 +58,11 @@ describe('OAuthService', () => {
   });
 
   test('handleCallback 成功返回 token 与用户信息', async () => {
-    const state = service.generateAuthUrl('google').split('state=')[1];
+    const authUrl = service.generateAuthUrl('google');
+    const state = new URL(authUrl).searchParams.get('state');
     const code = 'auth-code';
+
+    expect(state).toBeTruthy();
 
     axios.post.mockResolvedValue({
       data: { access_token: 'access-token', token_type: 'Bearer', expires_in: 3600 },
@@ -90,7 +93,7 @@ describe('OAuthService', () => {
       expiresIn: 3600,
     });
 
-    const result = await service.handleCallback('google', code, state);
+    const result = await service.handleCallback('google', code, state as string);
 
     expect(result.success).toBe(true);
     expect(result.tokens?.accessToken).toBe('jwt-access');

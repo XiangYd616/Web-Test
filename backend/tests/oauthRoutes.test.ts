@@ -70,3 +70,5 @@ describe('oauth 路由', () => {
     expect(response.body.data.token).toBe('token');
   });
 });
+
+export {};

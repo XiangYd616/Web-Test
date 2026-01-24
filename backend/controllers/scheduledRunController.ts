@@ -10,7 +10,7 @@ type ScheduledRunServiceLike = {
   updateSchedule: (scheduleId: string, updates: Record<string, unknown>) => Promise<unknown>;
   deleteSchedule: (scheduleId: string) => Promise<boolean>;
   executeSchedule: (scheduleId: string, options?: Record<string, unknown>) => Promise<string>;
-  getStatistics: () => Promise<unknown>;
+  getStatistics: (workspaceId?: string) => Promise<unknown>;
   getExecution: (executionId: string) => Promise<unknown>;
   getAllExecutions: () => Promise<unknown[]>;
   cancelExecution: (executionId: string) => Promise<boolean>;
@@ -526,8 +526,17 @@ const getExecutionHistory = async (req: AuthRequest, res: ApiResponse) => {
 };
 
 const getSchedulingStatistics = async (_req: AuthRequest, res: ApiResponse) => {
+  const workspaceId = _req.query.workspaceId as string | undefined;
+  if (!workspaceId) {
+    return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
+  }
+  const permission = await ensureWorkspacePermission(workspaceId, _req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
+  }
+
   const service = getScheduledRunService();
-  const statistics = await service.getStatistics();
+  const statistics = await service.getStatistics(workspaceId);
   return res.success(statistics);
 };
 

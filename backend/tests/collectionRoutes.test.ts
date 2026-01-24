@@ -169,3 +169,5 @@ describe('collections 路由', () => {
     expect(mockManager.createFolder).toHaveBeenCalled();
   });
 });
+
+export {};

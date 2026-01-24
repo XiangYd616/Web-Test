@@ -759,6 +759,7 @@ CREATE INDEX IF NOT EXISTS idx_archive_policies_enabled ON archive_policies(enab
 CREATE TABLE IF NOT EXISTS data_records (
     id VARCHAR(80) PRIMARY KEY,
     type VARCHAR(100) NOT NULL,
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
     data JSONB NOT NULL,
     metadata JSONB NOT NULL DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -767,6 +768,7 @@ CREATE TABLE IF NOT EXISTS data_records (
 );
 
 CREATE INDEX IF NOT EXISTS idx_data_records_type ON data_records(type);
+CREATE INDEX IF NOT EXISTS idx_data_records_workspace_id ON data_records(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_data_records_created ON data_records(created_at DESC);
 
 CREATE TABLE IF NOT EXISTS data_backups (
@@ -991,6 +993,18 @@ CHECK (check_interval >= 60 AND check_interval <= 86400); -- 1分钟到1天
 -- 确保文件大小合理
 ALTER TABLE uploaded_files ADD CONSTRAINT chk_file_size
 CHECK (size > 0 AND size <= 1073741824); -- 最大1GB
+
+-- monitoring 数据隔离字段
+ALTER TABLE monitoring_sites
+    ADD COLUMN IF NOT EXISTS workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL;
+ALTER TABLE monitoring_results
+    ADD COLUMN IF NOT EXISTS workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL;
+ALTER TABLE monitoring_alerts
+    ADD COLUMN IF NOT EXISTS workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL;
+
+CREATE INDEX IF NOT EXISTS idx_monitoring_sites_workspace_id ON monitoring_sites(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_monitoring_results_workspace_id ON monitoring_results(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_workspace_id ON monitoring_alerts(workspace_id);
 
 -- =====================================================
 -- 10. 视图创建 - 便于查询的视图
