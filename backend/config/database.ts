@@ -459,7 +459,10 @@ const getStats = async () => {
  */
 const getConnectionManager = async (): Promise<ConnectionManager> => {
   if (!connectionManager) {
-    const manager = new DatabaseConnectionManager(dbConfig) as ConnectionManager;
+    const manager = new DatabaseConnectionManager({
+      ...dbConfig,
+      existingPool: pool ?? undefined,
+    }) as ConnectionManager;
 
     // 设置事件监听
     manager.on('connected', (data: { status?: string }) => {

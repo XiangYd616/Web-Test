@@ -23,9 +23,14 @@ router.post(
   asyncHandler(workspaceController.acceptInvitation)
 );
 router.put(
-  '/:workspaceId/members/:userId',
+  '/:workspaceId/members/:memberId',
   authMiddleware,
   asyncHandler(workspaceController.updateMemberRole)
+);
+router.delete(
+  '/:workspaceId/members/:memberId',
+  authMiddleware,
+  asyncHandler(workspaceController.removeMember)
 );
 
 export default router;
