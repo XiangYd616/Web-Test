@@ -35,7 +35,7 @@ jest.mock('../middleware/logger', () => ({
   apiStats: (_req: any, _res: any, next: () => void) => next(),
 }));
 
-jest.mock('../database/sequelize', () => ({
+jest.mock('../database/pgModels', () => ({
   models: {
     WorkspaceMember: workspaceMemberModel,
     Collection: collectionModel,
@@ -59,13 +59,13 @@ jest.mock(
   { virtual: true }
 );
 
-const { responseFormatter } = require('../middleware/responseFormatter');
+const { response } = require('../middleware/responseFormatter');
 const collectionsRouter = require('../routes/collections').default;
 
 const createApp = () => {
   const app = express();
   app.use(express.json());
-  app.use(responseFormatter);
+  app.use(response);
   app.use('/api/collections', collectionsRouter);
   return app;
 };

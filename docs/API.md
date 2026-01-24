@@ -11,6 +11,35 @@ Test-Web API 提供了完整的网站测试服务，包括性能测试、SEO分�
 - **认证**: Bearer Token (可选)
 - **数据格式**: JSON
 
+### 响应规范
+
+后端统一由 `response` 中间件返回标准响应结构，控制器需使用以下接口：
+
+- `res.success(data, message?)`
+- `res.created(data, message?)`
+- `res.error(code, message?, details?, statusCode?)`
+
+禁止在控制器中直接 `res.status(...).json(...)` 拼装响应结构。
+
+> 以下响应示例默认省略 `success/meta` 外层包装，仅展示 `data` 核心内容。
+
+### 通用模板
+
+#### 参数说明模板
+
+- `field` (类型): 字段说明
+- `optionalField` (类型, 可选): 可选字段说明
+
+#### 响应模板（示意）
+
+```json
+{
+  "data": {
+    "field": "value"
+  }
+}
+```
+
 ## 认证
 
 ### 获取访问令牌
@@ -29,7 +58,6 @@ Content-Type: application/json
 
 ```json
 {
-  "success": true,
   "data": {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "user": {
@@ -149,7 +177,6 @@ Content-Type: application/json
 
 ```json
 {
-  "success": true,
   "data": {
     "sessionId": "perf_1234567890",
     "status": "running",
@@ -168,7 +195,6 @@ GET /tests/{sessionId}/status
 
 ```json
 {
-  "success": true,
   "data": {
     "sessionId": "perf_1234567890",
     "status": "running",
@@ -188,7 +214,6 @@ GET /tests/{sessionId}/result
 
 ```json
 {
-  "success": true,
   "data": {
     "sessionId": "perf_1234567890",
     "status": "completed",
@@ -250,7 +275,6 @@ Content-Type: application/json
 
 ```json
 {
-  "success": true,
   "data": {
     "sessionId": "seo_1234567890",
     "status": "running"
@@ -313,7 +337,6 @@ Content-Type: application/json
 
 ```json
 {
-  "success": true,
   "data": {
     "batchId": "batch_1234567890",
     "sessions": ["perf_1234567891", "seo_1234567892"],
@@ -344,7 +367,6 @@ GET /tests/history?page=1&limit=10&type=performance&status=completed
 
 ```json
 {
-  "success": true,
   "data": {
     "tests": [
       {
@@ -367,37 +389,240 @@ GET /tests/history?page=1&limit=10&type=performance&status=completed
 }
 ```
 
-## 导出 API
+## 数据管理 API
 
-### 导出测试结果
+### 获取数据概览
 
 ```http
-POST /tests/{sessionId}/export
+GET /data/overview?workspaceId={workspaceId}
+```
+
+### 获取数据统计
+
+```http
+GET /data/statistics?workspaceId={workspaceId}&period=30d&type=test_results
+```
+
+### 获取数据列表
+
+```http
+GET /data?workspaceId={workspaceId}&page=1&limit=20&type=test_results&status=completed&search=keyword
+```
+
+### 获取单条数据
+
+```http
+GET /data/{id}?workspaceId={workspaceId}
+```
+
+### 创建数据
+
+```http
+POST /data
 Content-Type: application/json
 
 {
-  "format": "pdf",
-  "options": {
-    "includeCharts": true,
-    "includeRecommendations": true
-  }
+  "workspaceId": "xxx",
+  "type": "test_results",
+  "data": { "url": "https://example.com", "testType": "api" }
 }
 ```
 
-**参数说明**:
+### 更新数据
 
-- `format` (string): 导出格式 (`pdf`, `json`, `csv`, `html`)
-- `options` (object): 导出选项
+```http
+PUT /data/{id}
+Content-Type: application/json
+
+{
+  "workspaceId": "xxx",
+  "status": "completed"
+}
+```
+
+### 删除数据
+
+```http
+DELETE /data/{id}?workspaceId={workspaceId}
+```
+
+### 数据批量操作
+
+```http
+POST /data/batch
+Content-Type: application/json
+
+{
+  "workspaceId": "xxx",
+  "operation": "update",
+  "ids": ["id1", "id2"],
+  "data": { "status": "archived" }
+}
+```
+
+### 数据搜索
+
+```http
+POST /data/search
+Content-Type: application/json
+
+{
+  "workspaceId": "xxx",
+  "query": "keyword",
+  "filters": { "type": "test_results" },
+  "options": { "page": 1, "limit": 20 }
+}
+```
+
+### 数据导出（任务）
+
+```http
+POST /data/export
+Content-Type: application/json
+
+{
+  "workspaceId": "xxx",
+  "format": "csv",
+  "filters": { "type": "test_results" },
+  "options": { "dataType": "test_results" }
+}
+```
 
 **响应**:
 
 ```json
 {
-  "success": true,
   "data": {
-    "downloadUrl": "/api/exports/perf_1234567890.pdf",
-    "expiresAt": "2023-12-01T11:00:00Z"
+    "jobId": "export_123",
+    "status": "pending",
+    "createdAt": "2026-01-24T08:00:00Z"
   }
+}
+```
+
+### 查询导出状态
+
+```http
+GET /data/export/status/{jobId}
+```
+
+### 下载导出文件
+
+```http
+GET /data/export/download/{jobId}
+```
+
+### 取消导出任务
+
+```http
+DELETE /data/export/{jobId}
+```
+
+### 获取导出历史
+
+```http
+GET /data/export/history?page=1&limit=10
+```
+
+### 获取导出格式
+
+```http
+GET /data/export/formats
+```
+
+### 数据导入
+
+```http
+POST /data/import
+Content-Type: multipart/form-data
+```
+
+### 数据备份
+
+```http
+POST /data/backup
+Content-Type: application/json
+
+{
+  "type": "full",
+  "options": { "name": "manual_backup" }
+}
+```
+
+### 数据恢复
+
+```http
+POST /data/restore
+Content-Type: multipart/form-data
+```
+
+### 获取版本历史
+
+```http
+GET /data/{id}/versions?workspaceId={workspaceId}
+```
+
+### 数据验证
+
+```http
+POST /data/validate
+Content-Type: application/json
+
+{
+  "workspaceId": "xxx",
+  "data": { "type": "test_results" },
+  "schema": { "type": "test_results" }
+}
+```
+
+## 对比与基准测试 API
+
+### 基准测试对比
+
+```http
+POST /comparison/benchmark
+Content-Type: application/json
+
+{
+  "testResult": { "id": "test_123", "metrics": { "response_time": 120 } },
+  "benchmarkType": "backend_api"
+}
+```
+
+### 获取可用基准测试
+
+```http
+GET /comparison/benchmarks?testType=api
+```
+
+### 生成对比摘要
+
+```http
+POST /comparison/summary
+Content-Type: application/json
+
+{
+  "comparisons": [ { "benchmark": { "id": "b1", "category": "backend" }, "comparison": { "trend": "stable" } } ],
+  "groupBy": "category"
+}
+```
+
+### 获取对比指标
+
+```http
+GET /comparison/metrics?testType=api
+```
+
+### 导出对比报告
+
+```http
+POST /comparison/export
+Content-Type: application/json
+
+{
+  "comparisonId": "cmp_123",
+  "format": "json",
+  "options": { "includeSummary": true }
 }
 ```
 
@@ -413,7 +638,6 @@ GET /system/status
 
 ```json
 {
-  "success": true,
   "data": {
     "status": "healthy",
     "version": "1.0.0",
@@ -442,7 +666,6 @@ GET /test-engines
 
 ```json
 {
-  "success": true,
   "data": {
     "engines": [
       {
@@ -482,15 +705,22 @@ GET /test-engines
 
 ### 常见错误码
 
-| 错误码                | HTTP状态码 | 描述             |
-| --------------------- | ---------- | ---------------- |
-| `VALIDATION_ERROR`    | 400        | 请求参数验证失败 |
-| `UNAUTHORIZED`        | 401        | 未授权访问       |
-| `FORBIDDEN`           | 403        | 权限不足         |
-| `NOT_FOUND`           | 404        | 资源不存在       |
-| `RATE_LIMIT_EXCEEDED` | 429        | 请求频率超限     |
-| `INTERNAL_ERROR`      | 500        | 服务器内部错误   |
-| `SERVICE_UNAVAILABLE` | 503        | 服务不可用       |
+| 错误码                   | HTTP状态码 | 描述             |
+| ------------------------ | ---------- | ---------------- |
+| `INVALID_INPUT`          | 400        | 请求参数错误     |
+| `VALIDATION_ERROR`       | 400        | 请求参数验证失败 |
+| `MISSING_REQUIRED_FIELD` | 400        | 缺少必填字段     |
+| `UNAUTHORIZED`           | 401        | 未授权访问       |
+| `FORBIDDEN`              | 403        | 权限不足         |
+| `NOT_FOUND`              | 404        | 资源不存在       |
+| `RESOURCE_NOT_FOUND`     | 404        | 资源未找到       |
+| `CONFLICT`               | 409        | 资源冲突         |
+| `RATE_LIMIT_EXCEEDED`    | 429        | 请求频率超限     |
+| `TOO_MANY_REQUESTS`      | 429        | 请求过多         |
+| `INTERNAL_SERVER_ERROR`  | 500        | 服务器内部错误   |
+| `SERVICE_UNAVAILABLE`    | 503        | 服务不可用       |
+| `TIMEOUT_ERROR`          | 504        | 请求超时         |
+| `EXTERNAL_SERVICE_ERROR` | 502        | 外部服务错误     |
 
 ## 限制和配额
 

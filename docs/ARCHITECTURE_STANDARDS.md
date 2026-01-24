@@ -37,6 +37,32 @@
 - **Services**: 封装业务逻辑和数据处理
 - **API**: 仅负责HTTP请求
 
+## 后端响应规范
+
+### 统一响应中间件
+
+- 使用 `backend/middleware/responseFormatter.ts` 导出的 `response` 中间件。
+- 控制器内统一使用 `res.success / res.created / res.error`。
+- 禁止自定义 `successResponse/createdResponse/_errorResponse` 等重复封装。
+
+### 推荐用法
+
+```ts
+// 成功响应
+return res.success(data, '操作成功');
+
+// 创建响应
+return res.created(data, '创建成功');
+
+// 错误响应（可传状态码）
+return res.error('INVALID_INPUT', '参数错误', details, 400);
+```
+
+### 约束
+
+- 所有控制器不得直接拼装“成功/失败”结构体。
+- 统一返回结构由 response 中间件负责。
+
 ## 前端架构规范
 
 ### 目录结构

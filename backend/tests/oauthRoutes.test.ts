@@ -15,13 +15,13 @@ jest.mock('../services/oauth/OAuthService', () => {
   return jest.fn().mockImplementation(() => mockService);
 });
 
-const { responseFormatter } = require('../middleware/responseFormatter');
+const { response } = require('../middleware/responseFormatter');
 const oauthRouter = require('../routes/oauth').default;
 
 const createApp = () => {
   const app = express();
   app.use(express.json());
-  app.use(responseFormatter);
+  app.use(response);
   app.use('/api/oauth', oauthRouter);
   return app;
 };
