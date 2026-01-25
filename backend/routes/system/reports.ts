@@ -7,15 +7,18 @@ import express from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
-import type { ReportType } from '../../../shared/types/testEngine.types';
+import {
+  DEFAULT_REPORT_TYPE,
+  REPORT_TYPES,
+  type ReportType,
+} from '../../../shared/types/testEngine.types';
 import { query } from '../../config/database';
 import asyncHandler from '../../middleware/asyncHandler';
+import { authMiddleware } from '../../middleware/auth';
 import type { ReportTemplate as ServiceReportTemplate } from '../../services/reporting/AutomatedReportingService';
+import AutomatedReportingService from '../../services/reporting/AutomatedReportingService';
 import Logger from '../../utils/logger';
-const { hasWorkspacePermission } = require('../../utils/workspacePermissions');
-const { authMiddleware } = require('../../middleware/auth');
-const AutomatedReportingService = require('../../services/reporting/AutomatedReportingService');
-const { REPORT_TYPES, DEFAULT_REPORT_TYPE } = require('../../../shared/types/testEngine.types');
+import { hasWorkspacePermission } from '../../utils/workspacePermissions';
 
 type AuthRequest = express.Request & {
   user: {

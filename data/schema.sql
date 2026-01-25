@@ -1278,7 +1278,12 @@ CREATE TRIGGER update_uploaded_files_updated_at
 -- 确保用户测试统计的数据逻辑正确
 DO $$
 BEGIN
-    IF to_regclass('public.user_test_stats') IS NOT NULL THEN
+    IF to_regclass('public.user_test_stats') IS NOT NULL
+       AND NOT EXISTS (
+           SELECT 1
+           FROM pg_constraint
+           WHERE conname = 'chk_user_stats_logic'
+       ) THEN
         ALTER TABLE user_test_stats
             ADD CONSTRAINT chk_user_stats_logic
             CHECK (successful_tests + failed_tests <= total_tests);
@@ -1286,14 +1291,34 @@ BEGIN
 END $$;
 
 -- 确保监控站点的检查间隔合理
-ALTER TABLE monitoring_sites
-    ADD CONSTRAINT chk_monitoring_interval
-    CHECK (check_interval >= 60 AND check_interval <= 86400); -- 1分钟到1天
+DO $$
+BEGIN
+    IF to_regclass('public.monitoring_sites') IS NOT NULL
+       AND NOT EXISTS (
+           SELECT 1
+           FROM pg_constraint
+           WHERE conname = 'chk_monitoring_interval'
+       ) THEN
+        ALTER TABLE monitoring_sites
+            ADD CONSTRAINT chk_monitoring_interval
+            CHECK (check_interval >= 60 AND check_interval <= 86400); -- 1分钟到1天
+    END IF;
+END $$;
 
 -- 确保文件大小合理
-ALTER TABLE uploaded_files
-    ADD CONSTRAINT chk_file_size
-    CHECK (size > 0 AND size <= 1073741824); -- 最大1GB
+DO $$
+BEGIN
+    IF to_regclass('public.uploaded_files') IS NOT NULL
+       AND NOT EXISTS (
+           SELECT 1
+           FROM pg_constraint
+           WHERE conname = 'chk_file_size'
+       ) THEN
+        ALTER TABLE uploaded_files
+            ADD CONSTRAINT chk_file_size
+            CHECK (size > 0 AND size <= 1073741824); -- 最大1GB
+    END IF;
+END $$;
 
 -- =====================================================
 -- 10. 视图创建 - 便于查询的视图
