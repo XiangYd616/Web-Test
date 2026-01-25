@@ -9,6 +9,7 @@
 -- 启用必要的扩展
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- =====================================================
 -- 0. 辅助函数
@@ -480,6 +481,24 @@ CREATE TABLE IF NOT EXISTS test_metrics (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 用户测试统计表（用于统一统计）
+CREATE TABLE IF NOT EXISTS user_test_stats (
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    test_type VARCHAR(50) NOT NULL,
+    total_tests INTEGER NOT NULL DEFAULT 0,
+    successful_tests INTEGER NOT NULL DEFAULT 0,
+    failed_tests INTEGER NOT NULL DEFAULT 0,
+    last_test_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE (user_id, test_type)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_test_stats_user_id ON user_test_stats(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_test_stats_test_type ON user_test_stats(test_type);
+CREATE INDEX IF NOT EXISTS idx_user_test_stats_updated_at ON user_test_stats(updated_at DESC);
+
 -- 测试对比记录表
 CREATE TABLE IF NOT EXISTS test_comparisons (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -526,45 +545,99 @@ CREATE TABLE IF NOT EXISTS stress_test_results (
 );
 
 -- =====================================================
--- 4. 索引创建
+-- 3. 系统配置与监控模块（运行时依赖）
 -- =====================================================
 
--- 用户表索引
-CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
-CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
-CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
-CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
-CREATE INDEX IF NOT EXISTS idx_users_login_attempts ON users(login_attempts);
+-- 系统配置表
+CREATE TABLE IF NOT EXISTS system_configs (
+    config_key VARCHAR(255) PRIMARY KEY,
+    config_value JSONB NOT NULL,
+    description TEXT,
+    category VARCHAR(100),
+    is_public BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
--- 密码与登录安全索引
-CREATE INDEX IF NOT EXISTS idx_password_history_user_id ON password_history(user_id);
-CREATE INDEX IF NOT EXISTS idx_password_history_created_at ON password_history(created_at);
-CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_token ON password_reset_tokens(token);
-CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires ON password_reset_tokens(expires_at);
-CREATE INDEX IF NOT EXISTS idx_login_attempts_user_id ON login_attempts(user_id);
-CREATE INDEX IF NOT EXISTS idx_login_attempts_ip ON login_attempts(ip_address);
-CREATE INDEX IF NOT EXISTS idx_login_attempts_created_at ON login_attempts(created_at);
+-- 监控站点表
+CREATE TABLE IF NOT EXISTS monitoring_sites (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
+    name VARCHAR(255) NOT NULL,
+    url TEXT NOT NULL,
+    monitoring_type VARCHAR(50) DEFAULT 'uptime',
+    check_interval INTEGER DEFAULT 300,
+    timeout INTEGER DEFAULT 30,
+    config JSONB DEFAULT '{}',
+    notification_settings JSONB DEFAULT '{}',
+    status VARCHAR(20) DEFAULT 'active',
+    last_check TIMESTAMP WITH TIME ZONE,
+    consecutive_failures INTEGER DEFAULT 0,
+    last_status VARCHAR(20),
+    last_checked_at TIMESTAMP WITH TIME ZONE,
+    last_response_time INTEGER,
+    is_active BOOLEAN DEFAULT true,
+    deleted_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
--- 测试执行表索引
-CREATE INDEX IF NOT EXISTS idx_test_executions_user_id ON test_executions(user_id);
-CREATE INDEX IF NOT EXISTS idx_test_executions_workspace_id ON test_executions(workspace_id);
-CREATE INDEX IF NOT EXISTS idx_test_executions_engine_type ON test_executions(engine_type);
-CREATE INDEX IF NOT EXISTS idx_test_executions_status ON test_executions(status);
-CREATE INDEX IF NOT EXISTS idx_test_executions_created_at ON test_executions(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_test_executions_test_id ON test_executions(test_id);
+-- 监控结果表
+CREATE TABLE IF NOT EXISTS monitoring_results (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    site_id UUID NOT NULL REFERENCES monitoring_sites(id) ON DELETE CASCADE,
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
+    status VARCHAR(20) NOT NULL,
+    response_time INTEGER,
+    status_code INTEGER,
+    results JSONB DEFAULT '{}',
+    error_message TEXT,
+    checked_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
--- 测试结果表索引
-CREATE INDEX IF NOT EXISTS idx_test_results_execution_id ON test_results(execution_id);
-CREATE INDEX IF NOT EXISTS idx_test_results_score ON test_results(score);
-CREATE INDEX IF NOT EXISTS idx_test_results_grade ON test_results(grade);
+-- 监控告警表
+CREATE TABLE IF NOT EXISTS monitoring_alerts (
+    id VARCHAR(255) PRIMARY KEY,
+    site_id UUID NOT NULL REFERENCES monitoring_sites(id) ON DELETE CASCADE,
+    workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL,
+    alert_type VARCHAR(50) NOT NULL,
+    severity VARCHAR(20) NOT NULL CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+    source VARCHAR(50) NOT NULL DEFAULT 'monitoring',
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'acknowledged', 'resolved')),
+    message TEXT,
+    details JSONB DEFAULT '{}',
+    acknowledged_at TIMESTAMP WITH TIME ZONE,
+    acknowledged_by UUID,
+    resolved_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
--- 测试指标表索引
-CREATE INDEX IF NOT EXISTS idx_test_metrics_result_id ON test_metrics(result_id);
-CREATE INDEX IF NOT EXISTS idx_test_metrics_name ON test_metrics(metric_name);
-CREATE INDEX IF NOT EXISTS idx_test_metrics_type ON test_metrics(metric_type);
-CREATE INDEX IF NOT EXISTS idx_test_metrics_severity ON test_metrics(severity);
+-- 系统指标表
+CREATE TABLE IF NOT EXISTS system_metrics (
+    id BIGSERIAL PRIMARY KEY,
+    metric_type VARCHAR(50) NOT NULL,
+    metric_name VARCHAR(100) NOT NULL,
+    value DOUBLE PRECISION NOT NULL,
+    unit VARCHAR(50),
+    source VARCHAR(50) DEFAULT 'system',
+    tags JSONB DEFAULT '{}',
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 系统统计表（供索引/报表使用）
+CREATE TABLE IF NOT EXISTS system_stats (
+    id BIGSERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    data JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- 4. 索引创建
+-- =====================================================
 
 -- 压力测试结果表索引
 CREATE INDEX IF NOT EXISTS idx_stress_test_results_test_id ON stress_test_results(test_id);
@@ -596,6 +669,12 @@ CREATE TRIGGER update_test_executions_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_user_test_stats_updated_at ON user_test_stats;
+CREATE TRIGGER update_user_test_stats_updated_at
+    BEFORE UPDATE ON user_test_stats
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
 DROP TRIGGER IF EXISTS update_stress_test_results_updated_at ON stress_test_results;
 CREATE TRIGGER update_stress_test_results_updated_at
     BEFORE UPDATE ON stress_test_results
@@ -614,23 +693,38 @@ CREATE TRIGGER update_monitoring_alerts_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_user_permissions_updated_at ON user_permissions;
-CREATE TRIGGER update_user_permissions_updated_at
-    BEFORE UPDATE ON user_permissions
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+DO $$
+BEGIN
+    IF to_regclass('public.user_permissions') IS NOT NULL THEN
+        DROP TRIGGER IF EXISTS update_user_permissions_updated_at ON user_permissions;
+        CREATE TRIGGER update_user_permissions_updated_at
+            BEFORE UPDATE ON user_permissions
+            FOR EACH ROW
+            EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+END $$;
 
-DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
-CREATE TRIGGER update_projects_updated_at
-    BEFORE UPDATE ON projects
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+DO $$
+BEGIN
+    IF to_regclass('public.projects') IS NOT NULL THEN
+        DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
+        CREATE TRIGGER update_projects_updated_at
+            BEFORE UPDATE ON projects
+            FOR EACH ROW
+            EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+END $$;
 
-DROP TRIGGER IF EXISTS update_project_members_updated_at ON project_members;
-CREATE TRIGGER update_project_members_updated_at
-    BEFORE UPDATE ON project_members
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+DO $$
+BEGIN
+    IF to_regclass('public.project_members') IS NOT NULL THEN
+        DROP TRIGGER IF EXISTS update_project_members_updated_at ON project_members;
+        CREATE TRIGGER update_project_members_updated_at
+            BEFORE UPDATE ON project_members
+            FOR EACH ROW
+            EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+END $$;
 
 DROP TRIGGER IF EXISTS update_workspaces_updated_at ON workspaces;
 CREATE TRIGGER update_workspaces_updated_at
@@ -1072,19 +1166,6 @@ CREATE TABLE IF NOT EXISTS engine_status (
 -- =====================================================
 
 -- 扩展功能表索引
-CREATE INDEX IF NOT EXISTS idx_test_templates_user_id ON test_templates(user_id);
-CREATE INDEX IF NOT EXISTS idx_test_templates_workspace_id ON test_templates(workspace_id);
-CREATE INDEX IF NOT EXISTS idx_test_templates_engine_type ON test_templates(engine_type);
-CREATE INDEX IF NOT EXISTS idx_test_templates_is_public ON test_templates(is_public);
-CREATE INDEX IF NOT EXISTS idx_test_templates_is_default ON test_templates(is_default);
-CREATE INDEX IF NOT EXISTS idx_test_templates_usage_count ON test_templates(usage_count);
-
-CREATE INDEX IF NOT EXISTS idx_test_reports_execution_id ON test_reports(execution_id);
-CREATE INDEX IF NOT EXISTS idx_test_reports_user_id ON test_reports(user_id);
-CREATE INDEX IF NOT EXISTS idx_test_reports_workspace_id ON test_reports(workspace_id);
-CREATE INDEX IF NOT EXISTS idx_test_reports_type ON test_reports(report_type);
-CREATE INDEX IF NOT EXISTS idx_test_reports_format ON test_reports(format);
-CREATE INDEX IF NOT EXISTS idx_test_reports_generated_at ON test_reports(generated_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_report_shares_report_id ON report_shares(report_id);
 CREATE INDEX IF NOT EXISTS idx_report_shares_shared_by ON report_shares(shared_by);
@@ -1195,28 +1276,24 @@ CREATE TRIGGER update_uploaded_files_updated_at
 -- =====================================================
 
 -- 确保用户测试统计的数据逻辑正确
-ALTER TABLE user_test_stats ADD CONSTRAINT chk_user_stats_logic
-CHECK (successful_tests + failed_tests <= total_tests);
+DO $$
+BEGIN
+    IF to_regclass('public.user_test_stats') IS NOT NULL THEN
+        ALTER TABLE user_test_stats
+            ADD CONSTRAINT chk_user_stats_logic
+            CHECK (successful_tests + failed_tests <= total_tests);
+    END IF;
+END $$;
 
 -- 确保监控站点的检查间隔合理
-ALTER TABLE monitoring_sites ADD CONSTRAINT chk_monitoring_interval
-CHECK (check_interval >= 60 AND check_interval <= 86400); -- 1分钟到1天
+ALTER TABLE monitoring_sites
+    ADD CONSTRAINT chk_monitoring_interval
+    CHECK (check_interval >= 60 AND check_interval <= 86400); -- 1分钟到1天
 
 -- 确保文件大小合理
-ALTER TABLE uploaded_files ADD CONSTRAINT chk_file_size
-CHECK (size > 0 AND size <= 1073741824); -- 最大1GB
-
--- monitoring 数据隔离字段
-ALTER TABLE monitoring_sites
-    ADD COLUMN IF NOT EXISTS workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL;
-ALTER TABLE monitoring_results
-    ADD COLUMN IF NOT EXISTS workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL;
-ALTER TABLE monitoring_alerts
-    ADD COLUMN IF NOT EXISTS workspace_id UUID REFERENCES workspaces(id) ON DELETE SET NULL;
-
-CREATE INDEX IF NOT EXISTS idx_monitoring_sites_workspace_id ON monitoring_sites(workspace_id);
-CREATE INDEX IF NOT EXISTS idx_monitoring_results_workspace_id ON monitoring_results(workspace_id);
-CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_workspace_id ON monitoring_alerts(workspace_id);
+ALTER TABLE uploaded_files
+    ADD CONSTRAINT chk_file_size
+    CHECK (size > 0 AND size <= 1073741824); -- 最大1GB
 
 -- =====================================================
 -- 10. 视图创建 - 便于查询的视图
@@ -1280,6 +1357,140 @@ INSERT INTO users (
     true,
     NOW()
 ) ON CONFLICT (username) DO NOTHING;
+
+-- 插入默认权限
+INSERT INTO permissions (id, name, description, resource, action, effect, conditions, metadata)
+VALUES
+  (gen_random_uuid(), 'user:read', '查看用户', 'user', 'read', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'user:write', '编辑用户', 'user', 'write', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'user:delete', '删除用户', 'user', 'delete', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'user:admin', '用户管理', 'user', 'admin', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'test:create', '创建测试', 'test', 'create', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'test:read', '查看测试', 'test', 'read', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'test:update', '编辑测试', 'test', 'update', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'test:delete', '删除测试', 'test', 'delete', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'test:execute', '执行测试', 'test', 'execute', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'test:admin', '测试管理', 'test', 'admin', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'monitoring:read', '查看监控', 'monitoring', 'read', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'monitoring:write', '配置监控', 'monitoring', 'write', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'monitoring:admin', '监控管理', 'monitoring', 'admin', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'system:config', '系统配置', 'system', 'config', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'system:logs', '系统日志', 'system', 'logs', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'system:admin', '系统管理', 'system', 'admin', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'data:export', '数据导出', 'data', 'export', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'data:import', '数据导入', 'data', 'import', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'data:backup', '数据备份', 'data', 'backup', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'data:admin', '数据管理', 'data', 'admin', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'report:read', '查看报告', 'report', 'read', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'report:create', '创建报告', 'report', 'create', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'report:admin', '报告管理', 'report', 'admin', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'integration:read', '查看集成', 'integration', 'read', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'integration:write', '配置集成', 'integration', 'write', 'allow', '[]', '{}'),
+  (gen_random_uuid(), 'integration:admin', '集成管理', 'integration', 'admin', 'allow', '[]', '{}')
+ON CONFLICT (name) DO NOTHING;
+
+-- 插入默认角色
+INSERT INTO roles (
+  id, name, description, type, level, is_active, is_system, metadata,
+  created_at, updated_at, created_by, updated_by
+) VALUES
+  (gen_random_uuid(), 'admin', '超级管理员', 'system', 10, true, true, '{}', NOW(), NOW(),
+   (SELECT id FROM users WHERE username = 'admin' LIMIT 1),
+   (SELECT id FROM users WHERE username = 'admin' LIMIT 1)),
+  (gen_random_uuid(), 'manager', '管理员', 'system', 7, true, true, '{}', NOW(), NOW(),
+   (SELECT id FROM users WHERE username = 'admin' LIMIT 1),
+   (SELECT id FROM users WHERE username = 'admin' LIMIT 1)),
+  (gen_random_uuid(), 'premium', '高级用户', 'system', 5, true, true, '{}', NOW(), NOW(),
+   (SELECT id FROM users WHERE username = 'admin' LIMIT 1),
+   (SELECT id FROM users WHERE username = 'admin' LIMIT 1)),
+  (gen_random_uuid(), 'user', '普通用户', 'system', 3, true, true, '{}', NOW(), NOW(),
+   (SELECT id FROM users WHERE username = 'admin' LIMIT 1),
+   (SELECT id FROM users WHERE username = 'admin' LIMIT 1)),
+  (gen_random_uuid(), 'viewer', '只读用户', 'system', 1, true, true, '{}', NOW(), NOW(),
+   (SELECT id FROM users WHERE username = 'admin' LIMIT 1),
+   (SELECT id FROM users WHERE username = 'admin' LIMIT 1))
+ON CONFLICT (name) DO NOTHING;
+
+-- 角色权限关联（admin 拥有全部权限）
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM roles r
+JOIN permissions p ON p.name IN (
+  'user:read','user:write','user:delete','user:admin',
+  'test:create','test:read','test:update','test:delete','test:execute','test:admin',
+  'monitoring:read','monitoring:write','monitoring:admin',
+  'system:config','system:logs','system:admin',
+  'data:export','data:import','data:backup','data:admin',
+  'report:read','report:create','report:admin',
+  'integration:read','integration:write','integration:admin'
+)
+WHERE r.name = 'admin'
+ON CONFLICT DO NOTHING;
+
+-- manager 权限
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM roles r
+JOIN permissions p ON p.name IN (
+  'user:read','user:write',
+  'test:create','test:read','test:update','test:delete','test:execute','test:admin',
+  'monitoring:read','monitoring:write','monitoring:admin',
+  'data:export','data:import','data:backup',
+  'report:read','report:create','report:admin',
+  'integration:read','integration:write'
+)
+WHERE r.name = 'manager'
+ON CONFLICT DO NOTHING;
+
+-- premium 权限
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM roles r
+JOIN permissions p ON p.name IN (
+  'user:read',
+  'test:create','test:read','test:update','test:delete','test:execute',
+  'monitoring:read',
+  'data:export',
+  'report:read','report:create',
+  'integration:read'
+)
+WHERE r.name = 'premium'
+ON CONFLICT DO NOTHING;
+
+-- user 权限
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM roles r
+JOIN permissions p ON p.name IN (
+  'user:read',
+  'test:create','test:read','test:update','test:execute',
+  'monitoring:read',
+  'data:export',
+  'report:read'
+)
+WHERE r.name = 'user'
+ON CONFLICT DO NOTHING;
+
+-- viewer 权限
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM roles r
+JOIN permissions p ON p.name IN (
+  'user:read',
+  'test:read',
+  'monitoring:read',
+  'report:read'
+)
+WHERE r.name = 'viewer'
+ON CONFLICT DO NOTHING;
+
+-- 为默认管理员用户分配 admin 角色
+INSERT INTO user_roles (id, user_id, role_id, assigned_by, assigned_at, is_active)
+SELECT gen_random_uuid(), u.id, r.id, u.id, NOW(), true
+FROM users u
+JOIN roles r ON r.name = 'admin'
+WHERE u.username = 'admin'
+ON CONFLICT (user_id, role_id) DO NOTHING;
 
 -- 插入测试模板数据
 INSERT INTO test_templates (

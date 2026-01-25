@@ -1,6 +1,4 @@
 const { calculateUXScore, scoreToGrade } = require('../shared/utils/uxScore');
-const { query } = require('../../config/database');
-const testResultRepository = require('../../repositories/testResultRepository');
 const Joi = require('joi');
 
 type UXConfig = {
@@ -201,13 +199,6 @@ class UXTestEngine {
         summary,
         recommendations,
       };
-
-      try {
-        await this.saveTestResults(testId, results);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.warn(`UX测试结果落库失败: ${message}`);
-      }
 
       this.activeTests.set(testId, { status: 'completed', progress: 100, results });
       this.updateTestProgress(testId, 100, 'UX测试完成');
@@ -434,119 +425,6 @@ class UXTestEngine {
     return recommendations;
   }
 
-  private async saveTestResults(testId: string, results: Record<string, unknown>) {
-    const executionResult = await query(
-      'SELECT id, user_id FROM test_executions WHERE test_id = $1',
-      [testId]
-    );
-    const execution = executionResult.rows?.[0];
-    if (!execution) {
-      return;
-    }
-
-    const existing = await query('SELECT id FROM test_results WHERE execution_id = $1 LIMIT 1', [
-      execution.id,
-    ]);
-    if (existing.rows?.length) {
-      return;
-    }
-
-    const summary =
-      (results as { summary?: Record<string, unknown> }).summary ||
-      (results as { results?: { summary?: Record<string, unknown> } }).results?.summary ||
-      results;
-    const score = (results as { score?: number }).score;
-    const grade = (results as { grade?: string }).grade;
-    const passed = typeof score === 'number' ? score >= 70 : undefined;
-    const warnings = (results as { warnings?: unknown[] }).warnings || [];
-    const errors = (results as { errors?: unknown[] }).errors || [];
-
-    const resultId = await testResultRepository.saveResult(
-      execution.id,
-      summary,
-      score,
-      grade,
-      passed,
-      warnings,
-      errors
-    );
-
-    const metrics = this.buildUxMetrics(resultId, results);
-    await testResultRepository.saveMetrics(metrics);
-
-    await this.updateUserUxStats(execution.user_id, passed);
-  }
-
-  private buildUxMetrics(resultId: number, results: Record<string, unknown>) {
-    const metrics = (results as { metrics?: Record<string, unknown> }).metrics || {};
-    const navigation = (metrics as { navigation?: { ttfb?: number } }).navigation || {};
-    const entries: Array<{
-      metricName: string;
-      metricValue: number | string;
-      metricUnit?: string;
-      metricType?: string;
-      thresholdMax?: number;
-      passed?: boolean;
-      severity?: string;
-    }> = [];
-
-    const pushMetric = (
-      name: string,
-      value: number | undefined,
-      threshold: number,
-      unit = 'ms'
-    ) => {
-      if (typeof value !== 'number' || !Number.isFinite(value)) return;
-      const passed = value <= threshold;
-      entries.push({
-        metricName: name,
-        metricValue: Math.round(value),
-        metricUnit: unit,
-        metricType: 'ux',
-        thresholdMax: threshold,
-        passed,
-        severity: passed ? 'low' : value > threshold * 1.5 ? 'high' : 'medium',
-      });
-    };
-
-    pushMetric('lcp', (metrics as { lcp?: number }).lcp, 2500);
-    pushMetric('fcp', (metrics as { fcp?: number }).fcp, 1800);
-    pushMetric('fid', (metrics as { fid?: number }).fid, 100);
-    pushMetric('cls', (metrics as { cls?: number }).cls, 0.1, '');
-    pushMetric('ttfb', (navigation as { ttfb?: number }).ttfb, 800);
-
-    return entries.map(item => ({
-      resultId,
-      metricName: item.metricName,
-      metricValue: item.metricValue,
-      metricUnit: item.metricUnit,
-      metricType: item.metricType,
-      thresholdMin: null,
-      thresholdMax: item.thresholdMax,
-      passed: item.passed,
-      severity: item.severity,
-    }));
-  }
-
-  private async updateUserUxStats(userId?: string, passed?: boolean) {
-    if (!userId) {
-      return;
-    }
-
-    const successCount = passed ? 1 : 0;
-    const failedCount = passed === false ? 1 : 0;
-
-    await query(
-      `INSERT INTO user_test_stats (user_id, test_type, total_tests, successful_tests, failed_tests)
-       VALUES ($1, 'ux', 1, $2, $3)
-       ON CONFLICT (user_id, test_type)
-       DO UPDATE SET
-         total_tests = user_test_stats.total_tests + 1,
-         successful_tests = user_test_stats.successful_tests + $2,
-         failed_tests = user_test_stats.failed_tests + $3`,
-      [userId, successCount, failedCount]
-    );
-  }
 
   async stopTest(testId: string) {
     if (!this.activeTests.has(testId)) {

@@ -18,6 +18,7 @@ type DatabaseConfig = {
   retryAttempts?: number;
   retryDelay?: number;
   healthCheckInterval?: number;
+  existingPool?: PgPool;
 };
 
 type PoolStats = {
@@ -34,16 +35,50 @@ class DatabaseConnectionManager extends EventEmitter {
   private retryCount: number;
   private maxRetries: number;
   private retryDelay: number;
+  private listenersAttached: boolean;
 
   constructor(config: DatabaseConfig) {
     super();
     this.config = config;
-    this.pool = null;
-    this.isConnected = false;
+    this.pool = config.existingPool ?? null;
+    this.isConnected = Boolean(this.pool);
     this.healthCheckInterval = null;
     this.retryCount = 0;
     this.maxRetries = config.retryAttempts || 5;
     this.retryDelay = config.retryDelay || 1000;
+    this.listenersAttached = false;
+
+    if (this.pool) {
+      this.attachPoolListeners(this.pool);
+    }
+  }
+
+  private attachPoolListeners(pool: PgPool) {
+    if (this.listenersAttached) {
+      return;
+    }
+    this.listenersAttached = true;
+
+    pool.on('error', (err: Error) => {
+      console.error('Unexpected error on idle client', err);
+      this.emit('connectionError', { error: err, timestamp: new Date().toISOString() });
+      this.isConnected = false;
+    });
+
+    pool.on('connect', (client: { query: (sql: string) => Promise<unknown> }) => {
+      this.isConnected = true;
+      client
+        .query(
+          `
+        SET search_path TO public;
+        SET timezone TO 'UTC';
+        SET statement_timeout TO '${this.config.statement_timeout || 30000}ms';
+      `
+        )
+        .catch(err => {
+          console.error('Failed to set session parameters:', err);
+        });
+    });
   }
 
   /**
@@ -75,29 +110,7 @@ class DatabaseConnectionManager extends EventEmitter {
 
     const pool = new Pool(this.config);
     this.pool = pool;
-
-    // Setup pool event listeners
-    pool.on('error', (err: Error) => {
-      console.error('Unexpected error on idle client', err);
-      this.emit('connectionError', { error: err, timestamp: new Date().toISOString() });
-      this.isConnected = false;
-    });
-
-    pool.on('connect', (client: { query: (sql: string) => Promise<unknown> }) => {
-      this.isConnected = true;
-      // Set session parameters
-      client
-        .query(
-          `
-        SET search_path TO public;
-        SET timezone TO 'UTC';
-        SET statement_timeout TO '${this.config.statement_timeout || 30000}ms';
-      `
-        )
-        .catch(err => {
-          console.error('Failed to set session parameters:', err);
-        });
-    });
+    this.attachPoolListeners(pool);
 
     // Test the connection
     const client = await pool.connect();

@@ -1358,6 +1358,32 @@ class TestController {
       return handleControllerError(res, error);
     }
   }
+
+  /**
+   * 预览测试模板
+   * POST /api/test/templates/:templateId/preview
+   */
+  async previewTemplate(req: AuthRequest, res: ApiResponse, _next: NextFunction) {
+    try {
+      const { templateId } = req.params as { templateId: string };
+      const payload = req.body as {
+        variables?: Record<string, unknown>;
+        workspaceId?: string;
+      };
+      if (payload.workspaceId) {
+        await ensureWorkspacePermission(payload.workspaceId, req.user.id, 'read');
+      }
+      const result = await testTemplateService.renderTemplatePreview(
+        req.user.id,
+        templateId,
+        payload.variables || {},
+        payload.workspaceId
+      );
+      return res.success(result);
+    } catch (error) {
+      return handleControllerError(res, error);
+    }
+  }
 }
 
 module.exports = new TestController();

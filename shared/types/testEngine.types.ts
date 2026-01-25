@@ -25,6 +25,12 @@ export enum TestEngineType {
   INFRASTRUCTURE = 'infrastructure',
 }
 
+// 报告类型 (与测试引擎保持单一来源)
+export const DEFAULT_REPORT_TYPE = 'comprehensive' as const;
+export const REPORT_TYPES = [...Object.values(TestEngineType), DEFAULT_REPORT_TYPE] as const;
+
+export type ReportType = (typeof REPORT_TYPES)[number];
+
 /**
  * 测试引擎层次
  */

@@ -4,11 +4,60 @@
  */
 
 import Logger from '@/utils/logger';
-import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Assessment,
+  CheckCircle,
+  Download,
+  Memory,
+  People,
+  Refresh,
+  Speed,
+  Timer,
+  TrendingDown,
+  TrendingFlat,
+  TrendingUp,
+  Warning,
+} from '@mui/icons-material';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  Chip,
+  CircularProgress,
+  FormControl,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Tooltip,
+  Typography,
+} from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { Grid } from '../ui/GridWrapper';
-import { Card, Typography, Box, Chip, LinearProgress, Alert, Tabs, Tab, Button, Select, MenuItem, FormControl, InputLabel, IconButton, Tooltip, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
-import {TrendingUp, TrendingDown, TrendingFlat, Refresh, Download, Warning, CheckCircle, Error as ErrorIcon, Speed, People, Assessment, Memory, Timer} from '@mui/icons-material';
-import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell} from 'recharts';
 
 import { useAppState } from '../../hooks/useAppState';
 import { formatBytes, formatDuration, formatNumber } from '../../utils/formatters';
@@ -99,10 +148,10 @@ const BusinessAnalyticsDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setError(null);
-      const response = await fetch('/api/analytics/dashboard', {
+      const response = await fetch('/api/system/analytics/dashboard', {
         headers: {
-          'Authorization': `Bearer ${state.user.session?.sessionId || ''}`
-        }
+          Authorization: `Bearer ${state.user.session?.sessionId || ''}`,
+        },
       });
 
       if (!response.ok) {
@@ -147,20 +196,28 @@ const BusinessAnalyticsDashboard: React.FC = () => {
   // 鑾峰彇鍋ュ悍鐘舵€侀鑹?
   const getHealthColor = (health: string) => {
     switch (health) {
-      case 'healthy': return '#4caf50';
-      case 'warning': return '#ff9800';
-      case 'critical': return '#f44336';
-      default: return '#9e9e9e';
+      case 'healthy':
+        return '#4caf50';
+      case 'warning':
+        return '#ff9800';
+      case 'critical':
+        return '#f44336';
+      default:
+        return '#9e9e9e';
     }
   };
 
   // 鑾峰彇鍛婅绾у埆棰滆壊
   const getAlertSeverity = (level: string) => {
     switch (level) {
-      case 'info': return 'info';
-      case 'warning': return 'warning';
-      case 'critical': return 'error';
-      default: return 'info';
+      case 'info':
+        return 'info';
+      case 'warning':
+        return 'warning';
+      case 'critical':
+        return 'error';
+      default:
+        return 'info';
     }
   };
 
@@ -175,24 +232,25 @@ const BusinessAnalyticsDashboard: React.FC = () => {
   const _formatChartData = (data: unknown[]) => {
     return data.map((item, index) => ({
       time: new Date((item as any).timestamp).toLocaleTimeString(),
-      ...item as any
+      ...(item as any),
     }));
   };
 
   // 鐢熸垚娴嬭瘯绫诲瀷鍥捐〃鏁版嵁
   const testTypeChartData = useMemo(() => {
     if (!dashboardData?.business?.business?.testTypes) return [];
-    
+
     const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#d084d0'];
-    
-    return Object.entries(dashboardData?.business.business?.testTypes).map(([type, count], index) => ({
-      name: type,
-      value: count,
-      color: colors[index % colors.length]
-    }));
 
+    return Object.entries(dashboardData?.business.business?.testTypes).map(
+      ([type, count], index) => ({
+        name: type,
+        value: count,
+        color: colors[index % colors.length],
+      })
+    );
 
-  /**
+    /**
 
 
    * if功能函数
@@ -220,8 +278,8 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 
   if (error) {
     return (
-      <Alert 
-        severity="error" 
+      <Alert
+        severity="error"
         sx={{ m: 2 }}
         action={
           <Button color="inherit" size="small" onClick={fetchDashboardData}>
@@ -249,14 +307,14 @@ const BusinessAnalyticsDashboard: React.FC = () => {
         <Typography variant="h4" component="h1">
           涓氬姟鍒嗘瀽浠〃鏉?
         </Typography>
-        
+
         <Box display="flex" alignItems="center" gap={2}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>鏃堕棿鑼冨洿</InputLabel>
             <Select
               value={timeRange}
               label="鏃堕棿鑼冨洿"
-              onChange={(e) => setTimeRange(e?.target.value)}
+              onChange={e => setTimeRange(e?.target.value)}
             >
               <MenuItem value="1h">1灏忔椂</MenuItem>
               <MenuItem value="6h">6灏忔椂</MenuItem>
@@ -285,12 +343,17 @@ const BusinessAnalyticsDashboard: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ p: 2, height: '100%' }}>
             <Box display="flex" alignItems="center" mb={1}>
-              <CheckCircle sx={{ color: getHealthColor(dashboardData?.summary.systemHealth), mr: 1 }} />
+              <CheckCircle
+                sx={{ color: getHealthColor(dashboardData?.summary.systemHealth), mr: 1 }}
+              />
               <Typography variant="subtitle2">绯荤粺鍋ュ悍</Typography>
             </Box>
             <Typography variant="h4" color={getHealthColor(dashboardData?.summary.systemHealth)}>
-              {dashboardData?.summary.systemHealth === 'healthy' ? '姝ｅ父' :
-               dashboardData?.summary.systemHealth === 'warning' ? '璀﹀憡' : '涓ラ噸'}
+              {dashboardData?.summary.systemHealth === 'healthy'
+                ? '姝ｅ父'
+                : dashboardData?.summary.systemHealth === 'warning'
+                  ? '璀﹀憡'
+                  : '涓ラ噸'}
             </Typography>
             <Typography variant="body2" color="textSecondary">
               杩愯鏃堕棿: {formatDuration(dashboardData?.system?.system?.uptime * 1000 || 0)}
@@ -304,9 +367,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
               <Assessment sx={{ color: '#2196f3', mr: 1 }} />
               <Typography variant="subtitle2">娴嬭瘯鎬绘暟</Typography>
             </Box>
-            <Typography variant="h4">
-              {formatNumber(dashboardData?.summary.totalTests)}
-            </Typography>
+            <Typography variant="h4">{formatNumber(dashboardData?.summary.totalTests)}</Typography>
             <Typography variant="body2" color="textSecondary">
               鎴愬姛鐜? {dashboardData?.summary.successRate.toFixed(1)}%
             </Typography>
@@ -319,9 +380,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
               <Timer sx={{ color: '#ff9800', mr: 1 }} />
               <Typography variant="subtitle2">鍝嶅簲鏃堕棿</Typography>
             </Box>
-            <Typography variant="h4">
-              {dashboardData?.summary.averageResponseTime}ms
-            </Typography>
+            <Typography variant="h4">{dashboardData?.summary.averageResponseTime}ms</Typography>
             <Typography variant="body2" color="textSecondary">
               骞冲潎鍝嶅簲鏃堕棿
             </Typography>
@@ -334,9 +393,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
               <People sx={{ color: '#4caf50', mr: 1 }} />
               <Typography variant="subtitle2">娲昏穬鐢ㄦ埛</Typography>
             </Box>
-            <Typography variant="h4">
-              {dashboardData?.summary.activeUsers}
-            </Typography>
+            <Typography variant="h4">{dashboardData?.summary.activeUsers}</Typography>
             <Typography variant="body2" color="textSecondary">
               褰撳墠鍦ㄧ嚎鐢ㄦ埛
             </Typography>
@@ -346,8 +403,8 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 
       {/* 鏍囩椤?*/}
       <Paper sx={{ width: '100%', mb: 3 }}>
-        <Tabs 
-          value={activeTab} 
+        <Tabs
+          value={activeTab}
           onChange={(e, newValue) => setActiveTab(newValue)}
           indicatorColor="primary"
           textColor="primary"
@@ -375,14 +432,14 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                     {dashboardData?.system?.system?.memoryPercent.toFixed(1)}%
                   </Typography>
                 </Box>
-                <LinearProgress 
-                  variant="determinate" 
+                <LinearProgress
+                  variant="determinate"
                   value={dashboardData?.system?.system?.memoryPercent || 0}
                   sx={{ height: 8, borderRadius: 4 }}
                 />
               </Box>
               <Typography variant="body2" color="textSecondary">
-                {formatBytes(dashboardData?.system?.system?.memory?.rss || 0)} / 
+                {formatBytes(dashboardData?.system?.system?.memory?.rss || 0)} /
                 {formatBytes(dashboardData?.system?.system?.totalMemory || 0)}
               </Typography>
             </Card>
@@ -401,15 +458,16 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                     {dashboardData?.system?.system?.cpuPercent?.toFixed(1) || 0}%
                   </Typography>
                 </Box>
-                <LinearProgress 
-                  variant="determinate" 
+                <LinearProgress
+                  variant="determinate"
                   value={dashboardData?.system?.system?.cpuPercent || 0}
                   color={dashboardData?.system?.system?.cpuPercent > 80 ? 'error' : 'primary'}
                   sx={{ height: 8, borderRadius: 4 }}
                 />
               </Box>
               <Typography variant="body2" color="textSecondary">
-                璐熻浇骞冲潎鍊? {dashboardData?.system?.system?.loadAverage?.[0]?.toFixed(2) || 'N/A'}
+                璐熻浇骞冲潎鍊?{' '}
+                {dashboardData?.system?.system?.loadAverage?.[0]?.toFixed(2) || 'N/A'}
               </Typography>
             </Card>
           </Grid>
@@ -421,7 +479,9 @@ const BusinessAnalyticsDashboard: React.FC = () => {
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>娴嬭瘯鎵ц瓒嬪娍</Typography>
+              <Typography variant="h6" mb={2}>
+                娴嬭瘯鎵ц瓒嬪娍
+              </Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={[]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -438,7 +498,9 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 
           <Grid item xs={12} md={4}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>娴嬭瘯绫诲瀷鍒嗗竷</Typography>
+              <Typography variant="h6" mb={2}>
+                娴嬭瘯绫诲瀷鍒嗗竷
+              </Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -463,7 +525,9 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 
           <Grid item xs={12}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>鍏抽敭涓氬姟鎸囨爣</Typography>
+              <Typography variant="h6" mb={2}>
+                鍏抽敭涓氬姟鎸囨爣
+              </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={3}>
                   <Box textAlign="center">
@@ -516,7 +580,9 @@ const BusinessAnalyticsDashboard: React.FC = () => {
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>鐢ㄦ埛娲诲姩缁熻</Typography>
+              <Typography variant="h6" mb={2}>
+                鐢ㄦ埛娲诲姩缁熻
+              </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <Box textAlign="center">
@@ -544,12 +610,16 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>浼氳瘽缁熻</Typography>
+              <Typography variant="h6" mb={2}>
+                浼氳瘽缁熻
+              </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <Box textAlign="center">
                     <Typography variant="h3" color="info.main">
-                      {formatDuration(dashboardData?.user?.users?.userSessions?.averageSessionDuration * 1000 || 0)}
+                      {formatDuration(
+                        dashboardData?.user?.users?.userSessions?.averageSessionDuration * 1000 || 0
+                      )}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       骞冲潎浼氳瘽鏃堕暱
@@ -559,7 +629,9 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Grid item xs={6}>
                   <Box textAlign="center">
                     <Typography variant="h3" color="warning.main">
-                      {(dashboardData?.user?.users?.userSessions?.bounceRate * 100)?.toFixed(1) || 0}%
+                      {(dashboardData?.user?.users?.userSessions?.bounceRate * 100)?.toFixed(1) ||
+                        0}
+                      %
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       璺冲嚭鐜?
@@ -572,7 +644,9 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 
           <Grid item xs={12}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>鐑棬鐢ㄦ埛鎿嶄綔</Typography>
+              <Typography variant="h6" mb={2}>
+                鐑棬鐢ㄦ埛鎿嶄綔
+              </Typography>
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -584,9 +658,13 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                   </TableHead>
                   <TableBody>
                     {dashboardData?.user?.users?.topUserActions?.map((action, index) => {
-                      const total = dashboardData?.user?.users?.topUserActions?.reduce((sum, a) => sum + a?.count, 0) || 1;
-                      const percentage = (action?.count / total * 100).toFixed(1);
-                      
+                      const total =
+                        dashboardData?.user?.users?.topUserActions?.reduce(
+                          (sum, a) => sum + a?.count,
+                          0
+                        ) || 1;
+                      const percentage = ((action?.count / total) * 100).toFixed(1);
+
                       return (
                         <TableRow key={index}>
                           <TableCell>{action?.action}</TableCell>
@@ -612,10 +690,10 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Warning sx={{ mr: 1, verticalAlign: 'middle' }} />
                 鏈€鏂板憡璀?({dashboardData?.alerts?.length || 0})
               </Typography>
-              
+
               {dashboardData?.alerts && dashboardData?.alerts.length > 0 ? (
                 <Box>
-                  {dashboardData?.alerts.slice(0, 10).map((alert) => (
+                  {dashboardData?.alerts.slice(0, 10).map(alert => (
                     <Alert
                       key={alert.id}
                       severity={getAlertSeverity(alert.level) as any}
@@ -638,9 +716,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                   ))}
                 </Box>
               ) : (
-                <Alert severity="success">
-                  鏆傛棤鍛婅锛岀郴缁熻繍琛屾甯?
-                </Alert>
+                <Alert severity="success">鏆傛棤鍛婅锛岀郴缁熻繍琛屾甯?</Alert>
               )}
             </Card>
           </Grid>
@@ -650,9 +726,8 @@ const BusinessAnalyticsDashboard: React.FC = () => {
       {/* 搴曢儴鐘舵€佹爮 */}
       <Box mt={4} pt={2} borderTop="1px solid" borderColor="divider">
         <Typography variant="body2" color="textSecondary" align="center">
-          鏈€鍚庢洿鏂? {new Date(dashboardData?.summary.lastUpdated).toLocaleString()} |
-          自动刷新: {autoRefresh ? '开启' : '关闭'} |
-          鏁版嵁鏉ユ簮: BusinessAnalyticsService
+          鏈€鍚庢洿鏂? {new Date(dashboardData?.summary.lastUpdated).toLocaleString()} | 自动刷新:{' '}
+          {autoRefresh ? '开启' : '关闭'} | 鏁版嵁鏉ユ簮: BusinessAnalyticsService
         </Typography>
       </Box>
     </Box>
@@ -660,4 +735,3 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 };
 
 export default BusinessAnalyticsDashboard;
-

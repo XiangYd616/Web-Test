@@ -44,6 +44,7 @@ const CollaborationService = require('./services/collaboration/CollaborationServ
 const registerTestEngines = require('./engines/core/registerEngines');
 const testEngineRegistry = require('./core/TestEngineRegistry');
 const { startWorker } = require('./services/testing/TestQueueService');
+const { setupSwaggerDocs } = require('./config/swagger');
 
 // 导入中间件
 const { response } = require('./middleware/responseFormatter');
@@ -131,6 +132,9 @@ app.use(apiStats);
 app.use(response);
 // 响应类型对齐
 app.use(typeAlignmentMiddleware);
+
+// Swagger 文档
+setupSwaggerDocs(app);
 
 // 健康检查端点
 app.get('/health', (_req: Request, res: Response) => {

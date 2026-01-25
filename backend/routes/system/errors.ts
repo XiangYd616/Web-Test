@@ -40,6 +40,73 @@ interface ErrorReport {
   column?: number;
 }
 
+const formatBucketKey = (date: Date, interval: 'hour' | 'day') => {
+  const iso = date.toISOString();
+  if (interval === 'hour') {
+    return `${iso.slice(0, 13)}:00:00Z`;
+  }
+  return iso.slice(0, 10);
+};
+
+const resolveGroupKey = (error: ErrorReport, groupBy: string) => {
+  switch (groupBy) {
+    case 'severity':
+      return error.severity || 'unknown';
+    case 'source':
+      return error.source || error.context?.url || 'unknown';
+    case 'module':
+      return (
+        (error.details?.module as string | undefined) ||
+        (error.context?.url as string | undefined) ||
+        'unknown'
+      );
+    case 'type':
+    default:
+      return error.type || 'unknown';
+  }
+};
+
+const router = express.Router();
+
+type ErrorRecord = {
+  id: string;
+  data: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+};
+
+const isAdminRole = (role?: string) =>
+  ['admin', 'moderator', 'enterprise'].includes(String(role || '').toLowerCase());
+
+const ensureAuthenticatedUser = (
+  req: express.Request,
+  res: express.Response
+): { id: string; role?: string } | null => {
+  const user = (req as { user?: { id?: string; role?: string } }).user;
+  if (!user?.id) {
+    res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
+    return null;
+  }
+  return { id: user.id, role: user.role };
+};
+
+const filterRecordsByRole = (
+  records: ErrorRecord[],
+  userId: string,
+  role?: string
+): ErrorRecord[] => {
+  if (isAdminRole(role)) {
+    return records;
+  }
+  return records.filter(record => {
+    const metadataUser = record.metadata?.userId ? String(record.metadata.userId) : undefined;
+    if (metadataUser && metadataUser === userId) {
+      return true;
+    }
+    const errorReport = record.data as Partial<ErrorReport>;
+    return errorReport.context?.userId === userId;
+  });
+};
+
 interface ErrorQuery {
   page?: number;
   limit?: number;
@@ -71,14 +138,12 @@ interface ErrorStatistics {
   }>;
 }
 
-const router = express.Router();
-
 // 初始化错误监控管理器
 errorMonitoringSystem.initialize().catch(console.error);
 
 const ERROR_REPORTS_TYPE = 'system_error_reports';
 
-dataManagementService.initialize().catch(error => {
+dataManagementService.initialize().catch((error: unknown) => {
   console.error('错误数据服务初始化失败:', error);
 });
 
@@ -140,6 +205,156 @@ const applyTimeRangeFilter = (errors: ErrorReport[], timeRange?: ErrorQuery['tim
 };
 
 /**
+ * GET /api/system/errors/trends
+ * 获取错误趋势
+ */
+router.get(
+  '/trends',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const {
+      timeRange = '7d',
+      groupBy,
+      workspaceId: workspaceIdInput,
+    } = req.query as {
+      timeRange?: ErrorQuery['timeRange'];
+      groupBy?: string;
+      workspaceId?: string;
+    };
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
+
+    try {
+      const requester = ensureAuthenticatedUser(req, res);
+      if (!requester) {
+        return res;
+      }
+      if (workspaceIdInput) {
+        await ensureWorkspacePermission(workspaceId, requester.id, 'read');
+      }
+
+      const { results } = await dataManagementService.queryData(
+        ERROR_REPORTS_TYPE,
+        { workspaceId, userId: isAdminRole(requester.role) ? undefined : requester.id },
+        {}
+      );
+      const scopedRecords = filterRecordsByRole(
+        results as ErrorRecord[],
+        requester.id,
+        requester.role
+      );
+      const filteredErrors = applyTimeRangeFilter(
+        scopedRecords.map(record => mapErrorRecord(record)),
+        timeRange
+      );
+
+      const interval: 'hour' | 'day' = timeRange === '1h' || timeRange === '24h' ? 'hour' : 'day';
+      const bucketMap = new Map<string, number>();
+      const groupedMap = new Map<string, Map<string, number>>();
+
+      filteredErrors.forEach(error => {
+        const bucketKey = formatBucketKey(new Date(error.timestamp), interval);
+        bucketMap.set(bucketKey, (bucketMap.get(bucketKey) || 0) + 1);
+
+        if (groupBy) {
+          const groupKey = resolveGroupKey(error, groupBy);
+          if (!groupedMap.has(groupKey)) {
+            groupedMap.set(groupKey, new Map());
+          }
+          const groupBucket = groupedMap.get(groupKey) as Map<string, number>;
+          groupBucket.set(bucketKey, (groupBucket.get(bucketKey) || 0) + 1);
+        }
+      });
+
+      const series = Array.from(bucketMap.entries())
+        .map(([timestamp, count]) => ({ timestamp, count }))
+        .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+
+      const grouped = Array.from(groupedMap.entries()).reduce<Record<string, unknown[]>>(
+        (acc, [key, buckets]) => {
+          acc[key] = Array.from(buckets.entries())
+            .map(([timestamp, count]) => ({ timestamp, count }))
+            .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+          return acc;
+        },
+        {}
+      );
+
+      return res.success({ timeRange, interval, series, grouped });
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取错误趋势失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
+    }
+  })
+);
+
+/**
+ * GET /api/system/errors/groups
+ * 获取错误分组统计
+ */
+router.get(
+  '/groups',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const {
+      timeRange = '7d',
+      groupBy = 'type',
+      workspaceId: workspaceIdInput,
+    } = req.query as {
+      timeRange?: ErrorQuery['timeRange'];
+      groupBy?: string;
+      workspaceId?: string;
+    };
+    const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
+
+    try {
+      const requester = ensureAuthenticatedUser(req, res);
+      if (!requester) {
+        return res;
+      }
+      if (workspaceIdInput) {
+        await ensureWorkspacePermission(workspaceId, requester.id, 'read');
+      }
+
+      const { results } = await dataManagementService.queryData(
+        ERROR_REPORTS_TYPE,
+        { workspaceId, userId: isAdminRole(requester.role) ? undefined : requester.id },
+        {}
+      );
+      const scopedRecords = filterRecordsByRole(
+        results as ErrorRecord[],
+        requester.id,
+        requester.role
+      );
+      const filteredErrors = applyTimeRangeFilter(
+        scopedRecords.map(record => mapErrorRecord(record)),
+        timeRange
+      );
+
+      const groupCounts = filteredErrors.reduce<Record<string, number>>((acc, error) => {
+        const key = resolveGroupKey(error, groupBy);
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+
+      const items = Object.entries(groupCounts)
+        .map(([key, count]) => ({ key, count }))
+        .sort((a, b) => b.count - a.count);
+
+      return res.success({ groupBy, timeRange, items });
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取错误分组统计失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
+    }
+  })
+);
+
+/**
  * POST /api/system/errors/report
  * 前端错误报告
  */
@@ -150,6 +365,7 @@ router.post(
       const errorReport: ErrorReport = req.body;
       const workspaceIdInput = (req.body as { workspaceId?: string }).workspaceId;
       const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
+      const reporter = (req as { user?: { id?: string } }).user?.id;
       if (workspaceIdInput) {
         const userId = (req as { user?: { id?: string } }).user?.id;
         if (!userId) {
@@ -168,6 +384,7 @@ router.post(
         { ...errorReport, id: undefined },
         {
           source: 'error-report',
+          userId: reporter,
           workspaceId,
         }
       );
@@ -219,12 +436,12 @@ router.get(
     const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
+      const requester = ensureAuthenticatedUser(req, res);
+      if (!requester) {
+        return res;
+      }
       if (workspaceIdInput) {
-        const userId = (req as { user?: { id?: string } }).user?.id;
-        if (!userId) {
-          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
-        }
-        await ensureWorkspacePermission(workspaceId, userId, 'read');
+        await ensureWorkspacePermission(workspaceId, requester.id, 'read');
       }
       const { results } = await dataManagementService.queryData(
         ERROR_REPORTS_TYPE,
@@ -236,11 +453,16 @@ router.get(
           search: query.search,
           sort: { field: 'timestamp', direction: 'desc' },
           workspaceId,
+          userId: isAdminRole(requester.role) ? undefined : requester.id,
         },
         {}
       );
-
-      const rawErrors = results.map(record => mapErrorRecord(record));
+      const scopedRecords = filterRecordsByRole(
+        results as ErrorRecord[],
+        requester.id,
+        requester.role
+      );
+      const rawErrors = scopedRecords.map(record => mapErrorRecord(record));
       const filteredErrors = applyTimeRangeFilter(rawErrors, query.timeRange);
       filteredErrors.sort(
         (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -284,19 +506,21 @@ router.get(
     const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
-      if (workspaceIdInput) {
-        const userId = (req as { user?: { id?: string } }).user?.id;
-        if (!userId) {
-          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
-        }
-        await ensureWorkspacePermission(workspaceId, userId, 'read');
+      const requester = ensureAuthenticatedUser(req, res);
+      if (!requester) {
+        return res;
       }
-      const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, id, {
+      if (workspaceIdInput) {
+        await ensureWorkspacePermission(workspaceId, requester.id, 'read');
+      }
+      const errorRecord = (await dataManagementService.readData(ERROR_REPORTS_TYPE, id, {
         workspaceId,
-      });
-      const errorReport = mapErrorRecord(
-        errorRecord as { id: string; data: Record<string, unknown> }
-      );
+      })) as ErrorRecord;
+      const recordList = filterRecordsByRole([errorRecord], requester.id, requester.role);
+      if (recordList.length === 0) {
+        return res.error(StandardErrorCode.FORBIDDEN, '无权限查看该错误报告', undefined, 403);
+      }
+      const errorReport = mapErrorRecord(errorRecord);
 
       return res.success(errorReport);
     } catch (error) {
@@ -324,21 +548,26 @@ router.get(
     const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
 
     try {
+      const requester = ensureAuthenticatedUser(req, res);
+      if (!requester) {
+        return res;
+      }
       if (workspaceIdInput) {
-        const userId = (req as { user?: { id?: string } }).user?.id;
-        if (!userId) {
-          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
-        }
-        await ensureWorkspacePermission(workspaceId, userId, 'read');
+        await ensureWorkspacePermission(workspaceId, requester.id, 'read');
       }
       const { results } = await dataManagementService.queryData(
         ERROR_REPORTS_TYPE,
-        { workspaceId },
+        { workspaceId, userId: isAdminRole(requester.role) ? undefined : requester.id },
         {}
+      );
+      const scopedRecords = filterRecordsByRole(
+        results as ErrorRecord[],
+        requester.id,
+        requester.role
       );
       const now = new Date();
       const recentErrors = applyTimeRangeFilter(
-        results.map(record => mapErrorRecord(record)),
+        scopedRecords.map(record => mapErrorRecord(record)),
         timeRange as ErrorQuery['timeRange']
       );
 
@@ -602,19 +831,24 @@ router.get(
     const { workspaceId: workspaceIdInput } = req.query as { workspaceId?: string };
     const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
     try {
+      const requester = ensureAuthenticatedUser(req, res);
+      if (!requester) {
+        return res;
+      }
       if (workspaceIdInput) {
-        const userId = (req as { user?: { id?: string } }).user?.id;
-        if (!userId) {
-          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
-        }
-        await ensureWorkspacePermission(workspaceId, userId, 'read');
+        await ensureWorkspacePermission(workspaceId, requester.id, 'read');
       }
       const { results } = await dataManagementService.queryData(
         ERROR_REPORTS_TYPE,
-        { workspaceId },
+        { workspaceId, userId: isAdminRole(requester.role) ? undefined : requester.id },
         {}
       );
-      const types = Array.from(new Set(results.map(record => mapErrorRecord(record).type)));
+      const scopedRecords = filterRecordsByRole(
+        results as ErrorRecord[],
+        requester.id,
+        requester.role
+      );
+      const types = Array.from(new Set(scopedRecords.map(record => mapErrorRecord(record).type)));
 
       return res.success(types);
     } catch (error) {
@@ -638,23 +872,28 @@ router.get(
     const { workspaceId: workspaceIdInput } = req.query as { workspaceId?: string };
     const workspaceId = workspaceIdInput ? String(workspaceIdInput) : 'system';
     try {
+      const requester = ensureAuthenticatedUser(req, res);
+      if (!requester) {
+        return res;
+      }
       if (workspaceIdInput) {
-        const userId = (req as { user?: { id?: string } }).user?.id;
-        if (!userId) {
-          return res.error(StandardErrorCode.UNAUTHORIZED, '用户未认证', undefined, 401);
-        }
-        await ensureWorkspacePermission(workspaceId, userId, 'read');
+        await ensureWorkspacePermission(workspaceId, requester.id, 'read');
       }
       const health = errorMonitoringSystem.getStatus();
       const { total } = await dataManagementService.queryData(
         ERROR_REPORTS_TYPE,
-        { workspaceId },
+        { workspaceId, userId: isAdminRole(requester.role) ? undefined : requester.id },
         {}
       );
       const { results } = await dataManagementService.queryData(
         ERROR_REPORTS_TYPE,
-        { workspaceId },
+        { workspaceId, userId: isAdminRole(requester.role) ? undefined : requester.id },
         {}
+      );
+      const scopedRecords = filterRecordsByRole(
+        results as ErrorRecord[],
+        requester.id,
+        requester.role
       );
       const lastRecord = results
         .map(record => mapErrorRecord(record))
@@ -663,7 +902,7 @@ router.get(
 
       return res.success({
         status: 'healthy',
-        errorReports: total,
+        errorReports: scopedRecords.length || total,
         lastReport: lastRecord?.timestamp ?? null,
         ...health,
       });

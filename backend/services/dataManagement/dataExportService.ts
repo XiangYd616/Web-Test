@@ -47,6 +47,7 @@ export interface ExportJobStatus {
   completedAt?: Date;
   error?: string;
   filePath?: string;
+  progress?: ExportTask['progress'];
 }
 
 // 导出任务接口
@@ -274,6 +275,7 @@ class DataExportService extends EventEmitter {
         completedAt: task.completedAt,
         error: task.error,
         filePath: task.result?.filePath,
+        progress: task.progress,
       };
     }
 
@@ -466,6 +468,27 @@ class DataExportService extends EventEmitter {
   }
 
   /**
+   * 更新导出模板
+   */
+  async updateTemplate(
+    id: string,
+    updates: Partial<ExportTemplate>
+  ): Promise<ExportTemplate | null> {
+    const existing = this.templates.get(id);
+    if (!existing) {
+      return null;
+    }
+    const updated: ExportTemplate = {
+      ...existing,
+      ...updates,
+      id,
+    };
+    this.templates.set(id, updated);
+    this.logger.info('Export template updated', { id });
+    return updated;
+  }
+
+  /**
    * 获取模板
    */
   async getTemplate(id: string): Promise<ExportTemplate | null> {
@@ -480,10 +503,37 @@ class DataExportService extends EventEmitter {
   }
 
   /**
+   * 应用导出模板生成任务配置
+   */
+  async applyTemplate(
+    id: string,
+    overrides: Partial<ExportConfig & { fields?: ExportField[] }> = {}
+  ): Promise<{ template: ExportTemplate; config: ExportConfig }> {
+    const template = this.templates.get(id);
+    if (!template) {
+      throw new Error('导出模板不存在');
+    }
+    const config: ExportConfig = {
+      format: (overrides.format || template.format) as ExportConfig['format'],
+      filters: overrides.filters,
+      options: {
+        ...(template.options || {}),
+        ...(overrides.options || {}),
+        ...(template.filters ? { templateFilters: template.filters } : {}),
+      },
+    };
+    return { template, config };
+  }
+
+  /**
    * 删除模板
    */
   async deleteTemplate(id: string): Promise<boolean> {
     return this.templates.delete(id);
+  }
+
+  getTask(taskId: string): ExportTask | null {
+    return this.tasks.get(taskId) || null;
   }
 
   /**

@@ -7,6 +7,7 @@ import express from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
+import type { ReportType } from '../../../shared/types/testEngine.types';
 import { query } from '../../config/database';
 import asyncHandler from '../../middleware/asyncHandler';
 import type { ReportTemplate as ServiceReportTemplate } from '../../services/reporting/AutomatedReportingService';
@@ -14,6 +15,7 @@ import Logger from '../../utils/logger';
 const { hasWorkspacePermission } = require('../../utils/workspacePermissions');
 const { authMiddleware } = require('../../middleware/auth');
 const AutomatedReportingService = require('../../services/reporting/AutomatedReportingService');
+const { REPORT_TYPES, DEFAULT_REPORT_TYPE } = require('../../../shared/types/testEngine.types');
 
 type AuthRequest = express.Request & {
   user: {
@@ -30,15 +32,6 @@ type ApiResponse = express.Response & {
     statusCode?: number
   ) => express.Response;
 };
-
-enum ReportType {
-  PERFORMANCE = 'performance',
-  SECURITY = 'security',
-  SEO = 'seo',
-  COMPREHENSIVE = 'comprehensive',
-  STRESS_TEST = 'stress_test',
-  API_TEST = 'api_test',
-}
 
 enum ReportFormat {
   PDF = 'pdf',
@@ -191,6 +184,57 @@ const validateShareAccess = (
   return { allowed: true, message: '' };
 };
 
+const resolveTemplateValue = (key: string, variables: Record<string, unknown>) => {
+  if (!key) return undefined;
+  if (!key.includes('.')) {
+    return variables[key];
+  }
+  return key.split('.').reduce<unknown>((acc, part) => {
+    if (acc && typeof acc === 'object' && part in (acc as Record<string, unknown>)) {
+      return (acc as Record<string, unknown>)[part];
+    }
+    return undefined;
+  }, variables);
+};
+
+const renderTemplate = (template: string, variables: Record<string, unknown>) => {
+  return template.replace(/\{\{\s*([\w.-]+)\s*\}\}/g, (_match, key: string) => {
+    const value = resolveTemplateValue(key, variables);
+    return value === undefined || value === null ? '' : String(value);
+  });
+};
+
+const insertTemplateVersion = async (
+  templateId: string,
+  template: Record<string, unknown>,
+  action: string,
+  userId: string | null
+) => {
+  const versionResult = await query(
+    `SELECT COALESCE(MAX(version), 0) + 1 AS next_version
+     FROM data_record_versions
+     WHERE record_id = $1 AND type = $2`,
+    [templateId, 'report_template']
+  );
+  const version = Number(versionResult.rows[0]?.next_version || 1);
+  await query(
+    `INSERT INTO data_record_versions
+     (record_id, type, workspace_id, data, metadata, version, action, created_by)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+    [
+      templateId,
+      'report_template',
+      null,
+      JSON.stringify(template),
+      JSON.stringify({ action }),
+      version,
+      action,
+      userId,
+    ]
+  );
+  return version;
+};
+
 /**
  * GET /api/system/reports
  * 获取报告列表
@@ -269,14 +313,13 @@ router.get(
         .map(row => mapReportRow(row, userId, status as string | undefined))
         .filter(report => report !== null);
 
-      const summaryByType: Record<ReportType, number> = {
-        [ReportType.PERFORMANCE]: 0,
-        [ReportType.SECURITY]: 0,
-        [ReportType.SEO]: 0,
-        [ReportType.COMPREHENSIVE]: 0,
-        [ReportType.STRESS_TEST]: 0,
-        [ReportType.API_TEST]: 0,
-      };
+      const byType = (REPORT_TYPES as ReportType[]).reduce<Record<string, number>>(
+        (acc: Record<string, number>, typeValue: ReportType) => {
+          acc[typeValue] = 0;
+          return acc;
+        },
+        {}
+      );
       const summaryByFormat: Record<ReportFormat, number> = {
         [ReportFormat.PDF]: 0,
         [ReportFormat.HTML]: 0,
@@ -287,7 +330,7 @@ router.get(
       const summaryByStatus: Record<string, number> = {};
 
       mappedReports.forEach(report => {
-        summaryByType[report.type] = (summaryByType[report.type] || 0) + 1;
+        byType[report.type] = (byType[report.type] || 0) + 1;
         summaryByFormat[report.format] = (summaryByFormat[report.format] || 0) + 1;
         summaryByStatus[report.status] = (summaryByStatus[report.status] || 0) + 1;
       });
@@ -302,7 +345,7 @@ router.get(
         },
         summary: {
           total: Number(countResult.rows[0]?.total) || 0,
-          byType: summaryByType,
+          byType,
           byFormat: summaryByFormat,
           byStatus: summaryByStatus,
         },
@@ -311,6 +354,133 @@ router.get(
       return res.error(
         StandardErrorCode.INTERNAL_SERVER_ERROR,
         '获取报告列表失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
+    }
+  })
+);
+
+/**
+ * PUT /api/system/reports/templates/:templateId
+ * 更新报告模板
+ */
+router.put(
+  '/templates/:templateId',
+  authMiddleware,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const userId = (req as AuthRequest).user.id;
+    const { templateId } = req.params as { templateId: string };
+    const { name, description, template, variables } = req.body;
+
+    try {
+      await ensureReportingInitialized();
+      const existing = await automatedReportingService.getTemplate(templateId);
+      if (!existing) {
+        return res.error(StandardErrorCode.NOT_FOUND, '报告模板不存在', undefined, 404);
+      }
+
+      const updated = await automatedReportingService.updateTemplate(templateId, {
+        name: name ?? existing.name,
+        description: description ?? existing.description,
+        template: template ?? existing.template,
+        variables: variables ?? existing.variables,
+      });
+
+      await insertTemplateVersion(templateId, updated as Record<string, unknown>, 'update', userId);
+
+      return res.success(
+        {
+          id: updated.id,
+          name: updated.name,
+          type: mapReportCategory(updated.category),
+          description: updated.description,
+          template: updated.template,
+          variables: updated.variables,
+          createdAt: updated.createdAt,
+          updatedAt: updated.updatedAt,
+          createdBy: userId,
+        },
+        '报告模板更新成功'
+      );
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '更新报告模板失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
+    }
+  })
+);
+
+/**
+ * GET /api/system/reports/templates/:templateId/versions
+ * 获取报告模板版本
+ */
+router.get(
+  '/templates/:templateId/versions',
+  authMiddleware,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { templateId } = req.params as { templateId: string };
+    try {
+      const result = await query(
+        `SELECT id, version, action, created_by, created_at, data
+         FROM data_record_versions
+         WHERE record_id = $1 AND type = $2
+         ORDER BY version DESC`,
+        [templateId, 'report_template']
+      );
+
+      const versions = result.rows.map(row => ({
+        id: row.id,
+        version: row.version,
+        action: row.action,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        data: row.data,
+      }));
+
+      return res.success({ templateId, versions });
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取模板版本失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
+    }
+  })
+);
+
+/**
+ * POST /api/system/reports/templates/:templateId/preview
+ * 预览报告模板
+ */
+router.post(
+  '/templates/:templateId/preview',
+  authMiddleware,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { templateId } = req.params as { templateId: string };
+    const { variables = {} } = req.body as { variables?: Record<string, unknown> };
+    try {
+      await ensureReportingInitialized();
+      const templateRecord = await automatedReportingService.getTemplate(templateId);
+      if (!templateRecord) {
+        return res.error(StandardErrorCode.NOT_FOUND, '报告模板不存在', undefined, 404);
+      }
+      const preview = renderTemplate(templateRecord.template, variables);
+      return res.success({
+        id: templateRecord.id,
+        name: templateRecord.name,
+        type: mapReportCategory(templateRecord.category),
+        preview,
+        variables,
+      });
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '预览报告模板失败',
         error instanceof Error ? error.message : String(error),
         500
       );
@@ -1408,7 +1578,7 @@ router.get(
         (await automatedReportingService.getAllTemplates()) as ServiceReportTemplate[];
       if (type) {
         templates = templates.filter(
-          template => mapReportCategory(template.category) === (type as ReportType)
+          template => mapReportCategory(template.category) === String(type)
         );
       }
 
@@ -1524,6 +1694,14 @@ router.post(
       });
 
       const createdTemplate = await automatedReportingService.getTemplate(templateId);
+      if (createdTemplate) {
+        await insertTemplateVersion(
+          templateId,
+          createdTemplate as Record<string, unknown>,
+          'create',
+          userId
+        );
+      }
 
       return res.success(
         createdTemplate
@@ -1593,14 +1771,13 @@ router.get(
       );
 
       const reportRows = statsResult.rows || [];
-      const byType: Record<ReportType, number> = {
-        [ReportType.PERFORMANCE]: 0,
-        [ReportType.SECURITY]: 0,
-        [ReportType.SEO]: 0,
-        [ReportType.COMPREHENSIVE]: 0,
-        [ReportType.STRESS_TEST]: 0,
-        [ReportType.API_TEST]: 0,
-      };
+      const byType = (REPORT_TYPES as ReportType[]).reduce<Record<string, number>>(
+        (acc: Record<string, number>, typeValue: ReportType) => {
+          acc[typeValue] = 0;
+          return acc;
+        },
+        {}
+      );
       const byFormat: Record<ReportFormat, number> = {
         [ReportFormat.PDF]: 0,
         [ReportFormat.HTML]: 0,
@@ -1828,35 +2005,19 @@ router.get(
 );
 
 const mapReportCategory = (category: string): ReportType => {
-  switch (category) {
-    case 'performance':
-      return ReportType.PERFORMANCE;
-    case 'security':
-      return ReportType.SECURITY;
-    case 'seo':
-      return ReportType.SEO;
-    case 'analytics':
-      return ReportType.COMPREHENSIVE;
-    default:
-      return ReportType.COMPREHENSIVE;
+  if (!category || category === 'analytics') {
+    return DEFAULT_REPORT_TYPE as ReportType;
   }
+  return (REPORT_TYPES as ReportType[]).includes(category as ReportType)
+    ? (category as ReportType)
+    : (DEFAULT_REPORT_TYPE as ReportType);
 };
 
-const mapReportTypeToCategory = (
-  type: ReportType
-): 'performance' | 'security' | 'seo' | 'analytics' | 'custom' => {
-  switch (type) {
-    case ReportType.PERFORMANCE:
-      return 'performance';
-    case ReportType.SECURITY:
-      return 'security';
-    case ReportType.SEO:
-      return 'seo';
-    case ReportType.COMPREHENSIVE:
-      return 'analytics';
-    default:
-      return 'custom';
+const mapReportTypeToCategory = (type: ReportType): string => {
+  if (type === DEFAULT_REPORT_TYPE) {
+    return 'analytics';
   }
+  return type || 'custom';
 };
 
 const mapReportFormat = (format: string): ReportFormat => {
@@ -1880,11 +2041,11 @@ const mapReportTypeFromRow = (row: Record<string, unknown>): ReportType => {
   const metadata = row.report_data as { metadata?: { type?: string } } | undefined;
   if (
     metadata?.metadata?.type &&
-    Object.values(ReportType).includes(metadata.metadata.type as ReportType)
+    (REPORT_TYPES as ReportType[]).includes(metadata.metadata.type as ReportType)
   ) {
     return metadata.metadata.type as ReportType;
   }
-  return ReportType.COMPREHENSIVE;
+  return DEFAULT_REPORT_TYPE as ReportType;
 };
 
 const mapReportRow = (

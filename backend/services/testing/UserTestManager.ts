@@ -8,6 +8,7 @@ import {
   updateStatusWithLog,
 } from './testLogService';
 
+const { query } = require('../../config/database');
 const testOperationsRepository = require('../../repositories/testOperationsRepository');
 const testRepository = require('../../repositories/testRepository');
 const testResultRepository = require('../../repositories/testResultRepository');
@@ -536,6 +537,8 @@ class UserTestManager {
       const failureMessage = errors[0] ? String(errors[0]) : '测试失败';
       const isFailed = normalizedStatus !== TestStatus.COMPLETED;
 
+      await this.updateUserTestStats(userId, execution.engine_type, !isFailed);
+
       if (isFailed) {
         await markFailedWithLog(
           testId,
@@ -640,6 +643,34 @@ class UserTestManager {
     const startTime = startedAt ? new Date(startedAt) : createdAt ? new Date(createdAt) : null;
     if (!startTime) return 0;
     return Math.max(0, Math.floor((Date.now() - startTime.getTime()) / 1000));
+  }
+
+  private async updateUserTestStats(userId: string, engineType: string, passed: boolean) {
+    const successCount = passed ? 1 : 0;
+    const failedCount = passed ? 0 : 1;
+
+    try {
+      await query(
+        `INSERT INTO user_test_stats (
+           user_id, test_type, total_tests, successful_tests, failed_tests, last_test_at, updated_at
+         ) VALUES ($1, $2, 1, $3, $4, NOW(), NOW())
+         ON CONFLICT (user_id, test_type)
+         DO UPDATE SET
+           total_tests = user_test_stats.total_tests + 1,
+           successful_tests = user_test_stats.successful_tests + $3,
+           failed_tests = user_test_stats.failed_tests + $4,
+           last_test_at = NOW(),
+           updated_at = NOW()`,
+        [userId, engineType, successCount, failedCount]
+      );
+    } catch (error) {
+      const dbError = error as { code?: string };
+      if (dbError.code === '42P01') {
+        Logger.warn('user_test_stats 表不存在，跳过统计写入');
+        return;
+      }
+      Logger.warn('写入 user_test_stats 失败', error);
+    }
   }
 
   private buildMetricsFromResults(

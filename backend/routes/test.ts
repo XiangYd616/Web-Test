@@ -196,6 +196,16 @@ router.post('/templates', authMiddleware, asyncHandler(testController.createTemp
 router.put('/templates/:templateId', authMiddleware, asyncHandler(testController.updateTemplate));
 
 /**
+ * 预览测试模板
+ * POST /api/test/templates/:templateId/preview
+ */
+router.post(
+  '/templates/:templateId/preview',
+  authMiddleware,
+  asyncHandler(testController.previewTemplate)
+);
+
+/**
  * 删除测试模板
  * DELETE /api/test/templates/:templateId
  */

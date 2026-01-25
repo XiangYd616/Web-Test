@@ -12,7 +12,7 @@ import { query } from '../../config/database';
 import asyncHandler from '../../middleware/asyncHandler';
 import { authMiddleware } from '../../middleware/auth';
 import { dataManagementService } from '../../services/data/DataManagementService';
-import DataExportService from '../../services/dataManagement/dataExportService';
+import DataExportService, { DataFilter } from '../../services/dataManagement/dataExportService';
 import DataImportService, { ImportConfig } from '../../services/dataManagement/dataImportService';
 import Logger from '../../utils/logger';
 
@@ -138,6 +138,222 @@ router.get(
         500
       );
     }
+  })
+);
+
+/**
+ * 获取导出模板列表
+ * GET /api/data/export/templates
+ */
+router.get(
+  '/export/templates',
+  asyncHandler(async (_req: AuthenticatedRequest, res: ApiResponse) => {
+    try {
+      const service = initializeExportService();
+      const templates = await service.getAllTemplates();
+      return res.success(templates);
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '获取导出模板失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
+    }
+  })
+);
+
+/**
+ * 创建导出模板
+ * POST /api/data/export/templates
+ */
+router.post(
+  '/export/templates',
+  asyncHandler(async (req: AuthenticatedRequest, res: ApiResponse) => {
+    try {
+      const service = initializeExportService();
+      const payload = req.body as {
+        name: string;
+        description?: string;
+        format: string;
+        template: string;
+        fields: Array<{
+          name: string;
+          label: string;
+          type: 'string' | 'number' | 'date' | 'boolean';
+        }>;
+        filters?: DataFilter[];
+        options?: Record<string, unknown>;
+      };
+      if (!payload.name || !payload.format || !payload.template) {
+        return res.error(StandardErrorCode.INVALID_INPUT, '模板名称、格式和模板内容必填');
+      }
+      const templateId = await service.createTemplate({
+        name: payload.name,
+        description: payload.description || '',
+        format: payload.format,
+        template: payload.template,
+        fields: payload.fields || [],
+        filters: payload.filters,
+        options: payload.options,
+      });
+      return res.created({ id: templateId }, '导出模板创建成功');
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '创建导出模板失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
+    }
+  })
+);
+
+/**
+ * 更新导出模板
+ * PUT /api/data/export/templates/:templateId
+ */
+router.put(
+  '/export/templates/:templateId',
+  asyncHandler(async (req: AuthenticatedRequest, res: ApiResponse) => {
+    const { templateId } = req.params as { templateId: string };
+    try {
+      const service = initializeExportService();
+      const updated = await service.updateTemplate(templateId, req.body);
+      if (!updated) {
+        return res.error(StandardErrorCode.NOT_FOUND, '导出模板不存在', undefined, 404);
+      }
+      return res.success(updated, '导出模板已更新');
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '更新导出模板失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
+    }
+  })
+);
+
+/**
+ * 删除导出模板
+ * DELETE /api/data/export/templates/:templateId
+ */
+router.delete(
+  '/export/templates/:templateId',
+  asyncHandler(async (req: AuthenticatedRequest, res: ApiResponse) => {
+    const { templateId } = req.params as { templateId: string };
+    try {
+      const service = initializeExportService();
+      const removed = await service.deleteTemplate(templateId);
+      if (!removed) {
+        return res.error(StandardErrorCode.NOT_FOUND, '导出模板不存在', undefined, 404);
+      }
+      return res.success({ templateId }, '导出模板已删除');
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '删除导出模板失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
+    }
+  })
+);
+
+/**
+ * 应用导出模板
+ * POST /api/data/export/templates/:templateId/apply
+ */
+router.post(
+  '/export/templates/:templateId/apply',
+  asyncHandler(async (req: AuthenticatedRequest, res: ApiResponse) => {
+    const { templateId } = req.params as { templateId: string };
+    const { dataType, overrides } = req.body as {
+      dataType: string;
+      overrides?: Record<string, unknown>;
+    };
+    try {
+      if (!dataType) {
+        return res.error(StandardErrorCode.INVALID_INPUT, 'dataType 必填');
+      }
+      const service = initializeExportService();
+      const { template, config } = await service.applyTemplate(templateId, overrides || {});
+      return res.success({ template, config, dataType });
+    } catch (error) {
+      return res.error(
+        StandardErrorCode.INTERNAL_SERVER_ERROR,
+        '应用导出模板失败',
+        error instanceof Error ? error.message : String(error),
+        500
+      );
+    }
+  })
+);
+
+/**
+ * SSE 导出进度流
+ * GET /api/data/export/:jobId/progress
+ */
+router.get(
+  '/export/:jobId/progress',
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const { jobId } = req.params;
+    const userId = getUserId(req);
+    const service = initializeExportService();
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const sendEvent = (status: Awaited<ReturnType<DataExportService['getExportStatus']>>) => {
+      res.write(`data: ${JSON.stringify(status)}\n\n`);
+    };
+
+    const sendError = (message: string) => {
+      res.write(`event: error\ndata: ${JSON.stringify({ message })}\n\n`);
+    };
+
+    const closeStream = () => {
+      res.end();
+    };
+
+    try {
+      const status = await service.getExportStatus(jobId);
+      if (status.userId !== userId) {
+        sendError('无权访问此导出任务');
+        return closeStream();
+      }
+      sendEvent(status);
+    } catch (error) {
+      sendError(error instanceof Error ? error.message : String(error));
+      return closeStream();
+    }
+
+    const onProgress = (task: { id: string }) => {
+      if (task.id === jobId) {
+        void service.getExportStatus(jobId).then(sendEvent);
+      }
+    };
+
+    const onFinished = (task: { id: string }) => {
+      if (task.id === jobId) {
+        void service.getExportStatus(jobId).then(sendEvent);
+        closeStream();
+      }
+    };
+
+    service.on('progress_updated', onProgress);
+    service.on('task_completed', onFinished);
+    service.on('task_failed', onFinished);
+    service.on('task_cancelled', onFinished);
+
+    req.on('close', () => {
+      service.off('progress_updated', onProgress);
+      service.off('task_completed', onFinished);
+      service.off('task_failed', onFinished);
+      service.off('task_cancelled', onFinished);
+    });
   })
 );
 

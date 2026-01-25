@@ -31,6 +31,46 @@ export interface TestTemplateRecord {
 }
 
 class TestTemplateService {
+  private resolveVariableValue(
+    key: string,
+    variables: Record<string, unknown>
+  ): string | undefined {
+    if (!key) {
+      return undefined;
+    }
+    if (!key.includes('.')) {
+      const value = variables[key];
+      return value === undefined ? undefined : String(value);
+    }
+    return key.split('.').reduce<unknown>((acc, part) => {
+      if (acc && typeof acc === 'object' && part in (acc as Record<string, unknown>)) {
+        return (acc as Record<string, unknown>)[part];
+      }
+      return undefined;
+    }, variables) as string | undefined;
+  }
+
+  private applyTemplateVariables(value: unknown, variables: Record<string, unknown>): unknown {
+    if (typeof value === 'string') {
+      return value.replace(/\{\{\s*([\w.-]+)\s*\}\}/g, (_, key: string) => {
+        const resolved = this.resolveVariableValue(key, variables);
+        return resolved ?? '';
+      });
+    }
+    if (Array.isArray(value)) {
+      return value.map(item => this.applyTemplateVariables(item, variables));
+    }
+    if (value && typeof value === 'object') {
+      return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>(
+        (acc, [key, entry]) => {
+          acc[key] = this.applyTemplateVariables(entry, variables);
+          return acc;
+        },
+        {}
+      );
+    }
+    return value;
+  }
   async getTemplateForUser(
     userId: string,
     templateId: string,
@@ -52,6 +92,20 @@ class TestTemplateService {
       ...template,
       config: this.parseJsonValue(template.config, {} as Record<string, unknown>),
     };
+  }
+
+  async renderTemplatePreview(
+    userId: string,
+    templateId: string,
+    variables: Record<string, unknown> = {},
+    workspaceId?: string
+  ): Promise<{ template: TestTemplateRecord; previewConfig: Record<string, unknown> }> {
+    const template = await this.getTemplateForUser(userId, templateId, workspaceId);
+    const previewConfig = this.applyTemplateVariables(template.config, variables) as Record<
+      string,
+      unknown
+    >;
+    return { template, previewConfig };
   }
 
   async getDefaultTemplate(

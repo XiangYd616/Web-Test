@@ -7,7 +7,9 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { StandardErrorCode } from '../../../shared/types/standardApiResponse';
 import asyncHandler from '../../middleware/asyncHandler';
+import alertRoutes from './alerts';
 import configRoutes from './config';
+import errorRoutes from './errors';
 import monitoringRoutes from './monitoring';
 import reportRoutes from './reports';
 const { getPool, getStats, healthCheck } = require('../../config/database');
@@ -622,5 +624,7 @@ router.delete(
 router.use('/monitoring', monitoringRoutes);
 router.use('/reports', reportRoutes);
 router.use('/config', configRoutes);
+router.use('/alerts', alertRoutes);
+router.use('/errors', errorRoutes);
 
 export default router;
