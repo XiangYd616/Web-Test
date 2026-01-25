@@ -10,6 +10,25 @@ const fs = require('fs');
 const path = require('path');
 const DatabaseConnectionManager = require('../utils/database');
 
+const resolveInitMarkerPath = () => {
+  const candidates = [
+    path.resolve(process.cwd()),
+    path.resolve(process.cwd(), '..'),
+    path.resolve(__dirname, '..', '..', '..'),
+    path.resolve(__dirname, '..', '..', '..', '..'),
+  ];
+  const rootDir =
+    candidates.find(root => fs.existsSync(path.join(root, 'storage'))) ||
+    path.resolve(process.cwd(), '..');
+  const storageDir = path.join(rootDir, 'storage');
+  if (!fs.existsSync(storageDir)) {
+    fs.mkdirSync(storageDir, { recursive: true });
+  }
+  return path.join(storageDir, '.db_initialized');
+};
+
+const initMarkerPath = resolveInitMarkerPath();
+
 type DbConfig = {
   host: string;
   port: number;
@@ -45,6 +64,26 @@ type ConnectionManager = {
 // 数据库连接池和管理器
 let pool: Pool | null = null;
 let connectionManager: ConnectionManager | null = null;
+
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, label: string) => {
+  if (!timeoutMs || timeoutMs <= 0) {
+    return promise;
+  }
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`数据库连接超时(${timeoutMs}ms): ${label}`));
+    }, timeoutMs);
+    promise
+      .then(result => {
+        clearTimeout(timer);
+        resolve(result);
+      })
+      .catch(error => {
+        clearTimeout(timer);
+        reject(error);
+      });
+  });
+};
 
 // 根据环境自动选择数据库
 const getDefaultDatabase = () => {
@@ -150,16 +189,24 @@ const createPool = (): Pool => {
  */
 const connectDB = async () => {
   try {
+    const startupTimeoutMs = Number(process.env.STARTUP_DB_TIMEOUT_MS || '15000');
+    console.log('⏱️ 开始数据库连接...');
     const dbPool = createPool();
-
-    const client = await dbPool.connect();
-    await client.query('SELECT NOW()');
-    client.release();
+    const client = await withTimeout(dbPool.connect(), startupTimeoutMs, 'connect');
+    try {
+      await withTimeout(client.query('SELECT NOW()'), startupTimeoutMs, 'ping');
+    } finally {
+      client.release();
+    }
 
     console.log(`✅ 数据库连接成功: ${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`);
 
+    console.log('⏱️ 开始数据库初始化...');
+
     // 初始化数据库表
     await initializeTables();
+
+    console.log('⏱️ 数据库初始化完成');
 
     return dbPool;
   } catch (error: unknown) {
@@ -223,6 +270,14 @@ export const query = async (text: string, params: unknown[] = []) => {
  */
 const initializeTables = async () => {
   try {
+    if (process.env.SKIP_DB_INIT === 'true') {
+      console.log('⚠️ 已跳过数据库初始化 (SKIP_DB_INIT=true)');
+      return;
+    }
+    if (fs.existsSync(initMarkerPath)) {
+      console.log(`⚠️ 已检测到数据库初始化标记，跳过 schema 初始化: ${initMarkerPath}`);
+      return;
+    }
     const dbPool = getPool();
 
     // 检查是否需要初始化 (检查新的优化表结构)
@@ -237,6 +292,9 @@ const initializeTables = async () => {
 
     if (tableCount >= 4) {
       console.log('✅ 优化数据库表已存在，跳过初始化');
+
+      fs.writeFileSync(initMarkerPath, new Date().toISOString());
+      console.log(`📝 已写入数据库初始化标记: ${initMarkerPath}`);
 
       // 检查是否需要升级到新架构
       const newTablesResult = await dbPool.query(`
@@ -259,6 +317,9 @@ const initializeTables = async () => {
       const schemaSql = fs.readFileSync(schemaSqlPath, 'utf8');
       await dbPool.query(schemaSql);
       console.log('✅ 数据库架构初始化完成');
+
+      fs.writeFileSync(initMarkerPath, new Date().toISOString());
+      console.log(`📝 已写入数据库初始化标记: ${initMarkerPath}`);
 
       // 验证初始化结果
       const verifyResult = await dbPool.query(`

@@ -1094,3 +1094,6 @@ class WorkspaceManager extends EventEmitter {
 }
 
 export default WorkspaceManager;
+
+// 兼容 CommonJS require
+module.exports = { WorkspaceManager };

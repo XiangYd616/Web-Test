@@ -2646,4 +2646,4 @@ class MonitoringService extends EventEmitter {
 export { MonitoringService };
 
 // 兼容 CommonJS require
-module.exports = MonitoringService;
+module.exports = { MonitoringService };

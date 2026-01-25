@@ -402,6 +402,87 @@ CREATE INDEX IF NOT EXISTS idx_workspace_activities_user_id ON workspace_activit
 -- 2. 测试管理模块
 -- =====================================================
 
+-- =====================================================
+-- 1.2 RBAC 权限与角色模块
+-- =====================================================
+
+-- 权限表
+CREATE TABLE IF NOT EXISTS permissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    resource VARCHAR(100) NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    effect VARCHAR(20) NOT NULL DEFAULT 'allow',
+    conditions JSONB DEFAULT '[]',
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 角色表
+CREATE TABLE IF NOT EXISTS roles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    type VARCHAR(50) DEFAULT 'custom',
+    level INTEGER DEFAULT 1,
+    parent_role_id UUID REFERENCES roles(id) ON DELETE SET NULL,
+    is_active BOOLEAN DEFAULT true,
+    is_system BOOLEAN DEFAULT false,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    updated_by UUID REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- 角色权限关联表
+CREATE TABLE IF NOT EXISTS role_permissions (
+    role_id UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    permission_id UUID NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (role_id, permission_id)
+);
+
+-- 用户角色关联表
+CREATE TABLE IF NOT EXISTS user_roles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role_id UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    assigned_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    assigned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN DEFAULT true,
+    revoked_at TIMESTAMP WITH TIME ZONE,
+    revoked_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    UNIQUE (user_id, role_id)
+);
+
+-- 权限审计日志表
+CREATE TABLE IF NOT EXISTS permission_audit_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    action VARCHAR(50) NOT NULL,
+    resource VARCHAR(100) NOT NULL,
+    resource_id VARCHAR(100),
+    result VARCHAR(50) NOT NULL,
+    reason TEXT,
+    ip_address INET,
+    user_agent TEXT,
+    session_id VARCHAR(255),
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    metadata JSONB DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_permissions_name ON permissions(name);
+CREATE INDEX IF NOT EXISTS idx_roles_name ON roles(name);
+CREATE INDEX IF NOT EXISTS idx_role_permissions_role ON role_permissions(role_id);
+CREATE INDEX IF NOT EXISTS idx_role_permissions_permission ON role_permissions(permission_id);
+CREATE INDEX IF NOT EXISTS idx_user_roles_user ON user_roles(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_roles_role ON user_roles(role_id);
+CREATE INDEX IF NOT EXISTS idx_permission_audit_logs_user ON permission_audit_logs(user_id);
+
 -- 测试执行核心表（当前代码使用）
 CREATE TABLE IF NOT EXISTS test_executions (
     id SERIAL PRIMARY KEY,
@@ -819,7 +900,8 @@ CREATE TABLE IF NOT EXISTS test_templates (
 
     -- 时间戳
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE (template_name)
 );
 
 CREATE INDEX IF NOT EXISTS idx_test_templates_user_id ON test_templates(user_id);

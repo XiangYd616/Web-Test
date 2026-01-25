@@ -36,6 +36,9 @@ type ApiResponse = express.Response & {
   ) => express.Response;
 };
 
+const REPORT_TYPE_LIST = [...REPORT_TYPES] as ReportType[];
+type ReportCategory = ServiceReportTemplate['category'];
+
 enum ReportFormat {
   PDF = 'pdf',
   HTML = 'html',
@@ -316,7 +319,7 @@ router.get(
         .map(row => mapReportRow(row, userId, status as string | undefined))
         .filter(report => report !== null);
 
-      const byType = (REPORT_TYPES as ReportType[]).reduce<Record<string, number>>(
+      const byType = REPORT_TYPE_LIST.reduce<Record<string, number>>(
         (acc: Record<string, number>, typeValue: ReportType) => {
           acc[typeValue] = 0;
           return acc;
@@ -390,7 +393,12 @@ router.put(
         variables: variables ?? existing.variables,
       });
 
-      await insertTemplateVersion(templateId, updated as Record<string, unknown>, 'update', userId);
+      await insertTemplateVersion(
+        templateId,
+        updated as unknown as Record<string, unknown>,
+        'update',
+        userId
+      );
 
       return res.success(
         {
@@ -1326,8 +1334,6 @@ router.post(
           },
         },
         enabled: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
 
       const instanceId = await automatedReportingService.generateReport(configId);
@@ -1692,15 +1698,13 @@ router.post(
             },
           },
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
 
       const createdTemplate = await automatedReportingService.getTemplate(templateId);
       if (createdTemplate) {
         await insertTemplateVersion(
           templateId,
-          createdTemplate as Record<string, unknown>,
+          createdTemplate as unknown as Record<string, unknown>,
           'create',
           userId
         );
@@ -1774,7 +1778,7 @@ router.get(
       );
 
       const reportRows = statsResult.rows || [];
-      const byType = (REPORT_TYPES as ReportType[]).reduce<Record<string, number>>(
+      const byType = REPORT_TYPE_LIST.reduce<Record<string, number>>(
         (acc: Record<string, number>, typeValue: ReportType) => {
           acc[typeValue] = 0;
           return acc;
@@ -1917,13 +1921,7 @@ router.post(
           },
         },
         enabled: Boolean(enabled),
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
-
-      if (enabled) {
-        await automatedReportingService.scheduleReport(configId);
-      }
 
       return res.success(
         {
@@ -2011,16 +2009,19 @@ const mapReportCategory = (category: string): ReportType => {
   if (!category || category === 'analytics') {
     return DEFAULT_REPORT_TYPE as ReportType;
   }
-  return (REPORT_TYPES as ReportType[]).includes(category as ReportType)
+  return REPORT_TYPE_LIST.includes(category as ReportType)
     ? (category as ReportType)
     : (DEFAULT_REPORT_TYPE as ReportType);
 };
 
-const mapReportTypeToCategory = (type: ReportType): string => {
+const mapReportTypeToCategory = (type: ReportType): ReportCategory => {
   if (type === DEFAULT_REPORT_TYPE) {
     return 'analytics';
   }
-  return type || 'custom';
+  if (type === 'performance' || type === 'security' || type === 'seo') {
+    return type;
+  }
+  return 'custom';
 };
 
 const mapReportFormat = (format: string): ReportFormat => {
@@ -2042,10 +2043,7 @@ const mapReportFormat = (format: string): ReportFormat => {
 
 const mapReportTypeFromRow = (row: Record<string, unknown>): ReportType => {
   const metadata = row.report_data as { metadata?: { type?: string } } | undefined;
-  if (
-    metadata?.metadata?.type &&
-    (REPORT_TYPES as ReportType[]).includes(metadata.metadata.type as ReportType)
-  ) {
+  if (metadata?.metadata?.type && REPORT_TYPE_LIST.includes(metadata.metadata.type as ReportType)) {
     return metadata.metadata.type as ReportType;
   }
   return DEFAULT_REPORT_TYPE as ReportType;

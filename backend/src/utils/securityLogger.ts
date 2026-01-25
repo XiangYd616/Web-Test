@@ -7,6 +7,12 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as winston from 'winston';
 
+const fsSync = require('fs');
+const logsDir = path.join(__dirname, '../../logs');
+if (!fsSync.existsSync(logsDir)) {
+  fsSync.mkdirSync(logsDir, { recursive: true });
+}
+
 // 安全事件类型枚举
 export enum SecurityEventType {
   LOGIN_SUCCESS = 'login_success',
@@ -92,6 +98,7 @@ const securityLogger = winston.createLogger({
     winston.format.errors({ stack: true }),
     winston.format.json()
   ),
+  exitOnError: false,
   transports: [
     // 安全事件日志文件
     new winston.transports.File({

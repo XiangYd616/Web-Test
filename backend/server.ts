@@ -18,26 +18,13 @@ const fs = require('fs');
 // 导入数据库连接 (pg)
 const { connectDB, closeConnection } = require('./config/database');
 
-// 导入路由
-const authRoutes = require('./routes/auth');
-const oauthRoutes = require('./routes/oauth');
-const testRoutes = require('./routes/test');
-const usersRoutes = require('./routes/users');
-const performanceRoutes = require('./routes/performance');
-const comparisonRoutes = require('./routes/misc/comparison');
-const integrationsRoutes = require('./routes/misc/integrations');
-const batchRoutes = require('./routes/misc/batch');
-const coreRoutes = require('./routes/misc/core');
-const analyticsRoutes = require('./routes/analytics');
-const systemRoutes = require('./routes/system');
-const dataRoutes = require('./routes/data');
-const storageRoutes = require('./routes/data/storage');
-const adminRoutes = require('./routes/admin');
-const workspaceRoutes = require('./routes/workspaces');
-const collectionRoutes = require('./routes/collections');
-const environmentRoutes = require('./routes/environments');
-const runRoutes = require('./routes/runs');
-const scheduledRunRoutes = require('./routes/scheduledRuns');
+const loadRoute = (routePath: string, label: string) => {
+  const start = Date.now();
+  const moduleExports = require(routePath);
+  const route = moduleExports?.default || moduleExports;
+  console.log(`⏱️ 路由加载完成 [${label}]: ${Date.now() - start}ms`);
+  return route;
+};
 const scheduledRunController = require('./controllers/scheduledRunController');
 const ScheduledRunService = require('./services/runs/ScheduledRunService');
 const CollaborationService = require('./services/collaboration/CollaborationService');
@@ -178,26 +165,47 @@ app.get('/api/info', (_req: Request, res: Response) => {
   });
 });
 
-// API路由
-app.use('/api/auth', authRoutes);
-app.use('/api/oauth', oauthRoutes);
-app.use('/api/test', testRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/performance', performanceRoutes);
-app.use('/api/comparison', comparisonRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/integrations', integrationsRoutes);
-app.use('/api/batch', batchRoutes);
-app.use('/api/core', coreRoutes);
-app.use('/api/system', systemRoutes);
-app.use('/api/data', dataRoutes);
-app.use('/api/storage', storageRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/workspaces', workspaceRoutes);
-app.use('/api/collections', collectionRoutes);
-app.use('/api/environments', environmentRoutes);
-app.use('/api/runs', runRoutes);
-app.use('/api/schedules', scheduledRunRoutes);
+const registerRoutes = () => {
+  // 导入路由
+  const authRoutes = loadRoute('./routes/auth', 'auth');
+  const oauthRoutes = loadRoute('./routes/oauth', 'oauth');
+  const testRoutes = loadRoute('./routes/test', 'test');
+  const usersRoutes = loadRoute('./routes/users', 'users');
+  const comparisonRoutes = loadRoute('./routes/misc/comparison', 'comparison');
+  const integrationsRoutes = loadRoute('./routes/misc/integrations', 'integrations');
+  const batchRoutes = loadRoute('./routes/misc/batch', 'batch');
+  const coreRoutes = loadRoute('./routes/misc/core', 'core');
+  const analyticsRoutes = loadRoute('./routes/analytics', 'analytics');
+  const systemRoutes = loadRoute('./routes/system', 'system');
+  const dataRoutes = loadRoute('./routes/data', 'data');
+  const storageRoutes = loadRoute('./routes/data/storage', 'storage');
+  const adminRoutes = loadRoute('./routes/admin', 'admin');
+  const workspaceRoutes = loadRoute('./routes/workspaces', 'workspaces');
+  const collectionRoutes = loadRoute('./routes/collections', 'collections');
+  const environmentRoutes = loadRoute('./routes/environments', 'environments');
+  const runRoutes = loadRoute('./routes/runs', 'runs');
+  const scheduledRunRoutes = loadRoute('./routes/scheduledRuns', 'scheduledRuns');
+
+  // API路由
+  app.use('/api/auth', authRoutes);
+  app.use('/api/oauth', oauthRoutes);
+  app.use('/api/test', testRoutes);
+  app.use('/api/users', usersRoutes);
+  app.use('/api/comparison', comparisonRoutes);
+  app.use('/api/analytics', analyticsRoutes);
+  app.use('/api/integrations', integrationsRoutes);
+  app.use('/api/batch', batchRoutes);
+  app.use('/api/core', coreRoutes);
+  app.use('/api/system', systemRoutes);
+  app.use('/api/data', dataRoutes);
+  app.use('/api/storage', storageRoutes);
+  app.use('/api/admin', adminRoutes);
+  app.use('/api/workspaces', workspaceRoutes);
+  app.use('/api/collections', collectionRoutes);
+  app.use('/api/environments', environmentRoutes);
+  app.use('/api/runs', runRoutes);
+  app.use('/api/schedules', scheduledRunRoutes);
+};
 
 // 静态文件服务（如果需要）
 if (NODE_ENV === 'production') {
@@ -268,6 +276,10 @@ process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) =>
 const startServer = async (): Promise<Server> => {
   try {
     console.log('🚀 Starting Test-Web Platform Backend...');
+    const startTime = Date.now();
+    const logStep = (label: string) => {
+      console.log(`⏱️ ${label}: ${Date.now() - startTime}ms`);
+    };
 
     // 确保日志目录存在
     const logsDir = path.join(__dirname, 'logs');
@@ -277,9 +289,15 @@ const startServer = async (): Promise<Server> => {
 
     // 连接数据库
     await connectDB();
+    logStep('数据库连接完成');
+
+    registerRoutes();
+    logStep('路由加载完成');
 
     registerTestEngines();
+    logStep('测试引擎注册完成');
     await testEngineRegistry.initialize();
+    logStep('测试引擎初始化完成');
 
     const enableTestQueue = process.env.TEST_QUEUE_ENABLED !== 'false';
     if (enableTestQueue) {
@@ -287,6 +305,7 @@ const startServer = async (): Promise<Server> => {
         startWorker({ queueName: 'test-execution' });
         startWorker({ queueName: 'test-execution-heavy' });
         console.log('✅ 测试队列 Worker 已启动');
+        logStep('测试队列 Worker 启动完成');
       } catch (error: unknown) {
         console.error('启动测试队列 Worker 失败:', error);
       }
@@ -300,11 +319,13 @@ const startServer = async (): Promise<Server> => {
       scheduledRunService.start().catch((error: unknown) => {
         console.error('启动定时运行服务失败:', error);
       });
+      logStep('定时运行服务启动完成');
     }
 
     // 启动HTTP服务器
     const server = app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
+      logStep('HTTP 服务监听完成');
 
       if (NODE_ENV === 'development') {
         console.log('🔧 Development mode - CORS enabled for all origins');
@@ -320,6 +341,7 @@ const startServer = async (): Promise<Server> => {
       .catch((error: unknown) => {
         console.error('启动协作服务失败:', error);
       });
+    logStep('协作服务启动完成');
 
     // 设置服务器超时
     server.timeout = 30000; // 30秒超时

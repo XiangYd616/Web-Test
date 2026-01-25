@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { StandardErrorCode } from '../../shared/types/standardApiResponse';
 
 const { models } = require('../database/pgModels');
-const CollectionManager = require('../services/collections/CollectionManager');
+const { CollectionManager } = require('../services/collections/CollectionManager');
 const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 const Logger = require('../utils/logger');
 

@@ -397,9 +397,8 @@ class SessionManager {
    * 清理过期会话
    */
   async cleanupExpiredSessions() {
-    const pool = getPool() as DbPool;
-
     try {
+      const pool = getPool() as DbPool;
       const result = await pool.query<DbRow>(
         `
         UPDATE user_sessions
@@ -417,6 +416,9 @@ class SessionManager {
 
       return cleanedCount;
     } catch (error) {
+      if (error instanceof Error && error.message.includes('数据库连接池未初始化')) {
+        return 0;
+      }
       Logger.error('Failed to cleanup expired sessions', error as Error);
       return 0;
     }
@@ -544,7 +546,7 @@ class SessionManager {
    */
   startCleanupTimer() {
     this.cleanupTimer = setInterval(() => {
-      this.cleanupExpiredSessions();
+      void this.cleanupExpiredSessions();
     }, SESSION_CONFIG.cleanupInterval * 1000);
   }
 

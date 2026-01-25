@@ -6,8 +6,8 @@
   "scripts": {
     "_comment_main": "🚀 主要启动命令",
     "prestart": "npm run build",
-    "start": "cross-env NODE_ENV=production node dist/server.js",
-    "dev": "npm run build && node dist/server.js",
+    "start": "cross-env NODE_ENV=production node dist/backend/server.js",
+    "dev": "npm run build && node dist/backend/server.js",
     "dev:ts": "node -r ts-node/register server.js",
     "_comment_test": "🧪 测试相关",
     "test": "jest",

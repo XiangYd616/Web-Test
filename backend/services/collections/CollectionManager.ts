@@ -1543,3 +1543,6 @@ class CollectionManager {
 }
 
 export default CollectionManager;
+
+// 兼容 CommonJS require
+module.exports = { CollectionManager };

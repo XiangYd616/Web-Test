@@ -10,7 +10,7 @@ import asyncHandler from '../middleware/asyncHandler';
 import { loginRateLimiter, registerRateLimiter } from '../middleware/rateLimiter';
 const { authMiddleware } = require('../middleware/auth');
 const JwtService = require('../services/core/jwtService');
-const SessionManager = require('../services/auth/sessionManager');
+const { SessionManager } = require('../services/auth/sessionManager');
 const { securityLogger } = require('../middleware/logger');
 
 const router = express.Router();
@@ -39,7 +39,7 @@ const getUser = (req: AuthenticatedRequest): NonNullable<AuthenticatedRequest['u
 };
 
 // MFA路由
-const mfaRoutes = require('./mfa');
+const mfaRoutes = require('./mfa').default;
 router.use('/mfa', mfaRoutes);
 
 /**

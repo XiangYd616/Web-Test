@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { toDate } from '../utils/dateUtils';
 
 const { models } = require('../database/pgModels');
-const WorkspaceManager = require('../services/collaboration/WorkspaceManager');
+const { WorkspaceManager } = require('../services/collaboration/WorkspaceManager');
 const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 
 const workspaceManager = new WorkspaceManager({ models });
