@@ -1,0 +1,172 @@
+ <!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test-Web Local Console</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f1ea;
+        --bg-accent: #efe5d6;
+        --ink: #1b1b1b;
+        --muted: #6c5e52;
+        --brand: #c66b3d;
+        --brand-dark: #8b3e1b;
+        --card: #fffdf9;
+        --border: #e4d6c5;
+      }
+
+      * {
+        box-sizing: border-box;
+        font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top, #fff8ef 0%, var(--bg) 45%, #f1eadf 100%);
+        color: var(--ink);
+        min-height: 100vh;
+      }
+
+      header {
+        padding: 32px 40px 16px;
+      }
+
+      h1 {
+        font-size: 32px;
+        margin: 0;
+        letter-spacing: 1px;
+      }
+
+      p {
+        margin: 8px 0 0;
+        color: var(--muted);
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        padding: 0 40px 40px;
+      }
+
+      .panel {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(122, 86, 55, 0.08);
+      }
+
+      .panel h2 {
+        margin-top: 0;
+        font-size: 18px;
+      }
+
+      label {
+        display: block;
+        margin: 12px 0 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--ink);
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+        font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      button {
+        margin-top: 12px;
+        background: var(--brand);
+        color: #fff;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: transparent;
+        color: var(--brand-dark);
+        border: 1px solid var(--brand-dark);
+      }
+
+      .status {
+        padding: 12px;
+        border-radius: 12px;
+        background: #fff7ed;
+        border: 1px dashed #e2b18f;
+        color: var(--muted);
+        margin-top: 12px;
+      }
+
+      .history {
+        max-height: 320px;
+        overflow: auto;
+      }
+
+      .history-item {
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .history-item:last-child {
+        border-bottom: none;
+      }
+
+      .history-item strong {
+        display: block;
+      }
+
+      footer {
+        padding: 16px 40px 32px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      @media (max-width: 980px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Test-Web 本地客户端</h1>
+      <p>临时占位页已停用，请使用前端主界面。</p>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>提示</h2>
+        <p>当前页面仅用于过渡，Electron 开发模式会加载 Vite 前端界面。</p>
+        <p>请确保已启动前端开发服务（http://localhost:5174）。</p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "schedule": {
+    "daily": true,
+    "weekly": true,
+    "monthly": true
+  },
+  "checks": {
+    "projectStructure": true,
+    "dependencies": true,
+    "buildHealth": true,
+    "codeQuality": true,
+    "performance": true
+  },
+  "notifications": {
+    "email": false,
+    "slack": false,
+    "console": true
+  },
+  "thresholds": {
+    "maxChunkSize": 300,
+    "maxBuildTime": 60,
+    "minIntegrationScore": 95,
+    "maxBundleSize": 5242880,
+    "maxVulnerabilities": 0,
+    "maxOutdatedDependencies": 10
+  },
+  "autoFix": {
+    "enabled": false,
+    "securityVulnerabilities": false,
+    "outdatedDependencies": false,
+    "codeFormatting": true
+  },
+  "reporting": {
+    "generateHTML": true,
+    "keepHistoryDays": 30,
+    "detailedLogs": true
+  }
+}

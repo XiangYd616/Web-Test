@@ -1,0 +1,20 @@
+// ── 主题色：通过 CSS 变量跟随 light/dark 主题自动切换 ──
+$bg: hsl(var(--background));
+$panel: hsl(var(--card));
+$panel-border: hsl(var(--border));
+$text: hsl(var(--foreground));
+$text-muted: hsl(var(--muted-foreground));
+
+// ── 品牌色：固定不变 ──
+$primary: #ff6c37;
+$primary-hover: #e85d2a;
+$accent: #2d6cf6;
+$mono: "JetBrains Mono", "Fira Code", "SFMono-Regular", "Menlo", "Consolas", monospace;
+$success: #10b981;
+$warning: #f59e0b;
+$error: #ef4444;
+$info: #3b82f6;
+$radius: 10px;
+
+// ── 桌面端框架色（TitleBar / StatusBar 始终深色）──
+// 侧边栏已改为跟随主题，不再使用独立深色变量

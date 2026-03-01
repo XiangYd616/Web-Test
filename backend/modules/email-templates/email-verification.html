@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>邮箱验证 — Test-Web</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f4f5f7;
+      font-family:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    "
+  >
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 20px">
+      <tr>
+        <td align="center">
+          <table
+            width="520"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              background: #ffffff;
+              border-radius: 12px;
+              overflow: hidden;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            "
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                style="
+                  background: linear-gradient(135deg, #10b981, #14b8a6);
+                  padding: 32px 40px;
+                  text-align: center;
+                "
+              >
+                <h1
+                  style="
+                    margin: 0;
+                    color: #ffffff;
+                    font-size: 22px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                  "
+                >
+                  Test-Web
+                </h1>
+                <p style="margin: 8px 0 0; color: rgba(255, 255, 255, 0.85); font-size: 14px">
+                  邮箱验证
+                </p>
+              </td>
+            </tr>
+            <!-- Body -->
+            <tr>
+              <td style="padding: 36px 40px 24px">
+                <p style="margin: 0 0 16px; font-size: 16px; color: #1f2937">
+                  {{username}}，您好！
+                </p>
+                <p style="margin: 0 0 24px; font-size: 14px; color: #4b5563; line-height: 1.6">
+                  感谢您注册 Test-Web 平台。请点击下方按钮完成邮箱验证，验证后即可使用全部功能。
+                </p>
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" style="padding: 8px 0 24px">
+                      <a
+                        href="{{verificationUrl}}"
+                        style="
+                          display: inline-block;
+                          padding: 12px 36px;
+                          background: #10b981;
+                          color: #ffffff;
+                          font-size: 15px;
+                          font-weight: 600;
+                          text-decoration: none;
+                          border-radius: 8px;
+                        "
+                      >
+                        验证我的邮箱
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin: 0 0 8px; font-size: 12px; color: #9ca3af">
+                  如果按钮无法点击，请复制以下链接到浏览器打开：
+                </p>
+                <p style="margin: 0 0 24px; font-size: 12px; color: #6b7280; word-break: break-all">
+                  <a href="{{verificationUrl}}" style="color: #10b981">{{verificationUrl}}</a>
+                </p>
+                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 0 0 16px" />
+                <p style="margin: 0; font-size: 12px; color: #9ca3af; line-height: 1.5">
+                  如果这不是您本人的操作，请忽略此邮件，您的账户不会受到影响。
+                </p>
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="padding: 16px 40px 24px; text-align: center">
+                <p style="margin: 0; font-size: 11px; color: #9ca3af">
+                  &copy; Test-Web · 网站测试平台
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+{
+  "name": "test-web-shared",
+  "version": "1.0.0",
+  "description": "Shared utilities and types for Test Web App",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext .js,.ts,.tsx"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20.10.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "electron": "^32.2.6",
+    "sass-embedded": "^1.97.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
+    "@radix-ui/react-avatar": "^1.1.11",
+    "@radix-ui/react-checkbox": "^1.3.3",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-progress": "^1.1.8",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "@supabase/supabase-js": "^2.95.3",
+    "better-sqlite3": "^12.6.2",
+    "chartjs-plugin-annotation": "^3.1.0",
+    "class-variance-authority": "^0.7.1",
+    "i18next": "^25.8.0",
+    "jwks-rsa": "^3.2.2",
+    "next-themes": "^0.4.6",
+    "react-hook-form": "^7.71.1",
+    "react-i18next": "^16.5.4",
+    "sonner": "^2.0.7",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^4.3.6"
+  }
+}

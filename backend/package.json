@@ -1,0 +1,195 @@
+{
+  "name": "testweb-api-server",
+  "version": "1.0.0",
+  "description": "Test Web App API Server",
+  "main": "dist/server.js",
+  "scripts": {
+    "prestart": "npm run build",
+    "start": "cross-env NODE_ENV=production node dist/backend/server.js",
+    "dev": "npm run build && node dist/backend/server.js",
+    "test": "jest",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix",
+    "build": "tsc -p tsconfig.json && node -e \"const fs=require('fs'),p=require('path'),src=p.join(__dirname,'modules','email-templates'),dst=p.join(__dirname,'dist','backend','modules','email-templates');fs.mkdirSync(dst,{recursive:true});fs.readdirSync(src).filter(f=>f.endsWith('.html')).forEach(f=>fs.copyFileSync(p.join(src,f),p.join(dst,f)));console.log('✅ email-templates copied')\"",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@isaacs/fs-minipass": "^4.0.1",
+    "@supabase/supabase-js": "^2.95.3",
+    "abort-controller": "^3.0.0",
+    "archiver": "^7.0.1",
+    "axios": "^1.11.0",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.6.2",
+    "bullmq": "^5.10.4",
+    "cheerio": "^1.1.0",
+    "chrome-launcher": "^1.2.0",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "cron": "^3.1.6",
+    "csv-parser": "^3.2.0",
+    "csv-writer": "^1.6.0",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.3.1",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.2",
+    "express-openapi-validator": "^5.3.7",
+    "express-rate-limit": "^7.4.1",
+    "express-validator": "^7.2.0",
+    "fast-csv": "^5.0.2",
+    "fast-xml-parser": "^4.4.1",
+    "helmet": "^8.0.0",
+    "http-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^7.0.5",
+    "ioredis": "^5.4.1",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.2.2",
+    "lighthouse": "^12.8.2",
+    "lodash": "^4.17.21",
+    "maxmind": "^4.3.8",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.1",
+    "node-cron": "^3.0.3",
+    "node-fetch": "^2.7.0",
+    "nodemailer": "^7.0.12",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.17.1",
+    "pg": "^8.16.2",
+    "pg-hstore": "^2.3.4",
+    "playwright": "^1.53.1",
+    "prom-client": "^13.2.0",
+    "puppeteer": "^24.10.2",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.33.5",
+    "socket.io": "^4.8.1",
+    "speakeasy": "^2.0.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "tar": "^7.4.3",
+    "uuid": "^9.0.1",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0",
+    "ws": "^8.18.3",
+    "xlsx": "^0.18.5",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/archiver": "^6.0.3",
+    "@types/bcrypt": "^5.0.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/compression": "^1.7.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/lodash": "^4.17.13",
+    "@types/morgan": "^1.9.9",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^20.10.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^7.0.5",
+    "@types/pg": "^8.11.10",
+    "@types/qrcode": "^1.5.5",
+    "@types/speakeasy": "^2.0.10",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.7",
+    "@types/uuid": "^9.0.8",
+    "@types/ws": "^8.5.13",
+    "@vitest/coverage-v8": "^4.0.18",
+    "cross-env": "^7.0.3",
+    "electron": "^32.2.6",
+    "eslint": "^9.38.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "sass-embedded": "^1.97.3",
+    "supertest": "^7.1.3",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "test",
+    "web",
+    "api",
+    "performance",
+    "security",
+    "seo",
+    "monitoring",
+    "postgresql",
+    "express",
+    "javascript"
+  ],
+  "author": "Test Web App Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https:/github.com/your-org/test-web-app.git"
+  },
+  "bugs": {
+    "url": "https:/github.com/your-org/test-web-app/issues"
+  },
+  "homepage": "https:/github.com/your-org/test-web-app#readme",
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/../tests/setup.js"
+    ],
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!**/dist/**"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/dist/",
+      "<rootDir>/routes/"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "diagnostics": false
+        }
+      ]
+    },
+    "coverageThreshold": {
+      "global": {
+        "branches": 75,
+        "functions": 75,
+        "lines": 75,
+        "statements": 75
+      }
+    }
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "jest": true,
+      "es2021": true
+    },
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    },
+    "rules": {
+      "no-console": "warn",
+      "no-unused-vars": "error"
+    }
+  },
+  "nodemonConfig": {
+    "watch": [
+      "."
+    ],
+    "ext": "js,json",
+    "ignore": [
+      "node_modules/",
+      "dist/",
+      "coverage/",
+      "logs/"
+    ]
+  }
+}

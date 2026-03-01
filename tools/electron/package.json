@@ -1,0 +1,201 @@
+{
+  "name": "test-web-app-desktop",
+  "version": "1.0.0",
+  "description": "Test Web App - 专业的Web应用测试平台桌面版",
+  "main": "dist/main.js",
+  "author": "Test Web App Team",
+  "license": "MIT",
+  "homepage": "https://github.com/XiangYd616/Web-Test",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/XiangYd616/Web-Test.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "cross-env NODE_ENV=development electron .",
+    "compile": "node build.mjs",
+    "prebuild": "npm run compile",
+    "build": "electron-builder",
+    "build:win": "npm run compile && electron-builder --win",
+    "build:mac": "npm run compile && electron-builder --mac",
+    "build:linux": "npm run compile && electron-builder --linux",
+    "dist": "npm run build",
+    "pack": "npm run compile && electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.testweb.app",
+    "productName": "Test Web App",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "assets/icon.*",
+      "assets/entitlements.mac.plist",
+      "node_modules/**/*",
+      "!node_modules/**/playwright/**",
+      "!node_modules/**/playwright-core/**",
+      "!node_modules/**/canvas/**",
+      "!node_modules/**/chart.js/**",
+      "!node_modules/**/node-fetch/**",
+      "!node_modules/**/node-cron/**",
+      "!node_modules/**/*.md",
+      "!node_modules/**/*.map",
+      "!node_modules/**/LICENSE*",
+      "!node_modules/**/CHANGELOG*",
+      "!node_modules/**/test/**",
+      "!node_modules/**/tests/**",
+      "!node_modules/**/docs/**",
+      "!node_modules/**/example/**",
+      "!node_modules/**/examples/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../../frontend/dist",
+        "to": "frontend/dist",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "requestedExecutionLevel": "asInvoker",
+      "signAndEditExecutable": false
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "hardenedRuntime": true,
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "rpm",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png",
+      "category": "Development"
+    },
+    "protocols": [
+      {
+        "name": "Test Web App",
+        "schemes": ["testweb"]
+      }
+    ],
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Test Web App"
+    },
+    "dmg": {
+      "title": "Test Web App",
+      "icon": "assets/icon.icns",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "XiangYd616",
+      "repo": "Web-Test"
+    }
+  },
+  "dependencies": {
+    "axios": "^1.13.5",
+    "better-sqlite3": "^12.6.2",
+    "cheerio": "^1.2.0",
+    "dotenv": "^16.3.1",
+    "electron-updater": "^6.1.7",
+    "fs-extra": "^11.2.0",
+    "joi": "^18.0.2",
+    "nodemailer": "^8.0.1",
+    "puppeteer-core": "^24.37.5",
+    "winston": "^3.11.0"
+  },
+  "optionalDependencies": {
+    "archiver": "^6.0.1",
+    "docx": "^8.5.0",
+    "exceljs": "^4.4.0",
+    "extract-zip": "^2.0.1",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "cross-env": "^7.0.3",
+    "electron": "^32.2.6",
+    "electron-builder": "^24.13.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "electron",
+    "testing",
+    "web-testing",
+    "performance",
+    "security",
+    "compatibility",
+    "desktop-app"
+  ]
+}

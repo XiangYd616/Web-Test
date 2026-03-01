@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "../../dist-electron",
+    "rootDir": "../..",
+    "strict": false,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "sourceMap": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "../..",
+    "noEmitOnError": false
+  },
+  "include": [
+    "main.ts",
+    "preload.ts",
+    "types.ts",
+    "utils.ts",
+    "modules/**/*.ts",
+    "ipc/**/*.ts",
+    "managers/**/*.ts",
+    "../../shared/types/**/*.ts",
+    "../../backend/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/__tests__/**"
+  ]
+}
