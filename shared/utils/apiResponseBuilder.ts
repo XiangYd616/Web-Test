@@ -2,7 +2,7 @@
  * 标准API响应构建工具
  * 版本: v2.0.0
  * 创建时间: 2025-08-16
- * 
+ *
  * 提供统一的API响应构建方法，确保所有API响应格式一致
  */
 
@@ -19,7 +19,7 @@ import {
   StandardErrorMessages,
   StandardNoContentResponse,
   StandardPaginatedResponse,
-  StandardStatusCodeMap
+  StandardStatusCodeMap,
 } from '../types/standardApiResponse';
 
 // ==================== 工具函数 ====================
@@ -42,7 +42,7 @@ export function createStandardMeta(options: ResponseBuilderOptions = {}): Standa
     ...(options.path && { path: options.path }),
     ...(options.method && { method: options.method }),
     ...(options.version && { version: options.version }),
-    ...options.meta
+    ...options.meta,
   };
 }
 
@@ -59,7 +59,7 @@ export function createSuccessResponse<T = any>(
   const response: StandardApiSuccessResponse<T> = {
     success: true,
     data,
-    meta: createStandardMeta(options)
+    meta: createStandardMeta(options),
   };
 
   if (message) {
@@ -90,7 +90,7 @@ export function createNoContentResponse(
   return {
     success: true,
     message,
-    meta: createStandardMeta(options)
+    meta: createStandardMeta(options),
   };
 }
 
@@ -109,8 +109,8 @@ export function createPaginatedResponse<T = any>(
     ...(message && { message }),
     meta: {
       ...createStandardMeta(options),
-      pagination
-    }
+      pagination,
+    },
   };
 }
 
@@ -127,7 +127,7 @@ export function createErrorResponse(
 ): StandardApiErrorResponse {
   const error: StandardApiError = {
     code,
-    message: message || StandardErrorMessages[code as StandardErrorCode] || '未知错误'
+    message: message || StandardErrorMessages[code as StandardErrorCode] || '未知错误',
   };
 
   if (details) {
@@ -138,7 +138,7 @@ export function createErrorResponse(
     success: false,
     error,
     message: error.message,
-    meta: createStandardMeta(options)
+    meta: createStandardMeta(options),
   };
 }
 
@@ -185,12 +185,7 @@ export function createNotFoundResponse(
   resource: string = '资源',
   options: ResponseBuilderOptions = {}
 ): StandardApiErrorResponse {
-  return createErrorResponse(
-    StandardErrorCode.NOT_FOUND,
-    `${resource}未找到`,
-    undefined,
-    options
-  );
+  return createErrorResponse(StandardErrorCode.NOT_FOUND, `${resource}未找到`, undefined, options);
 }
 
 /**
@@ -218,12 +213,7 @@ export function createRateLimitResponse(
   options: ResponseBuilderOptions = {}
 ): StandardApiErrorResponse {
   const details = retryAfter ? { retryAfter } : undefined;
-  return createErrorResponse(
-    StandardErrorCode.RATE_LIMIT_EXCEEDED,
-    message,
-    details,
-    options
-  );
+  return createErrorResponse(StandardErrorCode.RATE_LIMIT_EXCEEDED, message, details, options);
 }
 
 /**
@@ -234,12 +224,7 @@ export function createInternalErrorResponse(
   details?: Record<string, any>,
   options: ResponseBuilderOptions = {}
 ): StandardApiErrorResponse {
-  return createErrorResponse(
-    StandardErrorCode.INTERNAL_SERVER_ERROR,
-    message,
-    details,
-    options
-  );
+  return createErrorResponse(StandardErrorCode.INTERNAL_SERVER_ERROR, message, details, options);
 }
 
 // ==================== 分页工具函数 ====================
@@ -247,11 +232,7 @@ export function createInternalErrorResponse(
 /**
  * 创建分页元数据
  */
-export function createPaginationMeta(
-  page: number,
-  limit: number,
-  total: number
-): PaginationMeta {
+export function createPaginationMeta(page: number, limit: number, total: number): PaginationMeta {
   const totalPages = Math.ceil(total / limit);
   const hasNext = page < totalPages;
   const hasPrev = page > 1;
@@ -264,7 +245,7 @@ export function createPaginationMeta(
     hasNext,
     hasPrev,
     nextPage: hasNext ? page + 1 : null,
-    prevPage: hasPrev ? page - 1 : null
+    prevPage: hasPrev ? page - 1 : null,
   };
 }
 
@@ -334,43 +315,7 @@ export const ApiResponseBuilder = {
   createMeta: createStandardMeta,
   createPagination: createPaginationMeta,
   getStatusCode: getHttpStatusCode,
-  wrapAsync: wrapAsyncOperation
+  wrapAsync: wrapAsyncOperation,
 };
 
 export default ApiResponseBuilder;
-
-// ==================== CommonJS导出 (用于Node.js后端) ====================
-
-// 如果在Node.js环境中，也提供CommonJS导出
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    // 成功响应
-    createSuccessResponse,
-    createCreatedResponse,
-    createNoContentResponse,
-    createPaginatedResponse,
-
-    // 错误响应
-    createErrorResponse,
-    createValidationErrorResponse,
-    createUnauthorizedResponse,
-    createForbiddenResponse,
-    createNotFoundResponse,
-    createConflictResponse,
-    createRateLimitResponse,
-    createInternalErrorResponse,
-
-    // 工具函数
-    generateRequestId,
-    createStandardMeta,
-    createPaginationMeta,
-    getHttpStatusCode,
-    wrapAsyncOperation,
-
-    // 主要导出对象
-    ApiResponseBuilder,
-
-    // 默认导出
-    default: ApiResponseBuilder
-  };
-}

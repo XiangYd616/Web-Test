@@ -1765,6 +1765,88 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
       return 'low';
     };
 
+    // ── 探测目标站点安全防护（WAF / CDN / 频率限制） ──
+    let siteProtected = false;
+    let protectionDetail = '';
+    try {
+      const probeUA =
+        (this.options.userAgent as string) || 'Mozilla/5.0 (compatible; SecurityScanner/1.0)';
+      const normalResp = await axios.get(url, {
+        timeout: 10000,
+        headers: { 'User-Agent': probeUA },
+        maxRedirects: 5,
+        validateStatus: () => true,
+      });
+      const probeResp = await axios.get(url, {
+        timeout: 10000,
+        params: { test: '<script>alert(1)</script>' },
+        headers: { 'User-Agent': probeUA },
+        maxRedirects: 5,
+        validateStatus: () => true,
+      });
+      const probeStatus = probeResp.status;
+      const probeBody = typeof probeResp.data === 'string' ? probeResp.data.toLowerCase() : '';
+      const probeHeaders = probeResp.headers || {};
+      const normalStatus = normalResp.status;
+      const wafSignatures = [
+        'cloudflare',
+        'cf-ray',
+        'akamai',
+        'incapsula',
+        'sucuri',
+        'barracuda',
+        'fortiweb',
+        'modsecurity',
+        'webknight',
+        'access denied',
+        'request blocked',
+        'forbidden',
+        'waf',
+        'firewall',
+        'protection',
+      ];
+      const headerStr = JSON.stringify(probeHeaders).toLowerCase();
+      const hasWafHeader = wafSignatures.some(sig => headerStr.includes(sig));
+      const hasWafBody = wafSignatures.some(sig => probeBody.includes(sig));
+      if (probeStatus === 403 && normalStatus < 400) {
+        siteProtected = true;
+        protectionDetail = '目标站点启用了 Web 应用防火墙 (WAF)，攻击性请求被拦截';
+      } else if (probeStatus === 429) {
+        siteProtected = true;
+        protectionDetail = '目标站点启用了请求频率限制，扫描请求被限流';
+      } else if (probeStatus === 503 && (hasWafHeader || hasWafBody)) {
+        siteProtected = true;
+        protectionDetail = '目标站点启用了 CDN/DDoS 防护，需要通过安全验证';
+      } else if (hasWafHeader && probeStatus >= 400) {
+        siteProtected = true;
+        protectionDetail = '目标站点检测到安全防护机制（WAF/CDN），部分扫描可能受限';
+      } else if (probeStatus === 406 || probeStatus === 451) {
+        siteProtected = true;
+        protectionDetail = '目标站点拒绝了带安全测试特征的请求';
+      }
+    } catch {
+      // 探测本身失败不阻塞后续扫描
+    }
+    if (siteProtected) {
+      scanWarnings.push(`${protectionDetail}，漏洞注入扫描（XSS/SQL）结果可能不完整`);
+    }
+
+    // ── 辅助：根据错误类型生成精确的警告文案 ──
+    const classifyError = (label: string, err: unknown): string => {
+      if (!err) return `${label}失败`;
+      const msg = err instanceof Error ? err.message : String(err);
+      const axiosErr = err as { response?: { status?: number }; code?: string };
+      const status = axiosErr?.response?.status;
+      if (status === 403) return `${label}被目标站点防火墙拦截 (HTTP 403)`;
+      if (status === 429) return `${label}被目标站点频率限制 (HTTP 429)`;
+      if (status === 503) return `${label}被目标站点防护系统阻断 (HTTP 503)`;
+      if (axiosErr?.code === 'ECONNREFUSED') return `${label}失败，目标站点拒绝连接`;
+      if (axiosErr?.code === 'ENOTFOUND') return `${label}失败，无法解析目标域名`;
+      if (msg.includes('timeout') || msg.includes('ETIMEDOUT'))
+        return `${label}超时（目标站点响应过慢，可尝试增大超时时间）`;
+      return `${label}失败: ${msg.length > 80 ? msg.slice(0, 80) + '…' : msg}`;
+    };
+
     const TIMEOUT_SENTINEL = Symbol('timeout');
     const withTimeout = <T>(
       promise: Promise<T>,
@@ -1777,23 +1859,20 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
         ),
       ]);
 
-    // 单项扫描超时 30s，三项并行执行，总耗时 ≤ 30s（而非串行 180s）
-    const scanTimeout = Math.min((this.options.timeout as number) || 30000, 30000);
+    // 单项扫描超时，三项并行执行；上限 60s 以保证 Puppeteer 启动 + 多轮 payload 有足够时间
+    const scanTimeout = Math.min((this.options.timeout as number) || 60000, 60000);
     const emptyVuln = {
       vulnerabilities: [] as Array<{ severity: string }>,
       summary: { totalTests: 0 },
     };
-    // 跟踪扫描是否实际执行成功，超时/失败时标记为 unknown 风险
     let xssSkipped = false;
     let sqlSkipped = false;
 
-    // XSS + SQL + 其他漏洞扫描 —— 并行执行
     let xssResult = emptyVuln;
     let sqlResult = emptyVuln;
     let other: Array<Record<string, unknown>> = [];
 
     const [xssRaw, sqlRaw, otherRaw] = await Promise.all([
-      // XSS 扫描
       withTimeout(
         xssAnalyzer.analyze(url, {
           timeout: scanTimeout,
@@ -1805,11 +1884,9 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
         }),
         scanTimeout
       ).catch((err: unknown) => {
-        const msg = err instanceof Error ? err.message : String(err);
-        scanWarnings.push(`XSS 漏洞扫描失败: ${msg}`);
+        scanWarnings.push(classifyError('XSS 漏洞扫描', err));
         return TIMEOUT_SENTINEL as typeof TIMEOUT_SENTINEL;
       }),
-      // SQL 注入扫描
       withTimeout(
         sqlAnalyzer.analyze(url, {
           timeout: scanTimeout,
@@ -1822,29 +1899,38 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
         }),
         scanTimeout
       ).catch((err: unknown) => {
-        const msg = err instanceof Error ? err.message : String(err);
-        scanWarnings.push(`SQL 注入扫描失败: ${msg}`);
+        scanWarnings.push(classifyError('SQL 注入扫描', err));
         return TIMEOUT_SENTINEL as typeof TIMEOUT_SENTINEL;
       }),
-      // 其他漏洞扫描
       withTimeout(this.scanOtherVulnerabilities(undefined, url), scanTimeout).catch(
         (err: unknown) => {
-          const msg = err instanceof Error ? err.message : String(err);
-          scanWarnings.push(`其他漏洞扫描失败: ${msg}`);
+          scanWarnings.push(classifyError('其他漏洞扫描', err));
           return TIMEOUT_SENTINEL as typeof TIMEOUT_SENTINEL;
         }
       ),
     ]);
 
     if (xssRaw === TIMEOUT_SENTINEL) {
-      scanWarnings.push('XSS 漏洞扫描超时（可能缺少 Puppeteer/Chromium 环境），已跳过');
+      if (!scanWarnings.some(w => w.startsWith('XSS'))) {
+        scanWarnings.push(
+          siteProtected
+            ? 'XSS 漏洞扫描超时，可能因站点防护拦截导致'
+            : 'XSS 漏洞扫描超时，已跳过（目标站点响应较慢或页面结构复杂，可尝试增大超时时间后重试）'
+        );
+      }
       xssSkipped = true;
     } else {
       xssResult = xssRaw as typeof emptyVuln;
     }
 
     if (sqlRaw === TIMEOUT_SENTINEL) {
-      scanWarnings.push('SQL 注入扫描超时，已跳过');
+      if (!scanWarnings.some(w => w.startsWith('SQL'))) {
+        scanWarnings.push(
+          siteProtected
+            ? 'SQL 注入扫描超时，可能因站点防护拦截导致'
+            : 'SQL 注入扫描超时，已跳过（目标站点响应较慢或参数点较多，可尝试增大超时时间后重试）'
+        );
+      }
       sqlSkipped = true;
     } else {
       sqlResult = sqlRaw as typeof emptyVuln;
@@ -1853,7 +1939,9 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
     if (otherRaw !== TIMEOUT_SENTINEL) {
       other = otherRaw as Array<Record<string, unknown>>;
     } else {
-      scanWarnings.push('其他漏洞扫描超时，已跳过');
+      if (!scanWarnings.some(w => w.startsWith('其他'))) {
+        scanWarnings.push('其他漏洞扫描超时，已跳过');
+      }
     }
 
     return {
@@ -1861,7 +1949,6 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
         ...xssResult,
         summary: {
           totalTests: xssResult.summary?.totalTests || 0,
-          // 超时/失败时标记为 unknown，防止评分系统误认为安全
           riskLevel: xssSkipped ? 'unknown' : buildRiskLevel(xssResult.vulnerabilities || []),
         },
       },

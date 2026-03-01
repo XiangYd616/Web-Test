@@ -117,13 +117,11 @@ export default defineConfig({
     cssCodeSplit: true,
     // 资源内联阈值
     assetsInlineLimit: 4096,
-    // Chunk大小警告限制 - 更严格
-    chunkSizeWarningLimit: 300,
+    // Electron file:// 下 manualChunks 易导致加载顺序问题，交由 Rollup 自动处理
+    chunkSizeWarningLimit: 700,
     rollupOptions: {
       external: ['electron', 'sqlite3', 'pg-native', 'crypto', 'jsonwebtoken', 'jwa', 'jws'],
       output: {
-        // 不手动分割 chunk，让 Rollup 自动处理依赖顺序，避免循环依赖问题
-        // 资源文件命名
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: assetInfo => {

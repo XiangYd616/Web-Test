@@ -1,5 +1,7 @@
 import {
+  ClipboardList,
   Clock,
+  Code2,
   ExternalLink,
   FolderOpen,
   Globe,
@@ -57,7 +59,7 @@ type AppLayoutProps = {
   children: ReactNode;
 };
 
-type SidebarTab = 'history' | 'collections' | 'environments';
+type SidebarTab = 'history' | 'collections' | 'environments' | 'snippets' | 'scratchpad';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'nav.console',
@@ -381,6 +383,22 @@ const AppLayout = ({ children }: AppLayoutProps) => {
                   <Variable className='w-3.5 h-3.5' />
                   <span>{t('sidebar.environments', 'Envs')}</span>
                 </button>
+                <button
+                  type='button'
+                  className={`tw-sidebar-tab ${sidebarTab === 'snippets' ? 'is-active' : ''}`}
+                  onClick={() => setSidebarTab('snippets')}
+                >
+                  <Code2 className='w-3.5 h-3.5' />
+                  <span>{t('sidebar.snippets', 'Snippets')}</span>
+                </button>
+                <button
+                  type='button'
+                  className={`tw-sidebar-tab ${sidebarTab === 'scratchpad' ? 'is-active' : ''}`}
+                  onClick={() => setSidebarTab('scratchpad')}
+                >
+                  <ClipboardList className='w-3.5 h-3.5' />
+                  <span>{t('sidebar.scratchpad', 'Scratch')}</span>
+                </button>
               </div>
             ) : (
               <div className='tw-sidebar-tabs-collapsed'>
@@ -416,6 +434,28 @@ const AppLayout = ({ children }: AppLayoutProps) => {
                   title={t('sidebar.environments', 'Environments')}
                 >
                   <Variable className='w-4 h-4' />
+                </button>
+                <button
+                  type='button'
+                  className={`tw-sidebar-tab-icon ${sidebarTab === 'snippets' ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setSidebarTab('snippets');
+                    if (!sidebarExpanded) toggleSidebar();
+                  }}
+                  title={t('sidebar.snippets', 'Snippets')}
+                >
+                  <Code2 className='w-4 h-4' />
+                </button>
+                <button
+                  type='button'
+                  className={`tw-sidebar-tab-icon ${sidebarTab === 'scratchpad' ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setSidebarTab('scratchpad');
+                    if (!sidebarExpanded) toggleSidebar();
+                  }}
+                  title={t('sidebar.scratchpad', 'Scratch Pad')}
+                >
+                  <ClipboardList className='w-4 h-4' />
                 </button>
               </div>
             )}
@@ -598,6 +638,63 @@ const AppLayout = ({ children }: AppLayoutProps) => {
                         <ExternalLink className='w-3.5 h-3.5' />
                         <span>{t('sidebar.manageEnvs', '管理环境变量')}</span>
                       </button>
+                    </div>
+                  </>
+                )}
+
+                {/* Snippets 面板 */}
+                {sidebarTab === 'snippets' && (
+                  <>
+                    <div className='tw-sidebar-panel-toolbar'>
+                      <div className='tw-sidebar-search'>
+                        <Search className='w-3.5 h-3.5 opacity-40' />
+                        <input
+                          type='text'
+                          className='tw-sidebar-search-input'
+                          placeholder={t('sidebar.searchSnippets', '搜索代码片段...')}
+                          readOnly
+                          onFocus={() => navigate('/templates')}
+                        />
+                      </div>
+                    </div>
+                    <div className='tw-sidebar-list'>
+                      <div className='tw-sidebar-empty'>
+                        <Code2 className='w-8 h-8 opacity-15' />
+                        <span>{t('sidebar.snippetsHint', '保存和复用常用测试配置')}</span>
+                        <button
+                          type='button'
+                          className='tw-sidebar-link-btn'
+                          onClick={() => navigate('/templates')}
+                        >
+                          {t('sidebar.goToSnippets', '前往代码片段')} →
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Scratch Pad 面板 */}
+                {sidebarTab === 'scratchpad' && (
+                  <>
+                    <div className='tw-sidebar-panel-toolbar'>
+                      <div className='tw-sidebar-search'>
+                        <Search className='w-3.5 h-3.5 opacity-40' />
+                        <input
+                          type='text'
+                          className='tw-sidebar-search-input'
+                          placeholder={t('sidebar.searchScratch', '搜索草稿...')}
+                          readOnly
+                        />
+                      </div>
+                    </div>
+                    <div className='tw-sidebar-list'>
+                      <div className='tw-sidebar-empty'>
+                        <ClipboardList className='w-8 h-8 opacity-15' />
+                        <span>{t('sidebar.scratchHint', '临时保存请求草稿')}</span>
+                        <p className='text-[11px] text-muted-foreground/60 mt-1 px-4 text-center'>
+                          {t('sidebar.scratchDesc', '无需登录即可使用，数据保存在本地')}
+                        </p>
+                      </div>
                     </div>
                   </>
                 )}

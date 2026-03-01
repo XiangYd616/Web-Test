@@ -31270,83 +31270,10 @@ function createPaginationMeta(page, limit, total) {
 function getHttpStatusCode(errorCode) {
   return StandardStatusCodeMap[errorCode] || 500;
 }
-async function wrapAsyncOperation(operation, options2 = {}) {
-  try {
-    const result = await operation();
-    return createSuccessResponse(result, void 0, options2);
-  } catch (error) {
-    console.error('\u5F02\u6B65\u64CD\u4F5C\u5931\u8D25:', error);
-    if (error instanceof Error) {
-      return createErrorResponse(
-        'INTERNAL_SERVER_ERROR' /* INTERNAL_SERVER_ERROR */,
-        error.message,
-        { stack: error.stack },
-        options2
-      );
-    }
-    return createErrorResponse(
-      'UNKNOWN_ERROR' /* UNKNOWN_ERROR */,
-      '\u672A\u77E5\u9519\u8BEF',
-      { error: String(error) },
-      options2
-    );
-  }
-}
-var ApiResponseBuilder;
 var init_apiResponseBuilder = __esm({
   'shared/utils/apiResponseBuilder.ts'() {
     'use strict';
     init_standardApiResponse();
-    ApiResponseBuilder = {
-      // 成功响应
-      success: createSuccessResponse,
-      created: createCreatedResponse,
-      noContent: createNoContentResponse,
-      paginated: createPaginatedResponse,
-      // 错误响应
-      error: createErrorResponse,
-      validationError: createValidationErrorResponse,
-      unauthorized: createUnauthorizedResponse,
-      forbidden: createForbiddenResponse,
-      notFound: createNotFoundResponse,
-      conflict: createConflictResponse,
-      rateLimit: createRateLimitResponse,
-      internalError: createInternalErrorResponse,
-      // 工具函数
-      generateRequestId,
-      createMeta: createStandardMeta,
-      createPagination: createPaginationMeta,
-      getStatusCode: getHttpStatusCode,
-      wrapAsync: wrapAsyncOperation,
-    };
-    if (typeof module !== 'undefined' && module.exports) {
-      module.exports = {
-        // 成功响应
-        createSuccessResponse,
-        createCreatedResponse,
-        createNoContentResponse,
-        createPaginatedResponse,
-        // 错误响应
-        createErrorResponse,
-        createValidationErrorResponse,
-        createUnauthorizedResponse,
-        createForbiddenResponse,
-        createNotFoundResponse,
-        createConflictResponse,
-        createRateLimitResponse,
-        createInternalErrorResponse,
-        // 工具函数
-        generateRequestId,
-        createStandardMeta,
-        createPaginationMeta,
-        getHttpStatusCode,
-        wrapAsyncOperation,
-        // 主要导出对象
-        ApiResponseBuilder,
-        // 默认导出
-        default: ApiResponseBuilder,
-      };
-    }
   },
 });
 

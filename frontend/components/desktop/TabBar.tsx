@@ -295,6 +295,28 @@ const TabBar = () => {
     return () => window.removeEventListener('tw:create-test-tab', handler);
   }, [handleNewTestTab]);
 
+  // 监听 selectTestType 发出的 tw:update-tab-type 事件，同步更新当前活跃标签的测试类型
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const testType = (e as CustomEvent).detail as TestType;
+      if (!testType || !TEST_TYPE_META[testType]) return;
+      setTabs(prev => {
+        const idx = prev.findIndex(t => t.id === activeTabId);
+        if (idx < 0) return prev;
+        const tab = prev[idx];
+        // 仅更新绑定了测试类型的可关闭标签（用户创建的测试标签）
+        if (!tab.closable) return prev;
+        if (tab.testType === testType) return prev;
+        const next = [...prev];
+        next[idx] = { ...tab, testType, label: TEST_TYPE_META[testType].labelKey };
+        saveTabs(next);
+        return next;
+      });
+    };
+    window.addEventListener('tw:update-tab-type', handler);
+    return () => window.removeEventListener('tw:update-tab-type', handler);
+  }, [activeTabId]);
+
   // 监听 runTest 发出的 tw:ensure-test-tab 事件
   // 如果当前活跃标签没有绑定 testType（即"控制台"标签），自动创建测试类型标签页
   useEffect(() => {

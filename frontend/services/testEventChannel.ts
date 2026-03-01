@@ -39,10 +39,16 @@ function subscribeIpc(testId: string, handlers: TestEventHandlers): TestEventSub
 
       if (event === 'test-progress') {
         const step = data.currentStep ?? data.message;
+        const statsRaw = data.stats;
+        const stats =
+          statsRaw && typeof statsRaw === 'object' && !Array.isArray(statsRaw)
+            ? (statsRaw as TestProgressInfo['stats'])
+            : undefined;
         handlers.onProgress({
           progress: Number(data.progress ?? 0),
           status: data.status ? (String(data.status) as TestStatus) : undefined,
           currentStep: step ? String(step) : undefined,
+          stats,
         });
       } else if (event === 'test-log') {
         handlers.onLog({

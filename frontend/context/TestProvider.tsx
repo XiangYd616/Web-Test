@@ -77,10 +77,18 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
   const [selectedType, setSelectedType] = useState<TestType>('performance');
 
   // 监听 TabBar 发出的测试类型切换事件
+  // 使用 ref 桥接：useEffect 注册时 selectTestType 尚未创建，通过 ref 延迟引用
+  const selectTestTypeRef = useRef<((type: TestType) => void) | null>(null);
   useEffect(() => {
     const handler = (e: Event) => {
       const testType = (e as CustomEvent).detail as TestType;
-      if (testType) setSelectedType(testType);
+      if (testType) {
+        if (selectTestTypeRef.current) {
+          selectTestTypeRef.current(testType);
+        } else {
+          setSelectedType(testType);
+        }
+      }
     };
     window.addEventListener('tw:select-test-type', handler);
     return () => window.removeEventListener('tw:select-test-type', handler);
@@ -782,6 +790,9 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
         status: isProcessing ? prev.status : 'idle',
       }));
 
+      // 通知 TabBar 更新当前活跃标签的测试类型
+      window.dispatchEvent(new CustomEvent('tw:update-tab-type', { detail: type }));
+
       // 自动更新 Accept 请求头以匹配目标测试类型
       const newAccept = getDefaultAcceptHeader(type);
       setRequestMeta(prev => {
@@ -804,6 +815,11 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
     },
     [buildDefaultConfigText, configText, isProcessing, selectedType, updateConfigText, url]
   );
+
+  // 同步 ref，让 TabBar 事件能调用最新的 selectTestType
+  useEffect(() => {
+    selectTestTypeRef.current = selectTestType;
+  }, [selectTestType]);
 
   const selectHistory = useCallback(
     (id: string) => {

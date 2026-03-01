@@ -448,7 +448,7 @@ a {
 
 .tw-app-shell--desktop .tw-main-area {
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 // 桌面模式下顶部工具栏内元素不触发拖拽
@@ -1950,12 +1950,16 @@ a {
   flex: 1;
   padding: 16px 20px 24px;
   overflow-y: auto;
+  min-height: 0;
 }
 
 /* Dashboard 页面内容区去除 padding，让上下分屏充满 */
 .tw-content--dashboard {
   padding: 0 !important;
   overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* ══════════════════════════════════════════════════════════════

@@ -63,6 +63,23 @@ const buildNormalizedResult = (
   // 安全引擎：details 直接包含分析结果
   // 其它引擎：summary 中嵌入了图表数据
   let chartDetails: Record<string, unknown> = {};
+  let metricsOverride: Array<Record<string, unknown>> | null = null;
+
+  // 辅助：将 summary 中的 KPI 转为 metrics 数组（供 ResultSummary 概览面板展示）
+  // defs: [key, label?, unit?, allowZero?]  — allowZero 为 true 时零值也展示
+  const buildMetrics = (
+    src: Record<string, unknown>,
+    defs: Array<[string, string?, string?, boolean?]>
+  ): Array<Record<string, unknown>> => {
+    const arr: Array<Record<string, unknown>> = [];
+    for (const [key, label, unit, allowZero] of defs) {
+      const v = src[key];
+      if (v === undefined || v === null || v === '') continue;
+      if (v === 0 && !allowZero) continue;
+      arr.push({ metricName: label ?? key, metricValue: v, unit });
+    }
+    return arr;
+  };
 
   if (engineType === 'performance') {
     // 从 details.results.details 提取图表数据
@@ -82,10 +99,30 @@ const buildNormalizedResult = (
       contentAnalysis: innerDetails.contentAnalysis,
       iterations: innerDetails.iterations || results.iterations,
     };
+    const m = buildMetrics(summary, [
+      ['averageLoadTime', 'averageLoadTime', undefined, true],
+      ['fastestLoadTime', 'fastestLoadTime'],
+      ['slowestLoadTime', 'slowestLoadTime'],
+    ]);
+    if (m.length) metricsOverride = m;
   } else if (engineType === 'security') {
     chartDetails = rawDetails;
+    const m = buildMetrics(summary, [
+      ['totalIssues', 'totalIssues', undefined, true],
+      ['criticalIssues', 'criticalIssues'],
+      ['highRiskIssues', 'highRiskIssues'],
+      ['recommendations', 'recommendations'],
+    ]);
+    if (m.length) metricsOverride = m;
   } else if (engineType === 'seo') {
     chartDetails = rawDetails;
+    const m = buildMetrics(summary, [
+      ['totalChecks', 'totalChecks', undefined, true],
+      ['passedChecks', 'passedChecks', undefined, true],
+      ['failedChecks', 'failedChecks'],
+      ['level', 'level'],
+    ]);
+    if (m.length) metricsOverride = m;
   } else if (engineType === 'accessibility') {
     // summary 中嵌入了 checks/recommendations
     const s = summary as Record<string, unknown>;
@@ -98,6 +135,13 @@ const buildNormalizedResult = (
     } else {
       chartDetails = rawDetails;
     }
+    const aM = buildMetrics(summary, [
+      ['totalIssues', 'totalIssues', undefined, true],
+      ['passedChecks', 'passedChecks', undefined, true],
+      ['errors', 'errors'],
+      ['warnings', 'warnings'],
+    ]);
+    if (aM.length) metricsOverride = aM;
   } else if (engineType === 'compatibility') {
     const s = summary as Record<string, unknown>;
     if (s.browsers || s.devices || s.matrix) {
@@ -118,6 +162,12 @@ const buildNormalizedResult = (
     } else {
       chartDetails = rawDetails;
     }
+    const cM = buildMetrics(summary, [
+      ['browserCount', 'browserCount', undefined, true],
+      ['deviceCount', 'deviceCount', undefined, true],
+      ['overallScore', 'overallScore', undefined, true],
+    ]);
+    if (cM.length) metricsOverride = cM;
   } else if (engineType === 'ux') {
     const s = summary as Record<string, unknown>;
     if (s.metrics || s.stats) {
@@ -155,12 +205,47 @@ const buildNormalizedResult = (
     } else {
       chartDetails = rawDetails;
     }
+    const wM = buildMetrics(summary, [
+      ['performance', 'performanceScore'],
+      ['seo', 'seoScore'],
+      ['accessibility', 'accessibilityScore'],
+      ['ux', 'uxScore'],
+    ]);
+    if (wM.length) metricsOverride = wM;
+  } else if (engineType === 'api') {
+    chartDetails = rawDetails;
+    const aM = buildMetrics(summary, [
+      ['total', 'totalRequests', undefined, true],
+      ['successful', 'successfulRequests', undefined, true],
+      ['failed', 'failedRequests'],
+      ['successRate', 'successRate', undefined, true],
+      ['averageResponseTime', 'averageResponseTime', 'ms'],
+      ['totalAssertions', 'totalAssertions', undefined, true],
+      ['failedAssertions', 'failedAssertions'],
+    ]);
+    if (aM.length) metricsOverride = aM;
   } else if (engineType === 'stress') {
     const base = isRecord(rawDetails) ? rawDetails : {};
     const innerDet = isRecord((base as { details?: unknown }).details)
       ? ((base as { details?: unknown }).details as Record<string, unknown>)
       : base;
     chartDetails = innerDet;
+
+    const stressSrc = isRecord(raw.summary) ? raw.summary : {};
+    const sM = buildMetrics(stressSrc, [
+      ['requestsPerSecond', 'throughput', 'req/s'],
+      ['averageResponseTime', 'averageResponseTime', 'ms'],
+      ['successRate', 'successRate', '%', true],
+      ['totalRequests', 'totalRequests', undefined, true],
+      ['failedRequests', 'failedRequests'],
+      ['minResponseTime', 'minResponseTime', 'ms'],
+      ['maxResponseTime', 'maxResponseTime', 'ms'],
+    ]);
+    // throughput 降级：requestsPerSecond 不存在时尝试 throughput
+    if (!sM.some(m => m.metricName === 'throughput') && stressSrc.throughput) {
+      sM.unshift({ metricName: 'throughput', metricValue: stressSrc.throughput, unit: 'req/s' });
+    }
+    if (sM.length) metricsOverride = sM;
   } else {
     chartDetails = rawDetails;
   }
@@ -234,7 +319,7 @@ const buildNormalizedResult = (
     if (recs.length) filteredSummary.recommendations = recs;
   }
 
-  const metricsArr = Array.isArray(raw.metrics) ? raw.metrics : [];
+  const metricsArr = metricsOverride ?? (Array.isArray(raw.metrics) ? raw.metrics : []);
   const warningsArr = Array.isArray(raw.warnings) ? raw.warnings : [];
   const errorsArr = Array.isArray(raw.errors) ? raw.errors : [];
 
@@ -352,6 +437,7 @@ const localTestService = {
     return {
       status: test.status,
       progress: test.progress ?? 0,
+      testType: test.engine_type,
     };
   },
 

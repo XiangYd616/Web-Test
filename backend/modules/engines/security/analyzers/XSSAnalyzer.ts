@@ -252,9 +252,9 @@ class XSSAnalyzer {
       if (browserSkipped) {
         recommendations.unshift({
           priority: 'high',
-          title: '浏览器引擎不可用',
+          title: '浏览器引擎暂时不可用',
           description:
-            '本次仅完成静态分析，反射型/DOM型/存储型 XSS 检测已跳过。建议在 Web 版中重新运行完整扫描。',
+            '本次仅完成静态分析，反射型/DOM型/存储型 XSS 检测已跳过。浏览器引擎可能正在初始化中，请稍后重试。',
           category: 'scan-limitation',
           effort: 'low',
           examples: [],

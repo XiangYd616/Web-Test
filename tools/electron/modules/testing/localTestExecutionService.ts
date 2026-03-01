@@ -31,7 +31,12 @@ async function ensureDbReady(): Promise<void> {
 type TestEngineType = string;
 type BaseTestConfig = { url?: string; metadata?: Record<string, unknown>; [key: string]: unknown };
 type BaseTestResult = { duration: number; engineType: string; [key: string]: unknown };
-type TestProgress = { progress?: number; currentStep?: string; messages?: unknown[] };
+type TestProgress = {
+  progress?: number;
+  currentStep?: string;
+  messages?: unknown[];
+  extra?: Record<string, unknown>;
+};
 type ITestEngine = {
   type: string;
   name: string;
@@ -189,12 +194,15 @@ const localTestExecutionService = {
             emitLog('info', latestMessage, { progress: progressValue });
           }
 
-          // 实时推送进度到渲染进程
+          // 实时推送进度到渲染进程（含 stats 供压力测试实时监控）
+          const extra = progress.extra as Record<string, unknown> | undefined;
+          const stats = extra?.stats as Record<string, unknown> | undefined;
           emitTestEvent('test-progress', {
             testId,
             progress: progressValue,
             currentStep: step || lastStep,
             status: 'running',
+            ...(stats ? { stats } : {}),
           });
         });
 
