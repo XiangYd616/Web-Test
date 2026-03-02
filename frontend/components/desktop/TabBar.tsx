@@ -212,7 +212,9 @@ const TabBar = () => {
       syncTestType(tab.testType);
       // 通知 TestProvider 保存旧会话、恢复新会话
       window.dispatchEvent(
-        new CustomEvent('tw:switch-tab', { detail: { fromTabId: prevId, toTabId: tab.id } })
+        new CustomEvent('tw:switch-tab', {
+          detail: { fromTabId: prevId, toTabId: tab.id, testType: tab.testType },
+        })
       );
       // 通知 DashboardPage 当前标签是否为测试类型标签（closable 的才是用户创建的测试标签）
       window.dispatchEvent(
@@ -273,14 +275,21 @@ const TabBar = () => {
         saveTabs(next);
         return next;
       });
+      const prevId = activeTabId;
       setActiveTabId(newTab.id);
       syncTestType(testType);
       setShowNewMenu(false);
+      // 通知 TestProvider 保存旧会话、重置新会话（携带 testType）
+      window.dispatchEvent(
+        new CustomEvent('tw:switch-tab', {
+          detail: { fromTabId: prevId, toTabId: newTab.id, testType },
+        })
+      );
       // 通知 DashboardPage 当前是测试类型标签
       window.dispatchEvent(new CustomEvent('tw:tab-is-test', { detail: true }));
       navigate('/dashboard');
     },
-    [navigate, syncTestType]
+    [activeTabId, navigate, syncTestType]
   );
 
   // 监听 DashboardOverview 发出的 tw:create-test-tab 事件
@@ -344,9 +353,11 @@ const TabBar = () => {
         });
         setActiveTabId(newTab.id);
         syncTestType(testType);
-        // 通知 TestProvider 保存旧会话、重置新会话
+        // 通知 TestProvider 保存旧会话、重置新会话（携带 testType）
         window.dispatchEvent(
-          new CustomEvent('tw:switch-tab', { detail: { fromTabId: prevId, toTabId: newTab.id } })
+          new CustomEvent('tw:switch-tab', {
+            detail: { fromTabId: prevId, toTabId: newTab.id, testType },
+          })
         );
         // 通知 DashboardPage 当前是测试类型标签
         window.dispatchEvent(new CustomEvent('tw:tab-is-test', { detail: true }));

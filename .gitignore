@@ -16,6 +16,7 @@ out/
 # Electron build artifacts
 tools/electron/dist/
 tools/electron/release/
+tools/electron/resources/backend/
 
 # Environment variables
 .env
@@ -181,4 +182,3 @@ _debug_*
 
 
 skills/
-server.js

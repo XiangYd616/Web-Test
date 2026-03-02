@@ -23,6 +23,7 @@ import {
 import type React from 'react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { type HistoryItem, type TestType, useTestHistory } from '../../context/TestContext';
 
@@ -187,9 +188,11 @@ const DashboardOverview: React.FC = () => {
     window.dispatchEvent(new CustomEvent('tw:create-test-tab', { detail: type }));
   };
 
+  const navigate = useNavigate();
+
   // 点击历史条目 → 查看详情
   const handleHistoryClick = (item: HistoryItem) => {
-    window.dispatchEvent(new CustomEvent('tw:view-history', { detail: item.id }));
+    navigate(`/history/${item.id}`);
   };
 
   return (

@@ -167,9 +167,10 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
   // 监听 TabBar 标签切换事件：保存旧会话显示状态、恢复新会话显示状态
   useEffect(() => {
     const handler = (e: Event) => {
-      const { fromTabId, toTabId } = (e as CustomEvent).detail as {
+      const { fromTabId, toTabId, testType } = (e as CustomEvent).detail as {
         fromTabId: string;
         toTabId: string;
+        testType?: TestType;
       };
       if (!fromTabId || !toTabId || fromTabId === toTabId) return;
 
@@ -197,13 +198,15 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
         setConfigText(cached.configText);
         setUrl(cached.url);
       } else {
-        // 新标签页：重置显示为空状态
-        setResult({ status: 'idle', duration: '-', score: 0, engine: 'performance' });
+        // 新标签页：重置显示为空状态，使用事件携带的 testType（默认 performance）
+        const engineType = testType || 'performance';
+        setSelectedType(engineType);
+        setResult({ status: 'idle', duration: '-', score: 0, engine: engineType });
         setResultPayloadText(DEFAULT_RESULT_PAYLOAD);
         setLogs(LOG_SEED);
         setLogStatus('idle');
         setProgressInfo(null);
-        setConfigText(DEFAULT_CONFIG);
+        setConfigText(buildDefaultConfigText(engineType, url));
       }
 
       activeTabIdRef.current = toTabId;
