@@ -862,9 +862,11 @@ class CompatibilityTestEngine implements ITestEngine<CompatibilityRunConfig, Bas
 
       return finalResult;
     } catch (error) {
+      const rawMessage = (error as Error).message;
+      const friendlyMessage = diagnoseNetworkError(error, '兼容性测试', url);
       this.activeTests.set(testId, {
         status: TestStatus.FAILED,
-        error: (error as Error).message,
+        error: rawMessage,
       });
 
       // 不在此处调用 errorCallback —— 由 UserTestManager 统一处理
@@ -883,12 +885,12 @@ class CompatibilityTestEngine implements ITestEngine<CompatibilityRunConfig, Bas
         version: this.version,
         success: false,
         testId,
-        error: (error as Error).message,
+        error: rawMessage,
         status: TestStatus.FAILED,
         score: 0,
         summary: null,
         warnings: [],
-        errors: [(error as Error).message],
+        errors: [friendlyMessage],
       } as CompatibilityFinalResult;
     }
   }

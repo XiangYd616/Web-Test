@@ -18,6 +18,7 @@ import AccessibilityTestEngine from '../accessibility/AccessibilityTestEngine';
 import PerformanceTestEngine from '../performance/PerformanceTestEngine';
 import SeoTestEngine from '../seo/SEOTestEngine';
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
+import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
 import UXTestEngine from '../ux/UXTestEngine';
 
 type WebsiteRunConfig = BaseTestConfig & {
@@ -786,17 +787,19 @@ class WebsiteTestEngine implements ITestEngine<WebsiteRunConfig, BaseTestResult>
 
       return finalResult;
     } catch (error) {
+      const rawMessage = (error as Error).message;
+      const friendlyMessage = diagnoseNetworkError(error, '网站综合测试', config.url);
       const errorResult = {
         engine: this.name,
         version: this.version,
         success: false,
-        error: (error as Error).message,
+        error: rawMessage,
         status: TestStatus.FAILED,
         score: 0,
         summary: {},
         metrics: {},
         warnings: [] as string[],
-        errors: [(error as Error).message],
+        errors: [friendlyMessage],
         timestamp: new Date().toISOString(),
       };
 

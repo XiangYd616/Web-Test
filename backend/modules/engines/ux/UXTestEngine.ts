@@ -12,6 +12,7 @@ import {
 import BaseTestEngine from '../base/BaseTestEngine';
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
 import ScreenshotService, { type ScreenshotResult } from '../shared/services/ScreenshotService';
+import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
 import { calculateUXScore, scoreToGrade } from '../shared/utils/uxScore';
 
 type DevicePreset = 'desktop' | 'mobile' | 'tablet';
@@ -579,8 +580,9 @@ class UXTestEngine extends BaseTestEngine implements ITestEngine<UXRunConfig, Ba
 
       return finalResult;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.activeTests.set(testId, { status: TestStatus.FAILED, error: message });
+      const rawMessage = error instanceof Error ? error.message : String(error);
+      const friendlyMessage = diagnoseNetworkError(error, 'UX 测试', url);
+      this.activeTests.set(testId, { status: TestStatus.FAILED, error: rawMessage });
       // 不在此处调用 emitError —— 由 UserTestManager 统一处理
 
       setTimeout(
@@ -598,7 +600,8 @@ class UXTestEngine extends BaseTestEngine implements ITestEngine<UXRunConfig, Ba
         success: false,
         testId,
         status: TestStatus.FAILED,
-        error: message,
+        error: rawMessage,
+        errors: [friendlyMessage],
       } as UXFinalResult;
     } finally {
       await release();

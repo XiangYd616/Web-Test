@@ -17,6 +17,7 @@ import {
 } from '../../../../shared/types/testEngine.types';
 import { query } from '../../config/database';
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
+import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
 
 type SeoRunConfig = BaseTestConfig & {
   url?: string;
@@ -595,6 +596,7 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
       // 优先使用 Puppeteer 获取 JS 渲染后的 HTML（SPA/SSR 场景下 SEO 标签可能是 JS 动态生成的）
       let htmlContent: string;
       let jsRendered = false;
+      let fallbackReason: 'unavailable' | 'error' | null = null;
       const poolAvailable = await puppeteerPool.isAvailable();
       if (poolAvailable) {
         try {
@@ -618,6 +620,7 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
             await release();
           }
         } catch {
+          fallbackReason = 'error';
           // Puppeteer 失败，回退到 HTTP 请求
           const response = await axios.get(validatedConfig.url, {
             timeout: validatedConfig.timeout,
@@ -626,6 +629,7 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
           htmlContent = typeof response.data === 'string' ? response.data : String(response.data);
         }
       } else {
+        fallbackReason = 'unavailable';
         const response = await axios.get(validatedConfig.url, {
           timeout: validatedConfig.timeout,
           headers: { 'User-Agent': validatedConfig.userAgent },
@@ -637,9 +641,13 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
 
       // Puppeteer 降级警告：静态获取无法解析 JS 渲染的内容
       const puppeteerWarnings: string[] = [];
-      if (!jsRendered) {
+      if (fallbackReason === 'unavailable') {
         puppeteerWarnings.push(
           '浏览器引擎不可用，本次使用静态 HTTP 获取页面。如果页面依赖 JavaScript 渲染 SEO 标签（SPA/SSR），检测结果可能不完整。'
+        );
+      } else if (fallbackReason === 'error') {
+        puppeteerWarnings.push(
+          '浏览器引擎打开页面失败，已回退到静态 HTTP 获取。JS 动态渲染的 SEO 内容（如 SPA 页面的 meta 标签）可能未被检测到。'
         );
       }
 
@@ -862,13 +870,14 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
 
       return finalResult;
     } catch (error) {
-      const message = (error as Error).message;
+      const rawMessage = (error as Error).message;
+      const message = diagnoseNetworkError(error, 'SEO 分析', config.url);
       const errorResult: SeoFinalResult = {
         engine: this.name,
         version: this.version,
         success: false,
         testId,
-        error: message,
+        error: rawMessage,
         status: TestStatus.FAILED,
         score: 0,
         summary: {
@@ -885,7 +894,7 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
 
       this.activeTests.set(testId, {
         status: TestStatus.FAILED,
-        error: message,
+        error: rawMessage,
       });
 
       if (this.errorCallback) {

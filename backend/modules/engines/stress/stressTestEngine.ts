@@ -12,6 +12,7 @@ import {
 import { getAlertManager } from '../../alert/services/AlertManager';
 import Logger from '../../utils/logger';
 // 进度事件统一由 UserTestManager.progressCallback -> sendToUser 推送，不再直接走房间广播
+import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
 import StressAnalyzer, {
   type StressConfig,
   type StressProgress,
@@ -621,6 +622,8 @@ class StressTestEngine implements ITestEngine<StressRunConfig, BaseTestResult> {
 
       return finalResult;
     } catch (error) {
+      const rawMessage = (error as Error).message;
+      const friendlyMessage = diagnoseNetworkError(error, '压力测试', url);
       Logger.error(`❌ 压力测试失败: ${testId}`, error as Error);
 
       const errorResult: StressFinalResult = {
@@ -629,12 +632,12 @@ class StressTestEngine implements ITestEngine<StressRunConfig, BaseTestResult> {
         success: false,
         testId,
         url,
-        error: (error as Error).message,
+        error: rawMessage,
         status: TestStatus.FAILED,
         score: 0,
         summary: null,
         warnings: [],
-        errors: [(error as Error).message],
+        errors: [friendlyMessage],
         timestamp: new Date().toISOString(),
       };
 

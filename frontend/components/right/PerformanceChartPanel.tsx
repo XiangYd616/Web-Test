@@ -46,6 +46,7 @@ type RecommendationItem = {
 type WebVitalItem = {
   value?: unknown;
   rating?: unknown;
+  estimated?: boolean;
 };
 
 type HttpInfoData = {
@@ -200,11 +201,31 @@ const PerformanceChartPanel = () => {
     )
       return null;
     return {
-      lcp: { value: lcpValue, rating: String(lcp?.rating ?? '') },
-      fcp: { value: fcpValue, rating: String(fcp?.rating ?? '') },
-      cls: { value: clsValue, rating: String(cls?.rating ?? '') },
-      inp: { value: inpValue, rating: String(inp?.rating ?? '') },
-      ttfb: { value: ttfbValue, rating: String(ttfb?.rating ?? '') },
+      lcp: {
+        value: lcpValue,
+        rating: String(lcp?.rating ?? ''),
+        estimated: lcp?.estimated !== false,
+      },
+      fcp: {
+        value: fcpValue,
+        rating: String(fcp?.rating ?? ''),
+        estimated: fcp?.estimated !== false,
+      },
+      cls: {
+        value: clsValue,
+        rating: String(cls?.rating ?? ''),
+        estimated: cls?.estimated !== false,
+      },
+      inp: {
+        value: inpValue,
+        rating: String(inp?.rating ?? ''),
+        estimated: inp?.estimated !== false,
+      },
+      ttfb: {
+        value: ttfbValue,
+        rating: String(ttfb?.rating ?? ''),
+        estimated: ttfb?.estimated !== false,
+      },
     };
   }, [performanceDetails]);
 
@@ -464,7 +485,25 @@ const PerformanceChartPanel = () => {
         <div className='space-y-3'>
           <div className='flex items-center gap-2'>
             <div className='h-5 w-1 rounded-full bg-green-500' />
-            <h3 className='text-sm font-semibold text-foreground'>Core Web Vitals</h3>
+            <h3 className='text-sm font-semibold text-foreground'>
+              Core Web Vitals
+              {webVitals && webVitals.lcp.estimated && (
+                <Badge
+                  variant='outline'
+                  className='ml-2 text-[10px] px-1.5 py-0 font-normal text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-700'
+                >
+                  估算值
+                </Badge>
+              )}
+              {webVitals && !webVitals.lcp.estimated && (
+                <Badge
+                  variant='outline'
+                  className='ml-2 text-[10px] px-1.5 py-0 font-normal text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                >
+                  浏览器实测
+                </Badge>
+              )}
+            </h3>
           </div>
 
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -515,9 +554,11 @@ const PerformanceChartPanel = () => {
                 <CardHeader className='py-2 px-4 border-b'>
                   <CardTitle className='text-sm font-medium'>
                     原始值
-                    <span className='text-xs text-muted-foreground font-normal ml-1'>
-                      (仅 TTFB 为实测)
-                    </span>
+                    {webVitals && webVitals.lcp.estimated && (
+                      <span className='text-xs text-muted-foreground font-normal ml-1'>
+                        (仅 TTFB 为实测，其余为估算)
+                      </span>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className='p-3'>

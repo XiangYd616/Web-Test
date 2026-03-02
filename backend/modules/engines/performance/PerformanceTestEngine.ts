@@ -18,6 +18,7 @@ import { insertExecutionLog } from '../../testing/services/testLogService';
 import HTMLParsingService from '../shared/services/HTMLParsingService';
 import PerformanceMetricsService from '../shared/services/PerformanceMetricsService';
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
+import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
 
 type RequestConfig = {
   method?: string;
@@ -1033,13 +1034,14 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
       );
       return finalResult;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error(`❌ 性能测试失败: ${message}`);
+      const rawMessage = error instanceof Error ? error.message : String(error);
+      const friendlyMessage = diagnoseNetworkError(error, '性能测试', config.url);
+      console.error(`❌ 性能测试失败: ${rawMessage}`);
       const errorResult: PerformanceFinalResult = {
         engine: this.name,
         version: this.version,
         success: false,
-        error: message,
+        error: rawMessage,
         status: TestStatus.FAILED,
         score: 0,
         summary: {
@@ -1050,15 +1052,15 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
           slowestLoadTime: 'N/A',
         },
         warnings: [],
-        errors: [message],
+        errors: [friendlyMessage],
         timestamp: new Date().toISOString(),
       };
       this.activeTests.set(testId, {
         status: TestStatus.FAILED,
-        error: message,
+        error: rawMessage,
       });
       if (this.errorCallback) {
-        this.errorCallback(error instanceof Error ? error : new Error(message));
+        this.errorCallback(error instanceof Error ? error : new Error(rawMessage));
       }
       this.abortControllers.delete(testId);
       setTimeout(
@@ -1195,9 +1197,8 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
         }
       } catch (iterError) {
         const msg = iterError instanceof Error ? iterError.message : String(iterError);
-        // 致命网络错误（DNS 解析失败等）直接抛出，不再继续迭代
-        const code = (iterError as NodeJS.ErrnoException)?.code ?? '';
-        if (['ENOTFOUND', 'ECONNREFUSED', 'ERR_INVALID_URL'].includes(code)) {
+        // 致命网络错误（DNS 解析失败、连接拒绝等）直接抛出，不再继续迭代
+        if (isFatalNetworkError(iterError)) {
           throw iterError;
         }
         if (testId) {

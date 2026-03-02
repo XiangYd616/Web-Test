@@ -21252,9 +21252,9 @@ var init_XSSAnalyzer = __esm({
           if (browserSkipped) {
             recommendations.unshift({
               priority: 'high',
-              title: '\u6D4F\u89C8\u5668\u5F15\u64CE\u4E0D\u53EF\u7528',
+              title: '\u6D4F\u89C8\u5668\u5F15\u64CE\u6682\u65F6\u4E0D\u53EF\u7528',
               description:
-                '\u672C\u6B21\u4EC5\u5B8C\u6210\u9759\u6001\u5206\u6790\uFF0C\u53CD\u5C04\u578B/DOM\u578B/\u5B58\u50A8\u578B XSS \u68C0\u6D4B\u5DF2\u8DF3\u8FC7\u3002\u5EFA\u8BAE\u5728 Web \u7248\u4E2D\u91CD\u65B0\u8FD0\u884C\u5B8C\u6574\u626B\u63CF\u3002',
+                '\u672C\u6B21\u4EC5\u5B8C\u6210\u9759\u6001\u5206\u6790\uFF0C\u53CD\u5C04\u578B/DOM\u578B/\u5B58\u50A8\u578B XSS \u68C0\u6D4B\u5DF2\u8DF3\u8FC7\u3002\u6D4F\u89C8\u5668\u5F15\u64CE\u53EF\u80FD\u6B63\u5728\u521D\u59CB\u5316\u4E2D\uFF0C\u8BF7\u7A0D\u540E\u91CD\u8BD5\u3002',
               category: 'scan-limitation',
               effort: 'low',
               examples: [],
@@ -24039,13 +24039,100 @@ var init_securityTestEngine = __esm({
           if (vulnerabilities.some(v => v.severity === 'medium')) return 'medium';
           return 'low';
         };
+        let siteProtected = false;
+        let protectionDetail = '';
+        try {
+          const probeUA = this.options.userAgent || 'Mozilla/5.0 (compatible; SecurityScanner/1.0)';
+          const normalResp = await import_axios8.default.get(url, {
+            timeout: 1e4,
+            headers: { 'User-Agent': probeUA },
+            maxRedirects: 5,
+            validateStatus: () => true,
+          });
+          const probeResp = await import_axios8.default.get(url, {
+            timeout: 1e4,
+            params: { test: '<script>alert(1)</script>' },
+            headers: { 'User-Agent': probeUA },
+            maxRedirects: 5,
+            validateStatus: () => true,
+          });
+          const probeStatus = probeResp.status;
+          const probeBody = typeof probeResp.data === 'string' ? probeResp.data.toLowerCase() : '';
+          const probeHeaders = probeResp.headers || {};
+          const normalStatus = normalResp.status;
+          const wafSignatures = [
+            'cloudflare',
+            'cf-ray',
+            'akamai',
+            'incapsula',
+            'sucuri',
+            'barracuda',
+            'fortiweb',
+            'modsecurity',
+            'webknight',
+            'access denied',
+            'request blocked',
+            'forbidden',
+            'waf',
+            'firewall',
+            'protection',
+          ];
+          const headerStr = JSON.stringify(probeHeaders).toLowerCase();
+          const hasWafHeader = wafSignatures.some(sig => headerStr.includes(sig));
+          const hasWafBody = wafSignatures.some(sig => probeBody.includes(sig));
+          if (probeStatus === 403 && normalStatus < 400) {
+            siteProtected = true;
+            protectionDetail =
+              '\u76EE\u6807\u7AD9\u70B9\u542F\u7528\u4E86 Web \u5E94\u7528\u9632\u706B\u5899 (WAF)\uFF0C\u653B\u51FB\u6027\u8BF7\u6C42\u88AB\u62E6\u622A';
+          } else if (probeStatus === 429) {
+            siteProtected = true;
+            protectionDetail =
+              '\u76EE\u6807\u7AD9\u70B9\u542F\u7528\u4E86\u8BF7\u6C42\u9891\u7387\u9650\u5236\uFF0C\u626B\u63CF\u8BF7\u6C42\u88AB\u9650\u6D41';
+          } else if (probeStatus === 503 && (hasWafHeader || hasWafBody)) {
+            siteProtected = true;
+            protectionDetail =
+              '\u76EE\u6807\u7AD9\u70B9\u542F\u7528\u4E86 CDN/DDoS \u9632\u62A4\uFF0C\u9700\u8981\u901A\u8FC7\u5B89\u5168\u9A8C\u8BC1';
+          } else if (hasWafHeader && probeStatus >= 400) {
+            siteProtected = true;
+            protectionDetail =
+              '\u76EE\u6807\u7AD9\u70B9\u68C0\u6D4B\u5230\u5B89\u5168\u9632\u62A4\u673A\u5236\uFF08WAF/CDN\uFF09\uFF0C\u90E8\u5206\u626B\u63CF\u53EF\u80FD\u53D7\u9650';
+          } else if (probeStatus === 406 || probeStatus === 451) {
+            siteProtected = true;
+            protectionDetail =
+              '\u76EE\u6807\u7AD9\u70B9\u62D2\u7EDD\u4E86\u5E26\u5B89\u5168\u6D4B\u8BD5\u7279\u5F81\u7684\u8BF7\u6C42';
+          }
+        } catch {}
+        if (siteProtected) {
+          scanWarnings.push(
+            `${protectionDetail}\uFF0C\u6F0F\u6D1E\u6CE8\u5165\u626B\u63CF\uFF08XSS/SQL\uFF09\u7ED3\u679C\u53EF\u80FD\u4E0D\u5B8C\u6574`
+          );
+        }
+        const classifyError = (label, err) => {
+          if (!err) return `${label}\u5931\u8D25`;
+          const msg = err instanceof Error ? err.message : String(err);
+          const axiosErr = err;
+          const status = axiosErr?.response?.status;
+          if (status === 403)
+            return `${label}\u88AB\u76EE\u6807\u7AD9\u70B9\u9632\u706B\u5899\u62E6\u622A (HTTP 403)`;
+          if (status === 429)
+            return `${label}\u88AB\u76EE\u6807\u7AD9\u70B9\u9891\u7387\u9650\u5236 (HTTP 429)`;
+          if (status === 503)
+            return `${label}\u88AB\u76EE\u6807\u7AD9\u70B9\u9632\u62A4\u7CFB\u7EDF\u963B\u65AD (HTTP 503)`;
+          if (axiosErr?.code === 'ECONNREFUSED')
+            return `${label}\u5931\u8D25\uFF0C\u76EE\u6807\u7AD9\u70B9\u62D2\u7EDD\u8FDE\u63A5`;
+          if (axiosErr?.code === 'ENOTFOUND')
+            return `${label}\u5931\u8D25\uFF0C\u65E0\u6CD5\u89E3\u6790\u76EE\u6807\u57DF\u540D`;
+          if (msg.includes('timeout') || msg.includes('ETIMEDOUT'))
+            return `${label}\u8D85\u65F6\uFF08\u76EE\u6807\u7AD9\u70B9\u54CD\u5E94\u8FC7\u6162\uFF0C\u53EF\u5C1D\u8BD5\u589E\u5927\u8D85\u65F6\u65F6\u95F4\uFF09`;
+          return `${label}\u5931\u8D25: ${msg.length > 80 ? msg.slice(0, 80) + '\u2026' : msg}`;
+        };
         const TIMEOUT_SENTINEL = Symbol('timeout');
         const withTimeout = (promise, ms) =>
           Promise.race([
             promise,
             new Promise(resolve => setTimeout(() => resolve(TIMEOUT_SENTINEL), ms)),
           ]);
-        const scanTimeout = Math.min(this.options.timeout || 3e4, 3e4);
+        const scanTimeout = Math.min(this.options.timeout || 6e4, 6e4);
         const emptyVuln = {
           vulnerabilities: [],
           summary: { totalTests: 0 },
@@ -24056,7 +24143,6 @@ var init_securityTestEngine = __esm({
         let sqlResult = emptyVuln;
         let other = [];
         const [xssRaw, sqlRaw, otherRaw] = await Promise.all([
-          // XSS 扫描
           withTimeout(
             xssAnalyzer.analyze(url, {
               timeout: scanTimeout,
@@ -24068,11 +24154,9 @@ var init_securityTestEngine = __esm({
             }),
             scanTimeout
           ).catch(err => {
-            const msg = err instanceof Error ? err.message : String(err);
-            scanWarnings.push(`XSS \u6F0F\u6D1E\u626B\u63CF\u5931\u8D25: ${msg}`);
+            scanWarnings.push(classifyError('XSS \u6F0F\u6D1E\u626B\u63CF', err));
             return TIMEOUT_SENTINEL;
           }),
-          // SQL 注入扫描
           withTimeout(
             sqlAnalyzer.analyze(url, {
               timeout: scanTimeout,
@@ -24085,27 +24169,34 @@ var init_securityTestEngine = __esm({
             }),
             scanTimeout
           ).catch(err => {
-            const msg = err instanceof Error ? err.message : String(err);
-            scanWarnings.push(`SQL \u6CE8\u5165\u626B\u63CF\u5931\u8D25: ${msg}`);
+            scanWarnings.push(classifyError('SQL \u6CE8\u5165\u626B\u63CF', err));
             return TIMEOUT_SENTINEL;
           }),
-          // 其他漏洞扫描
           withTimeout(this.scanOtherVulnerabilities(void 0, url), scanTimeout).catch(err => {
-            const msg = err instanceof Error ? err.message : String(err);
-            scanWarnings.push(`\u5176\u4ED6\u6F0F\u6D1E\u626B\u63CF\u5931\u8D25: ${msg}`);
+            scanWarnings.push(classifyError('\u5176\u4ED6\u6F0F\u6D1E\u626B\u63CF', err));
             return TIMEOUT_SENTINEL;
           }),
         ]);
         if (xssRaw === TIMEOUT_SENTINEL) {
-          scanWarnings.push(
-            'XSS \u6F0F\u6D1E\u626B\u63CF\u8D85\u65F6\uFF08\u53EF\u80FD\u7F3A\u5C11 Puppeteer/Chromium \u73AF\u5883\uFF09\uFF0C\u5DF2\u8DF3\u8FC7'
-          );
+          if (!scanWarnings.some(w => w.startsWith('XSS'))) {
+            scanWarnings.push(
+              siteProtected
+                ? 'XSS \u6F0F\u6D1E\u626B\u63CF\u8D85\u65F6\uFF0C\u53EF\u80FD\u56E0\u7AD9\u70B9\u9632\u62A4\u62E6\u622A\u5BFC\u81F4'
+                : 'XSS \u6F0F\u6D1E\u626B\u63CF\u8D85\u65F6\uFF0C\u5DF2\u8DF3\u8FC7\uFF08\u76EE\u6807\u7AD9\u70B9\u54CD\u5E94\u8F83\u6162\u6216\u9875\u9762\u7ED3\u6784\u590D\u6742\uFF0C\u53EF\u5C1D\u8BD5\u589E\u5927\u8D85\u65F6\u65F6\u95F4\u540E\u91CD\u8BD5\uFF09'
+            );
+          }
           xssSkipped = true;
         } else {
           xssResult = xssRaw;
         }
         if (sqlRaw === TIMEOUT_SENTINEL) {
-          scanWarnings.push('SQL \u6CE8\u5165\u626B\u63CF\u8D85\u65F6\uFF0C\u5DF2\u8DF3\u8FC7');
+          if (!scanWarnings.some(w => w.startsWith('SQL'))) {
+            scanWarnings.push(
+              siteProtected
+                ? 'SQL \u6CE8\u5165\u626B\u63CF\u8D85\u65F6\uFF0C\u53EF\u80FD\u56E0\u7AD9\u70B9\u9632\u62A4\u62E6\u622A\u5BFC\u81F4'
+                : 'SQL \u6CE8\u5165\u626B\u63CF\u8D85\u65F6\uFF0C\u5DF2\u8DF3\u8FC7\uFF08\u76EE\u6807\u7AD9\u70B9\u54CD\u5E94\u8F83\u6162\u6216\u53C2\u6570\u70B9\u8F83\u591A\uFF0C\u53EF\u5C1D\u8BD5\u589E\u5927\u8D85\u65F6\u65F6\u95F4\u540E\u91CD\u8BD5\uFF09'
+            );
+          }
           sqlSkipped = true;
         } else {
           sqlResult = sqlRaw;
@@ -24113,16 +24204,17 @@ var init_securityTestEngine = __esm({
         if (otherRaw !== TIMEOUT_SENTINEL) {
           other = otherRaw;
         } else {
-          scanWarnings.push(
-            '\u5176\u4ED6\u6F0F\u6D1E\u626B\u63CF\u8D85\u65F6\uFF0C\u5DF2\u8DF3\u8FC7'
-          );
+          if (!scanWarnings.some(w => w.startsWith('\u5176\u4ED6'))) {
+            scanWarnings.push(
+              '\u5176\u4ED6\u6F0F\u6D1E\u626B\u63CF\u8D85\u65F6\uFF0C\u5DF2\u8DF3\u8FC7'
+            );
+          }
         }
         return {
           xss: {
             ...xssResult,
             summary: {
               totalTests: xssResult.summary?.totalTests || 0,
-              // 超时/失败时标记为 unknown，防止评分系统误认为安全
               riskLevel: xssSkipped ? 'unknown' : buildRiskLevel(xssResult.vulnerabilities || []),
             },
           },

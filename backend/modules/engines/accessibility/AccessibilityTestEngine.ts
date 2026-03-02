@@ -676,13 +676,14 @@ class AccessibilityTestEngine implements ITestEngine<AccessibilityRunConfig, Bas
 
       return finalResult;
     } catch (error) {
-      const message = (error as Error).message;
+      const rawMessage = (error as Error).message;
+      const message = diagnoseNetworkError(error, '无障碍测试', config.url);
       const errorResult: AccessibilityFinalResult = {
         engine: this.name,
         version: this.version,
         success: false,
         testId,
-        error: message,
+        error: rawMessage,
         status: TestStatus.FAILED,
         score: 0,
         summary: { totalIssues: 0, errors: 0, warnings: 0, passed: 0, score: 0 },
@@ -690,7 +691,7 @@ class AccessibilityTestEngine implements ITestEngine<AccessibilityRunConfig, Bas
         errors: [message],
       };
 
-      this.activeTests.set(testId, { status: TestStatus.FAILED, error: message });
+      this.activeTests.set(testId, { status: TestStatus.FAILED, error: rawMessage });
 
       setTimeout(
         () => {

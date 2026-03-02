@@ -426,6 +426,12 @@ const SeoChartPanel = () => {
     []
   );
 
+  const renderMode = useMemo(() => {
+    if (!effectiveDetails) return null;
+    const mode = (effectiveDetails as { renderMode?: unknown }).renderMode;
+    return mode === 'browser' || mode === 'static' ? mode : null;
+  }, [effectiveDetails]);
+
   const hasAny = Boolean(effectiveDetails);
 
   return (
@@ -482,6 +488,28 @@ const SeoChartPanel = () => {
                 </>
               )}
             </div>
+
+            {/* 渲染模式标注 */}
+            {renderMode && (
+              <div className='flex items-center gap-2 text-xs'>
+                <Badge
+                  variant='outline'
+                  className={cn(
+                    'text-[10px] px-2 py-0.5',
+                    renderMode === 'browser'
+                      ? 'text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                      : 'text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-700'
+                  )}
+                >
+                  {renderMode === 'browser' ? '浏览器渲染' : '静态分析'}
+                </Badge>
+                <span className='text-muted-foreground'>
+                  {renderMode === 'browser'
+                    ? 'HTML 由浏览器引擎渲染，可检测 JS 动态内容'
+                    : 'HTML 由 HTTP 请求获取，JS 渲染内容可能未被检测'}
+                </span>
+              </div>
+            )}
 
             {/* 竞争力 */}
             {summaryData?.competitiveness && (
@@ -570,6 +598,66 @@ const SeoChartPanel = () => {
                         </span>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+            {/* 分组检查项问题详情 */}
+            {groupedChecks.length > 0 &&
+              groupedChecks.some(g => g.items.some(c => c.issues.length > 0)) && (
+                <div>
+                  <h4 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3'>
+                    检查项问题详情
+                  </h4>
+                  <div className='space-y-3'>
+                    {groupedChecks.map(g => {
+                      const itemsWithIssues = g.items.filter(c => c.issues.length > 0);
+                      if (itemsWithIssues.length === 0) return null;
+                      return (
+                        <div key={g.group} className='rounded-md border'>
+                          <div className='px-3 py-2 bg-muted/30 text-xs font-semibold text-muted-foreground'>
+                            {g.group}
+                          </div>
+                          <div className='divide-y'>
+                            {itemsWithIssues.map(item => (
+                              <div key={item.key} className='px-3 py-2'>
+                                <div className='flex items-center gap-2 mb-1'>
+                                  <Badge
+                                    variant={
+                                      item.status === 'failed'
+                                        ? 'destructive'
+                                        : item.status === 'warning'
+                                          ? 'default'
+                                          : 'secondary'
+                                    }
+                                    className={cn(
+                                      'text-[10px] px-1.5 py-0',
+                                      item.status === 'warning' &&
+                                        'bg-orange-500 hover:bg-orange-600 text-white'
+                                    )}
+                                  >
+                                    {item.score}
+                                  </Badge>
+                                  <span className='text-sm font-medium'>{item.title}</span>
+                                </div>
+                                <ul className='space-y-0.5 pl-4 text-xs text-muted-foreground'>
+                                  {item.issues.slice(0, 5).map((issue, i) => (
+                                    <li key={i} className='list-disc'>
+                                      {issue}
+                                    </li>
+                                  ))}
+                                  {item.issues.length > 5 && (
+                                    <li className='list-none text-muted-foreground/70'>
+                                      …还有 {item.issues.length - 5} 项
+                                    </li>
+                                  )}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

@@ -488,7 +488,7 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
           const tip = `${ep.method} ${ep.url} 返回 404 — 请检查 URL 路径是否正确`;
           if (!allRecommendations.includes(tip)) allRecommendations.unshift(tip);
         } else if (sc === 0 && ep.error) {
-          const tip = this.diagnoseConnectionError(ep.error, ep.url);
+          const tip = diagnoseNetworkError(ep.error, 'API 请求', ep.url);
           if (!allRecommendations.includes(tip)) allRecommendations.unshift(tip);
         }
       }
@@ -1132,7 +1132,7 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
           error: errorMessage,
           responseTime: `${responseTime}ms`,
         },
-        recommendations: [this.diagnoseConnectionError(errorMessage, url)],
+        recommendations: [diagnoseNetworkError(errorMessage, 'API 请求', url)],
       } as ApiEndpointResult;
     }
   }
@@ -1730,32 +1730,6 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
     }
 
     return recommendations;
-  }
-
-  /**
-   * F8: 根据连接错误类型生成针对性诊断建议
-   */
-  private diagnoseConnectionError(errorMessage: string, url: string): string {
-    const msg = errorMessage.toLowerCase();
-    if (msg.includes('enotfound') || msg.includes('getaddrinfo')) {
-      return `${url} DNS 解析失败 — 请检查域名是否正确、DNS 服务器是否可达`;
-    }
-    if (msg.includes('econnrefused')) {
-      return `${url} 连接被拒绝 — 请确认目标服务器已启动且端口正确`;
-    }
-    if (msg.includes('econnreset') || msg.includes('socket hang up')) {
-      return `${url} 连接被重置 — 服务器可能主动关闭了连接，检查防火墙或 WAF 规则`;
-    }
-    if (msg.includes('timeout') || msg.includes('etimedout')) {
-      return `${url} 请求超时 — 服务器响应过慢或网络不通，可尝试增加超时时间`;
-    }
-    if (msg.includes('cert') || msg.includes('ssl') || msg.includes('tls')) {
-      return `${url} SSL/TLS 错误 — 证书可能无效或已过期`;
-    }
-    if (msg.includes('econnaborted')) {
-      return `${url} 连接中断 — 请检查网络稳定性`;
-    }
-    return `${url} 请求失败: ${errorMessage}`;
   }
 
   calculateSummary(results: ApiEndpointResult[]): ApiBatchSummary {
