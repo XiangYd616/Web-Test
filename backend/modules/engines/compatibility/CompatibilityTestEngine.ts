@@ -1296,6 +1296,68 @@ class CompatibilityTestEngine implements ITestEngine<CompatibilityRunConfig, Bas
           };
         });
 
+        // 通过 CSS.supports() 检测真实 CSS 特性支持（仅 Chromium 环境，但能排除语法错误）
+        const cssFeatureSupport = await page.evaluate(() => {
+          const tests: Record<string, string> = {
+            containerQueries: '(container-type: inline-size)',
+            cssHas: 'selector(:has(*))',
+            cssNesting: '(color: red) or (not (color: red))', // 基础测试
+            subgrid: '(grid-template-columns: subgrid)',
+            colorMix: '(color: color-mix(in srgb, red 50%, blue))',
+            cssLayers:
+              '(not (color: invalid-for-layers-test))' /* always true, 用 @layer 检测替代 */,
+            aspectRatio: '(aspect-ratio: 1)',
+            gap: '(gap: 1px)',
+            logicalProperties: '(inline-size: 1px)',
+          };
+          const results: Record<string, boolean> = {};
+          if (typeof CSS !== 'undefined' && typeof CSS.supports === 'function') {
+            for (const [key, value] of Object.entries(tests)) {
+              try {
+                results[key] = CSS.supports(value);
+              } catch {
+                results[key] = false;
+              }
+            }
+          }
+          // 额外：检测页面中实际使用的 CSS 特性（从 styleSheets 中读取）
+          const usedFeatures: string[] = [];
+          try {
+            for (const sheet of Array.from(document.styleSheets)) {
+              try {
+                for (const rule of Array.from(sheet.cssRules)) {
+                  const text = rule.cssText;
+                  if (text.includes('container-type') || text.includes('@container'))
+                    usedFeatures.push('containerQueries');
+                  if (text.includes(':has(')) usedFeatures.push('cssHas');
+                  if (text.includes('subgrid')) usedFeatures.push('subgrid');
+                  if (text.includes('color-mix')) usedFeatures.push('colorMix');
+                  if (text.includes('@layer')) usedFeatures.push('cssLayers');
+                }
+              } catch {
+                // 跨域样式表无法读取 cssRules
+              }
+            }
+          } catch {
+            // styleSheets 不可用
+          }
+          return { support: results, usedFeatures: [...new Set(usedFeatures)] };
+        });
+
+        // 对页面实际使用但浏览器不支持的 CSS 特性生成 issue
+        const featureLabels: Record<string, string> = {
+          containerQueries: 'CSS Container Queries',
+          cssHas: 'CSS :has() 选择器',
+          subgrid: 'CSS Subgrid',
+          colorMix: 'CSS color-mix()',
+          cssLayers: 'CSS @layer (Cascade Layers)',
+        };
+        for (const feature of cssFeatureSupport.usedFeatures) {
+          if (cssFeatureSupport.support[feature] === false && featureLabels[feature]) {
+            issues.push(`页面使用了 ${featureLabels[feature]}，但当前浏览器引擎不支持`);
+          }
+        }
+
         if (!domStats.viewportMeta) {
           issues.push('缺少viewport meta标签');
         }

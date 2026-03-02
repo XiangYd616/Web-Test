@@ -744,16 +744,23 @@ const CompatibilityChartPanel = () => {
                       )}
                       {item.issues.length > 0 && (
                         <div className='mt-2 ml-14 flex flex-wrap gap-1.5'>
-                          {item.issues.slice(0, 4).map((issue, i) => (
-                            <Badge
-                              key={i}
-                              variant='outline'
-                              className='text-[11px] font-normal max-w-sm truncate'
-                              title={issue}
-                            >
-                              {issue}
-                            </Badge>
-                          ))}
+                          {item.issues.slice(0, 4).map((issue, i) => {
+                            const isCssFeature = issue.includes('但当前浏览器引擎不支持');
+                            return (
+                              <Badge
+                                key={i}
+                                variant='outline'
+                                className={cn(
+                                  'text-[11px] font-normal max-w-sm truncate',
+                                  isCssFeature &&
+                                    'text-purple-600 border-purple-300 dark:text-purple-400 dark:border-purple-700'
+                                )}
+                                title={issue}
+                              >
+                                {issue}
+                              </Badge>
+                            );
+                          })}
                           {item.issues.length > 4 && (
                             <Badge variant='outline' className='text-[11px] font-normal'>
                               +{item.issues.length - 4}

@@ -636,10 +636,25 @@ const AccessibilityChartPanel = () => {
                             ? 'bg-yellow-500'
                             : 'bg-red-500';
 
+                    const isBrowserCheck = item.name.includes('浏览器动态检测');
+                    const displayName = isBrowserCheck
+                      ? item.name.replace(' (浏览器动态检测)', '')
+                      : item.name;
+
                     return (
                       <div key={item.key} className='p-3 space-y-1.5'>
                         <div className='flex items-center justify-between'>
-                          <span className='text-sm font-medium'>{item.name}</span>
+                          <span className='text-sm font-medium flex items-center gap-1.5'>
+                            {displayName}
+                            {isBrowserCheck && (
+                              <Badge
+                                variant='outline'
+                                className='text-[9px] px-1.5 py-0 text-green-600 border-green-300 dark:text-green-400 dark:border-green-700 font-normal'
+                              >
+                                浏览器检测
+                              </Badge>
+                            )}
+                          </span>
                           <span className='text-xs text-muted-foreground'>
                             {item.passed}/{total} ({pct}%)
                             {item.issueCount > 0 && (

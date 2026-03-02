@@ -178,7 +178,16 @@ type PerformanceFinalResult = {
 
 type BrowserNetworkResources = {
   counts: Record<string, number>;
-  items: Array<{ url: string; type: string; size: number; duration: number }>;
+  items: Array<{
+    url: string;
+    type: string;
+    size: number;
+    duration: number;
+    compressed?: boolean;
+    encoding?: string;
+    renderBlocking?: boolean;
+    decodedSize?: number;
+  }>;
 };
 
 type InpDiagnosticsData = {
@@ -2217,9 +2226,19 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
       }
 
       // ── 基于浏览器网络资源的深度建议 ──
+      type NetItem = {
+        url: string;
+        type: string;
+        size: number;
+        duration: number;
+        compressed?: boolean;
+        encoding?: string;
+        renderBlocking?: boolean;
+        decodedSize?: number;
+      };
       const netItems = (
         results.resources as unknown as {
-          networkItems?: Array<{ url: string; type: string; size: number; duration: number }>;
+          networkItems?: NetItem[];
           totalTransferSize?: number;
         }
       )?.networkItems;
@@ -2239,6 +2258,53 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
               const name = r.url.split('/').pop()?.split('?')[0] || r.url;
               return `${r.type} ${name} (${sizeKB}KB, ${r.duration}ms)`;
             }),
+          });
+        }
+
+        // 未压缩的文本资源（JS/CSS/HTML >10KB 且无 Content-Encoding）
+        const textTypes = new Set(['scripts', 'stylesheets', 'documents', 'xhr']);
+        const uncompressed = netItems.filter(
+          i => textTypes.has(i.type) && i.size > 10 * 1024 && i.compressed === false
+        );
+        if (uncompressed.length > 0) {
+          const totalWaste = uncompressed.reduce((s, i) => s + i.size, 0);
+          recommendations.push({
+            type: 'uncompressed-resources',
+            priority: 'high',
+            title: `${uncompressed.length} 个文本资源未启用压缩`,
+            description: `共 ${Math.round(totalWaste / 1024)}KB 文本资源未经 Gzip/Brotli 压缩传输，启用后可减少 60-80% 传输体积`,
+            impact: '高',
+            suggestions: [
+              ...uncompressed.slice(0, 5).map(r => {
+                const name = r.url.split('/').pop()?.split('?')[0] || r.url;
+                return `${r.type} ${name} (${Math.round(r.size / 1024)}KB 未压缩)`;
+              }),
+              '在 Nginx/Apache/CDN 中启用 Brotli（优先）或 Gzip 压缩',
+            ],
+          });
+        }
+
+        // 渲染阻塞资源（render-blocking CSS/JS）
+        const renderBlockingItems = netItems.filter(
+          i => i.renderBlocking && (i.type === 'scripts' || i.type === 'stylesheets')
+        );
+        if (renderBlockingItems.length > 3) {
+          const totalBlockingSize = renderBlockingItems.reduce((s, i) => s + i.size, 0);
+          recommendations.push({
+            type: 'render-blocking',
+            priority: 'high',
+            title: `${renderBlockingItems.length} 个渲染阻塞资源`,
+            description: `${renderBlockingItems.length} 个 CSS/JS 资源阻塞了首次渲染（共 ${Math.round(totalBlockingSize / 1024)}KB），直接影响 FCP 和 LCP`,
+            impact: '高',
+            suggestions: [
+              ...renderBlockingItems.slice(0, 4).map(r => {
+                const name = r.url.split('/').pop()?.split('?')[0] || r.url;
+                return `${r.type === 'scripts' ? 'JS' : 'CSS'} ${name} (${Math.round(r.size / 1024)}KB, ${r.duration}ms)`;
+              }),
+              '为非关键 JS 添加 defer/async 属性',
+              '内联关键 CSS，异步加载其余样式表',
+              '使用 <link rel="preload"> 提升关键资源优先级',
+            ],
           });
         }
 
@@ -2327,10 +2393,7 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
     showBrowser?: boolean
   ): Promise<{
     vitals: PerformanceMetrics['coreWebVitals'];
-    networkResources?: {
-      counts: Record<string, number>;
-      items: Array<{ url: string; type: string; size: number; duration: number }>;
-    };
+    networkResources?: BrowserNetworkResources;
     inpDiagnostics?: {
       interactionEvents: Array<{
         name: string;
@@ -2364,8 +2427,17 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
     try {
       const cdp = await page.createCDPSession();
 
-      // 收集网络请求资源
-      const networkItems: Array<{ url: string; type: string; size: number; duration: number }> = [];
+      // 收集网络请求资源（含压缩状态和渲染阻塞标识）
+      const networkItems: Array<{
+        url: string;
+        type: string;
+        size: number;
+        duration: number;
+        compressed?: boolean;
+        encoding?: string;
+        renderBlocking?: boolean;
+        decodedSize?: number;
+      }> = [];
       const resourceCounts: Record<string, number> = {
         images: 0,
         scripts: 0,
@@ -2388,14 +2460,52 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
 
       await cdp.send('Network.enable');
       const pendingRequests = new Map<string, { url: string; type: string; startTime: number }>();
+      // 响应元数据缓存（Content-Encoding、内容长度、渲染阻塞标识）
+      const responseMeta = new Map<
+        string,
+        { encoding: string; decodedSize: number; renderBlocking: boolean }
+      >();
 
       cdp.on(
         'Network.requestWillBeSent',
-        (params: { requestId: string; request: { url: string }; type?: string }) => {
+        (params: {
+          requestId: string;
+          request: { url: string; initialPriority?: string };
+          type?: string;
+          initiator?: { type?: string };
+        }) => {
           pendingRequests.set(params.requestId, {
             url: params.request.url,
             type: String(params.type || 'Other'),
             startTime: Date.now(),
+          });
+        }
+      );
+
+      cdp.on(
+        'Network.responseReceived',
+        (params: {
+          requestId: string;
+          type?: string;
+          response: {
+            headers: Record<string, string>;
+            encodedDataLength?: number;
+            url?: string;
+          };
+        }) => {
+          const headers = params.response.headers || {};
+          const encoding = headers['content-encoding'] || headers['Content-Encoding'] || '';
+          const contentLength = parseInt(
+            headers['content-length'] || headers['Content-Length'] || '0',
+            10
+          );
+          // Render-blocking: <head> 中的同步 script/stylesheet（无 async/defer）
+          const resType = String(params.type || '').toLowerCase();
+          const isRenderBlocking = resType === 'stylesheet' || resType === 'script';
+          responseMeta.set(params.requestId, {
+            encoding,
+            decodedSize: contentLength || 0,
+            renderBlocking: isRenderBlocking,
           });
         }
       );
@@ -2417,7 +2527,18 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
           else if (cdpType === 'document') category = 'documents';
           else if (cdpType === 'xhr' || cdpType === 'fetch') category = 'xhr';
           resourceCounts[category] = (resourceCounts[category] || 0) + 1;
-          networkItems.push({ url: req.url, type: category, size, duration });
+          const meta = responseMeta.get(params.requestId);
+          networkItems.push({
+            url: req.url,
+            type: category,
+            size,
+            duration,
+            compressed: !!meta?.encoding,
+            encoding: meta?.encoding || '',
+            renderBlocking: meta?.renderBlocking || false,
+            decodedSize: meta?.decodedSize || 0,
+          });
+          responseMeta.delete(params.requestId);
         }
       );
 

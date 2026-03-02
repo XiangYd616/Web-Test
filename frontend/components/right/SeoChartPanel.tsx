@@ -240,6 +240,62 @@ const SeoChartPanel = () => {
     };
   }, [effectiveDetails]);
 
+  // 结构化数据深度验证详情
+  const structuredDataInfo = useMemo(() => {
+    if (!effectiveDetails) return null;
+    const checksData = isRecord(effectiveDetails.checks)
+      ? (effectiveDetails.checks as Record<string, unknown>)
+      : null;
+    if (!checksData?.structuredData || !isRecord(checksData.structuredData)) return null;
+    const sd = checksData.structuredData as Record<string, unknown>;
+    const details = sd.details;
+    if (!isRecord(details)) return null;
+    const items = (details as { structuredData?: unknown }).structuredData;
+    if (!Array.isArray(items) || items.length === 0) return null;
+    return items
+      .filter(item => item && typeof item === 'object')
+      .map(item => {
+        const d = item as Record<string, unknown>;
+        return {
+          type: String(d.type || 'Unknown'),
+          schema: String(d.schema || 'Unknown'),
+          valid: d.valid !== false,
+          missingRequired: Array.isArray(d.missingRequired) ? (d.missingRequired as string[]) : [],
+          missingRecommended: Array.isArray(d.missingRecommended)
+            ? (d.missingRecommended as string[])
+            : [],
+          contextWarning: typeof d.contextWarning === 'string' ? d.contextWarning : null,
+          error: typeof d.error === 'string' ? d.error : null,
+          schemas: Array.isArray(d.schemas) ? (d.schemas as string[]) : null,
+          count: typeof d.count === 'number' ? d.count : null,
+        };
+      });
+  }, [effectiveDetails]);
+
+  // 死链检测增强详情
+  const deadLinksInfo = useMemo(() => {
+    if (!effectiveDetails) return null;
+    const checksData = isRecord(effectiveDetails.checks)
+      ? (effectiveDetails.checks as Record<string, unknown>)
+      : null;
+    if (!checksData?.deadLinks || !isRecord(checksData.deadLinks)) return null;
+    const dl = checksData.deadLinks as Record<string, unknown>;
+    const details = dl.details;
+    if (!isRecord(details)) return null;
+    const d = details as Record<string, unknown>;
+    const internalLinks = typeof d.internalLinks === 'number' ? d.internalLinks : null;
+    const externalLinks = typeof d.externalLinks === 'number' ? d.externalLinks : null;
+    if (internalLinks === null && externalLinks === null) return null;
+    return {
+      checkedLinks: Number(d.checkedLinks ?? 0),
+      deadLinks: Number(d.deadLinks ?? 0),
+      totalLinksOnPage: Number(d.totalLinksOnPage ?? 0),
+      internalLinks: internalLinks ?? 0,
+      externalLinks: externalLinks ?? 0,
+      sampleSize: Number(d.sampleSize ?? 0),
+    };
+  }, [effectiveDetails]);
+
   /* ── 雷达图：各检查项评分 ── */
   const radarData = useMemo(() => {
     if (checkItems.length === 0) return null;
@@ -601,6 +657,101 @@ const SeoChartPanel = () => {
                   </div>
                 </div>
               )}
+
+            {/* 结构化数据深度验证详情 */}
+            {structuredDataInfo && structuredDataInfo.length > 0 && (
+              <div>
+                <h4 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3'>
+                  结构化数据验证
+                </h4>
+                <div className='space-y-2'>
+                  {structuredDataInfo.map((item, idx) => (
+                    <div key={idx} className='rounded-md border px-3 py-2'>
+                      <div className='flex items-center gap-2 mb-1'>
+                        <Badge
+                          variant={item.valid ? 'secondary' : 'destructive'}
+                          className='text-[10px] px-1.5 py-0'
+                        >
+                          {item.type}
+                        </Badge>
+                        {item.type === 'JSON-LD' && (
+                          <span className='text-sm font-medium'>{item.schema}</span>
+                        )}
+                        {item.type === 'Microdata' && item.schemas && (
+                          <span className='text-sm font-medium'>
+                            {item.schemas.join(', ')}
+                            {item.count ? ` (${item.count} 个)` : ''}
+                          </span>
+                        )}
+                        {item.type === 'RDFa' && <span className='text-sm font-medium'>RDFa</span>}
+                        {item.valid ? (
+                          <span className='text-[10px] text-green-600 dark:text-green-400'>
+                            ✓ 有效
+                          </span>
+                        ) : (
+                          <span className='text-[10px] text-red-600 dark:text-red-400'>
+                            ✗ 不完整
+                          </span>
+                        )}
+                      </div>
+                      {item.error && (
+                        <p className='text-xs text-red-600 dark:text-red-400'>{item.error}</p>
+                      )}
+                      {item.contextWarning && (
+                        <p className='text-xs text-amber-600 dark:text-amber-400'>
+                          {item.contextWarning}
+                        </p>
+                      )}
+                      {item.missingRequired.length > 0 && (
+                        <div className='text-xs mt-1'>
+                          <span className='text-red-600 dark:text-red-400 font-medium'>
+                            缺少必填属性：
+                          </span>
+                          <span className='text-muted-foreground'>
+                            {item.missingRequired.join(', ')}
+                          </span>
+                        </div>
+                      )}
+                      {item.missingRecommended.length > 0 && (
+                        <div className='text-xs mt-0.5'>
+                          <span className='text-amber-600 dark:text-amber-400 font-medium'>
+                            缺少推荐属性：
+                          </span>
+                          <span className='text-muted-foreground'>
+                            {item.missingRecommended.join(', ')}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 死链检测增强详情 */}
+            {deadLinksInfo && (
+              <div>
+                <h4 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3'>
+                  链接健康度
+                </h4>
+                <div className='grid grid-cols-2 sm:grid-cols-4 gap-3'>
+                  <Statistic title='页面总链接' value={deadLinksInfo.totalLinksOnPage} />
+                  <Statistic
+                    title='站内 / 站外'
+                    value={`${deadLinksInfo.internalLinks} / ${deadLinksInfo.externalLinks}`}
+                  />
+                  <Statistic
+                    title='抽样检测'
+                    value={`${deadLinksInfo.checkedLinks} / ${deadLinksInfo.sampleSize}`}
+                  />
+                  <Statistic
+                    title='死链'
+                    value={deadLinksInfo.deadLinks}
+                    className={deadLinksInfo.deadLinks > 0 ? 'text-red-600 dark:text-red-400' : ''}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* 分组检查项问题详情 */}
             {groupedChecks.length > 0 &&

@@ -1391,8 +1391,16 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
     const deadLinks: Array<{ url: string; status: number | string }> = [];
     const checkedCount = { total: 0, dead: 0 };
 
-    // 收集页面内所有绝对链接，抽样最多 15 个避免过多请求
-    const allHrefs: string[] = [];
+    // 收集页面内所有绝对链接（用 Set 去重，O(1)）
+    let baseHost: string;
+    try {
+      baseHost = new URL(baseUrl).hostname;
+    } catch {
+      baseHost = '';
+    }
+    const hrefSet = new Set<string>();
+    const internalLinks: string[] = [];
+    const externalLinks: string[] = [];
     $('a[href]').each((_, elem) => {
       const href = $(elem).attr?.('href') ?? '';
       if (
@@ -1404,27 +1412,53 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
       ) {
         try {
           const resolved = new URL(href, baseUrl).toString();
-          if (!allHrefs.includes(resolved)) allHrefs.push(resolved);
+          if (hrefSet.has(resolved)) return;
+          hrefSet.add(resolved);
+          const linkHost = new URL(resolved).hostname;
+          if (linkHost === baseHost) {
+            internalLinks.push(resolved);
+          } else {
+            externalLinks.push(resolved);
+          }
         } catch {
           // 无效 URL 忽略
         }
       }
     });
 
-    const sample = allHrefs.slice(0, 15);
+    // 抽样策略：优先检测站内链接（最多 12 个），再随机抽样站外链接（最多 8 个）
+    const MAX_INTERNAL = 12;
+    const MAX_EXTERNAL = 8;
+    const MAX_SAMPLE = 20;
+    const shuffled = (arr: string[]) => arr.sort(() => Math.random() - 0.5);
+    const sample = [
+      ...internalLinks.slice(0, MAX_INTERNAL),
+      ...shuffled(externalLinks).slice(0, MAX_EXTERNAL),
+    ].slice(0, MAX_SAMPLE);
+
     const CONCURRENCY = 5;
+    const reqHeaders = { 'User-Agent': 'Mozilla/5.0 (compatible; SEO-Bot/1.0)' };
 
     for (let i = 0; i < sample.length; i += CONCURRENCY) {
       const batch = sample.slice(i, i + CONCURRENCY);
       const results = await Promise.all(
         batch.map(async linkUrl => {
           try {
-            const resp = await axios.head(linkUrl, {
-              timeout: 5000,
+            // 先 HEAD（省带宽），被 405 拒绝时回退到 GET
+            let resp = await axios.head(linkUrl, {
+              timeout: 6000,
               maxRedirects: 3,
               validateStatus: () => true,
-              headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SEO-Bot/1.0)' },
+              headers: reqHeaders,
             });
+            if (resp.status === 405) {
+              resp = await axios.get(linkUrl, {
+                timeout: 6000,
+                maxRedirects: 3,
+                validateStatus: () => true,
+                headers: reqHeaders,
+              });
+            }
             return { url: linkUrl, status: resp.status };
           } catch {
             return { url: linkUrl, status: 'error' as const };
@@ -1451,7 +1485,9 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
         checkedLinks: checkedCount.total,
         deadLinks: checkedCount.dead,
         sampleSize: sample.length,
-        totalLinksOnPage: allHrefs.length,
+        totalLinksOnPage: hrefSet.size,
+        internalLinks: internalLinks.length,
+        externalLinks: externalLinks.length,
         deadLinksList: deadLinks.slice(0, 10),
       },
       issues,
@@ -1568,19 +1604,123 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
     let score = 0;
     const issues: string[] = [];
 
+    // Schema.org 常见类型的必填/推荐属性（用于深度验证）
+    const SCHEMA_REQUIRED_PROPS: Record<string, { required: string[]; recommended: string[] }> = {
+      Article: {
+        required: ['headline', 'author'],
+        recommended: ['datePublished', 'image', 'publisher'],
+      },
+      NewsArticle: {
+        required: ['headline', 'author', 'datePublished'],
+        recommended: ['image', 'publisher'],
+      },
+      BlogPosting: {
+        required: ['headline', 'author'],
+        recommended: ['datePublished', 'image', 'publisher'],
+      },
+      Product: {
+        required: ['name'],
+        recommended: ['image', 'description', 'offers', 'brand', 'sku'],
+      },
+      Organization: {
+        required: ['name'],
+        recommended: ['url', 'logo', 'contactPoint'],
+      },
+      LocalBusiness: {
+        required: ['name', 'address'],
+        recommended: ['telephone', 'openingHours', 'geo', 'image'],
+      },
+      Person: { required: ['name'], recommended: ['url', 'image', 'jobTitle'] },
+      WebSite: { required: ['name', 'url'], recommended: ['potentialAction'] },
+      WebPage: { required: ['name'], recommended: ['url', 'description'] },
+      BreadcrumbList: { required: ['itemListElement'], recommended: [] },
+      FAQPage: { required: ['mainEntity'], recommended: [] },
+      HowTo: { required: ['name', 'step'], recommended: ['image', 'totalTime'] },
+      Recipe: {
+        required: ['name', 'recipeIngredient'],
+        recommended: ['image', 'author', 'recipeInstructions'],
+      },
+      Event: {
+        required: ['name', 'startDate', 'location'],
+        recommended: ['endDate', 'image', 'offers', 'performer'],
+      },
+      VideoObject: {
+        required: ['name', 'uploadDate', 'thumbnailUrl'],
+        recommended: ['description', 'contentUrl', 'duration'],
+      },
+      Review: { required: ['itemReviewed', 'reviewRating'], recommended: ['author'] },
+      AggregateRating: { required: ['ratingValue', 'reviewCount'], recommended: ['bestRating'] },
+    };
+
+    // 验证单个 JSON-LD 对象
+    const validateJsonLdItem = (data: Record<string, unknown>, index: number) => {
+      const schemaType = String(data['@type'] || 'Unknown');
+      const context = data['@context'];
+      const entry: Record<string, unknown> = {
+        type: 'JSON-LD',
+        schema: schemaType,
+        valid: true,
+        missingRequired: [] as string[],
+        missingRecommended: [] as string[],
+      };
+
+      // 验证 @context
+      const ctxStr = typeof context === 'string' ? context : '';
+      if (context && !ctxStr.includes('schema.org')) {
+        entry.contextWarning = `@context 不是 schema.org（当前: ${ctxStr.substring(0, 60)})`;
+      }
+
+      // 验证必填/推荐属性
+      const spec = SCHEMA_REQUIRED_PROPS[schemaType];
+      if (spec) {
+        const missingReq = spec.required.filter(prop => data[prop] == null);
+        const missingRec = spec.recommended.filter(prop => data[prop] == null);
+        if (missingReq.length > 0) {
+          entry.valid = false;
+          entry.missingRequired = missingReq;
+          issues.push(
+            `JSON-LD #${index + 1} (${schemaType}): 缺少必填属性 ${missingReq.join(', ')}`
+          );
+          score += 25; // 有类型但必填不全
+        } else {
+          score += 50; // 必填属性齐全
+        }
+        if (missingRec.length > 0) {
+          entry.missingRecommended = missingRec;
+        }
+      } else {
+        // 未知类型但语法正确
+        score += 35;
+      }
+
+      structuredData.push(entry);
+    };
+
     // JSON-LD（最推荐的结构化数据格式）
     $('script[type="application/ld+json"]').each((_, elem) => {
       try {
         const scriptContent = $(elem).html?.() ?? '';
         const data = JSON.parse(scriptContent as string);
-        structuredData.push({
-          type: 'JSON-LD',
-          schema: (data as { ['@type']?: string })['@type'] || 'Unknown',
-          valid: true,
-        });
-        score += 50;
+
+        if (Array.isArray(data)) {
+          // 顶层数组
+          data.forEach((item, i) => {
+            if (item && typeof item === 'object') validateJsonLdItem(item, i);
+          });
+        } else if (data && typeof data === 'object') {
+          // 检查 @graph 数组（常见于 WordPress/Yoast SEO 等插件）
+          const graph = (data as { '@graph'?: unknown[] })['@graph'];
+          if (Array.isArray(graph)) {
+            graph.forEach((item, i) => {
+              if (item && typeof item === 'object')
+                validateJsonLdItem(item as Record<string, unknown>, i);
+            });
+          } else {
+            validateJsonLdItem(data as Record<string, unknown>, 0);
+          }
+        }
       } catch (error) {
-        issues.push('JSON-LD 数据格式错误');
+        issues.push(`JSON-LD 数据格式错误: ${(error as Error).message}`);
         structuredData.push({
           type: 'JSON-LD',
           valid: false,
@@ -1592,9 +1732,16 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
     // Microdata（itemscope/itemprop）
     const hasItemScope = ($('[itemscope]').length || 0) > 0;
     if (hasItemScope) {
+      const microdataTypes = new Set<string>();
+      $('[itemscope]').each((_, el) => {
+        const itemtype = $(el).attr('itemtype') || '';
+        const typeName = itemtype.split('/').pop() || 'Unknown';
+        microdataTypes.add(typeName);
+      });
       structuredData.push({
         type: 'Microdata',
         count: $('[itemscope]').length,
+        schemas: Array.from(microdataTypes),
         valid: true,
       });
       score += 30;

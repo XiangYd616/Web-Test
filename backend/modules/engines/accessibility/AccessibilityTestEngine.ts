@@ -240,6 +240,23 @@ const VALID_ARIA_ROLES = new Set([
   'treeitem',
 ]);
 
+// ARIA role 必需的状态/属性（WAI-ARIA 1.2 规范）
+const ROLE_REQUIRED_ATTRS: Record<string, string[]> = {
+  checkbox: ['aria-checked'],
+  combobox: ['aria-expanded'],
+  heading: ['aria-level'],
+  meter: ['aria-valuenow'],
+  option: ['aria-selected'],
+  radio: ['aria-checked'],
+  scrollbar: ['aria-controls', 'aria-valuenow'],
+  separator: [], // 仅当可聚焦时需要 aria-valuenow
+  slider: ['aria-valuenow'],
+  spinbutton: ['aria-valuenow'],
+  switch: ['aria-checked'],
+  tab: ['aria-selected'],
+  treeitem: ['aria-selected'],
+};
+
 class AccessibilityTestEngine implements ITestEngine<AccessibilityRunConfig, BaseTestResult> {
   readonly type: TestEngineType;
   readonly name: string;
@@ -1121,22 +1138,41 @@ class AccessibilityTestEngine implements ITestEngine<AccessibilityRunConfig, Bas
       failed: 0,
     };
 
-    // 检查 role 值是否有效
+    // 检查 role 值是否有效 + 必需属性是否存在
     $('[role]').each((_, el) => {
       const $el = $(el);
       const role = ($el.attr?.('role') || '').trim().toLowerCase();
       if (!role) return;
+      const tag = ((el as { tagName?: string }).tagName || '').toLowerCase();
 
-      if (VALID_ARIA_ROLES.has(role)) {
-        result.passed++;
-      } else {
+      if (!VALID_ARIA_ROLES.has(role)) {
         result.failed++;
         result.issues.push({
-          element: ((el as { tagName?: string }).tagName || '').toLowerCase(),
+          element: tag,
           issue: `无效的 role 值: "${role}"`,
           severity: 'error',
           wcagCriterion: '4.1.2',
         });
+        return;
+      }
+
+      // 检查该 role 的必需 ARIA 属性
+      const requiredAttrs = ROLE_REQUIRED_ATTRS[role];
+      if (requiredAttrs && requiredAttrs.length > 0) {
+        const missing = requiredAttrs.filter(attr => $el.attr?.(attr) == null);
+        if (missing.length > 0) {
+          result.failed++;
+          result.issues.push({
+            element: tag,
+            issue: `role="${role}" 缺少必需属性: ${missing.join(', ')}`,
+            severity: 'error',
+            wcagCriterion: '4.1.2',
+          });
+        } else {
+          result.passed++;
+        }
+      } else {
+        result.passed++;
       }
     });
 
@@ -1348,6 +1384,78 @@ class AccessibilityTestEngine implements ITestEngine<AccessibilityRunConfig, Bas
         element: 'i',
         issue: `使用了 ${iCount} 个 <i> 标签，建议使用 <em> 表示强调`,
         severity: 'info',
+      });
+    }
+
+    // ── Landmark Region 深度验证 ──
+
+    // <main> 应唯一（WCAG 最佳实践）
+    const mainCount = $('main, [role="main"]').length || 0;
+    if (mainCount === 0) {
+      result.failed++;
+      result.issues.push({
+        element: 'main',
+        issue: '页面缺少 <main> 或 role="main" 地标，屏幕阅读器用户无法快速定位主内容',
+        severity: 'error',
+        wcagCriterion: '1.3.1',
+      });
+    } else if (mainCount > 1) {
+      result.failed++;
+      result.issues.push({
+        element: 'main',
+        issue: `页面包含 ${mainCount} 个 <main> 地标，建议仅保留一个主内容区域`,
+        severity: 'warning',
+        wcagCriterion: '1.3.1',
+      });
+    } else {
+      result.passed++;
+    }
+
+    // 多个同名 landmark 应有 aria-label 区分
+    const landmarkSelectors: Record<string, string> = {
+      nav: 'nav, [role="navigation"]',
+      aside: 'aside, [role="complementary"]',
+      section: 'section[aria-labelledby], section[aria-label], [role="region"]',
+      form: 'form, [role="form"]',
+    };
+    for (const [name, selector] of Object.entries(landmarkSelectors)) {
+      const elements = $(selector);
+      if ((elements.length || 0) > 1) {
+        let unlabeled = 0;
+        elements.each((_, el) => {
+          const $el = $(el);
+          if (!$el.attr?.('aria-label') && !$el.attr?.('aria-labelledby')) {
+            unlabeled++;
+          }
+        });
+        if (unlabeled > 1) {
+          result.issues.push({
+            element: name,
+            issue: `页面有 ${elements.length} 个 <${name}> 地标，其中 ${unlabeled} 个缺少 aria-label，屏幕阅读器用户无法区分`,
+            severity: 'warning',
+            wcagCriterion: '1.3.1',
+          });
+        }
+      }
+    }
+
+    // banner (header) 和 contentinfo (footer) 检测
+    const hasBanner = ($('header, [role="banner"]').length || 0) > 0;
+    const hasContentinfo = ($('footer, [role="contentinfo"]').length || 0) > 0;
+    if (!hasBanner) {
+      result.issues.push({
+        element: 'header',
+        issue: '页面缺少 <header> 或 role="banner" 地标',
+        severity: 'info',
+        wcagCriterion: '1.3.1',
+      });
+    }
+    if (!hasContentinfo) {
+      result.issues.push({
+        element: 'footer',
+        issue: '页面缺少 <footer> 或 role="contentinfo" 地标',
+        severity: 'info',
+        wcagCriterion: '1.3.1',
       });
     }
 
@@ -2304,12 +2412,63 @@ class AccessibilityTestEngine implements ITestEngine<AccessibilityRunConfig, Bas
             });
           }
 
+          // 5. Dialog/Modal 焦点管理检测
+          const dialogs = document.querySelectorAll(
+            'dialog, [role="dialog"], [role="alertdialog"]'
+          );
+          dialogs.forEach(dialog => {
+            const tag = dialog.tagName.toLowerCase();
+            const isOpen =
+              tag === 'dialog'
+                ? (dialog as HTMLDialogElement).open
+                : dialog.getAttribute('aria-hidden') !== 'true' &&
+                  window.getComputedStyle(dialog).display !== 'none';
+            if (!isOpen) return;
+
+            // 打开的 dialog 应有 aria-modal="true"
+            if (!dialog.getAttribute('aria-modal')) {
+              issues.push({
+                key: 'focusManagement',
+                issue: `已打开的 ${tag === 'dialog' ? '<dialog>' : `[role="${dialog.getAttribute('role')}"]`} 缺少 aria-modal="true"，屏幕阅读器可能无法识别为模态对话框`,
+                severity: 'warning',
+                element: dialog.outerHTML.slice(0, 120),
+                wcagCriterion: '1.3.1',
+              });
+            }
+
+            // 打开的 dialog 应有无障碍名称（aria-label 或 aria-labelledby）
+            if (!dialog.getAttribute('aria-label') && !dialog.getAttribute('aria-labelledby')) {
+              issues.push({
+                key: 'focusManagement',
+                issue: `已打开的对话框缺少无障碍名称（aria-label 或 aria-labelledby），屏幕阅读器用户无法得知对话框用途`,
+                severity: 'error',
+                element: dialog.outerHTML.slice(0, 120),
+                wcagCriterion: '4.1.2',
+              });
+            }
+
+            // 打开的 dialog 内部应有可聚焦元素
+            const innerFocusable = dialog.querySelectorAll(
+              'a[href], button, input, select, textarea, [tabindex]'
+            );
+            if (innerFocusable.length === 0) {
+              issues.push({
+                key: 'focusManagement',
+                issue: '已打开的对话框内部没有可聚焦元素，键盘用户无法与其交互',
+                severity: 'error',
+                element: dialog.outerHTML.slice(0, 120),
+                wcagCriterion: '2.1.1',
+              });
+            }
+          });
+
           return {
             focusableCount: focusableElements.length,
             interactiveCount: interactiveElements.length,
             liveRegionCount: liveRegions.length,
             contrastPassed,
             contrastFailed,
+            dialogCount: dialogs.length,
             issues,
           };
         },

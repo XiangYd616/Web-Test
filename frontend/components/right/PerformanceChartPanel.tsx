@@ -252,11 +252,34 @@ const PerformanceChartPanel = () => {
     const res = (performanceDetails as { resources?: Record<string, unknown> } | null)?.resources;
     if (!res) return null;
     const items = res.networkItems as
-      | Array<{ url: string; type: string; size: number; duration: number }>
+      | Array<{
+          url: string;
+          type: string;
+          size: number;
+          duration: number;
+          compressed?: boolean;
+          encoding?: string;
+          renderBlocking?: boolean;
+        }>
       | undefined;
     const totalSize = res.totalTransferSize as number | undefined;
     if (!items || items.length === 0) return null;
-    return { items, totalTransferSize: totalSize ?? 0 };
+    // 统计资源健康指标
+    const textTypes = new Set(['scripts', 'stylesheets', 'documents', 'xhr']);
+    const uncompressedItems = items.filter(
+      i => textTypes.has(i.type) && i.size > 10 * 1024 && i.compressed === false
+    );
+    const renderBlockingItems = items.filter(
+      i => i.renderBlocking && (i.type === 'scripts' || i.type === 'stylesheets')
+    );
+    return {
+      items,
+      totalTransferSize: totalSize ?? 0,
+      uncompressedCount: uncompressedItems.length,
+      uncompressedSize: uncompressedItems.reduce((s, i) => s + i.size, 0),
+      renderBlockingCount: renderBlockingItems.length,
+      renderBlockingSize: renderBlockingItems.reduce((s, i) => s + i.size, 0),
+    };
   }, [performanceDetails]);
 
   const contentAnalysis = useMemo(() => {
@@ -949,6 +972,30 @@ const PerformanceChartPanel = () => {
                     <div className='text-xs font-medium text-muted-foreground mb-2'>
                       资源加载详情（按体积排序，前 15 项）
                     </div>
+                    {/* 资源健康摘要 */}
+                    {(networkResourceInfo.uncompressedCount > 0 ||
+                      networkResourceInfo.renderBlockingCount > 3) && (
+                      <div className='flex flex-wrap gap-2 mb-2'>
+                        {networkResourceInfo.uncompressedCount > 0 && (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] px-2 py-0.5 text-red-600 border-red-300 dark:text-red-400 dark:border-red-700'
+                          >
+                            {networkResourceInfo.uncompressedCount} 个未压缩 (
+                            {(networkResourceInfo.uncompressedSize / 1024).toFixed(0)}KB)
+                          </Badge>
+                        )}
+                        {networkResourceInfo.renderBlockingCount > 3 && (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] px-2 py-0.5 text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-700'
+                          >
+                            {networkResourceInfo.renderBlockingCount} 个渲染阻塞 (
+                            {(networkResourceInfo.renderBlockingSize / 1024).toFixed(0)}KB)
+                          </Badge>
+                        )}
+                      </div>
+                    )}
                     <div className='space-y-1.5 max-h-[300px] overflow-y-auto'>
                       {[...networkResourceInfo.items]
                         .sort((a, b) => b.size - a.size)
@@ -958,6 +1005,10 @@ const PerformanceChartPanel = () => {
                           const sizeKB = (item.size / 1024).toFixed(1);
                           const isLarge = item.size > 200 * 1024;
                           const isSlow = item.duration > 1000;
+                          const isUncompressed =
+                            ['scripts', 'stylesheets', 'documents', 'xhr'].includes(item.type) &&
+                            item.size > 10 * 1024 &&
+                            item.compressed === false;
                           return (
                             <div key={idx} className='flex items-center gap-2 text-xs'>
                               <Badge
@@ -972,6 +1023,21 @@ const PerformanceChartPanel = () => {
                               >
                                 {name}
                               </span>
+                              {item.renderBlocking && (
+                                <span className='text-[9px] px-1 py-0 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 shrink-0'>
+                                  阻塞
+                                </span>
+                              )}
+                              {isUncompressed && (
+                                <span className='text-[9px] px-1 py-0 rounded bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 shrink-0'>
+                                  未压缩
+                                </span>
+                              )}
+                              {item.compressed && item.encoding && (
+                                <span className='text-[9px] text-green-600 dark:text-green-400 shrink-0'>
+                                  {item.encoding}
+                                </span>
+                              )}
                               <span
                                 className={cn(
                                   'font-mono shrink-0',
