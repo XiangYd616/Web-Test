@@ -497,6 +497,86 @@ class LocalDatabase {
     `);
 
     console.log('[DB Migration] 同步表已就绪 (sync_meta, sync_queue, sync_conflicts)');
+
+    // ── 为可同步业务表添加 sync 字段 ──
+    const SYNCABLE_TABLES = ['workspaces', 'collections', 'environments', 'test_templates'];
+    const SYNC_COLUMNS = [
+      { name: 'sync_id', sql: "sync_id TEXT DEFAULT ''" },
+      { name: 'sync_version', sql: 'sync_version INTEGER DEFAULT 0' },
+      { name: 'sync_status', sql: "sync_status TEXT DEFAULT 'pending'" },
+      { name: 'sync_updated_at', sql: 'sync_updated_at DATETIME' },
+    ];
+
+    for (const table of SYNCABLE_TABLES) {
+      const cols = db.pragma(`table_info(${table})`) as Array<{ name: string }>;
+      const colNames = new Set(cols.map(c => c.name));
+      for (const col of SYNC_COLUMNS) {
+        if (!colNames.has(col.name)) {
+          db.exec(`ALTER TABLE ${table} ADD COLUMN ${col.sql}`);
+          console.log(`[DB Migration] ${table} 添加 ${col.name} 列`);
+        }
+      }
+
+      // 为已有记录填充 sync_id（使用 id 作为初始 sync_id）
+      db.exec(`UPDATE ${table} SET sync_id = id WHERE sync_id IS NULL OR sync_id = ''`);
+    }
+
+    // ── 创建 sync_id 索引 ──
+    for (const table of SYNCABLE_TABLES) {
+      db.exec(`CREATE INDEX IF NOT EXISTS idx_${table}_sync_id ON ${table}(sync_id)`);
+    }
+
+    // ── 创建 SQLite trigger：自动将变更写入 sync_queue ──
+    for (const table of SYNCABLE_TABLES) {
+      // AUTO-FILL trigger: 新记录 sync_id 为空时自动用 id 填充
+      db.exec(`
+        CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_autofill
+        AFTER INSERT ON ${table}
+        WHEN NEW.sync_id IS NULL OR NEW.sync_id = ''
+        BEGIN
+          UPDATE ${table} SET sync_id = NEW.id, sync_version = 1, sync_status = 'pending'
+          WHERE id = NEW.id;
+        END
+      `);
+
+      // INSERT trigger: 新记录入队 sync_queue
+      db.exec(`
+        CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_insert
+        AFTER INSERT ON ${table}
+        WHEN NEW.sync_id IS NOT NULL AND NEW.sync_id != '' AND NEW.sync_status != 'synced'
+        BEGIN
+          INSERT INTO sync_queue (table_name, record_sync_id, operation, data)
+          VALUES ('${table}', NEW.sync_id, 'insert', '{}');
+        END
+      `);
+
+      // UPDATE trigger: 业务字段变更时入队（排除纯 sync 字段更新避免递归）
+      db.exec(`
+        CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_update
+        AFTER UPDATE ON ${table}
+        WHEN NEW.sync_id IS NOT NULL AND NEW.sync_id != ''
+          AND OLD.updated_at != NEW.updated_at
+          AND NEW.sync_status != 'synced'
+        BEGIN
+          INSERT INTO sync_queue (table_name, record_sync_id, operation, data)
+          VALUES ('${table}', NEW.sync_id, 'update', '{}');
+        END
+      `);
+
+      // DELETE trigger
+      db.exec(`
+        CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_delete
+        AFTER DELETE ON ${table}
+        WHEN OLD.sync_id IS NOT NULL AND OLD.sync_id != ''
+        BEGIN
+          INSERT INTO sync_queue (table_name, record_sync_id, operation, data)
+          VALUES ('${table}', OLD.sync_id, 'delete',
+            json_object('id', OLD.id, 'sync_id', OLD.sync_id, 'sync_version', OLD.sync_version));
+        END
+      `);
+    }
+
+    console.log('[DB Migration] 同步字段、索引、触发器已就绪');
   }
 
   private seedOfficialTemplates(): void {

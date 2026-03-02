@@ -73,7 +73,7 @@ export class SyncConfigStore {
       const meta = (rows as { rows: Array<{ key: string; value: string }> }).rows || [];
       const map = new Map(meta.map(r => [r.key, r.value]));
 
-      this.config.serverUrl = map.get('server_url') || '';
+      this.config.serverUrl = map.get('server_url') || DEFAULT_SERVER_URL;
       this.config.intervalMs = Number(map.get('interval_ms')) || 30_000;
       this.config.enabled = map.get('enabled') === 'true';
       this.config.deviceId = map.get('device_id') || this.generateDeviceId();

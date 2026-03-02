@@ -353,14 +353,7 @@ type ConflictItem = {
   created_at: string;
 };
 
-const INTERVAL_OPTIONS = [
-  { labelKey: 'settings.sync.interval15s', fallback: '15 秒', value: 15_000 },
-  { labelKey: 'settings.sync.interval30s', fallback: '30 秒', value: 30_000 },
-  { labelKey: 'settings.sync.interval1m', fallback: '1 分钟', value: 60_000 },
-  { labelKey: 'settings.sync.interval5m', fallback: '5 分钟', value: 300_000 },
-  { labelKey: 'settings.sync.interval15m', fallback: '15 分钟', value: 900_000 },
-  { labelKey: 'settings.sync.interval30m', fallback: '30 分钟', value: 1_800_000 },
-];
+// INTERVAL_OPTIONS 已移至后台自动配置，不再面向用户展示
 
 const CloudSyncPanel = () => {
   const { t } = useTranslation();
@@ -378,7 +371,7 @@ const CloudSyncPanel = () => {
     conflicts?: number;
     error?: string;
   } | null>(null);
-  const [serverUrlInput, setServerUrlInput] = useState('');
+  // serverUrlInput 已移除（同步设置不面向用户展示）
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [logs, setLogs] = useState<Array<Record<string, unknown>>>([]);
 
@@ -410,7 +403,7 @@ const CloudSyncPanel = () => {
       setStatus(sts);
       setConflicts(cfls as ConflictItem[]);
       setLogs(syncLogs);
-      setServerUrlInput(effectiveCfg.serverUrl || '');
+      // serverUrlInput 已移除（技术细节不面向用户展示）
     } catch {
       toast.error(t('settings.sync.fetchFailed', '获取同步状态失败'));
     } finally {
@@ -484,27 +477,7 @@ const CloudSyncPanel = () => {
     }
   };
 
-  const handleSaveServer = async () => {
-    if (!api?.sync) return;
-    const url = serverUrlInput.trim().replace(/\/+$/, '');
-    try {
-      await api.sync.setConfig({ serverUrl: url });
-      await refresh();
-      toast.success(t('settings.sync.serverSaved', '服务器地址已保存'));
-    } catch {
-      toast.error(t('settings.sync.saveFailed', '保存失败'));
-    }
-  };
-
-  const handleIntervalChange = async (ms: number) => {
-    if (!api?.sync) return;
-    try {
-      await api.sync.setConfig({ intervalMs: ms });
-      await refresh();
-    } catch {
-      toast.error(t('settings.sync.settingFailed', '设置失败'));
-    }
-  };
+  // handleSaveServer / handleIntervalChange 已移至后台自动配置
 
   const handleResolveConflict = async (conflictId: string, resolution: 'local' | 'remote') => {
     if (!api?.sync) return;
@@ -698,70 +671,7 @@ const CloudSyncPanel = () => {
         </CardContent>
       </Card>
 
-      {/* 同步设置 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className='flex items-center gap-2 text-base'>
-            <Activity className='h-4 w-4' />
-            {t('settings.sync.settingsTitle', '同步设置')}
-          </CardTitle>
-          <CardDescription>
-            {t('settings.sync.settingsDesc', '配置云端服务器地址和同步策略')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className='space-y-4'>
-          {/* 服务器地址 */}
-          <div className='space-y-1.5'>
-            <label className='text-sm font-medium'>
-              {t('settings.sync.serverUrl', '服务器地址')}
-            </label>
-            <div className='flex gap-2'>
-              <input
-                type='url'
-                className='flex-1 rounded-md border bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring'
-                placeholder='https://your-server.com'
-                value={serverUrlInput}
-                onChange={e => setServerUrlInput(e.target.value)}
-              />
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => void handleSaveServer()}
-                disabled={serverUrlInput.trim() === (config?.serverUrl || '')}
-              >
-                {t('common.save', '保存')}
-              </Button>
-            </div>
-          </div>
-
-          {/* 同步间隔 */}
-          <div className='space-y-1.5'>
-            <label className='text-sm font-medium'>
-              {t('settings.sync.syncInterval', '同步间隔')}
-            </label>
-            <div className='flex flex-wrap gap-2'>
-              {INTERVAL_OPTIONS.map(opt => (
-                <Button
-                  key={opt.value}
-                  variant={config?.intervalMs === opt.value ? 'default' : 'outline'}
-                  size='sm'
-                  onClick={() => void handleIntervalChange(opt.value)}
-                >
-                  {t(opt.labelKey, opt.fallback)}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* 设备 ID */}
-          <div className='space-y-1.5'>
-            <label className='text-sm font-medium'>{t('settings.sync.deviceId', '设备标识')}</label>
-            <div className='text-xs text-muted-foreground font-mono bg-muted/50 rounded-md px-3 py-2'>
-              {config?.deviceId || t('common.loading', '加载中...')}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* 同步设置 — 技术细节对普通用户隐藏，配置在登录后自动完成 */}
 
       {/* 冲突解决 */}
       {/* 同步历史日志 */}

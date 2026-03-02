@@ -88,9 +88,11 @@ export class SyncFetcher {
     const serverUrl = this.deps.getServerUrl();
     if (!serverUrl) return false;
     try {
+      // serverUrl 形如 https://api.xiangweb.space/api，health 在根路径 /health
+      const baseOrigin = new URL(serverUrl).origin;
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5_000);
-      const resp = await fetch(`${serverUrl}/health`, {
+      const resp = await fetch(`${baseOrigin}/health`, {
         method: 'GET',
         signal: controller.signal,
       });
