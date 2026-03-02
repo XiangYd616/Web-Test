@@ -71,6 +71,9 @@ export const createEngineInstance = (
 
 // ── Puppeteer 浏览器池管理（供 main.ts 通过 engineBundle 调用） ──
 
+// 导出日志监听器注入接口，桌面端可通过此接口将引擎内部日志推送到渲染进程
+export { setLogListener } from '../../../../backend/modules/testing/services/testLogService';
+
 export const preloadPuppeteer = (): Promise<boolean> => getPool().preload();
 
 export const getPuppeteerStats = (): Record<string, unknown> =>

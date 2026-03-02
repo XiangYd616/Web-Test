@@ -11,6 +11,7 @@ import {
   TestStatus,
   ValidationResult,
 } from '../../../../shared/types/testEngine.types';
+import { insertExecutionLog } from '../../testing/services/testLogService';
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
 import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
 
@@ -625,6 +626,12 @@ class AccessibilityTestEngine implements ITestEngine<AccessibilityRunConfig, Bas
       });
 
       this.updateTestProgress(testId, 5, '开始可访问性测试');
+      void insertExecutionLog(
+        testId,
+        'info',
+        `可访问性测试开始: ${config.url} · WCAG ${config.wcagLevel || 'AA'}`,
+        { url: config.url }
+      );
 
       const results = await this.performAccessibilityTests(config, testId, signal);
 
@@ -677,6 +684,16 @@ class AccessibilityTestEngine implements ITestEngine<AccessibilityRunConfig, Bas
       };
 
       this.updateTestProgress(testId, 100, '可访问性测试完成');
+      void insertExecutionLog(
+        testId,
+        'info',
+        `可访问性测试完成 · 得分 ${normalizedResult.score} · 错误 ${errors.length} · 警告 ${warnings.length}`,
+        {
+          score: normalizedResult.score,
+          errorCount: errors.length,
+          warningCount: warnings.length,
+        }
+      );
 
       this.activeTests.set(testId, {
         status: TestStatus.COMPLETED,

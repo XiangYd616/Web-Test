@@ -14,6 +14,7 @@ import {
   ValidationResult,
 } from '../../../../shared/types/testEngine.types';
 // 进度/完成/错误事件统一由 UserTestManager 回调 -> sendToUser 推送，不再直接走房间广播
+import { insertExecutionLog } from '../../testing/services/testLogService';
 import AccessibilityTestEngine from '../accessibility/AccessibilityTestEngine';
 import PerformanceTestEngine from '../performance/PerformanceTestEngine';
 import SeoTestEngine from '../seo/SEOTestEngine';
@@ -464,6 +465,12 @@ class WebsiteTestEngine implements ITestEngine<WebsiteRunConfig, BaseTestResult>
         enableUX ? 'ux' : null,
       ].filter(Boolean) as string[];
 
+      void insertExecutionLog(
+        testId,
+        'info',
+        `网站综合测试开始: ${url} · 子引擎: ${enabledEngines.join(', ')}`,
+        { url }
+      );
       const strategy = this.getOptimalStrategy(enabledEngines);
       const engineMetrics: Record<string, Record<string, unknown>> = {};
 
@@ -758,6 +765,14 @@ class WebsiteTestEngine implements ITestEngine<WebsiteRunConfig, BaseTestResult>
 
       // 先发送 100% 进度（此时 activeTests 状态仍为 RUNNING）
       this.updateTestProgress(testId, 100, '网站测试完成', WEBSITE_PROGRESS_STAGE.COMPLETED);
+      void insertExecutionLog(
+        testId,
+        'info',
+        `网站综合测试完成 · 得分 ${results.summary.overallScore}`,
+        {
+          score: results.summary.overallScore,
+        }
+      );
 
       this.activeTests.set(testId, {
         status: TestStatus.COMPLETED,

@@ -25,6 +25,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { type TestProgressInfo, TEST_TYPE_LABELS } from '../../context/TestContext';
 import {
   type ConsoleEntry,
   type LogLevel,
@@ -130,6 +131,22 @@ const StatusBar = () => {
   const consoleEntries = useConsoleLogs();
   const scrollRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
+
+  // ── 监听全局测试进度（由 TestProvider 广播） ──
+  type TestProgressState = {
+    isProcessing: boolean;
+    selectedType?: string;
+    progressInfo?: TestProgressInfo | null;
+    url?: string;
+  };
+  const [testProgress, setTestProgress] = useState<TestProgressState>({ isProcessing: false });
+  useEffect(() => {
+    const handler = (e: Event) => {
+      setTestProgress((e as CustomEvent).detail as TestProgressState);
+    };
+    window.addEventListener('tw:test-progress-update', handler);
+    return () => window.removeEventListener('tw:test-progress-update', handler);
+  }, []);
 
   const filteredEntries =
     consoleFilter === 'all'
@@ -367,6 +384,48 @@ const StatusBar = () => {
               </button>
             </div>
           </div>
+          {/* ── Console 内嵌测试进度条 ── */}
+          {testProgress.isProcessing && (
+            <div className='tw-console-progress'>
+              <div className='tw-console-progress-header'>
+                <div className='tw-console-progress-left'>
+                  <Loader2 className='w-3 h-3 animate-spin' />
+                  <span className='tw-console-progress-type'>
+                    {testProgress.selectedType
+                      ? t(
+                          TEST_TYPE_LABELS[
+                            testProgress.selectedType as keyof typeof TEST_TYPE_LABELS
+                          ] ?? testProgress.selectedType
+                        )
+                      : t('result.running', '运行中')}
+                  </span>
+                  {testProgress.url && (
+                    <span className='tw-console-progress-url' title={testProgress.url}>
+                      {testProgress.url}
+                    </span>
+                  )}
+                </div>
+                <span className='tw-console-progress-pct'>
+                  {typeof testProgress.progressInfo?.progress === 'number'
+                    ? `${Math.round(Math.min(100, Math.max(0, testProgress.progressInfo.progress)))}%`
+                    : '...'}
+                </span>
+              </div>
+              <div className='tw-console-progress-track'>
+                <div
+                  className='tw-console-progress-fill'
+                  style={{
+                    width: `${typeof testProgress.progressInfo?.progress === 'number' ? Math.min(100, Math.max(0, testProgress.progressInfo.progress)) : 2}%`,
+                  }}
+                />
+              </div>
+              {testProgress.progressInfo?.currentStep && (
+                <div className='tw-console-progress-step'>
+                  {t('editor.currentStep', '当前步骤')}: {testProgress.progressInfo.currentStep}
+                </div>
+              )}
+            </div>
+          )}
           <div className='tw-console-body' ref={scrollRef}>
             {filteredEntries.length === 0 ? (
               <div className='tw-console-empty'>

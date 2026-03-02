@@ -16,6 +16,7 @@ import {
   ValidationResult,
 } from '../../../../shared/types/testEngine.types';
 import { query } from '../../config/database';
+import { insertExecutionLog } from '../../testing/services/testLogService';
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
 import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
 
@@ -590,6 +591,9 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
       });
 
       this.updateTestProgress(testId, 5, '开始SEO分析');
+      void insertExecutionLog(testId, 'info', `SEO 分析开始: ${validatedConfig.url}`, {
+        url: validatedConfig.url,
+      });
 
       this.updateTestProgress(testId, 15, '获取页面内容');
 
@@ -798,6 +802,15 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
       };
 
       this.updateTestProgress(testId, 100, 'SEO分析完成');
+      void insertExecutionLog(
+        testId,
+        'info',
+        `SEO 分析完成 · 得分 ${results.summary.score ?? 0} · 耗时 ${((results.totalTime || 0) / 1000).toFixed(1)}s`,
+        {
+          score: results.summary.score ?? 0,
+          executionTime: (results.totalTime || 0) / 1000,
+        }
+      );
 
       const warnings: string[] = [...puppeteerWarnings];
       const errors: string[] = [];

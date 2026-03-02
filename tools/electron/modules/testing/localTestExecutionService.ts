@@ -74,6 +74,23 @@ async function getCreateEngineInstance(): Promise<(type: string) => ITestEngine>
       if (typeof _createEngineInstance !== 'function') {
         throw new Error('engineBundle.js 中未找到 createEngineInstance 导出');
       }
+      // 注入日志监听器：引擎内部的 insertExecutionLog 会通过此回调推送 IPC 事件到渲染进程
+      const setLogListener = mod.setLogListener as ((listener: unknown) => void) | undefined;
+      if (typeof setLogListener === 'function') {
+        setLogListener(
+          (
+            testId: string,
+            log: {
+              level: string;
+              message: string;
+              context?: Record<string, unknown>;
+              timestamp?: string;
+            }
+          ) => {
+            emitTestEvent('test-log', { testId, ...log });
+          }
+        );
+      }
     } catch (err) {
       throw new Error(
         `无法加载测试引擎模块 (尝试路径: ${bundlePath}): ${err instanceof Error ? err.message : String(err)}`
@@ -173,28 +190,9 @@ const localTestExecutionService = {
 
         const result = await engine.run(config, async (progress: TestProgress) => {
           const progressValue = Number(progress.progress ?? 0);
-          await localTestOperationsRepository.updateProgress(testId, progressValue);
 
+          // 实时推送进度到渲染进程（优先执行，不等数据库）
           const step = progress.currentStep || '';
-          if (step && step !== lastStep) {
-            lastStep = step;
-            await insertExecutionLog(testId, 'info', `进度: ${step}`, {
-              progress: progressValue,
-            });
-            emitLog('info', step, { progress: progressValue });
-          }
-
-          const messages = Array.isArray(progress.messages) ? progress.messages : [];
-          const latestMessage = messages.length ? String(messages[messages.length - 1]) : '';
-          if (latestMessage && latestMessage !== lastMessage) {
-            lastMessage = latestMessage;
-            await insertExecutionLog(testId, 'info', `提示: ${latestMessage}`, {
-              progress: progressValue,
-            });
-            emitLog('info', latestMessage, { progress: progressValue });
-          }
-
-          // 实时推送进度到渲染进程（含 stats 供压力测试实时监控）
           const extra = progress.extra as Record<string, unknown> | undefined;
           const stats = extra?.stats as Record<string, unknown> | undefined;
           emitTestEvent('test-progress', {
@@ -203,6 +201,34 @@ const localTestExecutionService = {
             currentStep: step || lastStep,
             status: 'running',
             ...(stats ? { stats } : {}),
+          });
+
+          if (step && step !== lastStep) {
+            lastStep = step;
+            emitLog('info', step, { progress: progressValue });
+            // 数据库写入改为 fire-and-forget，不阻塞进度推送
+            void insertExecutionLog(testId, 'info', `进度: ${step}`, {
+              progress: progressValue,
+            }).catch(() => {
+              /* 忽略 */
+            });
+          }
+
+          const messages = Array.isArray(progress.messages) ? progress.messages : [];
+          const latestMessage = messages.length ? String(messages[messages.length - 1]) : '';
+          if (latestMessage && latestMessage !== lastMessage) {
+            lastMessage = latestMessage;
+            emitLog('info', latestMessage, { progress: progressValue });
+            void insertExecutionLog(testId, 'info', `提示: ${latestMessage}`, {
+              progress: progressValue,
+            }).catch(() => {
+              /* 忽略 */
+            });
+          }
+
+          // 数据库进度更新也改为 fire-and-forget
+          void localTestOperationsRepository.updateProgress(testId, progressValue).catch(() => {
+            /* 忽略 */
           });
         });
 

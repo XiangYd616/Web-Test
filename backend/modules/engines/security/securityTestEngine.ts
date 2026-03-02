@@ -23,6 +23,7 @@ import {
   ValidationResult,
 } from '../../../../shared/types/testEngine.types';
 import { getAlertManager } from '../../alert/services/AlertManager';
+import { insertExecutionLog } from '../../testing/services/testLogService';
 import Logger from '../../utils/logger';
 // 进度/完成/错误事件统一由 UserTestManager 回调 -> sendToUser 推送，不再直接走房间广播
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
@@ -682,6 +683,22 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
       // 发送测试开始事件
       this.updateTestProgress(testId, 0, '安全扫描开始', 'started', { url });
 
+      const enabledChecks: string[] = [];
+      if (validatedConfig.checkSSL !== false) enabledChecks.push('SSL/TLS');
+      if (validatedConfig.checkHeaders !== false) enabledChecks.push('安全头部');
+      if (validatedConfig.checkVulnerabilities !== false) enabledChecks.push('漏洞扫描');
+      if (validatedConfig.enablePortScan !== false) enabledChecks.push('端口扫描');
+      if (validatedConfig.checkCsrf !== false) enabledChecks.push('CSRF');
+      if (validatedConfig.checkCookies !== false) enabledChecks.push('Cookie');
+      if (validatedConfig.checkCors !== false) enabledChecks.push('CORS');
+      if (validatedConfig.checkContentSecurity !== false) enabledChecks.push('内容安全');
+      void insertExecutionLog(
+        testId,
+        'info',
+        `安全测试配置: ${enabledChecks.join(' · ')}${validatedConfig.enableDeepScan ? ' · 深度扫描' : ''}`,
+        { url }
+      );
+
       const _cfgRaw = validatedConfig as unknown as Record<string, unknown>;
       if (typeof _cfgRaw.engineMode === 'string') {
         puppeteerPool.applyEngineMode(_cfgRaw.engineMode);
@@ -791,6 +808,17 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
 
       // 先发送 100% 进度（此时 activeTests 状态仍为 RUNNING）
       this.updateTestProgress(testId, 100, '安全测试完成', 'completed');
+      void insertExecutionLog(
+        testId,
+        'info',
+        `安全测试完成 · 得分 ${normalizedResult.score} · 问题 ${summary.totalIssues} 个（严重 ${summary.criticalIssues} / 高危 ${summary.highRiskIssues}）`,
+        {
+          score: normalizedResult.score,
+          totalIssues: summary.totalIssues,
+          criticalIssues: summary.criticalIssues,
+          highRiskIssues: summary.highRiskIssues,
+        }
+      );
 
       this.activeTests.set(testId, {
         status: TestStatus.COMPLETED,
@@ -927,6 +955,15 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
       // 发送进度: 基础检查完成
       if (testId) {
         this.updateTestProgress(testId, 40, 'SSL和安全头部分析完成', 'running');
+        const sslScore = sslAnalysis?.score ?? 0;
+        const headerScore = headersAnalysis?.score ?? 0;
+        const sslIssueCount = sslAnalysis?.issues?.length ?? 0;
+        const missingHeaderCount = headersAnalysis?.missingHeaders?.length ?? 0;
+        void insertExecutionLog(
+          testId,
+          'info',
+          `SSL 得分 ${sslScore} · 安全头部得分 ${headerScore} · SSL 问题 ${sslIssueCount} 个 · 缺失头部 ${missingHeaderCount} 个`
+        );
       }
       if (this.isCancelled(testId)) throw new Error('测试已取消');
 
@@ -1048,6 +1085,7 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
       if (options.enablePortScan !== false) {
         if (testId) {
           this.updateTestProgress(testId, 65, '执行端口扫描...', 'running');
+          void insertExecutionLog(testId, 'info', '开始端口扫描');
         }
         try {
           const host = PortScanner.extractHost(url);

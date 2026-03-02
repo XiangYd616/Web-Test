@@ -487,8 +487,8 @@ class TestService {
       testType: test.engine_type,
       status: test.status,
       results: result?.summary || null,
-      createdAt: test.created_at,
-      updatedAt: test.updated_at,
+      createdAt: toDate(test.created_at),
+      updatedAt: toDate(test.updated_at),
       configSnapshot: parseConfig(test.test_config),
     };
   }
@@ -666,8 +666,8 @@ class TestService {
       testId: test.test_id,
       status: test.status,
       progress: typeof test.progress === 'number' ? test.progress : 0,
-      startTime: test.started_at || test.created_at,
-      endTime: test.completed_at || test.updated_at,
+      startTime: toDate(test.started_at || test.created_at),
+      endTime: toDate(test.completed_at || test.updated_at),
       errorMessage: test.error_message || undefined,
       results,
     };
@@ -758,8 +758,8 @@ class TestService {
         url: test.test_url || '',
         testType: test.engine_type,
         status: test.status,
-        createdAt: test.created_at,
-        updatedAt: test.updated_at,
+        createdAt: toDate(test.created_at),
+        updatedAt: toDate(test.updated_at),
       })),
       pagination: {
         page,

@@ -9,6 +9,7 @@ import {
   TestStatus,
   ValidationResult,
 } from '../../../../shared/types/testEngine.types';
+import { insertExecutionLog } from '../../testing/services/testLogService';
 import BaseTestEngine from '../base/BaseTestEngine';
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
 import ScreenshotService, { type ScreenshotResult } from '../shared/services/ScreenshotService';
@@ -467,6 +468,10 @@ class UXTestEngine extends BaseTestEngine implements ITestEngine<UXRunConfig, Ba
         startTime: Date.now(),
       });
       this.updateTestProgress(testId, 5, '初始化UX测试');
+      void insertExecutionLog(testId, 'info', `UX 测试开始: ${url} · ${iterations} 次采样`, {
+        url,
+        iterations,
+      });
       this.updateTestProgress(testId, 12, '启动真实浏览器');
       this.updateTestProgress(testId, 25, '准备测试页面');
 
@@ -556,6 +561,16 @@ class UXTestEngine extends BaseTestEngine implements ITestEngine<UXRunConfig, Ba
         results,
       });
       this.updateTestProgress(testId, 100, 'UX测试完成');
+      void insertExecutionLog(
+        testId,
+        'info',
+        `UX 测试完成 · 得分 ${score} · 等级 ${scoreToGrade(score)} · 有效采样 ${samples.length}/${iterations}`,
+        {
+          score,
+          grade: scoreToGrade(score),
+          validSamples: samples.length,
+        }
+      );
 
       const finalResult: UXFinalResult = {
         engine: this.name,

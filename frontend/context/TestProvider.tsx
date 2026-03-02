@@ -70,11 +70,28 @@ import {
   type TestType,
 } from './TestContext';
 
+/** 从 localStorage 恢复活跃 tab 的 testType（应用重启时使用） */
+const restoreActiveTestType = (): TestType => {
+  try {
+    const activeTabId = window.localStorage.getItem('tw:active-tab');
+    const raw = window.localStorage.getItem('tw:open-tabs');
+    if (activeTabId && raw) {
+      const tabs = JSON.parse(raw) as Array<{ id: string; testType?: string }>;
+      const active = tabs.find(t => t.id === activeTabId);
+      if (active?.testType) return active.testType as TestType;
+    }
+  } catch {
+    /* ignore */
+  }
+  return 'performance';
+};
+
 export const TestProvider = ({ children }: { children: ReactNode }) => {
   const isDesktop = checkIsDesktop();
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedType, setSelectedType] = useState<TestType>('performance');
+  const restoredType = useMemo(() => restoreActiveTestType(), []);
+  const [selectedType, setSelectedType] = useState<TestType>(restoredType);
 
   // 监听 TabBar 发出的测试类型切换事件
   // 使用 ref 桥接：useEffect 注册时 selectTestType 尚未创建，通过 ref 延迟引用
@@ -97,7 +114,11 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
   const [url, setUrl] = useState<string>('https://example.com');
-  const [configText, setConfigText] = useState<string>(DEFAULT_CONFIG);
+  const [configText, setConfigText] = useState<string>(() => {
+    if (restoredType === 'performance') return DEFAULT_CONFIG;
+    // 根据恢复的测试类型生成匹配的默认配置
+    return DEFAULT_CONFIG.replace('"testType": "performance"', `"testType": "${restoredType}"`);
+  });
   const [resultPayloadText, setResultPayloadText] = useState<string>(DEFAULT_RESULT_PAYLOAD);
   const [history, setHistory] = useState(HISTORY_ITEMS);
   const [historyPagination, setHistoryPagination] = useState(DEFAULT_HISTORY_PAGINATION);
@@ -126,7 +147,7 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
     status: 'idle',
     duration: '-',
     score: 0,
-    engine: 'performance',
+    engine: restoredType,
   });
   const [logs, setLogs] = useState(LOG_SEED);
   const [currentLogTestId, setCurrentLogTestId] = useState<string | null>(null);
@@ -272,9 +293,20 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
 
   const appendLogForTest = useCallback(
     (testId: string | null, entry: LogEntry) => {
-      // 同步写入全局 Console 面板
+      // 同步写入全局 Console 面板（附带 context 关键信息作为 detail）
       const level = entry.level === 'error' ? 'error' : entry.level === 'warn' ? 'warn' : 'info';
-      consoleLog(level, entry.message);
+      const ctx = entry.context;
+      let detail: string | undefined;
+      if (ctx) {
+        const parts: string[] = [];
+        if (typeof ctx.score === 'number') parts.push(`得分 ${ctx.score}`);
+        if (typeof ctx.grade === 'string') parts.push(`等级 ${ctx.grade}`);
+        if (typeof ctx.errorMessage === 'string') parts.push(ctx.errorMessage);
+        if (typeof ctx.executionTime === 'number')
+          parts.push(`耗时 ${(ctx.executionTime as number).toFixed(1)}s`);
+        if (parts.length > 0) detail = parts.join(' · ');
+      }
+      consoleLog(level, entry.message, detail);
 
       if (!testId) {
         setLogs(prev => [...prev, entry].slice(-LOG_MAX_PER_TEST));
@@ -690,6 +722,7 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    let lastStep = '';
     const sub = subscribeTestEvents(activeTestId, {
       onProgress: info => {
         setProgressInfo(prev => ({
@@ -698,6 +731,12 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
           currentStep: info.currentStep ?? prev?.currentStep,
           stats: info.stats ?? prev?.stats,
         }));
+        // 步骤变化时同步写入 Console，让用户看到每一步的测试过程
+        if (info.currentStep && info.currentStep !== lastStep) {
+          lastStep = info.currentStep;
+          const pct = typeof info.progress === 'number' ? `[${Math.round(info.progress)}%] ` : '';
+          consoleLog('info', `${pct}${info.currentStep}`);
+        }
       },
       onLog: log => {
         appendLogRef.current(activeTestId, log);
@@ -740,6 +779,17 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
       window.clearTimeout(hardTimeout);
     };
   }, [activeTestId, isProcessing, refreshTest]);
+
+  // ── 广播测试进度到全局（供 StatusBar Console 面板等非 Context 内组件使用） ──
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent('tw:test-progress-update', {
+        detail: isProcessing
+          ? { isProcessing: true, selectedType, progressInfo, url }
+          : { isProcessing: false },
+      })
+    );
+  }, [isProcessing, selectedType, progressInfo, url]);
 
   useEffect(() => {
     if (!activeTestId) {

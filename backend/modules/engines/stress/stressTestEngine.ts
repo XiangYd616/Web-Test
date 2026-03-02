@@ -10,6 +10,7 @@ import {
   ValidationResult,
 } from '../../../../shared/types/testEngine.types';
 import { getAlertManager } from '../../alert/services/AlertManager';
+import { insertExecutionLog } from '../../testing/services/testLogService';
 import Logger from '../../utils/logger';
 // 进度事件统一由 UserTestManager.progressCallback -> sendToUser 推送，不再直接走房间广播
 import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
@@ -493,6 +494,12 @@ class StressTestEngine implements ITestEngine<StressRunConfig, BaseTestResult> {
       });
 
       this.updateTestProgress(testId, 0, '压力测试开始', 'started', { url });
+      void insertExecutionLog(
+        testId,
+        'info',
+        `压力测试配置: 并发 ${validatedConfig.concurrency ?? 50} · 持续 ${validatedConfig.duration ?? 60}s · 缓冲 ${validatedConfig.rampUp ?? 15}s`,
+        { url }
+      );
 
       // 读取前端高级参数
       const runConfig = config as StressRunConfig;
@@ -599,6 +606,18 @@ class StressTestEngine implements ITestEngine<StressRunConfig, BaseTestResult> {
 
       // 先发送 100% 进度（此时 activeTests 状态仍为 RUNNING，不会被 guard 拦截）
       this.updateTestProgress(testId, 100, '压力测试完成', 'completed');
+      const totalReqs = (results as { totalRequests?: number }).totalRequests || 0;
+      const failedReqs = (results as { failedRequests?: number }).failedRequests || 0;
+      void insertExecutionLog(
+        testId,
+        'info',
+        `压力测试完成 · 得分 ${normalizedResult.score} · 总请求 ${totalReqs} · 失败 ${failedReqs}`,
+        {
+          score: normalizedResult.score,
+          totalRequests: totalReqs,
+          failedRequests: failedReqs,
+        }
+      );
 
       // 再更新状态为 COMPLETED
       this.activeTests.set(testId, {

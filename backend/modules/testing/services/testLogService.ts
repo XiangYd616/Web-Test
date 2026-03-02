@@ -6,6 +6,16 @@ import userTestManager from './UserTestManager';
 const TEST_LOG_LEVELS = ['error', 'warn', 'info', 'debug'] as const;
 export type TestLogLevel = (typeof TEST_LOG_LEVELS)[number];
 
+// ── 可注入的日志监听器（桌面端通过 engineBundle 注入 IPC 推送） ──
+type LogListener = (
+  testId: string,
+  log: { level: string; message: string; context?: Record<string, unknown>; timestamp?: string }
+) => void;
+let _logListener: LogListener | null = null;
+export const setLogListener = (listener: LogListener | null): void => {
+  _logListener = listener;
+};
+
 export const normalizeTestLogLevel = (
   level?: string,
   fallback: TestLogLevel = 'info'
@@ -25,13 +35,29 @@ export const insertExecutionLog = async (
   const normalizedLevel = normalizeTestLogLevel(level, 'info');
   const enrichedContext: Record<string, unknown> = { testId, ...context };
 
+  const timestamp = new Date().toISOString();
+
   // 先通过 WS 实时推送日志（不等数据库写入）
   userTestManager.sendLogToTestUser(testId, {
     level: normalizedLevel,
     message,
     context: enrichedContext,
-    timestamp: new Date().toISOString(),
+    timestamp,
   });
+
+  // 桌面端通过注入的监听器推送 IPC 事件
+  if (_logListener) {
+    try {
+      _logListener(testId, {
+        level: normalizedLevel,
+        message,
+        context: enrichedContext,
+        timestamp,
+      });
+    } catch {
+      /* 不影响主流程 */
+    }
+  }
 
   // 再异步持久化到数据库
   await testLogRepository.insertExecutionLog(testId, normalizedLevel, message, enrichedContext);

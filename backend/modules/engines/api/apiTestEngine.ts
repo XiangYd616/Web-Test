@@ -15,6 +15,7 @@ import {
   ValidationResult,
 } from '../../../../shared/types/testEngine.types';
 import { getAlertManager } from '../../alert/services/AlertManager';
+import { insertExecutionLog } from '../../testing/services/testLogService';
 import Logger from '../../utils/logger';
 // 进度/完成/错误事件统一由 UserTestManager 回调 -> sendToUser 推送，不再直接走房间广播
 import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
@@ -794,6 +795,12 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
       });
 
       this.updateTestProgress(testId, 0, `API测试开始: ${url || '多个端点'}`, 'started', { url });
+      void insertExecutionLog(
+        testId,
+        'info',
+        `API 测试开始: ${method} ${url || `${endpoints.length} 个端点`}`,
+        { url, method }
+      );
 
       let batchResult: ApiBatchResult;
 
@@ -845,6 +852,15 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
 
       // 先发送 100% 进度（此时 activeTests 状态仍为 RUNNING，不会被 guard 拦截）
       this.updateTestProgress(testId, 100, 'API测试完成', 'completed');
+      void insertExecutionLog(
+        testId,
+        'info',
+        `API 测试完成 · 得分 ${score} · 端点 ${batchResult.totalEndpoints} · 总耗时 ${batchResult.totalTime}`,
+        {
+          score,
+          totalEndpoints: batchResult.totalEndpoints,
+        }
+      );
 
       this.activeTests.set(testId, {
         status: TestStatus.COMPLETED,

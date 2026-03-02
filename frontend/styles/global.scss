@@ -928,8 +928,14 @@ a {
 }
 
 @keyframes tw-menu-fade {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .tw-tab-new-menu-title {
@@ -1023,7 +1029,9 @@ a {
   height: 2px;
   border-radius: 1px;
   background: $panel-border;
-  transition: background 0.15s, width 0.15s;
+  transition:
+    background 0.15s,
+    width 0.15s;
 }
 
 .tw-footer-resizer:hover .tw-footer-resizer-handle {
@@ -1773,7 +1781,6 @@ a {
   overflow-y: auto;
 }
 
-
 .tw-url-dropdown-header {
   padding: 6px 12px;
   font-size: 10px;
@@ -2204,7 +2211,9 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 8px;
 
-  p { margin: 0; }
+  p {
+    margin: 0;
+  }
 }
 
 /* Section 标题 */
@@ -3406,7 +3415,6 @@ a {
   flex-shrink: 0;
 }
 
-
 .tw-result-tabs-list {
   display: flex;
   gap: 0;
@@ -3680,7 +3688,9 @@ a {
   height: 2px;
   border-radius: 1px;
   background: $panel-border;
-  transition: background 0.12s, width 0.12s;
+  transition:
+    background 0.12s,
+    width 0.12s;
 }
 
 .tw-console-resizer:hover .tw-console-resizer-handle {
@@ -3726,14 +3736,17 @@ a {
   font-size: 11px;
   font-weight: 500;
   color: $text-muted;
-  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 4px center;
+  background: transparent
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+    no-repeat right 4px center;
   border: 1px solid $panel-border;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.1s;
   outline: none;
 
-  &:hover, &:focus {
+  &:hover,
+  &:focus {
     border-color: hsl(var(--ring));
     color: $text;
   }
@@ -3788,6 +3801,75 @@ a {
     color: $text;
     background: hsl(var(--accent));
   }
+}
+
+/* Console 内嵌测试进度条 */
+.tw-console-progress {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-bottom: 1px solid $panel-border;
+  background: hsl(var(--muted) / 0.15);
+}
+
+.tw-console-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.tw-console-progress-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: hsl(var(--primary));
+}
+
+.tw-console-progress-type {
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tw-console-progress-url {
+  font-size: 10px;
+  color: $text-muted;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 260px;
+}
+
+.tw-console-progress-pct {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: $text;
+  flex-shrink: 0;
+}
+
+.tw-console-progress-track {
+  height: 3px;
+  border-radius: 2px;
+  background: hsl(var(--muted));
+  overflow: hidden;
+}
+
+.tw-console-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: hsl(var(--primary));
+  transition: width 0.4s ease-out;
+}
+
+.tw-console-progress-step {
+  margin-top: 3px;
+  font-size: 10px;
+  color: $text-muted;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 日志列表 */
@@ -3852,17 +3934,23 @@ a {
 }
 
 .tw-console-level--info {
-  .tw-console-icon { color: #3b82f6; }
+  .tw-console-icon {
+    color: #3b82f6;
+  }
 }
 
 .tw-console-level--warn {
   background: rgba(245, 158, 11, 0.03);
-  .tw-console-icon { color: #f59e0b; }
+  .tw-console-icon {
+    color: #f59e0b;
+  }
 }
 
 .tw-console-level--error {
   background: rgba(239, 68, 68, 0.04);
-  .tw-console-icon { color: #ef4444; }
+  .tw-console-icon {
+    color: #ef4444;
+  }
 }
 
 .tw-console-time {
@@ -3923,7 +4011,7 @@ a {
 }
 
 /* ── 密码输入框圆点样式优化 ── */
-input[type='password'] {
+input[type="password"] {
   font-family: Verdana, sans-serif;
   letter-spacing: 0.2em;
   font-size: 0.75rem;

@@ -11,6 +11,7 @@ import {
   TestStatus,
   ValidationResult,
 } from '../../../../shared/types/testEngine.types';
+import { insertExecutionLog } from '../../testing/services/testLogService';
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
 import ScreenshotService from '../shared/services/ScreenshotService';
 import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
@@ -675,6 +676,12 @@ class CompatibilityTestEngine implements ITestEngine<CompatibilityRunConfig, Bas
         startTime: Date.now(),
       });
       this.updateTestProgress(testId, 10, '获取页面内容');
+      void insertExecutionLog(
+        testId,
+        'info',
+        `兼容性测试开始: ${url}${enableRealBrowser ? ' · 真实浏览器' : ' · 静态分析'}`,
+        { url }
+      );
 
       const response = await axios.get(url, { timeout });
       if (this.isCancelled(testId)) throw new Error('测试已取消');
@@ -839,6 +846,16 @@ class CompatibilityTestEngine implements ITestEngine<CompatibilityRunConfig, Bas
         results,
       });
       this.updateTestProgress(testId, 100, '兼容性测试完成');
+      void insertExecutionLog(
+        testId,
+        'info',
+        `兼容性测试完成 · 得分 ${overallScore} · 浏览器 ${browsers.length} 个 · 设备 ${devices.length} 个`,
+        {
+          score: overallScore,
+          browserCount: browsers.length,
+          deviceCount: devices.length,
+        }
+      );
 
       const finalResult: CompatibilityFinalResult = {
         engine: this.name,
