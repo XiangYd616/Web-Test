@@ -41,7 +41,7 @@ export class SyncStrategy {
 
   async pull(lastSyncAt: string | null): Promise<PullResult> {
     const since = lastSyncAt || '';
-    const url = `${this.getServerUrl()}/api/sync/pull?since=${encodeURIComponent(since)}&tables=${SYNCABLE_TABLES.join(',')}`;
+    const url = `${this.getServerUrl()}/sync/pull?since=${encodeURIComponent(since)}&tables=${SYNCABLE_TABLES.join(',')}`;
 
     const resp = await this.fetcher.fetchApi(url, 'GET');
     if (!resp.success || !resp.data) {
@@ -126,7 +126,7 @@ export class SyncStrategy {
       }
     }
 
-    const url = `${this.getServerUrl()}/api/sync/push`;
+    const url = `${this.getServerUrl()}/sync/push`;
     const resp = await this.fetcher.fetchApi(url, 'POST', {
       changes,
       deviceId: this.getDeviceId(),

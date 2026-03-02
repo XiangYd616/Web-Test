@@ -6,6 +6,7 @@
 
 import { ArrowRight, Database, X } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 
@@ -15,6 +16,7 @@ import { isDesktop } from '../utils/environment';
 const ScratchpadMigrationBanner = () => {
   const { mode, hasScratchpadData, markScratchpadMigrated } = useAppMode();
   const [dismissed, setDismissed] = useState(false);
+  const navigate = useNavigate();
 
   // Scratch Pad 仅桌面端有效，Web 端不显示迁移提示
   if (!isDesktop()) return null;
@@ -56,9 +58,8 @@ const ScratchpadMigrationBanner = () => {
           size='sm'
           className='h-7 text-xs'
           onClick={() => {
-            // 打开设置页面的导入/导出功能
-            window.location.hash = '#/settings';
-            window.location.pathname = '/settings';
+            // 打开设置页面的数据备份 tab
+            navigate('/settings?tab=backup');
             handleDismiss();
           }}
         >

@@ -392,11 +392,25 @@ const CloudSyncPanel = () => {
         api.sync.getConflicts(),
         api.sync.getLogs(15),
       ]);
-      setConfig(cfg);
+
+      // 如果 SyncEngine 没有 serverUrl，从已登录的 cloudApiUrl 自动补全
+      let effectiveCfg = cfg;
+      if (!cfg.serverUrl) {
+        const cloudUrl =
+          localStorage.getItem('cloudApiUrl') ||
+          import.meta.env.VITE_API_URL ||
+          'https://api.xiangweb.space/api';
+        if (cloudUrl) {
+          await api.sync.setConfig({ serverUrl: cloudUrl });
+          effectiveCfg = { ...cfg, serverUrl: cloudUrl };
+        }
+      }
+
+      setConfig(effectiveCfg);
       setStatus(sts);
       setConflicts(cfls as ConflictItem[]);
       setLogs(syncLogs);
-      setServerUrlInput(cfg.serverUrl || '');
+      setServerUrlInput(effectiveCfg.serverUrl || '');
     } catch {
       toast.error(t('settings.sync.fetchFailed', '获取同步状态失败'));
     } finally {

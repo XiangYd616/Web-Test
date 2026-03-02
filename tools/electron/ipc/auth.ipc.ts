@@ -41,14 +41,15 @@ export function handleAuthDeepLink(url: string, win: BrowserWindow | null): void
 
     // 存储到本地数据库
     const now = new Date().toISOString();
+    const effectiveServerUrl = serverUrl || 'https://api.xiangweb.space/api';
     void localQuery(
       `UPDATE app_state SET auth_mode = 'cloud', cloud_server_url = ?, cloud_token = ?,
        cloud_user_id = ?, cloud_username = ?, cloud_email = ?, updated_at = ? WHERE id = 1`,
-      [serverUrl, accessToken, userId, username, email, now]
+      [effectiveServerUrl, accessToken, userId, username, email, now]
     ).then(() => {
-      // 通知同步引擎
+      // 激活同步引擎（设置 token + serverUrl + 自动启用）
       void import('../modules/sync/SyncEngine')
-        .then(({ syncEngine }) => syncEngine.setToken(accessToken))
+        .then(({ syncEngine }) => syncEngine.activateWithAuth(accessToken, effectiveServerUrl))
         .catch(() => {
           /* sync module may not be loaded yet */
         });
@@ -85,13 +86,25 @@ export function registerAuthIpc(): void {
         return { success: false, error: '未配置服务器地址' };
       }
 
+      // 从 API URL 推导出前端 Web URL
+      // 例: https://api.xiangweb.space/api → https://app.xiangweb.space
+      let webBaseUrl = serverUrl.replace(/\/api\/?$/, ''); // 去掉尾部 /api
+      try {
+        const parsed = new URL(webBaseUrl);
+        if (parsed.hostname.startsWith('api.')) {
+          parsed.hostname = parsed.hostname.replace(/^api\./, 'app.');
+          webBaseUrl = parsed.origin;
+        }
+      } catch {
+        /* 保持原样 */
+      }
+
       // 构建 Web 端登录 URL，附带 desktop_auth=1 参数，
       // Web 端登录成功后会检测此参数并重定向到 testweb://auth-callback
-      const separator = serverUrl.includes('?') ? '&' : '?';
       const authUrl =
         mode === 'register'
-          ? `${serverUrl}/register${separator}desktop_auth=1`
-          : `${serverUrl}/login${separator}desktop_auth=1`;
+          ? `${webBaseUrl}/register?desktop_auth=1`
+          : `${webBaseUrl}/login?desktop_auth=1`;
 
       try {
         await shell.openExternal(authUrl);

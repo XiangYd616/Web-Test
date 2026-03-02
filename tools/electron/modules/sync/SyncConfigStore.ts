@@ -90,12 +90,20 @@ export class SyncConfigStore {
   async loadTokenFromAppState(): Promise<void> {
     try {
       const result = await localQuery(
-        `SELECT value FROM app_state WHERE key = 'cloud_token' LIMIT 1`,
+        `SELECT cloud_token, cloud_server_url FROM app_state WHERE id = 1`,
         []
       );
-      const rows = (result as { rows: Array<{ value: string }> }).rows || [];
-      if (rows.length > 0 && rows[0].value) {
-        this.token = rows[0].value;
+      const rows =
+        (result as { rows: Array<{ cloud_token: string; cloud_server_url: string }> }).rows || [];
+      if (rows.length > 0) {
+        if (rows[0].cloud_token) {
+          this.token = rows[0].cloud_token;
+        }
+        // 如果 sync_meta 中没有 server_url，从 app_state 继承
+        if (!this.config.serverUrl && rows[0].cloud_server_url) {
+          this.config.serverUrl = rows[0].cloud_server_url;
+          await this.saveMeta('server_url', rows[0].cloud_server_url);
+        }
       }
     } catch {
       // app_state 表可能不存在

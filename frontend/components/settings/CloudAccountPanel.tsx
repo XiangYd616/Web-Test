@@ -33,6 +33,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 
 import { apiClient } from '../../services/apiClient';
+import { DEFAULT_CLOUD_API_URL } from '../../utils/environment';
 
 // ─── 类型定义 ───
 
@@ -56,16 +57,15 @@ type LicenseCert = {
 
 const STORAGE_KEYS = {
   cloudApiUrl: 'cloudApiUrl',
-  cloudUser: 'cloudUser',
-  cloudToken: 'cloudAccessToken',
-  cloudRefresh: 'cloudRefreshToken',
+  cloudUser: 'current_user',
+  cloudToken: 'accessToken',
+  cloudRefresh: 'refreshToken',
   licenseCert: 'licenseCert',
 };
 
 // ─── 工具函数 ───
 
-// 默认云端 API 地址：从 .env 读取，未配置时用空字符串（用户需手动填写）
-const DEFAULT_CLOUD_API_URL = import.meta.env.VITE_API_URL || '';
+// 默认云端 API 地址：统一从 environment 模块获取（含硬编码 fallback）
 const getCloudApiUrl = (): string =>
   localStorage.getItem(STORAGE_KEYS.cloudApiUrl) || DEFAULT_CLOUD_API_URL;
 
@@ -80,7 +80,17 @@ const setCloudApiUrl = (url: string) => {
 const getCloudUser = (): CloudUser | null => {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.cloudUser);
-    return raw ? (JSON.parse(raw) as CloudUser) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (!parsed.id) return null;
+    return {
+      id: String(parsed.id),
+      username: String(parsed.username || parsed.name || ''),
+      email: String(parsed.email || ''),
+      role: String(parsed.role || 'user'),
+      plan: (parsed.plan as CloudUser['plan']) || 'free',
+      planExpiry: parsed.planExpiry ? String(parsed.planExpiry) : null,
+    };
   } catch {
     return null;
   }

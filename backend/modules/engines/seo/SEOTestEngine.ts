@@ -417,7 +417,10 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
         totalChecks: seoSummaryData?.totalChecks ?? 0,
         passedChecks: seoSummaryData?.passed ?? 0,
         failedChecks: seoSummaryData?.failed ?? 0,
-        level: seoSummaryData?.level ?? 'unknown',
+        level:
+          typeof seoSummaryData?.level === 'object' && seoSummaryData?.level
+            ? (seoSummaryData.level as { level?: string; description?: string }).level || 'unknown'
+            : String(seoSummaryData?.level ?? 'unknown'),
       };
       // 聚合 actionable + quickWins 建议（去重）
       const actionableRecs = (seoSummaryData?.recommendations?.actionable || []).map(
@@ -2039,7 +2042,7 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
     if (score >= 90) return 'A';
     if (score >= 80) return 'B';
     if (score >= 70) return 'C';
-    if (score >= 60) return 'D';
+    if (score >= 40) return 'D';
     return 'F';
   }
 

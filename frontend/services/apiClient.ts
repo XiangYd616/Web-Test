@@ -41,7 +41,7 @@ const resolveToken = async (): Promise<string | null> => {
 const resolveBaseURL = (): string => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
   if (isDesktop()) {
-    return window.localStorage.getItem('cloudApiUrl') || '/api';
+    return window.localStorage.getItem('cloudApiUrl') || 'https://api.xiangweb.space/api';
   }
   return '/api';
 };
@@ -94,10 +94,29 @@ export const tryLocalAutoLogin = async (): Promise<boolean> => {
 
 /**
  * 尝试自动恢复认证
- * 桌面端 Scratch Pad 模式：无需恢复，返回 false
- * Web 端：不尝试 local-token（PG 模式不支持），直接返回 false 让 401 拦截器跳转登录页
+ * 桌面端：用 refreshToken 调用 /auth/refresh 获取新 accessToken
+ * Web 端：直接返回 false 让 401 拦截器跳转登录页
  */
 const tryAutoRecover = async (): Promise<boolean> => {
+  const refreshToken = window.localStorage.getItem('refreshToken');
+  if (!refreshToken) return false;
+
+  try {
+    const resp = await axios.post(`${resolveBaseURL()}/auth/refresh`, {
+      refreshToken,
+    });
+    const data = resp.data?.data || resp.data;
+    const newAccessToken = data?.tokens?.accessToken;
+    if (newAccessToken) {
+      window.localStorage.setItem('accessToken', newAccessToken);
+      if (data.tokens.refreshToken) {
+        window.localStorage.setItem('refreshToken', data.tokens.refreshToken);
+      }
+      return true;
+    }
+  } catch {
+    // refresh token 也失效，无法恢复
+  }
   return false;
 };
 
@@ -157,7 +176,7 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // 并发 401 队列化：所有请求共享同一个恢复 promise
+      // 尝试用 refreshToken 自动恢复（桌面端和 Web 端共用）
       if (!refreshPromise) {
         refreshPromise = tryAutoRecover().finally(() => {
           refreshPromise = null;
@@ -175,18 +194,25 @@ apiClient.interceptors.response.use(
         return apiClient.request(error.config);
       }
 
-      // 恢复失败：清理本地状态
+      // 恢复失败
+      if (isDesktop()) {
+        // 桌面端：不清除凭据（保留 current_user 等），仅防抖提示
+        const now = Date.now();
+        if (now - lastOfflineToast > 5000) {
+          lastOfflineToast = now;
+          toast.error(i18n.t('common.loginExpired', '登录已过期，请前往 设置 → 账户 重新登录'), {
+            id: 'desktop-auth-expired',
+          });
+        }
+        return Promise.reject(error);
+      }
+
+      // Web 端：清理本地状态并跳转登录页
       console.warn('[apiClient] 认证恢复失败，清理本地凭据');
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem('accessToken');
         window.localStorage.removeItem('refreshToken');
         window.localStorage.removeItem('current_user');
-      }
-
-      // 认证恢复失败：桌面端提示错误但不跳转，Web 端跳转登录页
-      if (isDesktop()) {
-        toast.error(i18n.t('common.loginExpired') || '认证失败，请刷新页面重试');
-        return Promise.reject(error);
       }
 
       toast.error(i18n.t('common.loginExpired'));

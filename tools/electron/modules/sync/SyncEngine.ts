@@ -55,11 +55,15 @@ class SyncEngine {
     await this.configStore.loadTokenFromAppState();
     this.registerIpcHandlers();
 
-    if (
-      this.configStore.isEnabled() &&
-      this.configStore.getServerUrl() &&
-      this.configStore.getToken()
-    ) {
+    const hasToken = Boolean(this.configStore.getToken());
+    const hasServer = Boolean(this.configStore.getServerUrl());
+
+    // 已登录但同步未启用时，自动启用
+    if (hasToken && hasServer && !this.configStore.isEnabled()) {
+      await this.configStore.updateConfig({ enabled: true });
+    }
+
+    if (this.configStore.isEnabled() && hasServer && hasToken) {
       this.startPolling();
     }
 
@@ -67,7 +71,8 @@ class SyncEngine {
       enabled: this.configStore.isEnabled(),
       interval: this.configStore.getIntervalMs(),
       deviceId: this.configStore.getDeviceId(),
-      hasToken: Boolean(this.configStore.getToken()),
+      hasToken,
+      serverUrl: this.configStore.getServerUrl(),
     });
   }
 
@@ -77,6 +82,17 @@ class SyncEngine {
     if (this.configStore.isEnabled() && this.configStore.getServerUrl()) {
       this.startPolling();
     }
+  }
+
+  /** 登录成功后激活同步（设置 token + serverUrl + 自动启用） */
+  async activateWithAuth(token: string, serverUrl: string): Promise<void> {
+    this.configStore.setToken(token);
+    await this.configStore.updateConfig({
+      serverUrl,
+      enabled: true,
+    });
+    this.startPolling();
+    console.log('[SyncEngine] 已激活同步', { serverUrl, hasToken: true });
   }
 
   /** 清除认证（登出时调用） */
@@ -357,7 +373,7 @@ class SyncEngine {
     try {
       const os = require('os');
       const serverUrl = this.configStore.getServerUrl();
-      await this.fetcher.fetchApi(`${serverUrl}/api/sync/register-device`, 'POST', {
+      await this.fetcher.fetchApi(`${serverUrl}/sync/register-device`, 'POST', {
         deviceId: this.configStore.getDeviceId(),
         deviceName: os.hostname(),
         deviceType: 'desktop',

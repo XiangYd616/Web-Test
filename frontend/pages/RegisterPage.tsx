@@ -51,7 +51,10 @@ const RegisterPage = () => {
   const handleBrowserRegister = useCallback(async () => {
     const api = window.electronAPI;
     if (!api?.auth) return;
-    const serverUrl = localStorage.getItem('cloudApiUrl') || import.meta.env.VITE_API_URL || '';
+    const serverUrl =
+      localStorage.getItem('cloudApiUrl') ||
+      import.meta.env.VITE_API_URL ||
+      'https://api.xiangweb.space/api';
     if (!serverUrl) {
       toast.error(t('register.noServerUrl', '请先在设置中配置云端服务器地址'));
       return;

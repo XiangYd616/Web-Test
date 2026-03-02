@@ -340,15 +340,41 @@ const ProfilePage = () => {
     const fetchProfile = async () => {
       setLoading(true);
       try {
+        // 优先使用 localStorage 中的云端用户数据（浏览器登录回调写入）
+        const storedUser = window.localStorage.getItem('current_user');
+        let cloudProfile: Record<string, unknown> | null = null;
+        if (storedUser) {
+          try {
+            const parsed = JSON.parse(storedUser) as Record<string, unknown>;
+            if (parsed.id && parsed.id !== 'guest') cloudProfile = parsed;
+          } catch {
+            /* ignore */
+          }
+        }
+
         const data = await getProfile();
-        const profileData = data as Record<string, unknown>;
+        const localData = data as Record<string, unknown>;
+
+        // 合并：云端用户信息优先，本地数据作为 fallback
+        const profileData = cloudProfile
+          ? {
+              ...localData,
+              ...cloudProfile,
+              avatarUrl: String(
+                cloudProfile.avatarUrl || cloudProfile.avatar_url || localData.avatarUrl || ''
+              ),
+            }
+          : localData;
+
         setProfileForm({
           username: String(profileData.username || ''),
           email: String(profileData.email || ''),
           avatarUrl: String(profileData.avatarUrl || ''),
-          timezone: String(profileData.timezone || ''),
+          timezone: String(
+            profileData.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+          ),
           language: String(profileData.language || i18n.language || 'zh-CN'),
-          loginCount: Number(profileData.loginCount || 0),
+          loginCount: Number(profileData.loginCount || profileData.login_count || 0),
         });
         setAvatarPreview(String(profileData.avatarUrl || ''));
       } catch (err) {
@@ -470,50 +496,63 @@ const ProfilePage = () => {
   return (
     <div
       role='application'
-      className='container py-6 space-y-6 max-w-7xl mx-auto'
+      className='space-y-6'
       onMouseMove={handleCropMouseMove}
       onMouseUp={handleCropMouseUp}
     >
-      <div className='flex items-center justify-between'>
-        <div>
-          <h2 className='text-2xl font-bold tracking-tight'>{t('profile.title')}</h2>
-          <p className='text-sm text-muted-foreground mt-1'>{t('profile.subtitle')}</p>
-        </div>
+      <div>
+        <h2 className='text-2xl font-bold tracking-tight'>{t('profile.title')}</h2>
+        <p className='text-sm text-muted-foreground mt-1'>{t('profile.subtitle')}</p>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         {/* Sidebar Summary */}
-        <Card className='md:col-span-1 h-fit'>
+        <Card className='lg:col-span-1 h-fit'>
           <CardHeader>
             <CardTitle>{t('profile.summaryTitle')}</CardTitle>
           </CardHeader>
           <CardContent className='space-y-6'>
-            <div className='flex flex-col items-center text-center'>
-              <Avatar className='h-24 w-24 mb-4'>
+            <div className='flex flex-col items-center text-center min-w-0'>
+              <Avatar className='h-20 w-20 mb-3'>
                 <AvatarImage src={avatarPreview || profileForm.avatarUrl} />
-                <AvatarFallback className='text-2xl'>
+                <AvatarFallback className='text-xl'>
                   {userSummary.username.slice(0, 1).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <h3 className='font-semibold text-lg'>{userSummary.username}</h3>
-              <p className='text-sm text-muted-foreground'>{userSummary.email}</p>
+              <h3 className='font-semibold text-base truncate max-w-full'>
+                {userSummary.username}
+              </h3>
+              {userSummary.email !== '-' && (
+                <p
+                  className='text-sm text-muted-foreground truncate max-w-full'
+                  title={userSummary.email}
+                >
+                  {userSummary.email}
+                </p>
+              )}
             </div>
             <Separator />
-            <div className='space-y-4 text-sm'>
-              <div className='flex justify-between'>
-                <span className='text-muted-foreground'>{t('profile.role')}</span>
-                <Badge variant='outline'>{userSummary.role}</Badge>
+            <div className='space-y-3 text-sm'>
+              <div className='flex items-center justify-between gap-2'>
+                <span className='text-muted-foreground flex-shrink-0'>{t('profile.role')}</span>
+                <Badge variant='outline' className='truncate max-w-[120px]'>
+                  {userSummary.role}
+                </Badge>
               </div>
-              <div className='flex justify-between'>
-                <span className='text-muted-foreground'>{t('profile.lastLogin')}</span>
-                <span className='font-medium'>{userSummary.lastLogin}</span>
+              <div className='flex items-center justify-between gap-2'>
+                <span className='text-muted-foreground flex-shrink-0'>
+                  {t('profile.lastLogin')}
+                </span>
+                <span className='font-medium truncate' title={userSummary.lastLogin}>
+                  {userSummary.lastLogin}
+                </span>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Main Content */}
-        <Card className='md:col-span-3'>
+        <Card className='lg:col-span-2'>
           <Tabs defaultValue='profile' className='w-full'>
             <CardHeader className='border-b px-0 pb-0 mx-6 mb-6'>
               <TabsList className='w-full justify-start rounded-none border-b bg-transparent p-0'>
@@ -543,7 +582,7 @@ const ProfilePage = () => {
             <CardContent>
               <TabsContent value='profile' className='space-y-6 mt-0'>
                 <form onSubmit={handleProfileSubmit} className='space-y-6'>
-                  <div className='grid gap-4 md:grid-cols-2'>
+                  <div className='grid gap-4 sm:grid-cols-2'>
                     <div className='space-y-2'>
                       <Label htmlFor='username'>{t('profile.username')}</Label>
                       <Input

@@ -90,7 +90,7 @@ export class SyncFetcher {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5_000);
-      const resp = await fetch(`${serverUrl}/api/health`, {
+      const resp = await fetch(`${serverUrl}/health`, {
         method: 'GET',
         signal: controller.signal,
       });

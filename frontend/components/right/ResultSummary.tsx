@@ -702,10 +702,20 @@ const ResultSummary = () => {
                 const rawName = String(metric.metric || `Metric ${index + 1}`);
                 const name = METRIC_NAME_MAP[rawName] || rawName;
                 const rawValue = metric.value;
-                const value =
-                  rawValue !== undefined && rawValue !== null
-                    ? String(rawValue).replace(/^"|"$/g, '')
-                    : '-';
+                let value = '-';
+                if (rawValue !== undefined && rawValue !== null) {
+                  if (typeof rawValue === 'object') {
+                    const obj = rawValue as Record<string, unknown>;
+                    // 优先提取有意义的字段（level/name/label/value/score）
+                    const readable = obj.level ?? obj.name ?? obj.label ?? obj.value ?? obj.score;
+                    value =
+                      readable !== undefined && readable !== null
+                        ? String(readable)
+                        : JSON.stringify(rawValue);
+                  } else {
+                    value = String(rawValue).replace(/^"|"$/g, '');
+                  }
+                }
                 const trend = String(metric.trend || '').toLowerCase();
                 const metricStatus = String(metric.status || '').toLowerCase();
 

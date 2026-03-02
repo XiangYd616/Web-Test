@@ -459,6 +459,44 @@ class LocalDatabase {
       db.exec('ALTER TABLE test_executions ADD COLUMN score REAL');
       console.log('[DB Migration] 已添加 test_executions.score 列');
     }
+
+    // 同步功能所需的表
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS sync_meta (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL DEFAULT '',
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS sync_queue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        table_name TEXT NOT NULL,
+        record_sync_id TEXT NOT NULL,
+        operation TEXT NOT NULL DEFAULT 'update',
+        data TEXT DEFAULT '{}',
+        status TEXT NOT NULL DEFAULT 'pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS sync_conflicts (
+        id TEXT PRIMARY KEY,
+        table_name TEXT NOT NULL,
+        record_sync_id TEXT NOT NULL,
+        local_version INTEGER DEFAULT 0,
+        remote_version INTEGER DEFAULT 0,
+        local_data TEXT DEFAULT '{}',
+        remote_data TEXT DEFAULT '{}',
+        resolution TEXT NOT NULL DEFAULT 'pending',
+        resolved_at DATETIME,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    console.log('[DB Migration] 同步表已就绪 (sync_meta, sync_queue, sync_conflicts)');
   }
 
   private seedOfficialTemplates(): void {

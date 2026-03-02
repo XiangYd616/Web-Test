@@ -18,12 +18,14 @@ import {
   Home,
   Layers,
   LayoutDashboard,
+  LogOut,
   MessageSquare,
   Minus,
   Search,
   Settings,
   Shield,
   Square,
+  User,
   Variable,
   X,
 } from 'lucide-react';
@@ -133,7 +135,7 @@ const TitleBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  const { mode, cloudUser } = useAppMode();
+  const { mode, cloudUser, switchToScratchpad } = useAppMode();
   const { currentUser } = useTestUser();
   const userRole = String(
     (currentUser as Record<string, unknown> | null)?.role || ''
@@ -146,6 +148,8 @@ const TitleBar = () => {
   const navRef = useRef<HTMLDivElement>(null);
   const [wsOpen, setWsOpen] = useState(false);
   const wsRef = useRef<HTMLDivElement>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const api = window.electronAPI;
@@ -168,9 +172,9 @@ const TitleBar = () => {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  // 点击外部关闭导航菜单 / 工作空间菜单
+  // 点击外部关闭导航菜单 / 工作空间菜单 / 用户菜单
   useEffect(() => {
-    if (!navOpen && !wsOpen) return;
+    if (!navOpen && !wsOpen && !userMenuOpen) return;
     const handler = (e: MouseEvent) => {
       if (navOpen && navRef.current && !navRef.current.contains(e.target as Node)) {
         setNavOpen(false);
@@ -178,10 +182,13 @@ const TitleBar = () => {
       if (wsOpen && wsRef.current && !wsRef.current.contains(e.target as Node)) {
         setWsOpen(false);
       }
+      if (userMenuOpen && userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [navOpen, wsOpen]);
+  }, [navOpen, wsOpen, userMenuOpen]);
 
   const handleMinimize = useCallback(() => {
     void window.electronAPI?.window.minimize();
@@ -359,7 +366,68 @@ const TitleBar = () => {
         </button>
 
         {mode === 'workspace' ? (
-          <span className='tw-titlebar-user'>{cloudUser?.username || 'Workspace'}</span>
+          <div ref={userMenuRef} className='tw-titlebar-nav-dropdown-wrap'>
+            <button
+              type='button'
+              className={`tw-titlebar-user tw-titlebar-user--btn ${userMenuOpen ? 'is-active' : ''}`}
+              onClick={() => setUserMenuOpen(prev => !prev)}
+            >
+              <User className='w-3.5 h-3.5' />
+              <span>{cloudUser?.username || 'Workspace'}</span>
+              <ChevronDown
+                className={`w-3 h-3 opacity-60 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {userMenuOpen && (
+              <div className='tw-nav-menu' style={{ right: 0, left: 'auto', minWidth: 180 }}>
+                <div className='tw-nav-menu-section'>
+                  {cloudUser?.email || cloudUser?.username || ''}
+                </div>
+                <button
+                  type='button'
+                  className='tw-nav-menu-item'
+                  onClick={() => {
+                    navigate('/settings');
+                    setUserMenuOpen(false);
+                  }}
+                >
+                  <Settings className='w-4 h-4' />
+                  <span>{t('nav.settings', '系统设置')}</span>
+                </button>
+                <button
+                  type='button'
+                  className='tw-nav-menu-item'
+                  onClick={() => {
+                    navigate('/settings?tab=account');
+                    setUserMenuOpen(false);
+                  }}
+                >
+                  <User className='w-4 h-4' />
+                  <span>{t('nav.account', '账户管理')}</span>
+                </button>
+                <div className='tw-nav-menu-sep' />
+                <button
+                  type='button'
+                  className='tw-nav-menu-item tw-nav-menu-item--danger'
+                  onClick={() => {
+                    // 清除云端凭据
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    localStorage.removeItem('current_user');
+                    localStorage.removeItem('licenseCert');
+                    // 通知主进程
+                    void window.electronAPI?.appState?.clearCloudAuth?.();
+                    // 切回 Scratch Pad
+                    switchToScratchpad();
+                    setUserMenuOpen(false);
+                  }}
+                >
+                  <LogOut className='w-4 h-4' />
+                  <span>{t('nav.logout', '退出登录')}</span>
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
           <>
             <button

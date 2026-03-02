@@ -722,6 +722,31 @@ a {
   white-space: nowrap;
 }
 
+.tw-titlebar-user--btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.tw-titlebar-user--btn:hover,
+.tw-titlebar-user--btn.is-active {
+  background: var(--titlebar-hover);
+}
+
+.tw-nav-menu-item--danger {
+  color: #ef4444 !important;
+}
+
+.tw-nav-menu-item--danger:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #dc2626 !important;
+}
+
 /* 窗口控制按钮 */
 .tw-titlebar-controls {
   display: flex;
@@ -1153,7 +1178,8 @@ a {
   transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 50;
   flex-shrink: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   border-right: 1px solid $panel-border;
 }
 

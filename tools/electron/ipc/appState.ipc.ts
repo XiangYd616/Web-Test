@@ -35,10 +35,10 @@ export function registerAppStateIpc(): void {
         [payload.serverUrl, payload.token, payload.userId, payload.username, payload.email, now]
       );
 
-      // 通知同步引擎：已登录云端
+      // 激活同步引擎（设置 token + serverUrl + 自动启用）
       try {
         const { syncEngine } = await import('../modules/sync/SyncEngine');
-        syncEngine.setToken(payload.token);
+        await syncEngine.activateWithAuth(payload.token, payload.serverUrl);
       } catch {
         /* sync module may not be loaded yet */
       }
