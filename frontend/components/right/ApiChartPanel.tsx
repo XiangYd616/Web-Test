@@ -474,6 +474,59 @@ const ApiChartPanel = () => {
     return Math.round(values.reduce((acc, value) => acc + value, 0) / values.length);
   }, [apiResults, apiSummary]);
 
+  // 安全头 & CORS 详情（从第一个端点的 analysis.headers 提取）
+  const securityInfo = useMemo(() => {
+    if (!apiResults || apiResults.length === 0) return null;
+    // 选取第一个有 headers 分析的端点
+    for (const ep of apiResults) {
+      const headers = (ep as Record<string, unknown>).headers;
+      if (!isRecord(headers)) continue;
+      const security = (headers as { security?: unknown }).security;
+      if (!isRecord(security)) continue;
+      const sec = security as Record<string, unknown>;
+      const hasSecurityHeaders = isRecord(sec.hasSecurityHeaders)
+        ? (sec.hasSecurityHeaders as Record<string, boolean>)
+        : null;
+      const score = isRecord(sec.securityHeaderScore)
+        ? (sec.securityHeaderScore as { present?: number; total?: number })
+        : null;
+      const corsDetails = isRecord(sec.corsDetails)
+        ? (sec.corsDetails as {
+            allowOrigin?: string;
+            allowMethods?: string;
+            allowHeaders?: string;
+            allowCredentials?: boolean;
+            isWildcard?: boolean;
+          })
+        : null;
+      const rateLimiting = isRecord((headers as Record<string, unknown>).rateLimiting)
+        ? ((headers as Record<string, unknown>).rateLimiting as Record<string, string | null>)
+        : null;
+      const apiVersion =
+        typeof (headers as Record<string, unknown>).apiVersion === 'string'
+          ? ((headers as Record<string, unknown>).apiVersion as string)
+          : null;
+      return {
+        hasSecurityHeaders,
+        score,
+        hasCORS: sec.hasCORS === true,
+        corsDetails,
+        hasHttps: sec.hasHttps === true,
+        rateLimiting,
+        apiVersion,
+        compression:
+          typeof (headers as Record<string, unknown>).compression === 'string'
+            ? ((headers as Record<string, unknown>).compression as string)
+            : null,
+        server:
+          typeof (headers as Record<string, unknown>).server === 'string'
+            ? ((headers as Record<string, unknown>).server as string)
+            : null,
+      };
+    }
+    return null;
+  }, [apiResults]);
+
   const totalEndpoints = Number(apiSummary?.total ?? apiResults?.length ?? 0);
   const successRate = apiSummary?.successRate ? String(apiSummary.successRate) : null;
 
@@ -697,6 +750,158 @@ const ApiChartPanel = () => {
                       </div>
                     );
                   })}
+                </div>
+              </div>
+            )}
+
+            {/* ── 响应头安全分析 ── */}
+            {securityInfo && (
+              <div>
+                <h4 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3'>
+                  响应头分析
+                </h4>
+                <div className='space-y-3'>
+                  {/* 元信息 */}
+                  <div className='flex flex-wrap gap-2'>
+                    {securityInfo.server && securityInfo.server !== 'unknown' && (
+                      <Badge variant='outline' className='text-[11px] font-normal'>
+                        Server: {securityInfo.server}
+                      </Badge>
+                    )}
+                    {securityInfo.compression && (
+                      <Badge
+                        variant='outline'
+                        className='text-[11px] font-normal text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                      >
+                        {securityInfo.compression}
+                      </Badge>
+                    )}
+                    {securityInfo.apiVersion && (
+                      <Badge variant='outline' className='text-[11px] font-normal'>
+                        API {securityInfo.apiVersion}
+                      </Badge>
+                    )}
+                    {securityInfo.hasHttps && (
+                      <Badge
+                        variant='outline'
+                        className='text-[11px] font-normal text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                      >
+                        HSTS
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* 安全头评分 */}
+                  {securityInfo.hasSecurityHeaders && securityInfo.score && (
+                    <div className='rounded-md border p-3'>
+                      <div className='flex items-center justify-between mb-2'>
+                        <span className='text-xs font-medium'>安全响应头</span>
+                        <span
+                          className={cn(
+                            'text-xs font-semibold',
+                            (securityInfo.score.present ?? 0) >= 5
+                              ? 'text-green-600'
+                              : (securityInfo.score.present ?? 0) >= 3
+                                ? 'text-amber-600'
+                                : 'text-red-600'
+                          )}
+                        >
+                          {securityInfo.score.present}/{securityInfo.score.total}
+                        </span>
+                      </div>
+                      <div className='flex flex-wrap gap-1.5'>
+                        {Object.entries(securityInfo.hasSecurityHeaders).map(
+                          ([header, present]) => (
+                            <Badge
+                              key={header}
+                              variant='outline'
+                              className={cn(
+                                'text-[10px] font-mono',
+                                present
+                                  ? 'text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                                  : 'text-red-500 border-red-300 dark:text-red-400 dark:border-red-700'
+                              )}
+                            >
+                              {present ? '✓' : '✗'} {header}
+                            </Badge>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CORS 详情 */}
+                  {securityInfo.hasCORS && securityInfo.corsDetails && (
+                    <div className='rounded-md border p-3'>
+                      <div className='flex items-center gap-2 mb-2'>
+                        <span className='text-xs font-medium'>CORS</span>
+                        {securityInfo.corsDetails.isWildcard && (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-700'
+                          >
+                            通配符 *
+                          </Badge>
+                        )}
+                      </div>
+                      <div className='space-y-1 text-xs text-muted-foreground font-mono'>
+                        <div>
+                          <span className='font-semibold text-foreground'>Allow-Origin:</span>{' '}
+                          {securityInfo.corsDetails.allowOrigin}
+                        </div>
+                        {securityInfo.corsDetails.allowMethods && (
+                          <div>
+                            <span className='font-semibold text-foreground'>Allow-Methods:</span>{' '}
+                            {securityInfo.corsDetails.allowMethods}
+                          </div>
+                        )}
+                        {securityInfo.corsDetails.allowHeaders && (
+                          <div>
+                            <span className='font-semibold text-foreground'>Allow-Headers:</span>{' '}
+                            {securityInfo.corsDetails.allowHeaders}
+                          </div>
+                        )}
+                        {securityInfo.corsDetails.allowCredentials && (
+                          <div className='text-amber-600 dark:text-amber-400'>
+                            Allow-Credentials: true
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 速率限制 */}
+                  {securityInfo.rateLimiting && (
+                    <div className='rounded-md border p-3'>
+                      <span className='text-xs font-medium'>速率限制</span>
+                      <div className='flex flex-wrap gap-3 mt-1.5 text-xs text-muted-foreground font-mono'>
+                        {securityInfo.rateLimiting.limit && (
+                          <span>
+                            Limit:{' '}
+                            <span className='font-semibold text-foreground'>
+                              {securityInfo.rateLimiting.limit}
+                            </span>
+                          </span>
+                        )}
+                        {securityInfo.rateLimiting.remaining && (
+                          <span>
+                            Remaining:{' '}
+                            <span className='font-semibold text-foreground'>
+                              {securityInfo.rateLimiting.remaining}
+                            </span>
+                          </span>
+                        )}
+                        {securityInfo.rateLimiting.reset && (
+                          <span>
+                            Reset:{' '}
+                            <span className='font-semibold text-foreground'>
+                              {securityInfo.rateLimiting.reset}
+                            </span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

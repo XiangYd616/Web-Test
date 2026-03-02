@@ -820,7 +820,50 @@ class WebsiteTestEngine implements ITestEngine<WebsiteRunConfig, BaseTestResult>
   async performBasicChecks($: CheerioAPI) {
     const warnings: string[] = [];
     const errors: string[] = [];
+    const info: string[] = [];
 
+    // 1. viewport
+    const hasViewport = $('meta[name="viewport"]').length > 0;
+    if (!hasViewport) {
+      errors.push('缺少viewport meta，移动端适配风险');
+    }
+
+    // 2. lang 属性
+    const htmlLang = $('html').attr('lang') || '';
+    if (!htmlLang) {
+      warnings.push('html 标签缺少 lang 属性，影响屏幕阅读器和搜索引擎语言识别');
+    }
+
+    // 3. charset 声明
+    const hasCharset =
+      $('meta[charset]').length > 0 || $('meta[http-equiv="Content-Type"]').length > 0;
+    if (!hasCharset) {
+      warnings.push('缺少 charset 声明（<meta charset="utf-8">），可能导致字符编码问题');
+    }
+
+    // 4. title
+    const titleText = $('title').text().trim();
+    if (!titleText) {
+      errors.push('页面缺少 <title> 标签');
+    } else if (titleText.length > 60) {
+      warnings.push(`标题过长（${titleText.length} 字符），建议控制在 60 字符以内`);
+    }
+
+    // 5. meta description
+    const metaDesc = $('meta[name="description"]').attr('content') || '';
+    if (!metaDesc) {
+      warnings.push('缺少 meta description，影响搜索引擎结果展示');
+    }
+
+    // 6. H1
+    const h1Count = $('h1').length;
+    if (h1Count === 0) {
+      warnings.push('页面缺少H1标题');
+    } else if (h1Count > 1) {
+      warnings.push(`页面有 ${h1Count} 个 H1 标题，建议仅保留 1 个`);
+    }
+
+    // 7. 图片 alt
     const images = $('img');
     const imagesWithoutAlt = images.filter(
       (_index: number, el: DomElement) => !$(el).attr('alt')
@@ -829,26 +872,33 @@ class WebsiteTestEngine implements ITestEngine<WebsiteRunConfig, BaseTestResult>
       warnings.push(`图片缺少alt属性: ${imagesWithoutAlt}个`);
     }
 
+    // 8. 链接文本
     const links = $('a');
     const linksWithoutText = links.filter(
-      (_index: number, el: DomElement) => !$(el).text().trim()
+      (_index: number, el: DomElement) => !$(el).text().trim() && !$(el).attr('aria-label')
     ).length;
     if (linksWithoutText > 0) {
-      warnings.push(`链接缺少文本描述: ${linksWithoutText}个`);
+      warnings.push(`链接缺少文本描述或 aria-label: ${linksWithoutText}个`);
     }
 
-    const hasViewport = $('meta[name="viewport"]').length > 0;
-    if (!hasViewport) {
-      errors.push('缺少viewport meta，移动端适配风险');
+    // 9. favicon
+    const hasFavicon =
+      $('link[rel="icon"]').length > 0 ||
+      $('link[rel="shortcut icon"]').length > 0 ||
+      $('link[rel="apple-touch-icon"]').length > 0;
+    if (!hasFavicon) {
+      warnings.push('未检测到 favicon 声明');
     }
 
-    const h1Count = $('h1').length;
-    if (h1Count === 0) {
-      warnings.push('页面缺少H1标题');
+    // 10. Open Graph 基础标签
+    const hasOgTitle = $('meta[property="og:title"]').length > 0;
+    const hasOgImage = $('meta[property="og:image"]').length > 0;
+    if (!hasOgTitle && !hasOgImage) {
+      info.push('缺少 Open Graph 标签（og:title/og:image），社交分享时无法展示预览');
     }
 
-    // W2: 基础检查评分 — 仅反映 HTML 基础质量，不伪造子维度分数
-    const totalChecks = 4; // viewport, h1, alt, link-text
+    // W2: 基础检查评分
+    const totalChecks = 10;
     const failedChecks = errors.length + warnings.length;
     const score = Math.max(0, Math.round((1 - failedChecks / totalChecks) * 100));
 
@@ -858,6 +908,21 @@ class WebsiteTestEngine implements ITestEngine<WebsiteRunConfig, BaseTestResult>
       failedChecks,
       errors,
       warnings,
+      info,
+      details: {
+        lang: htmlLang || null,
+        charset: hasCharset,
+        title: titleText || null,
+        titleLength: titleText.length,
+        hasMetaDescription: !!metaDesc,
+        h1Count,
+        imagesTotal: images.length,
+        imagesWithoutAlt,
+        linksTotal: links.length,
+        linksWithoutText,
+        hasFavicon,
+        hasOpenGraph: hasOgTitle || hasOgImage,
+      },
     };
   }
 

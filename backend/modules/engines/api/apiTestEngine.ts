@@ -226,8 +226,20 @@ type ApiAnalysis = {
 };
 
 type ApiBodyStructure =
-  | { type: 'array'; length: number; itemTypes: string[] }
-  | { type: 'object'; keys: string[]; keyCount: number }
+  | {
+      type: 'array';
+      length: number;
+      itemTypes: string[];
+      itemTypeDistribution?: Record<string, number>;
+      sampleItem?: ApiBodyStructure | null;
+    }
+  | {
+      type: 'object';
+      keys: string[];
+      keyCount: number;
+      depth?: number;
+      valueTypes?: Record<string, number>;
+    }
   | { type: 'string' | 'number' | 'boolean' | 'null' | 'undefined' | 'unknown'; value: unknown };
 
 class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
@@ -1582,16 +1594,36 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
   }
 
   analyzeHeaders(headers: Record<string, string | undefined>) {
-    const security = {
-      hasHttps: !!headers['strict-transport-security'],
-      hasCORS: !!headers['access-control-allow-origin'],
-      hasSecurityHeaders: {
-        'x-frame-options': !!headers['x-frame-options'],
-        'x-content-type-options': !!headers['x-content-type-options'],
-        'x-xss-protection': !!headers['x-xss-protection'],
-        'strict-transport-security': !!headers['strict-transport-security'],
-      },
+    const securityHeaders: Record<string, boolean> = {
+      'x-frame-options': !!headers['x-frame-options'],
+      'x-content-type-options': !!headers['x-content-type-options'],
+      'x-xss-protection': !!headers['x-xss-protection'],
+      'strict-transport-security': !!headers['strict-transport-security'],
+      'content-security-policy': !!headers['content-security-policy'],
+      'referrer-policy': !!headers['referrer-policy'],
+      'permissions-policy': !!headers['permissions-policy'],
     };
+    const presentCount = Object.values(securityHeaders).filter(Boolean).length;
+    const totalCount = Object.keys(securityHeaders).length;
+
+    // CORS 详情
+    const corsOrigin = headers['access-control-allow-origin'] || null;
+    const corsMethods = headers['access-control-allow-methods'] || null;
+    const corsHeaders = headers['access-control-allow-headers'] || null;
+    const corsCredentials = headers['access-control-allow-credentials'] || null;
+    const hasCORS = !!corsOrigin;
+
+    // 速率限制头
+    const rateLimiting = {
+      limit: headers['x-ratelimit-limit'] || headers['ratelimit-limit'] || null,
+      remaining: headers['x-ratelimit-remaining'] || headers['ratelimit-remaining'] || null,
+      reset: headers['x-ratelimit-reset'] || headers['ratelimit-reset'] || null,
+      retryAfter: headers['retry-after'] || null,
+    };
+    const hasRateLimiting = !!(rateLimiting.limit || rateLimiting.retryAfter);
+
+    // API 版本头
+    const apiVersion = headers['x-api-version'] || headers['api-version'] || null;
 
     return {
       contentType: headers['content-type'] || 'unknown',
@@ -1602,8 +1634,24 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
         expires: headers['expires'],
         etag: headers['etag'],
       },
-      security,
+      security: {
+        hasHttps: !!headers['strict-transport-security'],
+        hasCORS,
+        corsDetails: hasCORS
+          ? {
+              allowOrigin: corsOrigin,
+              allowMethods: corsMethods,
+              allowHeaders: corsHeaders,
+              allowCredentials: corsCredentials === 'true',
+              isWildcard: corsOrigin === '*',
+            }
+          : null,
+        hasSecurityHeaders: securityHeaders,
+        securityHeaderScore: { present: presentCount, total: totalCount },
+      },
       compression: headers['content-encoding'],
+      rateLimiting: hasRateLimiting ? rateLimiting : null,
+      apiVersion,
     };
   }
 
@@ -1659,19 +1707,61 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
     return analysis;
   }
 
-  analyzeJSONStructure(data: unknown): ApiBodyStructure {
+  analyzeJSONStructure(data: unknown, _currentDepth = 0): ApiBodyStructure {
     if (Array.isArray(data)) {
+      // 元素类型分布
+      const typeDist: Record<string, number> = {};
+      const uniqueTypes = new Set<string>();
+      for (const item of data.slice(0, 100)) {
+        const t = item === null ? 'null' : Array.isArray(item) ? 'array' : typeof item;
+        uniqueTypes.add(t);
+        typeDist[t] = (typeDist[t] || 0) + 1;
+      }
+      // 采样第一个非 null 元素的结构（仅对象/数组，限制深度 ≤ 2）
+      let sampleItem: ApiBodyStructure | null = null;
+      if (_currentDepth < 2 && data.length > 0) {
+        const first = data.find(i => i !== null && typeof i === 'object');
+        if (first !== undefined) {
+          sampleItem = this.analyzeJSONStructure(first, _currentDepth + 1);
+        }
+      }
       return {
         type: 'array',
         length: data.length,
-        itemTypes: data.length > 0 ? [typeof data[0]] : [],
+        itemTypes: Array.from(uniqueTypes),
+        itemTypeDistribution: typeDist,
+        sampleItem,
       };
     }
     if (typeof data === 'object' && data !== null) {
+      const obj = data as Record<string, unknown>;
+      const keys = Object.keys(obj);
+      // 值类型统计
+      const valueTypes: Record<string, number> = {};
+      for (const key of keys) {
+        const v = obj[key];
+        const t = v === null ? 'null' : Array.isArray(v) ? 'array' : typeof v;
+        valueTypes[t] = (valueTypes[t] || 0) + 1;
+      }
+      // 计算嵌套深度（限制递归深度 ≤ 5 防止无限递归）
+      let maxChildDepth = 0;
+      if (_currentDepth < 5) {
+        for (const key of keys.slice(0, 20)) {
+          const v = obj[key];
+          if (v && typeof v === 'object') {
+            const child = this.analyzeJSONStructure(v, _currentDepth + 1);
+            const childDepth =
+              child.type === 'object' ? (child.depth ?? 1) : child.type === 'array' ? 1 : 0;
+            if (childDepth > maxChildDepth) maxChildDepth = childDepth;
+          }
+        }
+      }
       return {
         type: 'object',
-        keys: Object.keys(data as Record<string, unknown>),
-        keyCount: Object.keys(data as Record<string, unknown>).length,
+        keys: keys.slice(0, 50),
+        keyCount: keys.length,
+        depth: 1 + maxChildDepth,
+        valueTypes,
       };
     }
     const primitiveType = typeof data;
@@ -1723,6 +1813,43 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
     // 响应压缩（仅作为优化建议）
     if (!analysis.headers.compression && analysis.body.size > 10240) {
       recommendations.push('响应体较大且未启用压缩，建议启用 gzip/br 减少传输量');
+    }
+
+    // ── 安全头建议 ──
+    const secHeaders = analysis.headers.security?.hasSecurityHeaders;
+    if (secHeaders && typeof secHeaders === 'object') {
+      const missing = Object.entries(secHeaders as Record<string, boolean>)
+        .filter(([, v]) => !v)
+        .map(([k]) => k);
+      if (missing.length > 0 && missing.length <= 4) {
+        recommendations.push(`缺少安全响应头: ${missing.join(', ')}`);
+      } else if (missing.length > 4) {
+        recommendations.push(
+          `缺少 ${missing.length} 个安全响应头（${missing.slice(0, 3).join(', ')} 等），建议逐步添加`
+        );
+      }
+    }
+
+    // CORS 通配符风险
+    const corsDetails = (analysis.headers.security as Record<string, unknown>)?.corsDetails;
+    if (corsDetails && typeof corsDetails === 'object') {
+      const cors = corsDetails as { isWildcard?: boolean; allowCredentials?: boolean };
+      if (cors.isWildcard) {
+        recommendations.push('CORS Allow-Origin 为 *（通配符），生产环境建议限定具体域名');
+        if (cors.allowCredentials) {
+          recommendations.push(
+            '⚠️ CORS 同时配置了 Allow-Origin: * 和 Allow-Credentials: true，浏览器会拒绝此组合'
+          );
+        }
+      }
+    }
+
+    // 速率限制
+    const rateLimiting = (analysis.headers as Record<string, unknown>).rateLimiting;
+    if (!rateLimiting) {
+      recommendations.push(
+        '未检测到速率限制头（X-RateLimit-Limit），建议为 API 配置速率限制防止滥用'
+      );
     }
 
     if (recommendations.length === 0) {

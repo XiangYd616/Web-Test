@@ -414,20 +414,171 @@ const WebsiteChartPanel = () => {
                 <h4 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3'>
                   基础检查
                 </h4>
-                <div className='grid grid-cols-2 sm:grid-cols-3 gap-3'>
+                <div className='grid grid-cols-2 sm:grid-cols-4 gap-3'>
                   {basicChecks.score !== undefined && (
                     <Statistic title='基础评分' value={toNumber(basicChecks.score) ?? '-'} />
                   )}
+                  <Statistic
+                    title='通过率'
+                    value={`${(toNumber(basicChecks.totalChecks) ?? 0) - (toNumber(basicChecks.failedChecks) ?? 0)}/${toNumber(basicChecks.totalChecks) ?? 0}`}
+                  />
                   {Array.isArray(basicChecks.warnings) && (
-                    <Statistic title='警告数' value={basicChecks.warnings.length} />
+                    <Statistic title='警告' value={basicChecks.warnings.length} />
                   )}
                   {Array.isArray(basicChecks.errors) && (
-                    <Statistic title='错误数' value={basicChecks.errors.length} />
+                    <Statistic title='错误' value={basicChecks.errors.length} />
                   )}
                 </div>
+                {/* 页面基础信息 */}
+                {isRecord(basicChecks.details) &&
+                  (() => {
+                    const d = basicChecks.details as Record<string, unknown>;
+                    const lang = typeof d.lang === 'string' ? d.lang : null;
+                    const hasCharset = Boolean(d.charset);
+                    const hasFav = Boolean(d.hasFavicon);
+                    const hasOG = Boolean(d.hasOpenGraph);
+                    const hasDesc = Boolean(d.hasMetaDescription);
+                    const titleLen = typeof d.titleLength === 'number' ? d.titleLength : 0;
+                    const h1Cnt = typeof d.h1Count === 'number' ? d.h1Count : -1;
+                    const imgTotal = typeof d.imagesTotal === 'number' ? d.imagesTotal : -1;
+                    const imgNoAlt =
+                      typeof d.imagesWithoutAlt === 'number' ? d.imagesWithoutAlt : 0;
+                    const linkTotal = typeof d.linksTotal === 'number' ? d.linksTotal : -1;
+                    return (
+                      <div className='mt-3 flex flex-wrap gap-1.5'>
+                        {lang ? (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                          >
+                            lang={lang}
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] text-red-500 border-red-300 dark:text-red-400 dark:border-red-700'
+                          >
+                            ✗ lang
+                          </Badge>
+                        )}
+                        {hasCharset ? (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                          >
+                            ✓ charset
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] text-red-500 border-red-300 dark:text-red-400 dark:border-red-700'
+                          >
+                            ✗ charset
+                          </Badge>
+                        )}
+                        {hasFav ? (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                          >
+                            ✓ favicon
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] text-red-500 border-red-300 dark:text-red-400 dark:border-red-700'
+                          >
+                            ✗ favicon
+                          </Badge>
+                        )}
+                        {hasOG ? (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                          >
+                            ✓ OG
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-700'
+                          >
+                            ✗ OG
+                          </Badge>
+                        )}
+                        {hasDesc ? (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                          >
+                            ✓ description
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant='outline'
+                            className='text-[10px] text-red-500 border-red-300 dark:text-red-400 dark:border-red-700'
+                          >
+                            ✗ description
+                          </Badge>
+                        )}
+                        {titleLen > 0 && (
+                          <Badge
+                            variant='outline'
+                            className={cn(
+                              'text-[10px]',
+                              titleLen <= 60
+                                ? 'text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                                : 'text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-700'
+                            )}
+                          >
+                            title: {titleLen}字
+                          </Badge>
+                        )}
+                        {h1Cnt >= 0 && (
+                          <Badge
+                            variant='outline'
+                            className={cn(
+                              'text-[10px]',
+                              h1Cnt === 1
+                                ? 'text-green-600 border-green-300 dark:text-green-400 dark:border-green-700'
+                                : 'text-amber-600 border-amber-300 dark:text-amber-400 dark:border-amber-700'
+                            )}
+                          >
+                            H1×{h1Cnt}
+                          </Badge>
+                        )}
+                        {imgTotal >= 0 && (
+                          <Badge variant='outline' className='text-[10px]'>
+                            img: {imgTotal}
+                            {imgNoAlt > 0 && (
+                              <span className='ml-1 text-red-500'>({imgNoAlt} 无alt)</span>
+                            )}
+                          </Badge>
+                        )}
+                        {linkTotal >= 0 && (
+                          <Badge variant='outline' className='text-[10px]'>
+                            links: {linkTotal}
+                          </Badge>
+                        )}
+                      </div>
+                    );
+                  })()}
+                {Array.isArray(basicChecks.errors) && basicChecks.errors.length > 0 && (
+                  <div className='mt-2 rounded-md border border-red-200 p-3 space-y-1'>
+                    {(basicChecks.errors as string[]).slice(0, 5).map((e, i) => (
+                      <div
+                        key={i}
+                        className='flex items-start gap-1.5 text-xs text-red-700 dark:text-red-400'
+                      >
+                        <span className='shrink-0'>✕</span>
+                        <span>{e}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {Array.isArray(basicChecks.warnings) && basicChecks.warnings.length > 0 && (
                   <div className='mt-2 rounded-md border p-3 space-y-1'>
-                    {(basicChecks.warnings as string[]).slice(0, 5).map((w, i) => (
+                    {(basicChecks.warnings as string[]).slice(0, 8).map((w, i) => (
                       <div
                         key={i}
                         className='flex items-start gap-1.5 text-xs text-orange-700 dark:text-orange-400'
@@ -438,15 +589,15 @@ const WebsiteChartPanel = () => {
                     ))}
                   </div>
                 )}
-                {Array.isArray(basicChecks.errors) && basicChecks.errors.length > 0 && (
-                  <div className='mt-2 rounded-md border border-red-200 p-3 space-y-1'>
-                    {(basicChecks.errors as string[]).slice(0, 5).map((e, i) => (
+                {Array.isArray(basicChecks.info) && basicChecks.info.length > 0 && (
+                  <div className='mt-2 rounded-md border p-3 space-y-1'>
+                    {(basicChecks.info as string[]).slice(0, 5).map((msg, i) => (
                       <div
                         key={i}
-                        className='flex items-start gap-1.5 text-xs text-red-700 dark:text-red-400'
+                        className='flex items-start gap-1.5 text-xs text-blue-700 dark:text-blue-400'
                       >
-                        <span className='shrink-0'>✕</span>
-                        <span>{e}</span>
+                        <span className='shrink-0'>ℹ</span>
+                        <span>{msg}</span>
                       </div>
                     ))}
                   </div>
