@@ -48,32 +48,38 @@ class SyncEngine {
     });
   }
 
-  /** 初始化引擎：加载配置、注册 IPC、自动加载 token、启动定时器 */
+  /** 初始化引擎：注册 IPC、加载配置、自动加载 token、启动定时器 */
   async init(): Promise<void> {
-    await this.ensureLogTable();
-    await this.configStore.load();
-    await this.configStore.loadTokenFromAppState();
+    // IPC 必须最先注册，即使后续步骤失败前端也能得到空响应而非 "No handler" 错误
     this.registerIpcHandlers();
 
-    const hasToken = Boolean(this.configStore.getToken());
-    const hasServer = Boolean(this.configStore.getServerUrl());
+    try {
+      await this.ensureLogTable();
+      await this.configStore.load();
+      await this.configStore.loadTokenFromAppState();
 
-    // 已登录但同步未启用时，自动启用
-    if (hasToken && hasServer && !this.configStore.isEnabled()) {
-      await this.configStore.updateConfig({ enabled: true });
+      const hasToken = Boolean(this.configStore.getToken());
+      const hasServer = Boolean(this.configStore.getServerUrl());
+
+      // 已登录但同步未启用时，自动启用
+      if (hasToken && hasServer && !this.configStore.isEnabled()) {
+        await this.configStore.updateConfig({ enabled: true });
+      }
+
+      if (this.configStore.isEnabled() && hasServer && hasToken) {
+        this.startPolling();
+      }
+
+      console.log('[SyncEngine] 初始化完成', {
+        enabled: this.configStore.isEnabled(),
+        interval: this.configStore.getIntervalMs(),
+        deviceId: this.configStore.getDeviceId(),
+        hasToken,
+        serverUrl: this.configStore.getServerUrl(),
+      });
+    } catch (e) {
+      console.error('[SyncEngine] 初始化配置/轮询失败（IPC 已注册，面板可正常显示）:', e);
     }
-
-    if (this.configStore.isEnabled() && hasServer && hasToken) {
-      this.startPolling();
-    }
-
-    console.log('[SyncEngine] 初始化完成', {
-      enabled: this.configStore.isEnabled(),
-      interval: this.configStore.getIntervalMs(),
-      deviceId: this.configStore.getDeviceId(),
-      hasToken,
-      serverUrl: this.configStore.getServerUrl(),
-    });
   }
 
   /** 设置认证 token（登录云端后调用） */
@@ -232,43 +238,60 @@ class SyncEngine {
 
   private registerIpcHandlers(): void {
     ipcMain.handle('sync-trigger', async () => {
-      return this.triggerSync();
+      try {
+        return await this.triggerSync();
+      } catch (e) {
+        console.error('[SyncEngine] sync-trigger 失败:', e);
+        return { error: String(e) };
+      }
     });
 
     ipcMain.handle('sync-status', async () => {
-      const pendingQueue = await localQuery(
-        `SELECT COUNT(*) as count FROM sync_queue WHERE status = 'pending'`,
-        []
-      ).catch(() => ({ rows: [{ count: 0 }] }));
-      const pendingConflicts = await localQuery(
-        `SELECT COUNT(*) as count FROM sync_conflicts WHERE resolution = 'pending'`,
-        []
-      ).catch(() => ({ rows: [{ count: 0 }] }));
+      try {
+        const pendingQueue = await localQuery(
+          `SELECT COUNT(*) as count FROM sync_queue WHERE status = 'pending'`,
+          []
+        ).catch(() => ({ rows: [{ count: 0 }] }));
+        const pendingConflicts = await localQuery(
+          `SELECT COUNT(*) as count FROM sync_conflicts WHERE resolution = 'pending'`,
+          []
+        ).catch(() => ({ rows: [{ count: 0 }] }));
 
-      const queueRows = (pendingQueue as { rows: Array<{ count: number }> }).rows || [];
-      const conflictRows = (pendingConflicts as { rows: Array<{ count: number }> }).rows || [];
+        const queueRows = (pendingQueue as { rows: Array<{ count: number }> }).rows || [];
+        const conflictRows = (pendingConflicts as { rows: Array<{ count: number }> }).rows || [];
 
-      return {
-        status: this.status,
-        lastSyncAt: this.configStore.getLastSyncAt(),
-        pendingChanges: Number(queueRows[0]?.count) || 0,
-        pendingConflicts: Number(conflictRows[0]?.count) || 0,
-      };
+        return {
+          status: this.status,
+          lastSyncAt: this.configStore.getLastSyncAt(),
+          pendingChanges: Number(queueRows[0]?.count) || 0,
+          pendingConflicts: Number(conflictRows[0]?.count) || 0,
+        };
+      } catch {
+        return { status: this.status, pendingChanges: 0, pendingConflicts: 0 };
+      }
     });
 
     ipcMain.handle('sync-set-config', async (_event, config: Partial<SyncConfig>) => {
-      await this.configStore.updateConfig(config);
-      if (config.enabled !== undefined) {
-        if (config.enabled && this.configStore.getToken() && this.configStore.getServerUrl()) {
-          this.startPolling();
-        } else if (config.enabled === false) {
-          this.stopPolling();
+      try {
+        await this.configStore.updateConfig(config);
+        if (config.enabled !== undefined) {
+          if (config.enabled && this.configStore.getToken() && this.configStore.getServerUrl()) {
+            this.startPolling();
+          } else if (config.enabled === false) {
+            this.stopPolling();
+          }
         }
+      } catch (e) {
+        console.error('[SyncEngine] sync-set-config 失败:', e);
       }
     });
 
     ipcMain.handle('sync-get-config', async () => {
-      return { ...this.configStore.getConfig() };
+      try {
+        return { ...this.configStore.getConfig() };
+      } catch {
+        return { serverUrl: '', intervalMs: 30000, enabled: false, deviceId: '' };
+      }
     });
 
     ipcMain.handle(

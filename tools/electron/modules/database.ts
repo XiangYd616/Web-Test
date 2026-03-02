@@ -528,52 +528,56 @@ class LocalDatabase {
 
     // ── 创建 SQLite trigger：自动将变更写入 sync_queue ──
     for (const table of SYNCABLE_TABLES) {
-      // AUTO-FILL trigger: 新记录 sync_id 为空时自动用 id 填充
-      db.exec(`
-        CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_autofill
-        AFTER INSERT ON ${table}
-        WHEN NEW.sync_id IS NULL OR NEW.sync_id = ''
-        BEGIN
-          UPDATE ${table} SET sync_id = NEW.id, sync_version = 1, sync_status = 'pending'
-          WHERE id = NEW.id;
-        END
-      `);
+      try {
+        // AUTO-FILL trigger: 新记录 sync_id 为空时自动用 id 填充
+        db.exec(`
+          CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_autofill
+          AFTER INSERT ON ${table}
+          WHEN NEW.sync_id IS NULL OR NEW.sync_id = ''
+          BEGIN
+            UPDATE ${table} SET sync_id = NEW.id, sync_version = 1, sync_status = 'pending'
+            WHERE id = NEW.id;
+          END
+        `);
 
-      // INSERT trigger: 新记录入队 sync_queue
-      db.exec(`
-        CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_insert
-        AFTER INSERT ON ${table}
-        WHEN NEW.sync_id IS NOT NULL AND NEW.sync_id != '' AND NEW.sync_status != 'synced'
-        BEGIN
-          INSERT INTO sync_queue (table_name, record_sync_id, operation, data)
-          VALUES ('${table}', NEW.sync_id, 'insert', '{}');
-        END
-      `);
+        // INSERT trigger: 新记录入队 sync_queue
+        db.exec(`
+          CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_insert
+          AFTER INSERT ON ${table}
+          WHEN NEW.sync_id IS NOT NULL AND NEW.sync_id != '' AND NEW.sync_status != 'synced'
+          BEGIN
+            INSERT INTO sync_queue (table_name, record_sync_id, operation, data)
+            VALUES ('${table}', NEW.sync_id, 'insert', '{}');
+          END
+        `);
 
-      // UPDATE trigger: 业务字段变更时入队（排除纯 sync 字段更新避免递归）
-      db.exec(`
-        CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_update
-        AFTER UPDATE ON ${table}
-        WHEN NEW.sync_id IS NOT NULL AND NEW.sync_id != ''
-          AND OLD.updated_at != NEW.updated_at
-          AND NEW.sync_status != 'synced'
-        BEGIN
-          INSERT INTO sync_queue (table_name, record_sync_id, operation, data)
-          VALUES ('${table}', NEW.sync_id, 'update', '{}');
-        END
-      `);
+        // UPDATE trigger: 业务字段变更时入队（排除纯 sync 字段更新避免递归）
+        db.exec(`
+          CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_update
+          AFTER UPDATE ON ${table}
+          WHEN NEW.sync_id IS NOT NULL AND NEW.sync_id != ''
+            AND OLD.updated_at != NEW.updated_at
+            AND NEW.sync_status != 'synced'
+          BEGIN
+            INSERT INTO sync_queue (table_name, record_sync_id, operation, data)
+            VALUES ('${table}', NEW.sync_id, 'update', '{}');
+          END
+        `);
 
-      // DELETE trigger
-      db.exec(`
-        CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_delete
-        AFTER DELETE ON ${table}
-        WHEN OLD.sync_id IS NOT NULL AND OLD.sync_id != ''
-        BEGIN
-          INSERT INTO sync_queue (table_name, record_sync_id, operation, data)
-          VALUES ('${table}', OLD.sync_id, 'delete',
-            json_object('id', OLD.id, 'sync_id', OLD.sync_id, 'sync_version', OLD.sync_version));
-        END
-      `);
+        // DELETE trigger
+        db.exec(`
+          CREATE TRIGGER IF NOT EXISTS trg_${table}_sync_delete
+          AFTER DELETE ON ${table}
+          WHEN OLD.sync_id IS NOT NULL AND OLD.sync_id != ''
+          BEGIN
+            INSERT INTO sync_queue (table_name, record_sync_id, operation, data)
+            VALUES ('${table}', OLD.sync_id, 'delete',
+              json_object('id', OLD.id, 'sync_id', OLD.sync_id, 'sync_version', OLD.sync_version));
+          END
+        `);
+      } catch (triggerErr) {
+        console.warn(`[DB Migration] ${table} trigger 创建失败（不影响核心功能）:`, triggerErr);
+      }
     }
 
     console.log('[DB Migration] 同步字段、索引、触发器已就绪');

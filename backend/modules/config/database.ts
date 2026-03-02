@@ -92,6 +92,107 @@ const connectDB = async () => {
           END IF;
         END $$;
       `);
+
+      // ── 双向同步基础设施迁移（幂等） ──
+      const syncTables = ['workspaces', 'collections', 'environments', 'test_templates'];
+      for (const table of syncTables) {
+        await client.query(`ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS sync_id UUID UNIQUE`);
+        await client.query(
+          `ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS sync_version INTEGER DEFAULT 1`
+        );
+        await client.query(
+          `ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS sync_updated_at TIMESTAMPTZ`
+        );
+        await client.query(
+          `ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS sync_device_id VARCHAR(64)`
+        );
+      }
+      // 回填 sync_id / sync_updated_at
+      for (const table of syncTables) {
+        await client.query(`UPDATE ${table} SET sync_id = id WHERE sync_id IS NULL`);
+        await client.query(
+          `UPDATE ${table} SET sync_updated_at = COALESCE(updated_at, created_at, NOW()) WHERE sync_updated_at IS NULL`
+        );
+      }
+
+      // 同步日志表
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS sync_log (
+          id SERIAL PRIMARY KEY,
+          user_id UUID NOT NULL,
+          device_id VARCHAR(64) NOT NULL,
+          direction VARCHAR(10) NOT NULL CHECK (direction IN ('pull', 'push')),
+          tables_synced TEXT[],
+          records_pulled INTEGER DEFAULT 0,
+          records_pushed INTEGER DEFAULT 0,
+          conflicts_count INTEGER DEFAULT 0,
+          status VARCHAR(20) DEFAULT 'success' CHECK (status IN ('success', 'partial', 'failed')),
+          error_message TEXT,
+          started_at TIMESTAMPTZ DEFAULT NOW(),
+          completed_at TIMESTAMPTZ,
+          duration_ms INTEGER
+        )
+      `);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_sync_log_user ON sync_log(user_id)`);
+      await client.query(
+        `CREATE INDEX IF NOT EXISTS idx_sync_log_started ON sync_log(started_at DESC)`
+      );
+
+      // 同步冲突表
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS sync_conflicts (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id UUID NOT NULL,
+          table_name VARCHAR(64) NOT NULL,
+          record_sync_id UUID NOT NULL,
+          local_version INTEGER,
+          remote_version INTEGER,
+          local_data JSONB,
+          remote_data JSONB,
+          resolution VARCHAR(20) DEFAULT 'pending' CHECK (resolution IN ('pending', 'local', 'remote', 'merged')),
+          resolved_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      await client.query(
+        `CREATE INDEX IF NOT EXISTS idx_sync_conflicts_user ON sync_conflicts(user_id)`
+      );
+      await client.query(
+        `CREATE INDEX IF NOT EXISTS idx_sync_conflicts_pending ON sync_conflicts(resolution) WHERE resolution = 'pending'`
+      );
+
+      // 设备注册表
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS sync_devices (
+          id VARCHAR(64) PRIMARY KEY,
+          user_id UUID NOT NULL,
+          device_name VARCHAR(128),
+          device_type VARCHAR(20) NOT NULL CHECK (device_type IN ('desktop', 'web')),
+          platform VARCHAR(20),
+          last_sync_at TIMESTAMPTZ,
+          last_pull_at TIMESTAMPTZ,
+          last_push_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      await client.query(
+        `CREATE INDEX IF NOT EXISTS idx_sync_devices_user ON sync_devices(user_id)`
+      );
+
+      // 数据备份表（确保存在）
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS data_backups (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          name TEXT NOT NULL,
+          data_types JSONB DEFAULT '[]',
+          summary JSONB DEFAULT '{}',
+          records JSONB DEFAULT '{}',
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+
+      console.log('✅ 同步基础设施迁移完成');
     } finally {
       client.release();
     }

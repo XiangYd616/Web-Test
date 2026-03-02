@@ -1114,10 +1114,10 @@ class DataManagementService extends EventEmitter {
 
       await query(
         `INSERT INTO data_backups (name, data_types, summary, records, created_at)
-         VALUES ($1, $2, $3, $4, NOW())`,
+         VALUES ($1, $2::jsonb, $3::jsonb, $4::jsonb, NOW())`,
         [
           backupName,
-          typesToBackup,
+          JSON.stringify(typesToBackup),
           JSON.stringify({ timestamp, format, ...fileInfo }),
           JSON.stringify(recordsSummary),
         ]

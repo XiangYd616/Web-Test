@@ -379,12 +379,21 @@ const CloudSyncPanel = () => {
     if (!api?.sync) return;
     setLoading(true);
     try {
-      const [cfg, sts, cfls, syncLogs] = await Promise.all([
-        api.sync.getConfig(),
-        api.sync.getStatus(),
-        api.sync.getConflicts(),
-        api.sync.getLogs(15),
-      ]);
+      // 独立调用，每个带默认值防护，避免一个失败导致全部失败
+      const cfg = await api.sync.getConfig().catch(() => ({
+        serverUrl: '',
+        intervalMs: 30000,
+        enabled: false,
+        deviceId: '',
+      }));
+      const sts = await api.sync.getStatus().catch(() => ({
+        status: 'idle' as const,
+        lastSyncAt: undefined as string | undefined,
+        pendingChanges: 0,
+        pendingConflicts: 0,
+      }));
+      const cfls = await api.sync.getConflicts().catch(() => []);
+      const syncLogs = await api.sync.getLogs(15).catch(() => []);
 
       // 如果 SyncEngine 没有 serverUrl，从已登录的 cloudApiUrl 自动补全
       let effectiveCfg = cfg;
@@ -394,7 +403,7 @@ const CloudSyncPanel = () => {
           import.meta.env.VITE_API_URL ||
           'https://api.xiangweb.space/api';
         if (cloudUrl) {
-          await api.sync.setConfig({ serverUrl: cloudUrl });
+          await api.sync.setConfig({ serverUrl: cloudUrl }).catch(() => {});
           effectiveCfg = { ...cfg, serverUrl: cloudUrl };
         }
       }
@@ -403,7 +412,6 @@ const CloudSyncPanel = () => {
       setStatus(sts);
       setConflicts(cfls as ConflictItem[]);
       setLogs(syncLogs);
-      // serverUrlInput 已移除（技术细节不面向用户展示）
     } catch {
       toast.error(t('settings.sync.fetchFailed', '获取同步状态失败'));
     } finally {
