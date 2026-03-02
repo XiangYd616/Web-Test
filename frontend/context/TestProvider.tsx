@@ -158,8 +158,7 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
   const [environments, setEnvironments] = useState<EnvironmentItem[]>([]);
   const [resolvedVariables, setResolvedVariables] = useState<Record<string, string>>({});
 
-  // ── 标签页会话快照缓存：切换标签时保存/恢复显示层状态 ──
-  // 注意：activeTestId / isProcessing 保持全局，不隔离，确保后台测试订阅不中断
+  // ── 标签页会话快照缓存：切换标签时保存/恢复全部显示层状态（包含测试状态） ──
   type SessionSnapshot = {
     selectedType: TestType;
     result: TestResult;
@@ -169,11 +168,137 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
     progressInfo: TestProgressInfo | null;
     configText: string;
     url: string;
+    activeTestId: string | null;
+    isProcessing: boolean;
+    currentLogTestId: string | null;
+    selectedHistoryId: string | null;
   };
   const sessionCacheRef = useRef<Record<string, SessionSnapshot>>({});
   const activeTabIdRef = useRef<string | null>(null);
   // testId → tabId 映射：后台测试完成时知道结果属于哪个标签
   const testTabMapRef = useRef<Record<string, string>>({});
+  // 后台 tab 的测试订阅管理：testId → unsubscribe 函数
+  const bgSubscriptionsRef = useRef<Record<string, () => void>>({});
+
+  // 后台 tab 测试完成时：拉取结果写入对应 tab 的 sessionCache，不干扰当前显示的 tab
+  const bgRefreshTest = useCallback(
+    async (testId: string, ownerTabId: string) => {
+      try {
+        const statusData = await getTestStatus(testId, workspaceId || undefined);
+        const status = String(statusData.status || 'pending') as TestStatus;
+        const processing = status === 'pending' || status === 'queued' || status === 'running';
+        const actualEngine = statusData.testType
+          ? (String(statusData.testType) as TestType)
+          : undefined;
+
+        // 如果仍在运行，只更新 cache 中的状态
+        const snap = sessionCacheRef.current[ownerTabId];
+        if (!snap) return;
+
+        if (processing) return; // 仍在运行，无需更新
+
+        // 测试已结束，更新 cache
+        snap.isProcessing = false;
+        snap.result = {
+          ...snap.result,
+          status,
+          ...(actualEngine ? { engine: actualEngine } : {}),
+        };
+
+        if (status === 'completed') {
+          snap.progressInfo = {
+            progress: 100,
+            status,
+            currentStep: snap.progressInfo?.currentStep,
+          };
+          try {
+            const resultData = await getTestResult(testId, workspaceId || undefined);
+            if (resultData) {
+              snap.resultPayloadText = JSON.stringify(resultData, null, 2);
+              snap.result = { ...snap.result, score: Number(resultData.score ?? 0) };
+            }
+          } catch {
+            /* ignore */
+          }
+        } else {
+          snap.progressInfo = {
+            progress: snap.progressInfo?.progress ?? 0,
+            status,
+            currentStep: snap.progressInfo?.currentStep,
+          };
+          try {
+            const partialResult = await getTestResult(testId, workspaceId || undefined);
+            if (partialResult) {
+              snap.resultPayloadText = JSON.stringify(partialResult, null, 2);
+              snap.result = { ...snap.result, score: Number(partialResult.score ?? 0) };
+            }
+          } catch {
+            /* ignore */
+          }
+        }
+
+        // 拉取完整日志
+        try {
+          const logsData = await getTestLogs(testId, {
+            workspaceId: workspaceId || undefined,
+            limit: 200,
+            offset: 0,
+          });
+          if (Array.isArray(logsData.logs)) {
+            snap.logs = logsData.logs.map((log: Record<string, unknown>) => ({
+              level: (log.level as 'info' | 'warn' | 'error') || 'info',
+              message: String(log.message || ''),
+              timestamp: log.createdAt ? String(log.createdAt) : undefined,
+              context:
+                log.context && typeof log.context === 'object' && !Array.isArray(log.context)
+                  ? (log.context as Record<string, unknown>)
+                  : undefined,
+            }));
+            logsByTestIdRef.current[testId] = snap.logs;
+          }
+        } catch {
+          /* ignore */
+        }
+
+        snap.logStatus = 'done';
+
+        // 清理后台订阅
+        if (bgSubscriptionsRef.current[testId]) {
+          bgSubscriptionsRef.current[testId]();
+          delete bgSubscriptionsRef.current[testId];
+        }
+
+        // 刷新历史列表（通过 ref 延迟引用，避免前向依赖）
+        void bgRefreshHistoryRef.current();
+
+        // 如果用户此时切回了该 tab，同步显示
+        if (activeTabIdRef.current === ownerTabId) {
+          setResult(snap.result);
+          setResultPayloadText(snap.resultPayloadText);
+          setLogs(snap.logs);
+          setLogStatus(snap.logStatus);
+          setProgressInfo(snap.progressInfo);
+          setIsProcessing(false);
+        }
+      } catch {
+        /* ignore */
+      }
+    },
+    [workspaceId]
+  );
+  // bgRefreshTest 内部需要刷新历史，但 stableRefreshHistory 在后面才定义
+  // 通过 ref 延迟引用解决前向依赖
+  const bgRefreshHistoryRef = useRef<() => void>(() => {});
+
+  // 组件卸载时清理所有后台订阅
+  useEffect(() => {
+    return () => {
+      for (const unsub of Object.values(bgSubscriptionsRef.current)) {
+        unsub();
+      }
+      bgSubscriptionsRef.current = {};
+    };
+  }, []);
 
   // 监听 TabBar 初始化/路由变化时的 activeTabId 同步
   useEffect(() => {
@@ -195,7 +320,7 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
       };
       if (!fromTabId || !toTabId || fromTabId === toTabId) return;
 
-      // 保存旧标签页的显示快照
+      // 保存旧标签页的完整快照（包含测试状态）
       sessionCacheRef.current[fromTabId] = {
         selectedType,
         result,
@@ -205,9 +330,58 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
         progressInfo,
         configText,
         url,
+        activeTestId,
+        isProcessing,
+        currentLogTestId,
+        selectedHistoryId,
       };
 
-      // 恢复新标签页的显示快照（如果存在）
+      // 如果旧 tab 有正在运行的测试，创建后台订阅维持事件接收
+      if (activeTestId && isProcessing && !bgSubscriptionsRef.current[activeTestId]) {
+        const bgTestId = activeTestId;
+        const bgSub = subscribeTestEvents(bgTestId, {
+          onProgress: info => {
+            // 更新旧 tab 的 cache 中的进度
+            const snap = sessionCacheRef.current[fromTabId];
+            if (snap) {
+              snap.progressInfo = {
+                progress: info.progress ?? snap.progressInfo?.progress ?? 0,
+                status: info.status ?? snap.progressInfo?.status,
+                currentStep: info.currentStep ?? snap.progressInfo?.currentStep,
+                stats: info.stats ?? snap.progressInfo?.stats,
+              };
+            }
+            if (info.currentStep) {
+              const pct =
+                typeof info.progress === 'number' ? `[${Math.round(info.progress)}%] ` : '';
+              consoleLog('info', `${pct}${info.currentStep}`);
+            }
+          },
+          onLog: log => {
+            appendLogRef.current(bgTestId, log);
+            // 同步到 cache
+            const snap = sessionCacheRef.current[fromTabId];
+            if (snap) {
+              snap.logs = logsByTestIdRef.current[bgTestId] ?? snap.logs;
+            }
+          },
+          onCompleted: () => {
+            void bgRefreshTest(bgTestId, fromTabId);
+          },
+          onError: () => {
+            void bgRefreshTest(bgTestId, fromTabId);
+          },
+        });
+        const bgTimer = window.setInterval(() => {
+          void bgRefreshTest(bgTestId, fromTabId);
+        }, getPollInterval());
+        bgSubscriptionsRef.current[bgTestId] = () => {
+          bgSub.unsubscribe();
+          window.clearInterval(bgTimer);
+        };
+      }
+
+      // 恢复新标签页的完整快照（包含测试状态）
       const cached = sessionCacheRef.current[toTabId];
       if (cached) {
         setSelectedType(cached.selectedType);
@@ -218,6 +392,15 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
         setProgressInfo(cached.progressInfo);
         setConfigText(cached.configText);
         setUrl(cached.url);
+        setActiveTestId(cached.activeTestId);
+        setIsProcessing(cached.isProcessing);
+        setCurrentLogTestId(cached.currentLogTestId);
+        setSelectedHistoryId(cached.selectedHistoryId);
+        // 如果新 tab 有后台订阅，清除它（因为前台 useEffect 会接管）
+        if (cached.activeTestId && bgSubscriptionsRef.current[cached.activeTestId]) {
+          bgSubscriptionsRef.current[cached.activeTestId]();
+          delete bgSubscriptionsRef.current[cached.activeTestId];
+        }
       } else {
         // 新标签页：重置显示为空状态，使用事件携带的 testType（默认 performance）
         const engineType = testType || 'performance';
@@ -228,6 +411,10 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
         setLogStatus('idle');
         setProgressInfo(null);
         setConfigText(buildDefaultConfigText(engineType, url));
+        setActiveTestId(null);
+        setIsProcessing(false);
+        setCurrentLogTestId(null);
+        setSelectedHistoryId(null);
       }
 
       activeTabIdRef.current = toTabId;
@@ -236,11 +423,11 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener('tw:switch-tab', handler);
   }); // 不传依赖数组，每次渲染都用最新的状态值
 
-  // 自动将当前全局显示状态持续同步到 sessionCache
-  // 同步到两个 tabId：① 当前显示的标签 ② activeTestId 所属的标签
-  // 这样后台测试完成时，即使用户已切到其他标签，结果也会写入发起测试的标签 cache
+  // 自动将当前全局显示状态持续同步到当前显示标签的 sessionCache
   useEffect(() => {
-    const snapshot: SessionSnapshot = {
+    const displayTabId = activeTabIdRef.current;
+    if (!displayTabId) return;
+    sessionCacheRef.current[displayTabId] = {
       selectedType,
       result,
       resultPayloadText,
@@ -249,19 +436,11 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
       progressInfo,
       configText,
       url,
+      activeTestId,
+      isProcessing,
+      currentLogTestId,
+      selectedHistoryId,
     };
-    // 同步到当前显示的标签
-    const displayTabId = activeTabIdRef.current;
-    if (displayTabId) {
-      sessionCacheRef.current[displayTabId] = snapshot;
-    }
-    // 同步到发起测试的标签（如果不同于当前显示的标签）
-    if (activeTestId) {
-      const testOwnerTabId = testTabMapRef.current[activeTestId];
-      if (testOwnerTabId && testOwnerTabId !== displayTabId) {
-        sessionCacheRef.current[testOwnerTabId] = snapshot;
-      }
-    }
   }, [
     selectedType,
     result,
@@ -272,6 +451,9 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
     configText,
     url,
     activeTestId,
+    isProcessing,
+    currentLogTestId,
+    selectedHistoryId,
   ]);
 
   const configDraftsRef = useRef<Record<TestType, string>>({} as Record<TestType, string>);
@@ -556,6 +738,7 @@ export const TestProvider = ({ children }: { children: ReactNode }) => {
       refreshHistoryRef.current(params),
     []
   );
+  bgRefreshHistoryRef.current = stableRefreshHistory;
 
   const refreshTemplatesRef = useRef(refreshTemplates);
   refreshTemplatesRef.current = refreshTemplates;
