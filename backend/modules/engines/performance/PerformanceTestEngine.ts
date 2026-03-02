@@ -18,7 +18,7 @@ import { insertExecutionLog } from '../../testing/services/testLogService';
 import HTMLParsingService from '../shared/services/HTMLParsingService';
 import PerformanceMetricsService from '../shared/services/PerformanceMetricsService';
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
-import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
+import { diagnoseNetworkError, isFatalNetworkError } from '../shared/utils/networkDiagnostics';
 
 type RequestConfig = {
   method?: string;
@@ -1501,13 +1501,14 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
             decompressed = res.pipe(zlib.createBrotliDecompress());
           }
 
+          const MAX_BODY_BYTES = 5 * 1024 * 1024; // 5MB body 上限
           if (isCompressed) {
             // 压缩场景：res 统计传输大小，decompressed 读取解压后的 body
             res.on('data', (chunk: Buffer) => {
               contentLength += Buffer.byteLength(chunk);
             });
             decompressed.on('data', (chunk: Buffer) => {
-              if (options.includeContent) {
+              if (options.includeContent && body.length < MAX_BODY_BYTES) {
                 body += chunk.toString();
               }
             });
@@ -1515,7 +1516,7 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
             // 无压缩：只监听一次
             res.on('data', (chunk: Buffer) => {
               contentLength += Buffer.byteLength(chunk);
-              if (options.includeContent) {
+              if (options.includeContent && body.length < MAX_BODY_BYTES) {
                 body += chunk.toString();
               }
             });
@@ -2361,7 +2362,7 @@ class PerformanceTestEngine implements ITestEngine<PerformanceRunConfig, BaseTes
       for (let i = 0; i < recommendations.length; i++) {
         const key = recommendations[i].type || recommendations[i].title || '';
         if (seen.has(key)) {
-          const existingIdx = seen.get(key)!;
+          const existingIdx = seen.get(key) ?? i;
           const existingPri = priorityRank(recommendations[existingIdx].priority || 'low');
           const currentPri = priorityRank(recommendations[i].priority || 'low');
           if (currentPri < existingPri) {

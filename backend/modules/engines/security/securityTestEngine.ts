@@ -1458,6 +1458,7 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
       const resp = await axios.get(url, {
         timeout: Number(this.options.timeout) || 15000,
         headers: { 'User-Agent': this.options.userAgent as string },
+        maxContentLength: 5 * 1024 * 1024, // 5MB
       });
       const cspHeader =
         resp.headers['content-security-policy'] ||
@@ -1525,6 +1526,7 @@ class SecurityTestEngine implements ITestEngine<SecurityRunConfig, BaseTestResul
       const response = await axios.get(url, {
         timeout: Number(this.options.timeout) || 15000,
         headers: { 'User-Agent': this.options.userAgent as string },
+        maxContentLength: 5 * 1024 * 1024, // 5MB
       });
 
       const headers = response.headers || {};

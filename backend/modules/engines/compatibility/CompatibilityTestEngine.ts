@@ -13,6 +13,7 @@ import {
 } from '../../../../shared/types/testEngine.types';
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
 import ScreenshotService from '../shared/services/ScreenshotService';
+import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
 import {
   extractPageSignals as extractPageSignalsShared,
   type PageSignalsResult,
@@ -1100,7 +1101,11 @@ class CompatibilityTestEngine implements ITestEngine<CompatibilityRunConfig, Bas
       const results = await Promise.allSettled(
         batch.map(agent =>
           axios
-            .get(url, { timeout, headers: { 'User-Agent': agent } })
+            .get(url, {
+              timeout,
+              headers: { 'User-Agent': agent },
+              maxContentLength: 10 * 1024 * 1024,
+            })
             .then(response => ({ agent, html: String(response.data || '') }))
         )
       );
@@ -1301,15 +1306,14 @@ class CompatibilityTestEngine implements ITestEngine<CompatibilityRunConfig, Bas
           const tests: Record<string, string> = {
             containerQueries: '(container-type: inline-size)',
             cssHas: 'selector(:has(*))',
-            cssNesting: '(color: red) or (not (color: red))', // 基础测试
             subgrid: '(grid-template-columns: subgrid)',
             colorMix: '(color: color-mix(in srgb, red 50%, blue))',
-            cssLayers:
-              '(not (color: invalid-for-layers-test))' /* always true, 用 @layer 检测替代 */,
             aspectRatio: '(aspect-ratio: 1)',
             gap: '(gap: 1px)',
             logicalProperties: '(inline-size: 1px)',
           };
+          // cssNesting 和 cssLayers 无法通过 CSS.supports() 可靠检测，
+          // 仅依赖 styleSheets 扫描中的 @layer 匹配来判断
           const results: Record<string, boolean> = {};
           if (typeof CSS !== 'undefined' && typeof CSS.supports === 'function') {
             for (const [key, value] of Object.entries(tests)) {

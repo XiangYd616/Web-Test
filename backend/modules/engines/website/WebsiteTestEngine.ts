@@ -452,7 +452,7 @@ class WebsiteTestEngine implements ITestEngine<WebsiteRunConfig, BaseTestResult>
       });
       this.updateTestProgress(testId, 5, '获取页面内容', WEBSITE_PROGRESS_STAGE.STARTED, { url });
 
-      const response = await axios.get(url, { timeout });
+      const response = await axios.get(url, { timeout, maxContentLength: 10 * 1024 * 1024 });
       const $ = cheerio.load(response.data);
 
       const basicChecks = await this.performBasicChecks($);

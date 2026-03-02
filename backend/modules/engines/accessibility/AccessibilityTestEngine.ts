@@ -12,6 +12,7 @@ import {
   ValidationResult,
 } from '../../../../shared/types/testEngine.types';
 import { puppeteerPool } from '../shared/services/PuppeteerPool';
+import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
 
 // ── 前端发送的配置格式（checkXxx 布尔开关 + level 字符串） ──
 type FrontendAccessibilityConfig = BaseTestConfig & {
@@ -735,6 +736,7 @@ class AccessibilityTestEngine implements ITestEngine<AccessibilityRunConfig, Bas
       timeout: config.timeout,
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AccessibilityBot/3.0)' },
       signal,
+      maxContentLength: 10 * 1024 * 1024, // 10MB
     });
 
     if (signal?.aborted) throw new Error('测试已取消');
@@ -849,6 +851,19 @@ class AccessibilityTestEngine implements ITestEngine<AccessibilityRunConfig, Bas
         );
       });
     }
+
+    // 截断每个检查项的 issues 详情（防止巨型 DOM 导致结果对象过大）
+    const MAX_ISSUES_PER_CHECK = 30;
+    Object.values(results.checks).forEach(check => {
+      if (check.issues.length > MAX_ISSUES_PER_CHECK) {
+        const total = check.issues.length;
+        check.issues = check.issues.slice(0, MAX_ISSUES_PER_CHECK);
+        check.issues.push({
+          issue: `… 共 ${total} 个问题，仅显示前 ${MAX_ISSUES_PER_CHECK} 个`,
+          severity: 'info',
+        });
+      }
+    });
 
     results.summary = this.calculateAccessibilityScore(results.checks);
     results.recommendations = this.generateRecommendations(results.checks, config.includeWarnings);

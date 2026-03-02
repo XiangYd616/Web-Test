@@ -477,51 +477,35 @@ const ApiChartPanel = () => {
   // 安全头 & CORS 详情（从第一个端点的 analysis.headers 提取）
   const securityInfo = useMemo(() => {
     if (!apiResults || apiResults.length === 0) return null;
-    // 选取第一个有 headers 分析的端点
     for (const ep of apiResults) {
-      const headers = (ep as Record<string, unknown>).headers;
-      if (!isRecord(headers)) continue;
-      const security = (headers as { security?: unknown }).security;
-      if (!isRecord(security)) continue;
-      const sec = security as Record<string, unknown>;
-      const hasSecurityHeaders = isRecord(sec.hasSecurityHeaders)
-        ? (sec.hasSecurityHeaders as Record<string, boolean>)
-        : null;
-      const score = isRecord(sec.securityHeaderScore)
-        ? (sec.securityHeaderScore as { present?: number; total?: number })
-        : null;
-      const corsDetails = isRecord(sec.corsDetails)
-        ? (sec.corsDetails as {
-            allowOrigin?: string;
-            allowMethods?: string;
-            allowHeaders?: string;
-            allowCredentials?: boolean;
-            isWildcard?: boolean;
-          })
-        : null;
-      const rateLimiting = isRecord((headers as Record<string, unknown>).rateLimiting)
-        ? ((headers as Record<string, unknown>).rateLimiting as Record<string, string | null>)
-        : null;
-      const apiVersion =
-        typeof (headers as Record<string, unknown>).apiVersion === 'string'
-          ? ((headers as Record<string, unknown>).apiVersion as string)
-          : null;
+      const h = (ep as Record<string, unknown>).headers;
+      if (!isRecord(h)) continue;
+      const sec = isRecord(h.security) ? (h.security as Record<string, unknown>) : null;
+      if (!sec) continue;
       return {
-        hasSecurityHeaders,
-        score,
+        hasSecurityHeaders: isRecord(sec.hasSecurityHeaders)
+          ? (sec.hasSecurityHeaders as Record<string, boolean>)
+          : null,
+        score: isRecord(sec.securityHeaderScore)
+          ? (sec.securityHeaderScore as { present?: number; total?: number })
+          : null,
         hasCORS: sec.hasCORS === true,
-        corsDetails,
+        corsDetails: isRecord(sec.corsDetails)
+          ? (sec.corsDetails as {
+              allowOrigin?: string;
+              allowMethods?: string;
+              allowHeaders?: string;
+              allowCredentials?: boolean;
+              isWildcard?: boolean;
+            })
+          : null,
         hasHttps: sec.hasHttps === true,
-        rateLimiting,
-        apiVersion,
-        compression:
-          typeof (headers as Record<string, unknown>).compression === 'string'
-            ? ((headers as Record<string, unknown>).compression as string)
-            : null,
-        server:
-          typeof (headers as Record<string, unknown>).server === 'string'
-            ? ((headers as Record<string, unknown>).server as string)
-            : null,
+        rateLimiting: isRecord(h.rateLimiting)
+          ? (h.rateLimiting as Record<string, string | null>)
+          : null,
+        apiVersion: typeof h.apiVersion === 'string' ? h.apiVersion : null,
+        compression: typeof h.compression === 'string' ? h.compression : null,
+        server: typeof h.server === 'string' ? h.server : null,
       };
     }
     return null;

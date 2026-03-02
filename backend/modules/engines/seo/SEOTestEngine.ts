@@ -625,6 +625,7 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
           const response = await axios.get(validatedConfig.url, {
             timeout: validatedConfig.timeout,
             headers: { 'User-Agent': validatedConfig.userAgent },
+            maxContentLength: 10 * 1024 * 1024, // 10MB
           });
           htmlContent = typeof response.data === 'string' ? response.data : String(response.data);
         }
@@ -633,6 +634,7 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
         const response = await axios.get(validatedConfig.url, {
           timeout: validatedConfig.timeout,
           headers: { 'User-Agent': validatedConfig.userAgent },
+          maxContentLength: 10 * 1024 * 1024, // 10MB
         });
         htmlContent = typeof response.data === 'string' ? response.data : String(response.data);
       }
@@ -1430,7 +1432,7 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
     const MAX_INTERNAL = 12;
     const MAX_EXTERNAL = 8;
     const MAX_SAMPLE = 20;
-    const shuffled = (arr: string[]) => arr.sort(() => Math.random() - 0.5);
+    const shuffled = (arr: string[]) => [...arr].sort(() => Math.random() - 0.5);
     const sample = [
       ...internalLinks.slice(0, MAX_INTERNAL),
       ...shuffled(externalLinks).slice(0, MAX_EXTERNAL),
@@ -1457,6 +1459,7 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
                 maxRedirects: 3,
                 validateStatus: () => true,
                 headers: reqHeaders,
+                maxContentLength: 1024 * 1024, // 1MB（仅需状态码）
               });
             }
             return { url: linkUrl, status: resp.status };

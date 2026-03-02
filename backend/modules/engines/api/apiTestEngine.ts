@@ -17,6 +17,7 @@ import {
 import { getAlertManager } from '../../alert/services/AlertManager';
 import Logger from '../../utils/logger';
 // 进度/完成/错误事件统一由 UserTestManager 回调 -> sendToUser 推送，不再直接走房间广播
+import { diagnoseNetworkError } from '../shared/utils/networkDiagnostics';
 import { AssertionSystem } from './AssertionSystem';
 
 type HeaderValue = string | number;
@@ -208,9 +209,24 @@ type ApiAnalysis = {
     security: {
       hasHttps: boolean;
       hasCORS: boolean;
+      corsDetails: {
+        allowOrigin: string | null;
+        allowMethods: string | null;
+        allowHeaders: string | null;
+        allowCredentials: boolean;
+        isWildcard: boolean;
+      } | null;
       hasSecurityHeaders: Record<string, boolean>;
+      securityHeaderScore: { present: number; total: number };
     };
     compression?: string;
+    rateLimiting: {
+      limit: string | null;
+      remaining: string | null;
+      reset: string | null;
+      retryAfter: string | null;
+    } | null;
+    apiVersion: string | null;
   };
   body: {
     size: number;
@@ -1550,8 +1566,16 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
           }
 
           let data = '';
+          let truncated = false;
+          const MAX_BODY_BYTES = 5 * 1024 * 1024; // 5MB 响应体上限
           decompressed.on('data', (chunk: Buffer) => {
+            if (truncated) return;
             data += chunk.toString();
+            if (data.length > MAX_BODY_BYTES) {
+              truncated = true;
+              data = data.slice(0, MAX_BODY_BYTES);
+              res.destroy();
+            }
           });
 
           decompressed.on('error', () => {
@@ -1692,7 +1716,10 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
       try {
         const parsed = JSON.parse(body);
         analysis.type = 'json';
-        analysis.structure = this.analyzeJSONStructure(parsed as Record<string, unknown>);
+        // 超过 1MB 的 JSON 跳过深度结构分析（防止大对象遍历过慢）
+        if (analysis.size <= 1024 * 1024) {
+          analysis.structure = this.analyzeJSONStructure(parsed as Record<string, unknown>);
+        }
       } catch (_error) {
         void _error;
         analysis.valid = false;
@@ -1831,12 +1858,11 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
     }
 
     // CORS 通配符风险
-    const corsDetails = (analysis.headers.security as Record<string, unknown>)?.corsDetails;
-    if (corsDetails && typeof corsDetails === 'object') {
-      const cors = corsDetails as { isWildcard?: boolean; allowCredentials?: boolean };
-      if (cors.isWildcard) {
+    const corsDetails = analysis.headers.security.corsDetails;
+    if (corsDetails) {
+      if (corsDetails.isWildcard) {
         recommendations.push('CORS Allow-Origin 为 *（通配符），生产环境建议限定具体域名');
-        if (cors.allowCredentials) {
+        if (corsDetails.allowCredentials) {
           recommendations.push(
             '⚠️ CORS 同时配置了 Allow-Origin: * 和 Allow-Credentials: true，浏览器会拒绝此组合'
           );
@@ -1845,8 +1871,7 @@ class ApiTestEngine implements ITestEngine<ApiRunConfig, BaseTestResult> {
     }
 
     // 速率限制
-    const rateLimiting = (analysis.headers as Record<string, unknown>).rateLimiting;
-    if (!rateLimiting) {
+    if (!analysis.headers.rateLimiting) {
       recommendations.push(
         '未检测到速率限制头（X-RateLimit-Limit），建议为 API 配置速率限制防止滥用'
       );
