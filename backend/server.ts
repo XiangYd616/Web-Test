@@ -71,6 +71,7 @@ if (process.env.NODE_ENV === 'production') {
 // 环境变量配置
 const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
+const DEPLOY_MODE = process.env.DEPLOY_MODE || 'full'; // 'cloud' = 精简云端模式, 'full' = 全功能模式
 const CORS_ORIGIN =
   process.env.CORS_ORIGIN ||
   (NODE_ENV === 'production'
@@ -359,10 +360,15 @@ const startServer = async (): Promise<Server> => {
 
     // 纯本地模式：禁用 Redis 队列，测试直接异步执行
     setQueueEnabled(false);
-    const performanceBenchmarkService = new PerformanceBenchmarkService();
 
-    await performanceBenchmarkService.initialize();
-    logStep('性能基准服务启动完成');
+    let performanceBenchmarkService: PerformanceBenchmarkService | null = null;
+    if (DEPLOY_MODE !== 'cloud') {
+      performanceBenchmarkService = new PerformanceBenchmarkService();
+      await performanceBenchmarkService.initialize();
+      logStep('性能基准服务启动完成');
+    } else {
+      console.log('☁️  云端精简模式: 跳过性能基准服务');
+    }
 
     await registerRoutes();
     logStep('路由加载完成');
@@ -373,34 +379,38 @@ const startServer = async (): Promise<Server> => {
     // 全局错误处理 - 使用统一错误处理系统
     app.use(errorMiddleware as unknown as ErrorRequestHandler);
 
-    try {
-      await storageService.start();
-      logStep('存储归档/清理服务启动完成');
-    } catch (error: unknown) {
-      console.error('启动存储归档/清理服务失败:', error);
-    }
+    if (DEPLOY_MODE !== 'cloud') {
+      try {
+        await storageService.start();
+        logStep('存储归档/清理服务启动完成');
+      } catch (error: unknown) {
+        console.error('启动存储归档/清理服务失败:', error);
+      }
 
-    registerTestEngines();
-    logStep('测试引擎注册完成');
-    await testEngineRegistry.initialize();
-    logStep('测试引擎初始化完成');
+      registerTestEngines();
+      logStep('测试引擎注册完成');
+      await testEngineRegistry.initialize();
+      logStep('测试引擎初始化完成');
 
-    // 预加载 Puppeteer 浏览器池（正式依赖，启动时即检测可用性）
-    const { puppeteerPool } = await import('./modules/engines/shared/services/PuppeteerPool');
-    await puppeteerPool.preload();
-    logStep('Puppeteer 浏览器池预加载完成');
+      // 预加载 Puppeteer 浏览器池（正式依赖，启动时即检测可用性）
+      const { puppeteerPool } = await import('./modules/engines/shared/services/PuppeteerPool');
+      await puppeteerPool.preload();
+      logStep('Puppeteer 浏览器池预加载完成');
 
-    logStep('本地模式: 测试任务直接异步执行（无 Redis 队列）');
+      logStep('本地模式: 测试任务直接异步执行（无 Redis 队列）');
 
-    const enableScheduledRuns = process.env.SCHEDULED_RUNS_ENABLED === 'true';
+      const enableScheduledRuns = process.env.SCHEDULED_RUNS_ENABLED === 'true';
 
-    if (enableScheduledRuns) {
-      const scheduledRunService = new ScheduledRunService();
-      scheduledRunController.setScheduledRunService(scheduledRunService);
-      scheduledRunService.start().catch((error: unknown) => {
-        console.error('启动定时运行服务失败:', error);
-      });
-      logStep('定时运行服务启动完成');
+      if (enableScheduledRuns) {
+        const scheduledRunService = new ScheduledRunService();
+        scheduledRunController.setScheduledRunService(scheduledRunService);
+        scheduledRunService.start().catch((error: unknown) => {
+          console.error('启动定时运行服务失败:', error);
+        });
+        logStep('定时运行服务启动完成');
+      }
+    } else {
+      console.log('☁️  云端精简模式: 跳过测试引擎/Puppeteer/存储归档/定时运行');
     }
 
     // 启动HTTP服务器（使用 http.createServer 以便挂载 Socket.IO）
@@ -467,9 +477,15 @@ const startServer = async (): Promise<Server> => {
     server.keepAliveTimeout = 65000; // Keep-alive超时
     server.headersTimeout = 66000; // 请求头超时
 
-    (
-      server as unknown as { performanceBenchmarkService?: PerformanceBenchmarkService | null }
-    ).performanceBenchmarkService = performanceBenchmarkService;
+    if (performanceBenchmarkService) {
+      (
+        server as unknown as { performanceBenchmarkService?: PerformanceBenchmarkService | null }
+      ).performanceBenchmarkService = performanceBenchmarkService;
+    }
+
+    if (DEPLOY_MODE === 'cloud') {
+      console.log('☁️  云端精简模式已启动 — 仅提供: 认证/同步/数据管理/管理后台');
+    }
 
     return server;
   } catch (error: unknown) {
