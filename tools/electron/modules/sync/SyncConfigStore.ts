@@ -26,6 +26,7 @@ export class SyncConfigStore {
   private config: SyncConfig = { ...DEFAULT_CONFIG };
   private lastSyncAt: string | null = null;
   private token: string | null = null;
+  private refreshToken: string | null = null;
 
   // ─── Getters ───
 
@@ -65,6 +66,14 @@ export class SyncConfigStore {
     this.token = token;
   }
 
+  getRefreshToken(): string | null {
+    return this.refreshToken;
+  }
+
+  setRefreshToken(refreshToken: string | null): void {
+    this.refreshToken = refreshToken;
+  }
+
   // ─── 加载与持久化 ───
 
   async load(): Promise<void> {
@@ -100,6 +109,9 @@ export class SyncConfigStore {
       if (rows.length > 0) {
         if (rows[0].cloud_token) {
           this.token = rows[0].cloud_token;
+        }
+        if ((rows[0] as Record<string, unknown>).cloud_refresh_token) {
+          this.refreshToken = String((rows[0] as Record<string, unknown>).cloud_refresh_token);
         }
         // serverUrl 始终使用硬编码默认值，不从 app_state 继承
       }

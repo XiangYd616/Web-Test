@@ -23,6 +23,7 @@ export function registerAppStateIpc(): void {
       payload: {
         serverUrl: string;
         token: string;
+        refreshToken?: string;
         userId: string;
         username: string;
         email: string;
@@ -30,15 +31,23 @@ export function registerAppStateIpc(): void {
     ) => {
       const now = new Date().toISOString();
       await localQuery(
-        `UPDATE app_state SET auth_mode = 'cloud', cloud_server_url = ?, cloud_token = ?,
+        `UPDATE app_state SET auth_mode = 'cloud', cloud_server_url = ?, cloud_token = ?, cloud_refresh_token = ?,
        cloud_user_id = ?, cloud_username = ?, cloud_email = ?, updated_at = ? WHERE id = 1`,
-        [payload.serverUrl, payload.token, payload.userId, payload.username, payload.email, now]
+        [
+          payload.serverUrl,
+          payload.token,
+          payload.refreshToken || '',
+          payload.userId,
+          payload.username,
+          payload.email,
+          now,
+        ]
       );
 
       // 激活同步引擎（设置 token + serverUrl + 自动启用）
       try {
         const { syncEngine } = await import('../modules/sync/SyncEngine');
-        await syncEngine.activateWithAuth(payload.token, payload.serverUrl);
+        await syncEngine.activateWithAuth(payload.token, payload.serverUrl, payload.refreshToken);
       } catch {
         /* sync module may not be loaded yet */
       }
@@ -51,7 +60,7 @@ export function registerAppStateIpc(): void {
   ipcMain.handle('clear-cloud-auth', async () => {
     const now = new Date().toISOString();
     await localQuery(
-      `UPDATE app_state SET auth_mode = 'local', cloud_server_url = '', cloud_token = '',
+      `UPDATE app_state SET auth_mode = 'local', cloud_server_url = '', cloud_token = '', cloud_refresh_token = '',
        cloud_user_id = '', cloud_username = '', cloud_email = '', updated_at = ? WHERE id = 1`,
       [now]
     );

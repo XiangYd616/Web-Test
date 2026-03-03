@@ -25,7 +25,7 @@ interface SyncTableConfig {
 }
 
 const SYNCABLE_TABLES: Record<string, SyncTableConfig> = {
-  workspaces: { dbTable: 'workspaces', scopeField: 'user_id' },
+  workspaces: { dbTable: 'workspaces', scopeField: 'workspace_id' },
   collections: { dbTable: 'collections', scopeField: 'workspace_id' },
   environments: { dbTable: 'environments', scopeField: 'workspace_id' },
   test_templates: { dbTable: 'test_templates', scopeField: 'user_id' },
@@ -272,7 +272,12 @@ export const unifiedPull = async (req: AuthRequest, res: ApiResponse, _next: Nex
       const conditions: string[] = [];
 
       // 权限作用域
-      if (config.scopeField === 'workspace_id') {
+      if (tableName === 'workspaces') {
+        // workspaces 通过 workspace_members 关联用户，用 id IN (...) 查询
+        if (workspaceIds.length === 0) continue;
+        params.push(workspaceIds);
+        conditions.push(`id = ANY($${params.length})`);
+      } else if (config.scopeField === 'workspace_id') {
         if (workspaceIds.length === 0) continue;
         params.push(workspaceIds);
         conditions.push(`workspace_id = ANY($${params.length})`);
@@ -398,10 +403,6 @@ export const unifiedPush = async (req: AuthRequest, res: ApiResponse, _next: Nex
         } else if (!change.deleted) {
           // 新记录 → 插入（含业务字段）
           const id = String(change.data.id || change.sync_id);
-          const scopeValue =
-            config.scopeField === 'workspace_id'
-              ? String(change.data.workspace_id || workspaceIds[0] || '')
-              : userId;
 
           const baseCols = [
             'id',
@@ -409,20 +410,28 @@ export const unifiedPush = async (req: AuthRequest, res: ApiResponse, _next: Nex
             'sync_version',
             'sync_updated_at',
             'sync_device_id',
-            config.scopeField,
             'created_at',
             'updated_at',
           ];
-          const baseVals = [
+          const baseVals: unknown[] = [
             id,
             change.sync_id,
             change.sync_version,
             serverTime,
             deviceId || 'unknown',
-            scopeValue,
             serverTime,
             serverTime,
           ];
+
+          // workspaces 表没有 workspace_id/user_id 列，通过 workspace_members 关联
+          if (change.table !== 'workspaces') {
+            const scopeValue =
+              config.scopeField === 'workspace_id'
+                ? String(change.data.workspace_id || workspaceIds[0] || '')
+                : userId;
+            baseCols.push(config.scopeField);
+            baseVals.push(scopeValue);
+          }
 
           // 追加业务字段
           const allowed = ALLOWED_DATA_FIELDS[change.table] || [];

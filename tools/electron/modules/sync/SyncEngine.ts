@@ -32,6 +32,9 @@ class SyncEngine {
   constructor() {
     this.fetcher = new SyncFetcher({
       getToken: () => this.configStore.getToken(),
+      getRefreshToken: () => this.configStore.getRefreshToken(),
+      setToken: (token: string) => this.configStore.setToken(token),
+      setRefreshToken: (token: string | null) => this.configStore.setRefreshToken(token),
       clearToken: () => {
         this.configStore.setToken(null);
         this.setStatus('error');
@@ -91,8 +94,9 @@ class SyncEngine {
   }
 
   /** 登录成功后激活同步（设置 token + serverUrl + 自动启用） */
-  async activateWithAuth(token: string, serverUrl: string): Promise<void> {
+  async activateWithAuth(token: string, serverUrl: string, refreshToken?: string): Promise<void> {
     this.configStore.setToken(token);
+    if (refreshToken) this.configStore.setRefreshToken(refreshToken);
     await this.configStore.updateConfig({
       serverUrl,
       enabled: true,
@@ -127,7 +131,12 @@ class SyncEngine {
       return { success: false, error: '同步正在进行中' };
     }
 
-    if (!this.configStore.getToken() || !this.configStore.getServerUrl()) {
+    const currentToken = this.configStore.getToken();
+    const currentServer = this.configStore.getServerUrl();
+    console.log(
+      `[SyncEngine] triggerSync: token=${currentToken ? currentToken.slice(0, 20) + '...' : '(none)'}, serverUrl=${currentServer}`
+    );
+    if (!currentToken || !currentServer) {
       return { success: false, error: '未配置云端服务器或未登录' };
     }
 
@@ -138,7 +147,7 @@ class SyncEngine {
       // 0. 在线检测
       const online = await this.fetcher.checkOnline();
       if (!online) {
-        this.setStatus('offline');
+        this.setStatus('offline', '网络不可达: ' + currentServer);
         this.consecutiveFailures++;
         return { success: false, error: '网络不可达' };
       }
@@ -147,7 +156,7 @@ class SyncEngine {
       if (!this.configStore.getToken()) {
         await this.configStore.loadTokenFromAppState();
         if (!this.configStore.getToken()) {
-          this.setStatus('error');
+          this.setStatus('error', '未登录云端: token 为空');
           return { success: false, error: '未登录云端' };
         }
       }
@@ -187,9 +196,9 @@ class SyncEngine {
 
       // 连续失败超过阈值时切换为离线状态，避免频繁请求
       if (this.consecutiveFailures >= 5) {
-        this.setStatus('offline');
+        this.setStatus('offline', error);
       } else {
-        this.setStatus('error');
+        this.setStatus('error', error);
       }
       return { success: false, error };
     } finally {
@@ -221,7 +230,7 @@ class SyncEngine {
 
   // ==================== 状态广播 ====================
 
-  private setStatus(status: SyncStatus): void {
+  private setStatus(status: SyncStatus, errorDetail?: string): void {
     this.status = status;
     // 广播给所有渲染进程窗口
     for (const win of BrowserWindow.getAllWindows()) {
@@ -229,6 +238,7 @@ class SyncEngine {
         win.webContents.send('sync-status-changed', {
           status,
           detail: this.configStore.getLastSyncAt(),
+          error: errorDetail,
         });
       }
     }

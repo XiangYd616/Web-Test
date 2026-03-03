@@ -250,7 +250,8 @@ const StatusBar = () => {
       cleanupSync = api.sync.onStatusChange(s => {
         setSyncInfo(prev => ({ ...prev, status: s.status }));
         refreshSyncStatus();
-        if (s.status === 'error') consoleLog('error', '同步失败');
+        if (s.status === 'error')
+          consoleLog('error', `同步失败: ${(s as { error?: string }).error || '未知错误'}`);
         else if (s.status === 'conflict') consoleLog('warn', '同步冲突');
         else if (s.status === 'synced') consoleLog('info', '同步完成');
       });

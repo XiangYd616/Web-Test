@@ -116,6 +116,7 @@ declare global {
         setCloudAuth: (payload: {
           serverUrl: string;
           token: string;
+          refreshToken?: string;
           userId: string;
           username: string;
           email: string;

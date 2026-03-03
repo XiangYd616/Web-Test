@@ -191,6 +191,7 @@ const AuthForm = ({
         void window.electronAPI.appState.setCloudAuth({
           serverUrl: DEFAULT_CLOUD_API_URL,
           token: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
           userId: user.id,
           username: user.username || username,
           email: user.email || email,

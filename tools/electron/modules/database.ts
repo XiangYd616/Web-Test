@@ -338,6 +338,7 @@ class LocalDatabase {
         active_workspace_id TEXT NOT NULL,
         cloud_server_url TEXT DEFAULT '',
         cloud_token TEXT DEFAULT '',
+        cloud_refresh_token TEXT DEFAULT '',
         cloud_user_id TEXT DEFAULT '',
         cloud_username TEXT DEFAULT '',
         cloud_email TEXT DEFAULT '',
@@ -458,6 +459,13 @@ class LocalDatabase {
     if (!hasScore) {
       db.exec('ALTER TABLE test_executions ADD COLUMN score REAL');
       console.log('[DB Migration] 已添加 test_executions.score 列');
+    }
+
+    // app_state 表添加 cloud_refresh_token 列
+    const appStateCols = db.pragma('table_info(app_state)') as Array<{ name: string }>;
+    if (!appStateCols.some(c => c.name === 'cloud_refresh_token')) {
+      db.exec("ALTER TABLE app_state ADD COLUMN cloud_refresh_token TEXT DEFAULT ''");
+      console.log('[DB Migration] 已添加 app_state.cloud_refresh_token 列');
     }
 
     // 同步功能所需的表
