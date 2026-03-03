@@ -13,7 +13,7 @@ export interface SyncConfig {
 }
 
 // 内置生产 API 地址，与 CloudAccountPanel 的 DEFAULT_CLOUD_API_URL 保持一致
-const DEFAULT_SERVER_URL = 'http://8.137.111.126:3001/api';
+const DEFAULT_SERVER_URL = 'https://api.xiangweb.space/api';
 
 const DEFAULT_CONFIG: SyncConfig = {
   serverUrl: DEFAULT_SERVER_URL,

@@ -41,7 +41,7 @@ const resolveToken = async (): Promise<string | null> => {
 const resolveBaseURL = (): string => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
   if (isDesktop()) {
-    return window.localStorage.getItem('cloudApiUrl') || 'http://8.137.111.126:3001/api';
+    return window.localStorage.getItem('cloudApiUrl') || 'https://api.xiangweb.space/api';
   }
   return '/api';
 };
