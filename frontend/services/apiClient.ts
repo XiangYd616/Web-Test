@@ -41,7 +41,7 @@ const resolveToken = async (): Promise<string | null> => {
 const resolveBaseURL = (): string => {
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
   if (isDesktop()) {
-    return window.localStorage.getItem('cloudApiUrl') || 'https://api.xiangweb.space/api';
+    return window.localStorage.getItem('cloudApiUrl') || 'http://8.137.111.126:3001/api';
   }
   return '/api';
 };
@@ -122,7 +122,7 @@ const tryAutoRecover = async (): Promise<boolean> => {
 
 apiClient.interceptors.request.use(async config => {
   // 桌面端离线模式（无云端配置）：拦截所有非必要请求，返回空数据
-  if (isDesktop() && !window.localStorage.getItem('cloudApiUrl')) {
+  if (isDesktop() && !window.localStorage.getItem('accessToken')) {
     // 标记为桌面离线请求，在响应拦截器中处理
     (config as unknown as Record<string, unknown>)._desktopOffline = true;
   }
