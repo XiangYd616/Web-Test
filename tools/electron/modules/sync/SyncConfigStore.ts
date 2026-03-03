@@ -13,7 +13,28 @@ export interface SyncConfig {
 }
 
 // 内置生产 API 地址，与 CloudAccountPanel 的 DEFAULT_CLOUD_API_URL 保持一致
-const DEFAULT_SERVER_URL = 'https://api.xiangweb.space/api';
+const DEFAULT_SERVER_URL = 'http://8.137.111.126:3001/api';
+
+/** 归一化 API URL：确保指向后端 API（而非前端 Web 地址） */
+function normalizeApiUrl(url: string): string {
+  if (!url) return DEFAULT_SERVER_URL;
+  let u = url.replace(/\/+$/, ''); // 去尾部斜杠
+  // 常见误配：用户输入了前端 Web 地址 app.xxx 而非 api.xxx
+  try {
+    const parsed = new URL(u);
+    if (parsed.hostname.startsWith('app.')) {
+      parsed.hostname = parsed.hostname.replace(/^app\./, 'api.');
+      if (!parsed.pathname.startsWith('/api')) {
+        parsed.pathname = '/api';
+      }
+      u = parsed.toString().replace(/\/+$/, '');
+      console.log(`[SyncConfigStore] 自动修正 serverUrl: ${url} → ${u}`);
+    }
+  } catch {
+    /* 非标准 URL，原样保留 */
+  }
+  return u;
+}
 
 const DEFAULT_CONFIG: SyncConfig = {
   serverUrl: DEFAULT_SERVER_URL,
@@ -73,7 +94,7 @@ export class SyncConfigStore {
       const meta = (rows as { rows: Array<{ key: string; value: string }> }).rows || [];
       const map = new Map(meta.map(r => [r.key, r.value]));
 
-      this.config.serverUrl = map.get('server_url') || DEFAULT_SERVER_URL;
+      this.config.serverUrl = normalizeApiUrl(map.get('server_url') || DEFAULT_SERVER_URL);
       this.config.intervalMs = Number(map.get('interval_ms')) || 30_000;
       this.config.enabled = map.get('enabled') === 'true';
       this.config.deviceId = map.get('device_id') || this.generateDeviceId();
@@ -101,8 +122,8 @@ export class SyncConfigStore {
         }
         // 如果 sync_meta 中没有 server_url，从 app_state 继承
         if (!this.config.serverUrl && rows[0].cloud_server_url) {
-          this.config.serverUrl = rows[0].cloud_server_url;
-          await this.saveMeta('server_url', rows[0].cloud_server_url);
+          this.config.serverUrl = normalizeApiUrl(rows[0].cloud_server_url);
+          await this.saveMeta('server_url', this.config.serverUrl);
         }
       }
     } catch {
@@ -112,8 +133,8 @@ export class SyncConfigStore {
 
   async updateConfig(partial: Partial<SyncConfig>): Promise<void> {
     if (partial.serverUrl !== undefined) {
-      this.config.serverUrl = partial.serverUrl;
-      await this.saveMeta('server_url', partial.serverUrl);
+      this.config.serverUrl = normalizeApiUrl(partial.serverUrl);
+      await this.saveMeta('server_url', this.config.serverUrl);
     }
     if (partial.intervalMs !== undefined) {
       this.config.intervalMs = partial.intervalMs;

@@ -5,10 +5,7 @@
 
 import {
   CheckCircle2,
-  ChevronDown,
-  ChevronRight,
   Crown,
-  Globe,
   HardDrive,
   Loader2,
   LogIn,
@@ -30,7 +27,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 
 import { apiClient } from '../../services/apiClient';
 import { DEFAULT_CLOUD_API_URL } from '../../utils/environment';
@@ -65,17 +61,8 @@ const STORAGE_KEYS = {
 
 // ─── 工具函数 ───
 
-// 默认云端 API 地址：统一从 environment 模块获取（含硬编码 fallback）
-const getCloudApiUrl = (): string =>
-  localStorage.getItem(STORAGE_KEYS.cloudApiUrl) || DEFAULT_CLOUD_API_URL;
-
-const setCloudApiUrl = (url: string) => {
-  if (url) {
-    localStorage.setItem(STORAGE_KEYS.cloudApiUrl, url.replace(/\/+$/, ''));
-  } else {
-    localStorage.removeItem(STORAGE_KEYS.cloudApiUrl);
-  }
-};
+// 云端 API 地址：硬编码官方服务器，用户无需配置
+const getCloudApiUrl = (): string => DEFAULT_CLOUD_API_URL;
 
 const getCloudUser = (): CloudUser | null => {
   try {
@@ -141,63 +128,6 @@ const PLAN_LABELS: Record<string, { label: string; color: string; icon: typeof C
   team: { label: '团队版', color: 'bg-blue-100 text-blue-700', icon: Shield },
 };
 
-// ─── 云端 URL 配置区 ───
-
-const CloudUrlConfig = ({
-  url,
-  onUrlChange,
-  onTest,
-  testing,
-  connected,
-}: {
-  url: string;
-  onUrlChange: (v: string) => void;
-  onTest: () => void;
-  testing: boolean;
-  connected: boolean | null;
-}) => (
-  <div className='space-y-3'>
-    <div className='flex items-center gap-2 text-sm font-medium'>
-      <Globe className='h-4 w-4' />
-      服务器地址
-    </div>
-    <div className='flex gap-2'>
-      <Input
-        placeholder='https://api.yourserver.com/api'
-        value={url}
-        onChange={e => onUrlChange(e.target.value)}
-        className='flex-1'
-      />
-      <Button variant='outline' size='sm' onClick={onTest} disabled={testing || !url}>
-        {testing ? (
-          <Loader2 className='h-3.5 w-3.5 mr-1.5 animate-spin' />
-        ) : (
-          <RefreshCw className='h-3.5 w-3.5 mr-1.5' />
-        )}
-        测试连接
-      </Button>
-    </div>
-    {connected !== null && (
-      <div
-        className={`flex items-center gap-2 text-sm ${connected ? 'text-green-600' : 'text-destructive'}`}
-      >
-        {connected ? (
-          <>
-            <CheckCircle2 className='h-4 w-4' /> 连接成功
-          </>
-        ) : (
-          <>
-            <Globe className='h-4 w-4' /> 连接失败，请检查地址
-          </>
-        )}
-      </div>
-    )}
-    <p className='text-xs text-muted-foreground'>
-      提示：所有测试计算始终在本地执行。云端仅用于存储报告摘要和配置同步。
-    </p>
-  </div>
-);
-
 // ─── 登录/注册表单 ───
 
 const AuthForm = ({
@@ -259,16 +189,16 @@ const AuthForm = ({
       // 通知 Electron 主进程（写入 app_state + 激活 SyncEngine）
       if (window.electronAPI?.appState) {
         void window.electronAPI.appState.setCloudAuth({
-          serverUrl: apiUrl,
+          serverUrl: DEFAULT_CLOUD_API_URL,
           token: tokens.accessToken,
           userId: user.id,
           username: user.username || username,
           email: user.email || email,
         });
       }
-      // 同时设置 SyncEngine 的 serverUrl，避免用户需要在同步面板重复配置
+      // 同时设置 SyncEngine 的 serverUrl
       if (window.electronAPI?.sync) {
-        void window.electronAPI.sync.setConfig({ serverUrl: apiUrl, enabled: true });
+        void window.electronAPI.sync.setConfig({ serverUrl: DEFAULT_CLOUD_API_URL, enabled: true });
       }
 
       onSuccess(cloudUser);
@@ -424,7 +354,7 @@ const AccountInfo = ({
             </div>
           </div>
 
-          <Separator />
+          <div className='border-t' />
 
           {/* 权益信息 */}
           <div className='space-y-3'>
@@ -488,13 +418,9 @@ const AccountInfo = ({
 // ─── 主面板 ───
 
 const CloudAccountPanel = () => {
-  const [cloudUrl, setCloudUrl] = useState(getCloudApiUrl);
-  const [urlTesting, setUrlTesting] = useState(false);
-  const [urlConnected, setUrlConnected] = useState<boolean | null>(null);
   const [cloudUser, setCloudUserState] = useState<CloudUser | null>(getCloudUser);
   const [licenseCert, setLicenseCertState] = useState<LicenseCert | null>(getLicenseCert);
   const [refreshing, setRefreshing] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const isLoggedIn = Boolean(cloudUser && getCloudToken());
 
@@ -533,33 +459,10 @@ const CloudAccountPanel = () => {
     }
   };
 
-  const handleTestUrl = async () => {
-    if (!cloudUrl) return;
-    setUrlTesting(true);
-    setUrlConnected(null);
-    try {
-      const resp = await apiClient.get('/health', {
-        baseURL: cloudUrl,
-        timeout: 5000,
-      });
-      const ok = resp.status === 200;
-      setUrlConnected(ok);
-      if (ok) {
-        setCloudApiUrl(cloudUrl);
-        toast.success('连接成功，云端地址已保存');
-      }
-    } catch {
-      setUrlConnected(false);
-    } finally {
-      setUrlTesting(false);
-    }
-  };
-
   const { switchToWorkspace, switchToScratchpad } = useAppMode();
 
   const handleLoginSuccess = (user: CloudUser) => {
     setCloudUserState(user);
-    setCloudApiUrl(cloudUrl);
     // 切换到 Workspace 模式
     switchToWorkspace({
       id: user.id,
@@ -640,7 +543,7 @@ const CloudAccountPanel = () => {
   return (
     <div className='space-y-4'>
       {/* ① 未登录 → 直接显示登录表单 */}
-      {!isLoggedIn && <AuthForm apiUrl={cloudUrl} onSuccess={handleLoginSuccess} />}
+      {!isLoggedIn && <AuthForm apiUrl={DEFAULT_CLOUD_API_URL} onSuccess={handleLoginSuccess} />}
 
       {/* ② 已登录 → 显示账户信息 + 权益 */}
       {isLoggedIn && cloudUser && (
@@ -706,40 +609,6 @@ const CloudAccountPanel = () => {
           </p>
         </CardContent>
       </Card>
-
-      {/* ④ 高级设置 — 自定义服务器地址（折叠） */}
-      <div className='border rounded-lg'>
-        <button
-          type='button'
-          className='w-full flex items-center justify-between px-4 py-3 text-sm text-muted-foreground hover:text-foreground transition-colors'
-          onClick={() => setShowAdvanced(!showAdvanced)}
-        >
-          <span className='flex items-center gap-2'>
-            <Globe className='h-3.5 w-3.5' />
-            高级设置：自定义服务器地址
-          </span>
-          {showAdvanced ? (
-            <ChevronDown className='h-3.5 w-3.5' />
-          ) : (
-            <ChevronRight className='h-3.5 w-3.5' />
-          )}
-        </button>
-        {showAdvanced && (
-          <div className='px-4 pb-4 space-y-3'>
-            <Separator />
-            <CloudUrlConfig
-              url={cloudUrl}
-              onUrlChange={setCloudUrl}
-              onTest={() => void handleTestUrl()}
-              testing={urlTesting}
-              connected={urlConnected}
-            />
-            <p className='text-xs text-muted-foreground'>
-              默认已连接官方服务器，仅在自建后端时需要修改。
-            </p>
-          </div>
-        )}
-      </div>
     </div>
   );
 };

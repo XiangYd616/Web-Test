@@ -111,7 +111,16 @@ app.whenReady().then(async () => {
     console.error('❌ 数据库初始化失败:', dbError);
   }
 
-  // ⑤ 后台延迟加载：非阻塞，不影响窗口显示
+  // ⑤ 同步引擎（需在数据库之后、窗口渲染前注册 IPC handlers）
+  try {
+    const { syncEngine } = await import('./modules/sync/SyncEngine');
+    await syncEngine.init();
+    console.log('✅ 同步引擎初始化成功');
+  } catch (syncError) {
+    console.warn('⚠️ 同步引擎初始化失败（不影响离线功能）:', syncError);
+  }
+
+  // ⑥ 后台延迟加载：非阻塞，不影响窗口显示
   setTimeout(() => {
     void initDeferredModules();
   }, 1000);
@@ -142,15 +151,6 @@ async function initDeferredModules(): Promise<void> {
     }
   } catch (puppeteerError) {
     console.warn('⚠️ Puppeteer 预热异常（不影响其他功能）:', puppeteerError);
-  }
-
-  // 云端同步引擎
-  try {
-    const { syncEngine } = await import('./modules/sync/SyncEngine');
-    await syncEngine.init();
-    console.log('✅ 同步引擎初始化成功');
-  } catch (syncError) {
-    console.warn('⚠️ 同步引擎初始化失败（不影响离线功能）:', syncError);
   }
 
   // 自动更新

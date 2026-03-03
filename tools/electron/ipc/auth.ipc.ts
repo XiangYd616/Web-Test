@@ -41,7 +41,7 @@ export function handleAuthDeepLink(url: string, win: BrowserWindow | null): void
 
     // 存储到本地数据库
     const now = new Date().toISOString();
-    const effectiveServerUrl = serverUrl || 'https://api.xiangweb.space/api';
+    const effectiveServerUrl = serverUrl || 'http://8.137.111.126:3001/api';
     void localQuery(
       `UPDATE app_state SET auth_mode = 'cloud', cloud_server_url = ?, cloud_token = ?,
        cloud_user_id = ?, cloud_username = ?, cloud_email = ?, updated_at = ? WHERE id = 1`,

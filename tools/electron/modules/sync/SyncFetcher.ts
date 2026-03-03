@@ -86,19 +86,26 @@ export class SyncFetcher {
   /** 检测网络连通性 */
   async checkOnline(): Promise<boolean> {
     const serverUrl = this.deps.getServerUrl();
-    if (!serverUrl) return false;
+    if (!serverUrl) {
+      console.warn('[SyncFetcher] checkOnline: serverUrl 为空');
+      return false;
+    }
     try {
       // serverUrl 形如 https://api.xiangweb.space/api，health 在根路径 /health
       const baseOrigin = new URL(serverUrl).origin;
+      const healthUrl = `${baseOrigin}/health`;
+      console.log(`[SyncFetcher] checkOnline: serverUrl=${serverUrl}, healthUrl=${healthUrl}`);
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5_000);
-      const resp = await fetch(`${baseOrigin}/health`, {
+      const resp = await fetch(healthUrl, {
         method: 'GET',
         signal: controller.signal,
       });
       clearTimeout(timeout);
+      console.log(`[SyncFetcher] checkOnline: status=${resp.status}, ok=${resp.ok}`);
       return resp.ok;
-    } catch {
+    } catch (err) {
+      console.error('[SyncFetcher] checkOnline 失败:', (err as Error).message || err);
       return false;
     }
   }
