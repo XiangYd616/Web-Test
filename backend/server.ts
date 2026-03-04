@@ -179,7 +179,7 @@ app.get('/api/info', (_req: Request, res: Response) => {
     description: '本地 API 测试工具',
     endpoints: {
       auth: '/api/auth',
-      oauth: '/api/oauth',
+      // oauth: '/api/oauth', // 已移除
       test: '/api/test',
       users: '/api/users',
       comparison: '/api/comparison',
@@ -205,7 +205,7 @@ app.get('/api/info', (_req: Request, res: Response) => {
 const registerRoutes = async () => {
   // 导入路由
   const authRoutes = await loadRoute('./modules/auth/routes/auth', 'auth');
-  const oauthRoutes = await loadRoute('./modules/auth/routes/oauth', 'oauth');
+  // OAuth/MFA 路由已移除 - 前端无实现，本地工具不需要
   const testRoutes = await loadRoute('./modules/testing/routes', 'test');
   const usersRoutes = await loadRoute('./modules/users/routes/users', 'users');
   const comparisonRoutes = await loadRoute('./modules/testing/routes/comparison', 'comparison');
@@ -235,7 +235,7 @@ const registerRoutes = async () => {
 
   // API路由
   app.use('/api/auth', authRoutes);
-  app.use('/api/oauth', oauthRoutes);
+  // OAuth 路由已移除 - 前端无实现
   app.use('/api/test', testRoutes);
   app.use('/api/users', usersRoutes);
   app.use('/api/comparison', comparisonRoutes);
