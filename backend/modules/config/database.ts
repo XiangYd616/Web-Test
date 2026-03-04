@@ -212,7 +212,7 @@ const connectDB = async () => {
 export const query = async (
   text: string,
   params: unknown[] = []
-): Promise<{ rows: any[]; rowCount: number }> => {
+): Promise<{ rows: Record<string, unknown>[]; rowCount: number }> => {
   const start = Date.now();
   try {
     const result = isPg ? await pgQuery(text, params) : await sqliteQuery(text, params);

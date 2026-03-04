@@ -831,7 +831,9 @@ class PuppeteerPool {
     const maxLifetimeTimer = setTimeout(() => {
       if (!released.done) {
         console.warn('[PuppeteerPool] headed 浏览器存活超时（10min），自动关闭');
-        doRelease().catch(() => {});
+        doRelease().catch(err => {
+          console.error('[PuppeteerPool] Failed to release headed browser on timeout:', err);
+        });
       }
     }, HEADED_MAX_LIFETIME_MS);
     if (typeof maxLifetimeTimer === 'object' && 'unref' in maxLifetimeTimer) {
@@ -987,7 +989,9 @@ class PuppeteerPool {
       this.totalActivePages = Math.max(0, this.totalActivePages - pooled.activePages);
     }
     try {
-      Promise.race([pooled.browser.close(), new Promise(r => setTimeout(r, 5000))]).catch(() => {});
+      Promise.race([pooled.browser.close(), new Promise(r => setTimeout(r, 5000))]).catch(err => {
+        console.error('[PuppeteerPool] Failed to close browser:', err);
+      });
     } catch {
       // ignore
     }
@@ -1030,7 +1034,9 @@ class PuppeteerPool {
     }
 
     this.cleanupTimer = setInterval(() => {
-      this.cleanup().catch(() => {});
+      this.cleanup().catch(err => {
+        console.error('[PuppeteerPool] Cleanup failed:', err);
+      });
     }, HEALTH_CHECK_INTERVAL_MS);
 
     // 不阻止进程退出
@@ -1078,7 +1084,9 @@ class PuppeteerPool {
 
   private registerShutdownHooks(): void {
     const handler = () => {
-      this.shutdown().catch(() => {});
+      this.shutdown().catch(err => {
+        console.error('[PuppeteerPool] Shutdown failed:', err);
+      });
     };
 
     process.once('SIGINT', handler);

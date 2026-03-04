@@ -116,7 +116,14 @@ export const AppModeProvider = ({ children }: { children: ReactNode }) => {
       switchToScratchpad,
       markScratchpadMigrated,
     }),
-    [mode, cloudUser, hasScratchpadData, switchToWorkspace, switchToScratchpad, markScratchpadMigrated]
+    [
+      mode,
+      cloudUser,
+      hasScratchpadData,
+      switchToWorkspace,
+      switchToScratchpad,
+      markScratchpadMigrated,
+    ]
   );
 
   return <AppModeContext.Provider value={value}>{children}</AppModeContext.Provider>;
@@ -129,5 +136,3 @@ export const useAppMode = () => {
   }
   return context;
 };
-
-export default AppModeContext;

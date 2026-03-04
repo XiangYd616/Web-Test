@@ -8,6 +8,7 @@
 import {
   Activity,
   AlertTriangle,
+  CheckCircle,
   Clock,
   CloudOff,
   Copy,
@@ -46,6 +47,7 @@ const LEVEL_CONFIG: Record<LogLevel, { icon: typeof Info; cls: string }> = {
   info: { icon: Info, cls: 'tw-console-level--info' },
   warn: { icon: AlertTriangle, cls: 'tw-console-level--warn' },
   error: { icon: XCircle, cls: 'tw-console-level--error' },
+  success: { icon: CheckCircle, cls: 'tw-console-level--success' },
 };
 
 const formatTime = (d: Date) =>

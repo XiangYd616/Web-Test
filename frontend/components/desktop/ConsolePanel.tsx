@@ -5,7 +5,18 @@
  * 参考 Postman Console：All Logs 筛选 · Clear · 关闭(×)
  */
 
-import { AlertTriangle, Copy, Info, MoreHorizontal, Terminal, X, XCircle } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  Info,
+  Search,
+  Terminal,
+  X,
+  XCircle,
+} from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -27,6 +38,7 @@ const LEVEL_CONFIG: Record<LogLevel, { icon: typeof Info; cls: string }> = {
   info: { icon: Info, cls: 'tw-console-level--info' },
   warn: { icon: AlertTriangle, cls: 'tw-console-level--warn' },
   error: { icon: XCircle, cls: 'tw-console-level--error' },
+  success: { icon: CheckCircle, cls: 'tw-console-level--success' },
 };
 
 const formatTime = (d: Date) =>
@@ -46,10 +58,33 @@ const ConsolePanel = ({ open, onClose }: Props) => {
   const entries = useConsoleLogs();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<LogLevel | 'all'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [panelHeight, setPanelHeight] = useState(DEFAULT_PANEL_HEIGHT);
   const dragging = useRef(false);
 
-  const filtered = filter === 'all' ? entries : entries.filter(e => e.level === filter);
+  const filtered = entries.filter(e => {
+    if (filter !== 'all' && e.level !== filter) return false;
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      return (
+        e.message.toLowerCase().includes(term) ||
+        e.detail?.toLowerCase().includes(term) ||
+        e.metadata?.testId?.toLowerCase().includes(term) ||
+        e.metadata?.url?.toLowerCase().includes(term)
+      );
+    }
+    return true;
+  });
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   // 自动滚到底部
   useEffect(() => {
@@ -126,8 +161,21 @@ const ConsolePanel = ({ open, onClose }: Props) => {
         <div className='tw-console-header-left'>
           <Terminal className='w-3.5 h-3.5' />
           <span className='tw-console-title'>{t('console.title', 'Console')}</span>
+          <span className='tw-console-count'>({filtered.length})</span>
         </div>
         <div className='tw-console-header-right'>
+          {/* 搜索框 */}
+          <div className='tw-console-search'>
+            <Search className='w-3 h-3' />
+            <input
+              type='text'
+              placeholder={t('console.search', 'Search...')}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className='tw-console-search-input'
+            />
+          </div>
+
           {/* 级别筛选下拉 */}
           <select
             className='tw-console-log-select'
@@ -136,6 +184,7 @@ const ConsolePanel = ({ open, onClose }: Props) => {
           >
             <option value='all'>{t('console.allLogs', 'All Logs')}</option>
             <option value='info'>Info</option>
+            <option value='success'>Success</option>
             <option value='warn'>Warning</option>
             <option value='error'>Error</option>
           </select>
@@ -153,13 +202,9 @@ const ConsolePanel = ({ open, onClose }: Props) => {
             type='button'
             className='tw-console-action'
             onClick={handleCopyAll}
-            title={t('console.copy', 'Copy')}
+            title={t('console.copy', 'Copy All')}
           >
             <Copy className='w-3 h-3' />
-          </button>
-
-          <button type='button' className='tw-console-action' title={t('console.more', 'More')}>
-            <MoreHorizontal className='w-3.5 h-3.5' />
           </button>
 
           <button
@@ -179,19 +224,80 @@ const ConsolePanel = ({ open, onClose }: Props) => {
           <div className='tw-console-empty'>
             <h3 className='tw-console-empty-title'>{t('console.noLogs', 'No logs yet')}</h3>
             <p className='tw-console-empty-desc'>
-              {t('console.noLogsHint', 'Send a request to view its details in the console.')}
+              {t('console.noLogsHint', 'Run a test to view its details in the console.')}
             </p>
           </div>
         ) : (
           filtered.map(entry => {
             const cfg = LEVEL_CONFIG[entry.level];
             const Icon = cfg.icon;
+            const isExpanded = expandedIds.has(entry.id);
+            const hasDetails = !!(entry.metadata || entry.request || entry.response || entry.stack);
+
             return (
               <div key={entry.id} className={`tw-console-entry ${cfg.cls}`}>
-                <span className='tw-console-time'>{formatTime(entry.timestamp)}</span>
-                <Icon className='w-3 h-3 tw-console-icon' />
-                <span className='tw-console-msg'>{entry.message}</span>
-                {entry.detail && <span className='tw-console-detail'>{entry.detail}</span>}
+                <div className='tw-console-entry-main'>
+                  {hasDetails && (
+                    <button
+                      type='button'
+                      className='tw-console-expand-btn'
+                      onClick={() => toggleExpand(entry.id)}
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className='w-3 h-3' />
+                      ) : (
+                        <ChevronRight className='w-3 h-3' />
+                      )}
+                    </button>
+                  )}
+                  <span className='tw-console-time'>{formatTime(entry.timestamp)}</span>
+                  <Icon className='w-3 h-3 tw-console-icon' />
+                  <span className='tw-console-msg'>{entry.message}</span>
+                  {entry.detail && <span className='tw-console-detail'>{entry.detail}</span>}
+                  {entry.metadata?.testId && (
+                    <span className='tw-console-badge'>
+                      ID: {entry.metadata.testId.slice(0, 8)}
+                    </span>
+                  )}
+                  {entry.metadata?.duration && (
+                    <span className='tw-console-badge'>{entry.metadata.duration}ms</span>
+                  )}
+                </div>
+
+                {isExpanded && hasDetails && (
+                  <div className='tw-console-entry-details'>
+                    {entry.metadata && (
+                      <div className='tw-console-detail-section'>
+                        <div className='tw-console-detail-title'>Metadata</div>
+                        <pre className='tw-console-detail-content'>
+                          {JSON.stringify(entry.metadata, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                    {entry.request && (
+                      <div className='tw-console-detail-section'>
+                        <div className='tw-console-detail-title'>Request</div>
+                        <pre className='tw-console-detail-content'>
+                          {JSON.stringify(entry.request, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                    {entry.response && (
+                      <div className='tw-console-detail-section'>
+                        <div className='tw-console-detail-title'>Response</div>
+                        <pre className='tw-console-detail-content'>
+                          {JSON.stringify(entry.response, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                    {entry.stack && (
+                      <div className='tw-console-detail-section'>
+                        <div className='tw-console-detail-title'>Stack Trace</div>
+                        <pre className='tw-console-detail-content'>{entry.stack}</pre>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })

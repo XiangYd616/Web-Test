@@ -66,7 +66,9 @@ export class SyncStrategy {
         SELECT MAX(id) FROM sync_queue WHERE status = 'pending' GROUP BY table_name, record_sync_id
       )`,
       []
-    ).catch(() => {});
+    ).catch(err => {
+      console.error('Failed to clean duplicate sync queue entries:', err);
+    });
 
     // 读取本地待推送队列
     const queue = await localQuery(

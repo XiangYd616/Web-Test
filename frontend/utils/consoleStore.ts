@@ -3,7 +3,7 @@
  * 独立于组件，方便在任意模块中写入日志
  */
 
-export type LogLevel = 'info' | 'warn' | 'error';
+export type LogLevel = 'info' | 'warn' | 'error' | 'success';
 
 export type ConsoleEntry = {
   id: string;
@@ -11,6 +11,28 @@ export type ConsoleEntry = {
   level: LogLevel;
   message: string;
   detail?: string;
+  // 扩展字段：支持测试相关信息
+  metadata?: {
+    testId?: string;
+    testType?: string;
+    url?: string;
+    duration?: number;
+    status?: string;
+  };
+  request?: {
+    method?: string;
+    url?: string;
+    headers?: Record<string, string>;
+    body?: unknown;
+  };
+  response?: {
+    status?: number;
+    statusText?: string;
+    headers?: Record<string, string>;
+    body?: unknown;
+    time?: number;
+  };
+  stack?: string;
 };
 
 let entries: ConsoleEntry[] = [];
@@ -18,7 +40,12 @@ const listeners = new Set<() => void>();
 
 const notify = () => listeners.forEach(fn => fn());
 
-export const consoleLog = (level: LogLevel, message: string, detail?: string) => {
+export const consoleLog = (
+  level: LogLevel,
+  message: string,
+  detail?: string,
+  extra?: Partial<Omit<ConsoleEntry, 'id' | 'timestamp' | 'level' | 'message' | 'detail'>>
+) => {
   entries = [
     ...entries,
     {
@@ -27,6 +54,7 @@ export const consoleLog = (level: LogLevel, message: string, detail?: string) =>
       level,
       message,
       detail,
+      ...extra,
     },
   ].slice(-500);
   notify();

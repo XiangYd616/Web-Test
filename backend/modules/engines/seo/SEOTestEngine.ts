@@ -618,16 +618,23 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
               await page.setUserAgent(validatedConfig.userAgent);
             }
             await page.goto(validatedConfig.url, {
-              waitUntil: 'networkidle2',
+              waitUntil: 'domcontentloaded',
               timeout: validatedConfig.timeout,
             });
+            await page.waitForTimeout(1000);
             htmlContent = await page.content();
             jsRendered = true;
           } finally {
             await release();
           }
-        } catch {
+        } catch (err) {
           fallbackReason = 'error';
+          const errorMsg = err instanceof Error ? err.message : String(err);
+          void insertExecutionLog(testId, 'warn', `浏览器引擎失败，回退到静态HTTP: ${errorMsg}`, {
+            error: errorMsg,
+            url: validatedConfig.url,
+          });
+          console.warn(`[SEO] Puppeteer failed for ${validatedConfig.url}: ${errorMsg}`);
           // Puppeteer 失败，回退到 HTTP 请求
           const response = await axios.get(validatedConfig.url, {
             timeout: validatedConfig.timeout,
@@ -652,11 +659,11 @@ class SeoTestEngine extends EventEmitter implements ITestEngine<SeoRunConfig, Ba
       const puppeteerWarnings: string[] = [];
       if (fallbackReason === 'unavailable') {
         puppeteerWarnings.push(
-          '浏览器引擎不可用，本次使用静态 HTTP 获取页面。如果页面依赖 JavaScript 渲染 SEO 标签（SPA/SSR），检测结果可能不完整。'
+          '⚠️ 浏览器引擎不可用。可能原因：1) DEPLOY_MODE=cloud 模式禁用了 Puppeteer；2) Chromium 未安装或路径配置错误。本次使用静态 HTTP 获取页面，如果页面依赖 JavaScript 渲染 SEO 标签（SPA/SSR），检测结果可能不完整。'
         );
       } else if (fallbackReason === 'error') {
         puppeteerWarnings.push(
-          '浏览器引擎打开页面失败，已回退到静态 HTTP 获取。JS 动态渲染的 SEO 内容（如 SPA 页面的 meta 标签）可能未被检测到。'
+          '⚠️ 浏览器引擎启动失败（详见日志），已回退到静态 HTTP 获取。JS 动态渲染的 SEO 内容（如 SPA 页面的 meta 标签）可能未被检测到。建议检查：1) Chromium 是否正确安装；2) 系统资源是否充足；3) 防火墙/安全软件是否拦截。'
         );
       }
 

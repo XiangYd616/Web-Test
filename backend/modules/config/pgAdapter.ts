@@ -5,7 +5,7 @@
 
 import { Pool, type PoolClient, type PoolConfig } from 'pg';
 
-export interface QueryResult<T = any> {
+export interface QueryResult<T = Record<string, unknown>> {
   rows: T[];
   rowCount: number;
   fields?: Array<{ name: string }>;

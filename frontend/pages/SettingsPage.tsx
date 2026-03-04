@@ -403,7 +403,9 @@ const CloudSyncPanel = () => {
           import.meta.env.VITE_API_URL ||
           'https://api.xiangweb.space/api';
         if (cloudUrl) {
-          await api.sync.setConfig({ serverUrl: cloudUrl }).catch(() => {});
+          await api.sync.setConfig({ serverUrl: cloudUrl }).catch(err => {
+            console.error('Failed to set sync config:', err);
+          });
           effectiveCfg = { ...cfg, serverUrl: cloudUrl };
         }
       }

@@ -89,7 +89,9 @@ const PreferencesPage = () => {
     setAppLanguage(prefs.language);
     applyTheme(prefs.theme);
     // 同步语言到后端 profile（静默失败）
-    void updateProfile({ language: prefs.language }).catch(() => {});
+    void updateProfile({ language: prefs.language }).catch(err => {
+      console.error('Failed to sync language to profile:', err);
+    });
     toast.success(t('preferences.saved'));
   };
 

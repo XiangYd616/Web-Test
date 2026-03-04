@@ -16,7 +16,7 @@ export interface AdminAction {
   adminId: string;
   action: string;
   target?: string;
-  details?: any;
+  details?: Record<string, unknown>;
   timestamp: number;
 }
 

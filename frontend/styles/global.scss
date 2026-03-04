@@ -4009,6 +4009,142 @@ a {
   white-space: nowrap;
 }
 
+/* 新增：搜索框 */
+.tw-console-search {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px solid $panel-border;
+  border-radius: 4px;
+  background: transparent;
+  transition: border-color 0.1s;
+
+  &:focus-within {
+    border-color: hsl(var(--ring));
+  }
+
+  svg {
+    color: $text-muted;
+    flex-shrink: 0;
+  }
+}
+
+.tw-console-search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 11px;
+  color: $text;
+  width: 120px;
+
+  &::placeholder {
+    color: $text-muted;
+  }
+}
+
+/* 新增：日志计数 */
+.tw-console-count {
+  font-size: 11px;
+  color: $text-muted;
+  font-weight: 400;
+}
+
+/* 新增：展开按钮 */
+.tw-console-expand-btn {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: $text-muted;
+  display: flex;
+  align-items: center;
+  transition: color 0.1s;
+
+  &:hover {
+    color: $primary;
+  }
+}
+
+/* 新增：日志条目主行 */
+.tw-console-entry-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+/* 新增：徽章 */
+.tw-console-badge {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  font-size: 10px;
+  background: hsl(var(--muted));
+  color: $text-muted;
+  border-radius: 3px;
+  font-family: $mono;
+}
+
+/* 新增：详情展开区域 */
+.tw-console-entry-details {
+  margin-top: 8px;
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tw-console-detail-section {
+  background: hsl(var(--muted) / 0.3);
+  border: 1px solid $panel-border;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tw-console-detail-title {
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: $text-muted;
+  background: hsl(var(--muted) / 0.5);
+  border-bottom: 1px solid $panel-border;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tw-console-detail-content {
+  padding: 8px;
+  margin: 0;
+  font-size: 11px;
+  color: $text;
+  overflow-x: auto;
+  max-height: 200px;
+  overflow-y: auto;
+  font-family: $mono;
+  line-height: 1.5;
+}
+
+/* 新增：success 级别样式 */
+.tw-console-level--success {
+  .tw-console-icon {
+    color: #10b981;
+  }
+}
+
+/* 改进：日志条目布局 */
+.tw-console-entry {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  transition: background 0.08s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+}
+
 /* ── 响应式 ── */
 @media (max-width: 768px) {
   .tw-sidebar {

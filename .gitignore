@@ -176,6 +176,15 @@ pnpm-lock.yaml
 storybook-static/
 .storybook/
 
+# Academic documents
+docs/毕业论文.md
+docs/毕业论文*.pdf
+docs/毕业论文*.docx
+
+# AI assistant local settings
+.claude/settings.local.json
+.claude/settings.*.json
+
 # Debug artifacts
 *_debug_*.json
 _debug_*

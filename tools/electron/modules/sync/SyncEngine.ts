@@ -396,7 +396,9 @@ class SyncEngine {
     await localQuery(
       `DELETE FROM sync_local_log WHERE id NOT IN (SELECT id FROM sync_local_log ORDER BY created_at DESC LIMIT 100)`,
       []
-    ).catch(() => {});
+    ).catch(err => {
+      console.error('Failed to clean old sync logs:', err);
+    });
   }
 
   // ==================== 设备注册 ====================

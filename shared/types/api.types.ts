@@ -5,7 +5,7 @@
 
 // ==================== 基础响应类型 ====================
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
@@ -30,7 +30,7 @@ export interface ErrorResponse {
   error: string;
   message: string;
   code?: string | number;
-  details?: any;
+  details?: unknown;
   timestamp: string;
 }
 
@@ -40,8 +40,8 @@ export interface ApiRequest {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   url: string;
   headers?: Record<string, string>;
-  params?: Record<string, any>;
-  data?: any;
+  params?: Record<string, unknown>;
+  data?: unknown;
   timeout?: number;
 }
 
@@ -49,7 +49,7 @@ export interface TestRequest {
   url: string;
   testType: TestType;
   options?: TestOptions;
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 }
 
 // ==================== 错误代码枚举 ====================
@@ -132,7 +132,7 @@ export interface TestResult {
   endTime?: string;
   duration?: number;
   score?: number;
-  results?: any;
+  results?: Record<string, unknown>;
   error?: string;
   recommendations?: string[];
 }
@@ -170,7 +170,7 @@ export interface UserSettings {
   language?: string;
   notifications?: boolean;
   emailAlerts?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ==================== 认证类型 ====================
@@ -210,5 +210,5 @@ export interface FilterParams {
   type?: string;
   startDate?: string;
   endDate?: string;
-  [key: string]: any;
+  [key: string]: string | undefined;
 }
