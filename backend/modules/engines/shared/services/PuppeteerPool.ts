@@ -774,23 +774,40 @@ class PuppeteerPool {
     // ── 启动失败兜底：确保计数器一致 ──
     let browser: Browser;
     try {
+      console.log(`[PuppeteerPool] 正在启动可视化浏览器...`);
+      console.log(`[PuppeteerPool] Chromium 路径: ${this.chromiumPath || '使用内置'}`);
       browser = await pup.launch(launchOptions);
+      console.log(`[PuppeteerPool] ✓ 浏览器启动成功`);
     } catch (launchErr) {
       this.activeHeadedBrowsers = Math.max(0, this.activeHeadedBrowsers - 1);
-      throw launchErr;
+      const errMsg = launchErr instanceof Error ? launchErr.message : String(launchErr);
+      console.error(`[PuppeteerPool] ✗ 浏览器启动失败: ${errMsg}`);
+      console.error(`[PuppeteerPool] 诊断信息:`);
+      console.error(`  - Chromium 路径: ${this.chromiumPath || '未设置（使用内置）'}`);
+      console.error(`  - 启动参数: ${JSON.stringify(headedArgs)}`);
+      console.error(
+        `  - 建议: 1) 检查 Chromium 是否已安装 2) 尝试设置 PUPPETEER_EXECUTABLE_PATH 环境变量`
+      );
+      throw new Error(
+        `可视化浏览器启动失败: ${errMsg}。请检查 Chromium 安装或查看日志获取详细信息。`
+      );
     }
 
     let page: Page;
     try {
+      console.log(`[PuppeteerPool] 正在创建页面...`);
       page = await browser.newPage();
+      console.log(`[PuppeteerPool] ✓ 页面创建成功`);
     } catch (pageErr) {
       this.activeHeadedBrowsers = Math.max(0, this.activeHeadedBrowsers - 1);
+      const errMsg = pageErr instanceof Error ? pageErr.message : String(pageErr);
+      console.error(`[PuppeteerPool] ✗ 页面创建失败: ${errMsg}`);
       try {
         await browser.close();
       } catch {
         /* ignore */
       }
-      throw pageErr;
+      throw new Error(`创建浏览器页面失败: ${errMsg}`);
     }
 
     // 配置页面（视口、UA 等）

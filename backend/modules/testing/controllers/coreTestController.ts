@@ -242,6 +242,138 @@ const healthCheck = async (_req: AuthenticatedRequest, res: ApiResponse, _next: 
   }
 };
 
+const getTestProgress = async (
+  req: AuthenticatedRequest,
+  res: ApiResponse,
+  _next: NextFunction
+) => {
+  try {
+    const { testId } = req.params;
+    const status = engine.getTestStatus(testId);
+    if (!status) {
+      return res.error(StandardErrorCode.NOT_FOUND, '测试不存在', undefined, 404);
+    }
+    return res.success({ testId, progress: status.progress || 0, status: status.status });
+  } catch (error) {
+    return res.error(
+      StandardErrorCode.INTERNAL_SERVER_ERROR,
+      error instanceof Error ? error.message : String(error),
+      undefined,
+      500
+    );
+  }
+};
+
+const getTestLogs = async (req: AuthenticatedRequest, res: ApiResponse, _next: NextFunction) => {
+  try {
+    const { testId } = req.params;
+    const status = engine.getTestStatus(testId);
+    if (!status) {
+      return res.error(StandardErrorCode.NOT_FOUND, '测试不存在', undefined, 404);
+    }
+    return res.success({ testId, logs: status.logs || [] });
+  } catch (error) {
+    return res.error(
+      StandardErrorCode.INTERNAL_SERVER_ERROR,
+      error instanceof Error ? error.message : String(error),
+      undefined,
+      500
+    );
+  }
+};
+
+const stopTest = async (req: AuthenticatedRequest, res: ApiResponse, _next: NextFunction) => {
+  try {
+    const { testId } = req.params;
+    const success = engine.cancelTest(testId);
+    if (!success) {
+      return res.error(StandardErrorCode.NOT_FOUND, '测试不存在或已完成', undefined, 404);
+    }
+    return res.success({ testId, stopped: true });
+  } catch (error) {
+    return res.error(
+      StandardErrorCode.INTERNAL_SERVER_ERROR,
+      error instanceof Error ? error.message : String(error),
+      undefined,
+      500
+    );
+  }
+};
+
+const rerunTest = async (req: AuthenticatedRequest, res: ApiResponse, _next: NextFunction) => {
+  try {
+    const { testId } = req.params;
+    const oldStatus = engine.getTestStatus(testId);
+    if (!oldStatus) {
+      return res.error(StandardErrorCode.NOT_FOUND, '测试不存在', undefined, 404);
+    }
+    const result = await engine.runCoreTest(oldStatus.config as CoreTestRequest);
+    return res.success(result);
+  } catch (error) {
+    return res.error(
+      StandardErrorCode.INTERNAL_SERVER_ERROR,
+      error instanceof Error ? error.message : String(error),
+      undefined,
+      500
+    );
+  }
+};
+
+const updateTest = async (req: AuthenticatedRequest, res: ApiResponse, _next: NextFunction) => {
+  try {
+    const { testId } = req.params;
+    const status = engine.getTestStatus(testId);
+    if (!status) {
+      return res.error(StandardErrorCode.NOT_FOUND, '测试不存在', undefined, 404);
+    }
+    return res.success({ testId, message: '测试配置更新功能待实现' });
+  } catch (error) {
+    return res.error(
+      StandardErrorCode.INTERNAL_SERVER_ERROR,
+      error instanceof Error ? error.message : String(error),
+      undefined,
+      500
+    );
+  }
+};
+
+const getPuppeteerStatus = async (
+  _req: AuthenticatedRequest,
+  res: ApiResponse,
+  _next: NextFunction
+) => {
+  try {
+    const available = checkPuppeteerAvailable();
+    const stats = puppeteerPool.getStats();
+    return res.success({ available, stats });
+  } catch (error) {
+    return res.error(
+      StandardErrorCode.INTERNAL_SERVER_ERROR,
+      error instanceof Error ? error.message : String(error),
+      undefined,
+      500
+    );
+  }
+};
+
+const resetPuppeteerPool = async (
+  _req: AuthenticatedRequest,
+  res: ApiResponse,
+  _next: NextFunction
+) => {
+  try {
+    await puppeteerPool.reset();
+    return res.success({ message: 'Puppeteer 池已重置' });
+  } catch (error) {
+    return res.error(
+      StandardErrorCode.INTERNAL_SERVER_ERROR,
+      error instanceof Error ? error.message : String(error),
+      undefined,
+      500
+    );
+  }
+};
+
 export default {
   getStatus,
   enginesHealth,
@@ -255,4 +387,11 @@ export default {
   getMetrics,
   resetEngine,
   healthCheck,
+  getTestProgress,
+  getTestLogs,
+  stopTest,
+  rerunTest,
+  updateTest,
+  getPuppeteerStatus,
+  resetPuppeteerPool,
 };

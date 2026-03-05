@@ -22,11 +22,20 @@ router.post('/reset', asyncHandler(coreTestController.resetEngine));
 router.post('/run', asyncHandler(coreTestController.runTest));
 router.get('/tests', asyncHandler(coreTestController.getAllTests));
 router.get('/test/:testId', asyncHandler(coreTestController.getTestStatus));
+router.get('/test/:testId/progress', asyncHandler(coreTestController.getTestProgress));
+router.get('/test/:testId/logs', asyncHandler(coreTestController.getTestLogs));
+router.post('/test/:testId/stop', asyncHandler(coreTestController.stopTest));
+router.post('/test/:testId/rerun', asyncHandler(coreTestController.rerunTest));
+router.put('/test/:testId', asyncHandler(coreTestController.updateTest));
 router.delete('/test/:testId', asyncHandler(coreTestController.cancelTest));
 
 // 基准测试与验证
 router.post('/benchmark', asyncHandler(coreTestController.runBenchmark));
 router.get('/benchmarks', asyncHandler(coreTestController.getBenchmarks));
 router.post('/validate', asyncHandler(coreTestController.validateConfig));
+
+// Puppeteer 池管理
+router.get('/puppeteer/status', asyncHandler(coreTestController.getPuppeteerStatus));
+router.post('/puppeteer/reset', asyncHandler(coreTestController.resetPuppeteerPool));
 
 export default router;
