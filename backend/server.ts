@@ -232,6 +232,8 @@ const registerRoutes = async () => {
   const testPlanRoutes = await loadRoute('./modules/testplans/routes/testPlans', 'testPlans');
   const ciRoutes = await loadRoute('./modules/ci/routes/ci', 'ci');
   const syncRoutes = await loadRoute('./modules/sync/routes/sync', 'sync');
+  const monitoringRoutes = await loadRoute('./modules/monitoring/routes/monitoring', 'monitoring');
+  const alertRoutes = await loadRoute('./modules/alert/routes/alerts', 'alerts');
 
   // API路由
   app.use('/api/auth', authRoutes);
@@ -242,6 +244,8 @@ const registerRoutes = async () => {
   app.use('/api/batch', batchRoutes);
   app.use('/api/core', coreRoutes);
   app.use('/api/system', systemRoutes);
+  app.use('/api/system/monitoring', monitoringRoutes);
+  app.use('/api/system/alerts', alertRoutes);
   app.use('/api/data', dataRoutes);
   app.use('/api/storage', storageRoutes);
   app.use('/api/admin', adminRoutes);
